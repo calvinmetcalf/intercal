@@ -98,7 +98,7 @@ unsigned int pin(void)
     if (fgets(buf, BUFSIZ, stdin) == (char *)NULL)
 	lose(E562, lineno, (char *)NULL);
     n = strlen(buf) - 1;
-    if (buf[n-1] == '\r')
+    if (n > 0 && buf[n-1] == '\r')
 	--n;
     buf[n] = '\0';
 

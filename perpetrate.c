@@ -310,6 +310,7 @@ int main(int argc, char *argv[])
 	     */
 	    for (tp = tuples; tp->type; tp++)
 		if (tp->type == GETS || tp->type == RESIZE
+                    || tp->type == WRITE_IN || tp->type == READ_OUT
 		    || tp->type == FORGET || tp->type == RESUME)
 		    typecast(tp->u.node);
 
