@@ -89,7 +89,8 @@ The subdirectory tests contains some programs written only to test the
 compiler.
 
 by Donald Knuth
-  knuth.i       Demonstrates Don Knuth's patch for handling multiline comments
+  tpk.i         Don Knuth's implementation of the TPK algorithm
+  tpk.doc       Don's note about the algorithm
 
 by David Moews
   test1.i	Prints DO THIS TEST HAS BEEN SUCCESSFULLY COMPLETED
