@@ -100,8 +100,8 @@ static tuple *splat(void);
 %type <tuple> perform
 %type <numval> please preftype
 
-%nonassoc EARS SPARK
 %nonassoc HIGHPREC
+%nonassoc EARS SPARK
 
 %%	/* beginning of rules section */
 

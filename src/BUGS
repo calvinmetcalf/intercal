@@ -72,18 +72,6 @@ BLR = Brian Raiter
    the modified behavior of select's return type depends on this, so
    there's not much we can do about it as things stand.
 
-5) (BLR) An array can't have sparks or ears in its subscript list after the
-   first dimension. That is to say, this:
-
-	DO ,1SUB'#1'#1 <- #0
-
-   works fine, but this:
-
-	DO ,1SUB#1'#1' <- #0
-
-   doesn't parse, and gets treated as a syntax error (thus it is likely
-   to be a problem with the grammar).
-
 			TO DO
 
 1. (ESR) Add more optimization templates, esp. idioms for +, -, *, /.
