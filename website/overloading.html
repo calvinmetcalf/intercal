@@ -1,0 +1,95 @@
+<!doctype HTML public "-//W3O//DTD W3 HTML 3.2//EN">
+<HTML>
+<HEAD>
+<link rev=made href=mailto:esr@snark.thyrsus.com>
+<meta name="description" content="Overloading proposal for INTERCAL">
+<meta name="keywords" content="INTERCAL"> 
+<TITLE>Overloading proposal for INTERCAL</TITLE>
+</HEAD>
+<BODY>
+<table width="100%" cellpadding=0><tr>
+<td width="30%">Back to <a href="index.html">Intercal Home Page</a>
+<td width="30%" align=center>Up to <a href="/~esr/sitemap.html">Site Map</a>
+<td width="30%" align=right>$Date: 1998-06-06 15:09:59 $
+</table>
+<HR>
+<H1 ALIGN=CENTER>Operator Overloading in INTERCAL</H1>
+
+Andrew Arensburger &lt;arensb@cfar.umd.edu&gt; writes:<P>
+
+While rereading the INTERCAL reference manual, it occurred to me that
+INTERCAL is a bit dated, since the languages whose features it avoids
+(Fortran, COBOL, etc.) are pretty much dead. Shouldn't INTERCAL start
+avoiding features found in some more modern languages, like C++, Java
+and Perl?<P>
+  
+In this vein, let me suggest a direction for future
+development: overloaded operands. I suggest the following syntax:<P>
+
+<pre>
+        &lt;var&gt;/&lt;expr&gt;
+        &lt;expr1&gt;\&lt;expr2&gt;
+</pre>
+
+In the first form, &lt;var&gt; is a variable (16- or 32-bit, scalar or
+array). Subsequently, any time it appears as an operand to $ , ~ , & ,
+V , or ? , it will be silently replaced by &lt;expr&gt;. Thus,<P>
+
+<pre>
+        DO .7/#&77
+        DO :8<-.7
+</pre>
+
+will have the same effect as<P>
+
+<pre>
+        DO :8<-#&77
+</pre>
+
+In the second form, &lt;expr1&gt; is a 32-bit expression, divided into two
+16-bit numbers (high 16 bits and low 16 bite). This defines a range.
+Any time a variable whose number is in the range thus defined appears
+as an operand, it is replaced with the value of &lt;expr2&gt;.<P>
+
+Furthermore, any time the special token ) appears in &lt;expr2&gt;,
+it is replaced with the number of the variable being affected. Thus,<P>
+
+<pre>
+        DO #196608\#99
+</pre>
+
+will affect variables .3 through .10, :3 through :10, ,3 through ,10 ,
+and ;3 through ;10 , replacing them with #99 whenever they appear as
+an operand to $ , ~ , & , V , or ? .<P>
+
+<pre>
+        DO #196608\;)SUB".&)"
+        DO :1<-.9
+</pre>
+
+has the same effect as<P>
+
+<pre>
+        DO :1<-;9SUB".&9"
+</pre>
+  
+Since overloading is not indicated by a keyword, there can be
+no PLEASE ABSTAIN FROM OVERLOADING directive, but overloading can be
+undone by mapping variable numbers back to their original values.<P>
+
+There are, of course, various issues that still need to be
+ironed out, but it seems to me that operand overloading can be a
+powerful technique, on a par with Perl closures or Java's on-the-fly
+class definitions.<P>
+
+<HR>
+<table width="100%" cellpadding=0><tr>
+<td width="30%">Back to <a href="index.html">INTERCAL Home Page</a>
+<td width="30%" align=center>Up to <a href="/~esr/sitemap.html">Site Map</a>
+<td width="30%" align=right>$Date: 1998-06-06 15:09:59 $
+</table>
+
+<P><ADDRESS>Eric S. Raymond <A HREF="mailto:esr@thyrsus.com">&lt;esr@snark.thyrsus.com&gt;</A></ADDRESS>
+</BODY>
+</HTML>
+
