@@ -12,6 +12,9 @@ intercal-$(VERSION).tar.gz:
 	(cd ..; tar -czvf intercal/intercal-$(VERSION).tar.gz `cat intercal/manifest`)
 	rm ../intercal-$(VERSION) manifest
 
+intercal.spec:
+	specgen.sh $(VERSION) >intercal.spec
+
 RPMROOT=/usr/src/redhat
 RPM = rpmbuild
 RPMFLAGS = -ba
@@ -22,12 +25,6 @@ rpm: dist
 	cp $(RPMROOT)/RPMS/`arch|sed 's/i[4-9]86/i386/'`/intercal-$(VERSION)*.rpm .
 	cp $(RPMROOT)/SRPMS/intercal-$(VERSION)*.src.rpm .
 
-
-
-SHAROPTS = -l63 -n intercal -o intercal -a -s esr@snark.thyrsus.com 
-shar:
-	(cd ..; shar $(SHAROPTS) $(MANIFEST) >intercal-$(VERSION).shar)
-
 clean:
-	rm -f intercal-$(VERSION).shar intercal-$(VERSION).tar intercal-$(VERSION).tar.gz
+	rm -f intercal-$(VERSION).shar intercal-$(VERSION).tar intercal-$(VERSION).tar.gz intercal.spec
 
