@@ -1,7 +1,7 @@
 #
 # Utility productions for the INTERCAL distribution
 #
-VERSION = 0.15
+VERSION = 0.16
 MANIFEST = `sed <intercal-$(VERSION)/MANIFEST -e "s/^/intercal-$(VERSION)\//"`
 
 tgz: intercal-$(VERSION).tar.gz

@@ -1,6 +1,8 @@
 .\" Note: This is both a current manual and an archeological exhibit.
 .\" All revisions must be properly conditioned on the c string so that
-.\" it's still possible to format the INTERCAL-72 manual.
+.\" it's still possible to format the INTERCAL-72 manual.  Only outright
+.\" errors should be corrected -- each of these is marked with CORRECTION
+.\" and an explanatory comment.
 .\"
 .\"    This document is free; you can redistribute it and/or modify
 .\"    it under the terms of the GNU General Public License as published by
@@ -54,11 +56,11 @@ THE INTERCAL PROGRAMMING LANGUAGE
 and James M. Lyon\fR
 .if '\*c'y' \{\
 .ce 2
-\fICopyright (C) 1996 by Eric S. Raymond
+\fICopyright (C) 1996, 1997 by Eric S. Raymond
 Redistribution encouraged under GPL\}
 .sp
 .ce 1
-(This version distributed with C-INTERCAL 0.15)
+(This version distributed with C-INTERCAL 0.16)
 .AE
 .MT 4
 .nr % 0
@@ -66,6 +68,17 @@ Redistribution encouraged under GPL\}
 .nr Ej 1
 .bp
 .H 1 "INTRODUCTION"
+.if '\*c'y' \{\
+.DS I F
+"But I don't want to go among mad people," Alice remarked.
+.P
+"Oh, you ca'n't help that," said the Cat: "We're all mad here. I'm
+mad. You're mad."
+.P
+"How do you know I'm mad?" said Alice.
+.P
+"You must be," said the Cat, "or you wouldn't have come here."
+.DE \}
 .P
 The names you are about to ignore are true. However, the story has been changed
 significantly. Any resemblance of the programming language portrayed here
@@ -78,13 +91,13 @@ in the morning will become apparent in the course of this manual.
 .ie '\*c'y' \{\
 .P
 Eighteen years later (give or take a few months) Eric S. Raymond perpetrated
-a UNIX-hosted INTERCAL compiler as a weekend hack.  The C-INTERCAL
+a UNIX-hosted INTERCAL compiler as a weekend hack. The C-INTERCAL
 implementation has since been maintained and extended by an international
 community of technomasochists, including Louis Howell, Steve Swales,
 Michael Ernst, and Brian Raiter.
 .P
 (There was evidently an Atari implementation sometime between these
-two; notes on it got appended to the INTERCAL-72 manual.  The culprits
+two; notes on it got appended to the INTERCAL-72 manual. The culprits
 have sensibly declined to identify themselves.)
 .P
 INTERCAL \}
@@ -107,6 +120,18 @@ The authors are deeply indebted to Eric M. Van and Daniel J. Warmenhoven,
 without whose unwitting assistance this manual would still have been
 possible.
 .H 1 "FUNDAMENTAL CONCEPTS"
+.if '\*c'y' \{\
+.DS I F
+"There's nothing like eating hay when you're faint," the White King
+remarked to Alice, as he munched away.
+.P
+"I should think throwing cold water over you would be better," Alice
+suggested: "-- or some sal-volatile."
+.P
+"I didn't say there was nothing \fIbetter\fR," the King replied. "I
+said there was nothing \fIlike\fR it." Which Alice did not venture to
+deny.
+.DE \}
 .P
 In this section an attempt is made to describe how and why INTERCAL may be
 used; i.e., what it is like and what it is good for.
@@ -124,6 +149,9 @@ be greatly simplified if the subroutine library (see section
 A more detailed analysis of a program is made in section 
 .GETHN proghints
  of this manual.
+.\" Note: there was an error in line 15 in the original manual; 
+.\" the operands of the third \(ct were swapped. 
+
 .DS L
 .cs R 24
         DO (5) NEXT
@@ -140,7 +168,7 @@ A more detailed analysis of a program is made in section
         DO .1 <- "\*(vb':1~:2'\*(ct#1"~#3
         DO :1 <- "'\*(vb":1~'#65535\*(ct#0'"\*(ct":2~'#65535
                 \*(ct#0'"'~'#0\*(ct#65535'"\*(ct"'\*(vb":1~'#0
-                \*(ct#65535'"\*(ct":2~'#65535\*(ct#0'"'~'#0\*(ct#65535'"
+                \*(ct#65535'"\*(ct":2~'#0\*(ct#65535'"'~'#0\*(ct#65535'"
         DO (1) NEXT
         DO :2 <- ":2~'#0\*(ct#65535'"
                 \*(ct"'":2~'#65535\*(ct#0'"\*(ct#0'~'#32767\*(ct#1'"
@@ -168,7 +196,9 @@ INTERCAL is more useful (which isn't saying much) as a challenge to
 professional programmers.  Those who doubt this need only refer back to the
 sample program in section
 .GETHN example1
-\&. This 22-statement program took somewhere
+.\" CORRECTION:
+.\" The original manual counted 22 statements, incorrectly.
+\&. This 23-statement program took somewhere
 from 15 to 30 minutes to write, whereas the same objectives can be achieved
 by single-statement programs in either SNOBOL;
 .DS L
@@ -200,6 +230,22 @@ front of his boss, who would of course happened to turn up, as bosses are
 wont to do. The effect would be no less devastating for the programmer
 having been correct.
 .H 1 "DESCRIPTION"
+.if '\*c'y' \{\
+.DS I F
+"I quite agree with you," said the Duchess; "and the moral of that
+is -- 'Be what you would seem to be' -- or, if you'd like it put more
+simply -- 'Never imagine yourself not to be otherwise than what it might
+appear to others that what you were or might have been was not
+otherwise than what you had been would have appeared to them to be
+otherwise."
+.P
+"I think I should understand that better," Alice said very politely,
+"if I had it written down: but I ca'n't quite follow it as you say
+it."
+.P
+"That's nothing to what I could say if I chose," the Duchess replied,
+in a pleased tone.
+.DE \}
 .P
 The examples of INTERCAL programming which have appeared in the preceding
 sections of this manual have probably seemed highly esoteric to the reader
@@ -216,7 +262,7 @@ These are represented by a spot (.) or two-spot
 These variables may contain only non-negative numbers; thus they have the
 respective ranges of values: 0 to 65535 and 0 to 4294967295. Note: .123 and
 :123 are two distinct variables. On the other hand, .1 and .0001 are
-identical.  Furthermore, the latter may NOT be written as 1E-3.
+identical.  Furthermore, the latter may \fInot\fR be written as 1E-3.
 .H 2 "Constants"
 .P
 .B Constants
@@ -236,21 +282,28 @@ constructions, which are resolved as discussed in section
 \&.  Definition
 of array dimensions will be discussed later in greater detail, since
 discussing it in less detail would be difficult. As before, ,123 and ;123
-are distinct.  In summary, .123, :123, #123, ,123, and :123 are all
+are distinct.  In summary, .123, :123, #123, ,123, and ;123 are all
 distinct.
 .H 2 "Operators"
 .P
-INTERCAL recognizes 5 operators -- 2 binary and 3 unary. Please be kind to 
+INTERCAL recognizes 5 operators -- 2 binary and 3 unary \*F. Please be kind to 
 our operators: they may not be very intelligent, but they're all we've got.
 In a sense, all 5 operators are binary, as they are all bit-oriented, but
 it is not our purpose here to quibble about bits of trivia.
+.if '\*c'y' \{\
+.FS
+Other operators are also available with C-INTERCAL's non-standard
+dialects; see section 
+.GETHN tri_intercal
+\&.
+.FE \}
 .H 3 "Binary Operators"
 .P
 The binary operators are \fBinterleave\fR (also called \fBmingle\fR)
 and \fBselect\fR, which
 are represented by a change (\*(ct) and a sqiggle [sic] (~), respectively.
 .if '\*c'y' \{\
-(In C-INTERCAL'S ASCII environment, EBCDIC \*(ct is replaced by a big
+(In C-INTERCAL's ASCII environment, EBCDIC \*(ct is replaced by a big
 money ($).) \}
 .P
 The interleave operator takes two 16-bit values and produces a 32-bit result
@@ -269,39 +322,12 @@ selects from the first argument the 8th, 7th, 4th, and 1st from last bits,
 namely, 1001, which = 9. But #201~#179 selects from binary 11001001 the 8th,
 6th, 5th, 2nd, and 1st from last bits, giving 10001 = 17. #179~#179 has the
 value 31, while #201~#201 has the value 15.
-.if '\*c'y' \{\
-.H 4 "Return type of SELECT"
-.P
-INTERCAL-72 defined the return type of a SELECT operation
-to depend on the number of bits SELECTed.  The C-INTERCAL compiler
-takes the easier route of defining the return type to be that of
-the right operand, independent of its actual value.  This form has
-the advantage that all types can be determined at compile time.
-Putting in run time type checking would add significant overhead and
-complication, to effect a very minor change in language semantics.
-.P
-The only time this distinction makes any difference is when a unary
-operator is applied to the SELECT result.  This happens extremely
-rarely in practice, the only known instance being the 32-bit
-greater-than test in the standard library, where an XOR operator is
-applied to the result of SELECTing a number against itself.  The
-INTERCAL-72 authors first SELECT the result against #65535\*(ct#65535 to
-insure that XOR sees a 32-bit value.  With the current compiler this
-extra step is unnecessary, but harmless.
-.P
-The cautious programmer should write code that does not depend on
-the compiler version being used.  We therefore suggest the following
-guideline for determining the SELECT return type:
-.P
-A SELECT operation with a 16-bit right operand returns a 16-bit
-value.  The return type of a SELECT operation with a 32-bit right
-operand is undefined, but is guaranteed to be an acceptable input
-to a MINGLE operation so long as 16 or fewer bits are actually
-selected.  Correct code should not depend on whether the return
-type is 16 or 32 bits.\}
 .P
 Perhaps a simpler way of understanding the operation of the select operator
-would be to examine the logic diagram on the following page (Figure 1), which
+.\" CORRECTION:
+.\" "in Figure 1" was originally "on the following page (Figure 1)"
+.\" We can't rely on the page boundaries any more.
+would be to examine the logic diagram in Figure 1, which
 performs the select operation upon two 8-bit values, A and B. The gates used
 are Warmenhovian logic gates, which means the outputs have four possible
 values: low, high, undefined (value of an uninitialized flip-flop), and
@@ -320,7 +346,7 @@ Get a better output device.]
 # The CIRCUITOUS DIAGRAM, Figure 1 of the INTERCAL manual.
 #
 # Transcribed to PIC by Eric S. Raymond from the paper original.
-# The transcription to topologically correct but not geometrically perfect.
+# The transcription is topologically correct but not geometrically perfect.
 #
 # I discovered late in the process that the gate spacing to gate width
 # ratio should be 6/5, not 5/5. The only place the difference shows is
@@ -934,12 +960,42 @@ move right from last [].w;
 box invis wid 6 \
       "GATE TYPE 9.  BLACK BOX" ljust \
       "INPUTS A1-8,  B1-8.    " ljust \
-      "OUTPUT D1-8 = A1-8~B1=8" ljust
+      "OUTPUT O1-8 = A1-8~B1-8" ljust
 .PE
 .sp 10
 .ce 1
 FIGURE 1  (CONTINUED).  NEW YORK
 .bp
+.if '\*c'y' \{\
+.H 4 "Return type of SELECT"
+.P
+INTERCAL-72 defined the return type of a select operation
+to depend on the number of bits selected. The C-INTERCAL compiler
+takes the easier route of defining the return type to be that of
+the right operand, independent of its actual value. This form has
+the advantage that all types can be determined at compile time.
+Putting in run-time type-checking would add significant overhead and
+complication, to effect a very minor change in language semantics.
+.P
+The only time this distinction makes any difference is when a unary
+operator is applied to the select result. This happens extremely
+rarely in practice, the only known instance being the 32-bit
+greater-than test in the standard library, where an XOR operator is
+applied to the result of selecting a number against itself. The
+INTERCAL-72 authors first select the result against #65535\*(ct#65535 to
+insure that XOR sees a 32-bit value. With the current compiler this
+extra step is unnecessary, but harmless.
+.P
+The cautious programmer should write code that does not depend on
+the compiler version being used. We therefore suggest the following
+guideline for determining the select return type:
+.P
+A select operation with a 16-bit right operand returns a 16-bit
+value. The return type of a select operation with a 32-bit right
+operand is undefined, but is guaranteed to be an acceptable input
+to a mingle operation so long as 16 or fewer bits are actually
+selected. Correct code should not depend on whether the return
+type is 16 or 32 bits.\}
 .H 3 "Unary Operators"
 .P
 The unary operators are & (logical \fBAND\fR), V (logical \fBOR\fR),
@@ -947,10 +1003,9 @@ and \*(vb (logical
 \fBXOR\fR). This last character is obtained by overpunching a worm (\-) on a V
 (V).
 .if '\*c'y' \{\
-(In C-INTERCAL'S ASCII environment, EBCDIC \*(vb is replaced by the
-what (?). The compiler recognizes -<backspace>V as a valid
-equivalent, in case you are concerned about compatibility with the 
-Princeton compiler.) \}
+(In C-INTERCAL, \*(vb is replaced by what (?). The compiler recognizes
+V<backspace>- as a valid equivalent, in case you are concerned about
+compatibility with the Princeton compiler.) \}
 The operator is inserted between the spot, two-spot, mesh, or
 what-have-you, and the integer, thus: .&123, #\*(vb123. Multiple unary
 operators may not be concatenated, thus the form #\*(vb&123 is invalid. This
@@ -1008,6 +1063,21 @@ also section
 .GETHN princeton
 \&.
 .H 1 "STATEMENTS"
+.if '\*c'y' \{\
+.DS I F
+"There's glory for you!"
+.P
+"I don't know what you mean by 'glory,'" Alice said.
+.P
+Humpty Dumpty smiled contemptuously. "Of course you don't -- till I tell
+you. I meant 'there's a nice knock-down argument for you!'"
+.P
+"But 'glory' doesn't mean 'a nice knock-down argument.'" Alice
+objected.
+.P
+"When \fII\fR use a word," Humpty Dumpty said, in a rather scornful
+tone, "it means just what I choose it to mean -- neither more nor less."
+.DE \}
 .P
 In this section is described the format of INTERCAL statements.
 .H 2 "General Format"
@@ -1066,7 +1136,12 @@ of being executed each time it is encountered in the course of execution.
 .H 2 "Statements"
 .P
 Following the qualifiers (or, if none are used, the identifier) must occur
-one of the 13 valid operations. (Exception: see section 
+one of the
+.ie '\*c'y' \{\
+14 \}
+.el \{\
+13 \}
+valid operations. (Exception: see section 
 .GETHN comments
 \&.) These are 
 described individually in sections 
@@ -1085,7 +1160,7 @@ assigned 32-bit values only if the value is less than 65535. Thus, to
 invert the least significant bit of the first element of 16-bit
 2-dimensional array number 1, one could write:
 .DS
-,1SUB#1#1 <- '\*(vb,1SUB#1#1\*(ct#1'~'#0\*(ct#65535'
+,1SUB#1#1 <- '\*(vb",1SUB#1#1"\*(ct#1'~'#0\*(ct#65535'
 .DE
 Similarly to SNOBOL and SPITBOL, INTERCAL uses the angle-worm to define the
 dimensions of arrays. An example will probably best describe the format. 
@@ -1177,7 +1252,7 @@ performed by a sequence of the form:
 .cs R
 .DE
 Unlike the FORGET statement, an attempt to RESUME more levels of NEXTing than
-been stacked will cause program termination. See also section 
+has been stacked will cause program termination. See also section 
 .GETHN give_up
 \&.
 .H 3 "STASH"
@@ -1234,17 +1309,23 @@ available for use in expressions and the like.
 Though the INTERCAL-72 manual laid down that the value of an IGNOREd
 variable cannot change, it was unclear about whether or not a
 statement which appears to change an IGNOREd variable is executed or
-not.  This may appear to be a "If a tree falls in the forest..." type
+not. This may appear to be a "If a tree falls in the forest ..." type
 of question, but if the statement in question has other side effects
 it is not.
 .P
 Since another mechanism already exists for ABSTAINing from a
 statement, C-INTERCAL's IGNORE only prevents the changing of the
 specific variable in question, not the execution of the entire
-statement.  In the present version of the language this only makes
-a difference for the WRITE IN statement.  Attempting to WRITE IN
+statement. In the present version of the language this only makes
+a difference for the WRITE IN (see
+.GETHN input
+) and RETRIEVE (see
+.GETHN retrieve
+) statements. Attempting to WRITE IN
 to an IGNOREd variable will cause a number to be read from the input,
-which will be discarded since it cannot be stored in the variable. \}
+which will be discarded since it cannot be stored in the variable. 
+Using RETRIEVE on an IGNOREd variable will pop the variable's stash
+stack without actually changing its value. \}
 .H 3 "REMEMBER"
 .SETR remember
 .P
@@ -1270,10 +1351,11 @@ time. DO ABSTAIN FROM (label) causes the statement whose logical line label
 is (label) to be abstained from. PLEASE ABSTAIN FROM gerund list causes all
 statements of the specified type(s) to be abstained from, as in
 .DS L
-        PLEASE ABSTAIN FROM STASHING
-        PLEASE ABSTAIN FROM IGNORING + FORGETTING
-        PLEASE ABSTAIN FROM NEXTING
-     or PLEASE ABSTAIN FROM CALCULATING
+.ta .3i .6i T .6i
+		PLEASE ABSTAIN FROM STASHING
+		PLEASE ABSTAIN FROM IGNORING + FORGETTING
+		PLEASE ABSTAIN FROM NEXTING
+	or	PLEASE ABSTAIN FROM CALCULATING
 .DE
 Statements may also be automatically abstained from at the start of
 execution via the NOT or N'T parameter (see section 
@@ -1323,7 +1405,7 @@ statement.
 .SETR input
 .P
 Input is accomplished with the statement DO WRITE IN list, where list
-represents a string of variables and/or elements or arrays, separated by
+represents a string of variables and/or elements of arrays, separated by
 intersections. Numbers are represented on cards, each number on a separate
 card, by spelling out each digit (in English) and separating the digits
 with one or more spaces. A zero (0) may be spelled as either ZERO or OH.
@@ -1331,13 +1413,18 @@ Thus the range of (32-bit) input values permissible extends from ZERO (or
 OH) through FOUR TWO NINE FOUR NINE SIX SEVEN TWO NINE FIVE.
 .if '\*c'y' \{\
 (For the convenience of aviators, C-INTERCAL accepts the spelling
-NINER for NINE.  In the service of internationalization, C-INTERCAL
+NINER for NINE. In the service of internationalization, C-INTERCAL
 also accepts input digits in Sanskrit, Basque, Tagalog, Classical
-Nahuatl, Georgian, Kwakiutl, and Volapuk. \}
+Nahuatl, Georgian, Kwakiutl, and Volapuk.) \}
 .P
 Attempting to write in a value greater than or equal to SIX FIVE FIVE THREE
 SIX for a 16-bit variable will result in the error message, "DON'T BYTE OFF
 MORE THAN YOU CAN CHEW."
+.if '\*c'y' \{\
+.P
+(See also section
+.GETHN communication
+ for a description of C-INTERCAL's character I/O.) \}
 .H 3 "Output"
 .P
 Values may be output to the printer, one value per line, via the statement
@@ -1402,6 +1489,11 @@ i
 .fi \}
 for 1000000000.
 .if '\*c'y' \{\
+.P
+(See also section
+.GETHN communication
+ for a description of C-INTERCAL's character I/O.) \}
+.if '\*c'y' \{\
 .H 3 "COME FROM"
 .P
 In which we try to precisely define a statement that should never
@@ -1411,16 +1503,16 @@ in INTERCAL.
 .P
 The earliest known description of the COME FROM statement in the computing
 literature is in [R. L. Clark, "A linguistic contribution to GOTO-less
-programming," Commun. ACM 27 (1984), pp. 349--350], part of the famous April
-Fools issue of CACM.  The subsequent rush by language designers to include the
+programming," Commun. ACM 27 (1984), pp. 349-350], part of the famous April
+Fools issue of CACM. The subsequent rush by language designers to include the
 statement in their languages was underwhelming, one might even say nonexistent.
 It was therefore decided that COME FROM would be an appropriate addition
 to C-INTERCAL.
 .H 4 "Description"
 .P
 There are two useful ways to visualize the action of the COME FROM
-statement.  The simpler is to see that it acts like a GOTO when the
-program is traced backwards in time.  More precisely, the statements
+statement. The simpler is to see that it acts like a GOTO when the
+program is traced backwards in time. More precisely, the statements
 .DS L
 (1)     DO <any statement>
         .
@@ -1442,15 +1534,15 @@ doesn't.
 .P
 What this boils down to is that the statement DO COME FROM (label),
 anywhere in the program, places a kind of invisible trap door
-immediately after statement (label).  Execution or abstention of that
+immediately after statement (label). Execution or abstention of that
 statement is immediately followed by an unconditional jump to the
 COME FROM, unless the (label)ed statement is an executed NEXT, in which
 case the jump occurs if the program attempts to RESUME back to that
-NEXT statement.  It is an error for more than one COME FROM to refer
+NEXT statement. It is an error for more than one COME FROM to refer
 to the same (label).
 .P
 Modification of the target statement by ABSTAIN or by the % qualifier
-affects only that statement, not the subsequent jump.  Such
+affects only that statement, not the subsequent jump. Such
 modifications to the COME FROM itself, however, do affect the jump.
 Encountering the COME FROM statement itself, rather than its target,
 has no effect. \}
@@ -1484,8 +1576,11 @@ as are certain simple conditional errors:
 .DE
 This pair of statements will cause an error exit the second time they are
 encountered. Caution!! The appearance of a statement identifier in an
-intended comment will be taken as the beginning of a new statement. Thus,
-the first example on the preceding page could not have been:
+intended comment will be taken as the beginning of a new
+.\" CORRECTION:
+.\" "comment example above" was originally "example on the preceding page"
+.\" We can't rely on page boundaries any more.
+statement. Thus, the first comment example above could not have been:
 .sp 1
 *       PLEASE NOTE THAT THIS LINE DOES NOTHING
 .P
@@ -1494,54 +1589,61 @@ of D-space-O, since INTERCAL does not ignore extraneous spaces in statement
 identifiers.
 .if '\*c'y' \{\
 .H 1 "OUTSIDE COMMUNICATION"
+.if '\*c'y' \{\
+.DS I F
+She puzzled over this for some time, but at last a bright thought
+struck her. "Why, it's a Looking-glass book, of course! And, if I hold
+it up to a glass, the words will all go the right way again."
+.DE \}
+.SETR communication
 .P
 In which we try to remedy the fact that, due to I/O limitations, INTERCAL
-can not even in principle perform the same tasks as other languages.  It
+can not even in principle perform the same tasks as other languages. It
 is hoped that this addition will permit INTERCAL users to waste vast
 quantities of computer time well into the 21st century.
 .H 2 "Motivation"
 .P
 One of the goals of INTERCAL was to provide a language which, though
 different from all other languages, is nevertheless theoretically
-capable of all the same tasks.  INTERCAL-72 failed to
+capable of all the same tasks. INTERCAL-72 failed to
 accomplish this because its I/O functions could not handle arbitrary
-streams of bits, or even arbitrary sequences of characters.  A
+streams of bits, or even arbitrary sequences of characters. A
 language which can't even send its input directly to its output
 can hardly be considered as capable as other languages.
 .H 2 "Turing Text Model"
 .P
 To remedy this problem, character I/O is now provided in a form based
-on the "Turing Text" model, originally proposed by Jon Blow.  The
-C-INTERCAL programmer can access this capability by placing a one-
-dimensional array in the list of items given to a WRITE IN or READ OUT
-statement.  On execution of the statement, the elements of the array
+on the "Turing Text" model, originally proposed by Jon Blow. The
+C-INTERCAL programmer can access this capability by placing a
+one-dimensional array in the list of items given to a WRITE IN or READ
+OUT statement. On execution of the statement, the elements of the array
 will, from first to last, be either loaded from the input or sent
-to the output, as appropriate, in the manner described below.  There
+to the output, as appropriate, in the manner described below. There
 is currently no support for I/O involving higher-dimensional arrays,
 but some form of graphics might be a possible 2-D interpretation.
 .P
 The heart of the Turing Text model is the idea of a continuous loop
 of tape containing, in order, all the characters in the machine's
-character set.  When a character is received by the input routine,
+character set. When a character is received by the input routine,
 the tape is advanced the appropriate number of spaces to bring
 that character under the tape head, and the number of spaces the
 tape was moved is the number that is actually seen by the INTERCAL
-program.  Another way to say this is that the number placed in an
+program. Another way to say this is that the number placed in an
 INTERCAL array is the difference between the character just
 received and the previous character, modulo the number of characters
 in the machine character set.
 .P
 Output works in just the opposite fashion, except that the characters
-being output come from the other side of the tape.  From this position
+being output come from the other side of the tape. From this position
 the characters on the tape appear to be in reverse order, and are
-individually backwards as well.  (We would show you what it looks
+individually backwards as well. (We would show you what it looks
 like, but we don't have a font with backwards letters available.
-Use your imagination.)  The effect is that a number is taken out
-of an INTERCAL array, subtracted from the last character output---
-i.e., the result of the last subtraction---and then sent on down
-the output channel.  The only catch is that the character as seen
+Use your imagination.) The effect is that a number is taken out
+of an INTERCAL array, subtracted from the last character output --
+i.e., the result of the last subtraction -- and then sent on down
+the output channel. The only catch is that the character as seen
 by the INTERCAL program is the mirror-image of the character as
-seen by the machine and the user.  The bits of the character are
+seen by the machine and the user. The bits of the character are
 therefore taken in reverse order as it is sent to the output.
 Note that this bit reversal affects only the character seen by
 the outside world; it does not affect the character stored internally
@@ -1549,21 +1651,22 @@ by the program, from which the next output number will be subtracted.
 All subtractions are done modulo the number of characters in the
 character set.
 .P
-Two different tapes are used for input and for output to allow for
+Two different tapes are used for input and output to allow for
 future expansion of the language to include multiple input and
-output channels.  Both tapes start at character 0 when a program
-begins execution.  On input, when an end of file marker is reached
-the number placed in the array is one greater than the highest-
-numbered character on the tape.
+output channels. Both tapes start at character 0 when a program
+begins execution. On input, when an end-of-file marker is reached
+the number placed in the array is one greater than the
+highest-numbered character on the tape.
 .H 2 "Example Program"
 .P
 If all this seems terribly complicated, it should be made perfectly
 clear by the following example program, which simply maps its input
-to its output (like a simplified UNIX "cat").  It assumes that
+to its output (like a simplified UNIX "cat"). It assumes that
 characters are 8 bits long, but that's fine since the current version
-of C-INTERCAL does too.  It uses the standard library routines for addition
+of C-INTERCAL does too. It uses the standard library routines for addition
 and subtraction.
 .DS L
+.cs R 24
         DO ,1 <- #1
         DO .4 <- #0
         DO .5 <- #0
@@ -1586,59 +1689,68 @@ and subtraction.
         DO .5 <- .2
         DO ,1SUB#1 <- .3
 (30)    PLEASE READ OUT ,1
+.cs R
 .DE
 For each number received in the input array, the program first tests
-the #256 bit to see if the end of file has been reached.  If not, the
+the #256 bit to see if the end of file has been reached. If not, the
 previous input character is subtracted off to obtain the current
-input character.  Then the order of the bits is reversed to find
+input character. Then the order of the bits is reversed to find
 out what character should be sent to the output, and the result
-is subtracted from the last character sent.  Finally, the difference
-is placed in an array and given to a READ OUT statement.  See?
+is subtracted from the last character sent. Finally, the difference
+is placed in an array and given to a READ OUT statement. See?
 We told you it was simple! \}
 .if '\*c'y' \{\
 .H 1 "TriINTERCAL"
+.if '\*c'y' \{\
+.DS I F
+"-- oh dear, how puzzling it all is! I'll try if I know all the things
+I used to know. Let me see: four times five is twelve, and four times
+six is thirteen, and four times seven is -- oh dear! I shall never get
+to twenty at that rate!"
+.DE \}
+.SETR tri_intercal
 .P
 In which it is revealed that bitwise operations are too ordinary for
 hard-core INTERCAL programmers, and extensions to other bases are
-discussed.  These are not, strictly speaking, extensions to INTERCAL
+discussed. These are not, strictly speaking, extensions to INTERCAL
 itself, but rather new dialects sharing most of the features of the
 parent language.
 .H 2 "Motivation"
 .P
-INTERCAL is really a pretty sissy language.  It tries hard to be
+INTERCAL is really a pretty sissy language. It tries hard to be
 different, but when you get right down to its roots, what do you find?
-You find bits, that's what.  Plain old ones and zeroes, in groups of
-16 and 32, just like every other language you've ever heard of.  And
-what operations can you perform on these bits?  The INTERCAL operators
+You find bits, that's what. Plain old ones and zeroes, in groups of
+16 and 32, just like every other language you've ever heard of. And
+what operations can you perform on these bits? The INTERCAL operators
 may arrange and permute them in weird and wonderful ways, but at the
 bit level the operators are the same AND, OR and XOR you've seen
 countless times before.
 .P
 Once the prospective INTERCAL programmer masters the unusual syntax,
 she finds herself working with the familiar Boolean operators on
-perfectly ordinary unsigned integer words.  Even the constants she uses
-are familiar.  After all, who would not immediately recognize #65535
-and #32768?  It may take a just a moment more to figure out #65280,
+perfectly ordinary unsigned integer words. Even the constants she uses
+are familiar. After all, who would not immediately recognize #65535
+and #32768? It may take a just a moment more to figure out #65280,
 and #21845 and #43690 could be puzzles until she notices that they
-sum to #65535, but basically she's still on her home turf.  The 16-bit
+sum to #65535, but basically she's still on her home turf. The 16-bit
 limit on constants actually works in the programmer's favor by insuring
-that very long anonymous constants can not appear in INTERCAL programs.
+that very long anonymous constants cannot appear in INTERCAL programs.
 And this is in a language that is supposed to be different from any
 other!
 .H 2 "Abandon All Hope..."
 .P
 Standard INTERCAL is based on variables consisting of ordinary bits
-and familiar Boolean operations on those bits.  In pursuit of uniqueness,
+and familiar Boolean operations on those bits. In pursuit of uniqueness,
 it seems appropriate to provide a new dialect, otherwise identical to
 INTERCAL, which instead uses variables consisting of trits, i.e. ternary
-digits, and operators based on tritwise logical operations.  This is
+digits, and operators based on tritwise logical operations. This is
 intended to be a separate dialect, rather than an extension to INTERCAL
-itself, for a number of reasons.  Doing it this way avoids word-length
+itself, for a number of reasons. Doing it this way avoids word-length
 conflicts, does not spoil the elegance of the Spartan INTERCAL operator
 set, and dodges the objections of those who might feel it too great an
-alteration to the original language.  Primarily, though, giving INTERCAL
+alteration to the original language. Primarily, though, giving INTERCAL
 programmers the ability to switch numeric base at will amounts to
-excessive functionality.  So much better that a programmer choose a base
+excessive functionality. So much better that a programmer choose a base
 at the outset and then be forced to stick with it for the remainder of
 the program.
 .H 2 "Compiler Operation"
@@ -1647,183 +1759,182 @@ The same compiler, ick, supports both INTERCAL and TriINTERCAL.
 This has the advantage that future bug fixes and additions to the
 language not related to arithmetic immediately apply to both versions.
 The compiler recognizes INTERCAL source files by the extension '.i',
-and TriINTERCAL source files by the extension '.3i'.  It's as simple
-as that.  There is no way to mix INTERCAL and TriINTERCAL source in
+and TriINTERCAL source files by the extension '.3i'. It's as simple
+as that. There is no way to mix INTERCAL and TriINTERCAL source in
 the same program, and it is not always possible to determine which
 dialect a program is written in just by looking at the source code.
 .H 2 "Data Types"
 .P
 The two TriINTERCAL data types are 10-trit unsigned integers and
-20-trit unsigned integers.  All INTERCAL syntax for distinguishing
-data types is ported to these new types in the obvious way.  Small
-words may contain numbers from #0 to #59048, large words may contain
-numbers from #0$#0 to #59048$#59048.  Errors are signaled for constants
+20-trit unsigned integers. All INTERCAL syntax for distinguishing
+data types is ported to these new types in the obvious way. Small
+words may contain numbers from #0 to #59048; large words may contain
+numbers from #0$#0 to #59048$#59048. Errors are signaled for constants
 greater than #59048 and for attempts to WRITE IN numbers too large
 for a given variable or array element to hold.
 .P
 Note that though TriINTERCAL considers all numbers to be unsigned,
 nothing prevents the programmer from implementing arithmetic operations
-that treat their operands as signed.  Three's complement is one obvious
-choice, but balanced ternary notation is also a possibility.  This
+that treat their operands as signed. Three's complement is one obvious
+choice, but balanced ternary notation is also a possibility. This
 latter is a very pretty and symmetrical system in which all 2 trits
 are treated as if they had the value -1.
 .H 2 "Operators"
 .P
 The TriINTERCAL operators are designed to inherit the relevant properties
 of the standard INTERCAL operators, so that both can be considered as
-merely different aspects of the same Platonic ideal.  (Not that the word
+merely different aspects of the same Platonic ideal. (Not that the word
 "ideal" is ever particularly relevant when used in connection with
 INTERCAL.)
 .H 3 "Binary Operators I"
 .P
 The binary operators carry over from the original language with only
-minor changes.  The MINGLE operator ($) creates a 20-trit word by
-alternating trits from its two 10-trit operands.  The SELECT operator (~)
+minor changes. The mingle operator ($) creates a 20-trit word by
+alternating trits from its two 10-trit operands. The select operator (~)
 is a little more complicated, since the ternary tritmask may contain 0, 1,
-and 2 trits.  If we observe that the SELECT operation on binary operands
+and 2 trits. If we observe that the select operation on binary operands
 amounts to a bitwise AND and some rearrangement of bits, it seems
-appropriate to base the SELECT for ternary operands on a tritwise AND in
-the analogous fashion.  We therefore postpone the definition of SELECT
+appropriate to base the select for ternary operands on a tritwise AND in
+the analogous fashion. We therefore postpone the definition of select
 until we know what a tritwise AND looks like.
 .H 3 "Unary Operators"
 .P
 The unary operators in INTERCAL are all derived from the familiar
-Boolean operations on single bits.  To extend these operations to trits,
+Boolean operations on single bits. To extend these operations to trits,
 we first ask ourselves what the important properties of these operations
 are that we wish to be preserved, then design the tritwise operators so
 that they behave in a similar fashion.
 .H 4 "Unary Logical Operators"
 .P
-Let's start with AND and OR.  To begin with, these can be considered
+Let's start with AND and OR. To begin with, these can be considered
 "choice" or "preference" operators, as they always return one of their
-operands.  AND can be described as wanting to return 0, but returning 1
-if it is given no other choice, i.e., if both operands are 1.  Similarly,
-OR wants to return 1 but returns 0 if that is its only choice.  From
+operands. AND can be described as wanting to return 0, but returning 1
+if it is given no other choice, i.e., if both operands are 1. Similarly,
+OR wants to return 1 but returns 0 if that is its only choice. From
 this it is immediately apparent that each operator has an identity
 element that "always loses", and a dominator element that "always wins".
 .P
 AND and OR are commutative and associative, and each distributes
-over the other.  They are also symmetric with each other, in the sense
+over the other. They are also symmetric with each other, in the sense
 that AND looks like OR and OR looks like AND when the roles of 0 and 1
-are interchanged (De Morgan's Laws).  This symmetry property seems to be
+are interchanged (De Morgan's Laws). This symmetry property seems to be
 a key element to the idea that these are logical, rather than arithmetic,
-operators.  In a three-valued logic we would similarly expect a three-
-way symmetry among the three values 0, 1 and 2 and the three operators
-AND, OR and (of course) BUT.
+operators. In a three-valued logic we would similarly expect a
+three-way symmetry among the three values 0, 1 and 2 and the three
+operators AND, OR and (of course) BUT.
 .P
 The following tritwise operations have all the desired properties:
-OR returns the greater of its two operands.  That is, it returns 2 if
+OR returns the greater of its two operands. That is, it returns 2 if
 it can get it, else it tries to return 1, and it returns 0 only if both
-operands are 0.  AND wants to return 0, will return 2 if it can't get
-0, and returns 1 only if forced.  BUT wants 1, will take 0, and tries
-to avoid 2.  The equivalents to De Morgan's Laws apply to rotations
-of the three elements, e.g., 0 -> 1, 1 -> 2, 2 -> 0.  Each operator
+operands are 0. AND wants to return 0, will return 2 if it can't get
+0, and returns 1 only if forced. BUT wants 1, will take 0, and tries
+to avoid 2. The equivalents to De Morgan's Laws apply to rotations
+of the three elements, e.g., 0 -> 1, 1 -> 2, 2 -> 0. Each operator
 distributes over exactly one other operator, so the property
-"X distributes over Y" is not transitive.  The question of which way
+"X distributes over Y" is not transitive. The question of which way
 this distributivity ring goes around is left as an exercise for the
 student.
 .P
-In TriINTERCAL programs the whirlpool (@) symbol denotes the unary
-tritwise BUT operation.  You can think of the whirlpool as drawing
-values preferentially towards the central value 1.  Alternatively,
-you can think of it as drawing your soul and your sanity inexorably
-down...
+In TriINTERCAL programs the whirlpool (@) denotes the unary tritwise
+BUT operation. You can think of the whirlpool as drawing values
+preferentially towards the central value 1. Alternatively, you can
+think of it as drawing your soul and your sanity inexorably down ...
 .P
 On the other hand, maybe it's best you \fInot\fR think of it that way.
 .P
-A few comments about how these operators can be used.  OR acts like
-a tritwise maximum operation.  AND can be used with tritmasks.  0's
+A few comments about how these operators can be used. OR acts like
+a tritwise maximum operation. AND can be used with tritmasks. 0's
 in a mask wipe out the corresponding elements in the other operand,
-while 1's let the corresponding elements pass through unchanged.  2's
+while 1's let the corresponding elements pass through unchanged. 2's
 in a mask consolidate the values of nonzero elements, as both 1's and
-2's in the other operand yield 2's in the output.  BUT can be used to
-create "partial tritmasks".  0's in a mask let BUT eliminate 2's from
-the other operand while leaving other values unchanged.  Of course,
+2's in the other operand yield 2's in the output. BUT can be used to
+create "partial tritmasks". 0's in a mask let BUT eliminate 2's from
+the other operand while leaving other values unchanged. Of course,
 the symmetry property guarantees that the operators don't really
 behave differently from each other in any fundamental way; the apparent
 differences come from the intuitive view that a 0 trit is "not set"
 while a 1 or 2 trit is "set".
 .H 4 "Binary Operators II"
 .P
-At this point we can define SELECT, since we now know what the
-tritwise AND looks like.  SELECT takes the binary tritwise AND of
-its two operands.  It shifts all the trits of the result corresponding
+At this point we can define select, since we now know what the
+tritwise AND looks like. Select takes the binary tritwise AND of
+its two operands. It shifts all the trits of the result corresponding
 to 2's in the right operand over to the right (low) end of the result,
 then follows them with all the output trits corresponding to 1's in
-the right operand.  Trits corresponding to 0's in the right operand,
+the right operand. Trits corresponding to 0's in the right operand,
 which are all 0 anyway, occupy the remaining space at the left end of
-the output word.  Both 10-trit and 20-trit operands are accepted,
-and are padded with zeroes on the left if necessary.  The output
-type is determined the same way as in standard INTERCAL.
+the output word. Both 10-trit and 20-trit operands are accepted,
+and are padded with zeroes on the left if necessary. The output
+type is determined the same way as in standard C-INTERCAL.
 .H 4 "Unary Arithmetic Operators"
 .P
-Now that we've got all that settled, what about XOR?  This is
+Now that we've got all that settled, what about XOR? This is
 easily the most-useful of the three unary INTERCAL operators,
 because it combines in one package the operations ADD WITHOUT CARRY,
-SUBTRACT WITHOUT BORROW, BITWISE NOT-EQUAL, and BITWISE NOT.  In
+SUBTRACT WITHOUT BORROW, BITWISE NOT-EQUAL, and BITWISE NOT. In
 TriINTERCAL we can't have all of these in the same operator, since
-addition and subtraction are no longer the same thing.  The solution
-is to split the XOR concept into two operators.  The ADD WITHOUT CARRY
-operation is represented by the new sharkfin (^) symbol, while the
-old what (?) symbol represents SUBTRACT WITHOUT BORROW.  The reason for
-this choice is so that what (?) will also represent the TRITWISE NOT-EQUAL
+addition and subtraction are no longer the same thing. The solution
+is to split the XOR concept into two operators. The ADD WITHOUT CARRY
+operation is represented by the new sharkfin (^), while the old
+what (?) represents SUBTRACT WITHOUT BORROW. The reason for this
+choice is so that what (?) will also represent the TRITWISE NOT-EQUAL
 operation.
 .P
 Note that what (?), unlike the other four unary operators, is not
-symmetrical.  It should be thought of as rotating its operand one trit
+symmetrical. It should be thought of as rotating its operand one trit
 to the right (with wraparound) and then subtracting off the trits of
-the original number.  These subtractions are done without borrowing,
+the original number. These subtractions are done without borrowing,
 i.e., trit-by-trit modulo 3.
 .H 3 "Examples"
 .P
 The TriINTERCAL operators really aren't all that bad once you get
-used to them.  Let's look at a few examples to show how they can
-be used in practice.  In all of these examples the input value is
+used to them. Let's look at a few examples to show how they can
+be used in practice. In all of these examples the input value is
 contained in the 10-trit variable .3.
 .P
 In INTERCAL, single-bit values often have to be converted from
-{0,1} to {1,2} for use in RESUME statements.  Examples of how to do
-this appear in the original manual.  In TriINTERCAL the expression
-"^.3$#1"~#1 sends 0 -> 1 and 1 -> 2.  If the 1-trit input value can
+{0,1} to {1,2} for use in RESUME statements. Examples of how to do
+this appear in the original manual. In TriINTERCAL the expression
+"^.3$#1"~#1 sends 0 -> 1 and 1 -> 2. If the 1-trit input value can
 take on any of its three possible states, however, we will also have
-to deal with the 2 case.  The expression "V.3$#1"~#1 sends {0,1} -> 1
-and 2 -> 2.  To test if a trit is set, we can use "V'"&.3$#2"~#1'$#1"~#1,
-sending 0 -> 1 and {1,2} -> 2.  To reverse the test we use
-"?'"&.3$#2"~#1'$#1"~#1, sending 0 -> 2 and {1,2} -> 1.  Note that we
-have not been taking full advantage of the new SELECT operator.  These
+to deal with the 2 case. The expression "V.3$#1"~#1 sends {0,1} -> 1
+and 2 -> 2. To test if a trit is set, we can use "V'"&.3$#2"~#1'$#1"~#1,
+sending 0 -> 1 and {1,2} -> 2. To reverse the test we use
+"?'"&.3$#2"~#1'$#1"~#1, sending 0 -> 2 and {1,2} -> 1. Note that we
+have not been taking full advantage of the new select operator. These
 last two expressions can be simplified into "V!3~#2'$#1"~#1 and
-"?!3~#2'$#1"~#1, which perform exactly the same mappings.  Finally, if
+"?!3~#2'$#1"~#1, which perform exactly the same mappings. Finally, if
 we need a 3-way test, we can use "@'"^.3$#7"~#4'$#2"~#10, which
 obviously sends 0 -> 1, 1 -> 2, and 2 -> 3.
 .P
 For an unrelated example, the expression "^.3$.3"~"#0$#29524"
 converts all of the 1-trits of .3 into 2's and all of the 2-trits
-into 1's.  In balanced ternary, where 2-trits represent -1 values,
+into 1's. In balanced ternary, where 2-trits represent -1 values,
 this is the negation operation.
 .H 2 "Beyond Ternary..."
 .P
 While we're at it, we might as well extend this multiple bases
-business a little farther.  The ick compiler actually recognizes
+business a little farther. The ick compiler actually recognizes
 filename suffixes of the form '.Ni', where N is any number from 2
-to 7.  2 of course gives standard INTERCAL, while 3 gives TriINTERCAL.
+to 7. 2 of course gives standard INTERCAL, while 3 gives TriINTERCAL.
 We cut off before 8 because octal notation is the smallest base used
 to facilitate human-to-machine communication, and this seems quite
-contrary to the basic principles behind INTERCAL.  The small data
+contrary to the basic principles behind INTERCAL. The small data
 types hold 16 bits, 10 trits, 8 quarts, 6 quints, 6 sexts, or 5 septs,
 and the large types are always twice this size.
 .P
-As for operators, '?' is always SUBTRACT WITHOUT BORROW, and '^'
-is always ADD WITHOUT CARRY.  'V' is the OR operation and always
-returns the max of its inputs.  '&' is the AND operation, which chooses
-0 if possible but otherwise returns the max of the inputs.  '@' is BUT,
+As for operators, ? is always SUBTRACT WITHOUT BORROW, and ^
+is always ADD WITHOUT CARRY. V is the OR operation and always
+returns the max of its inputs. & is the AND operation, which chooses
+0 if possible but otherwise returns the max of the inputs. @ is BUT,
 which prefers 1, then 0, then the max of the remaining possibilities.
 Rather than add more special symbols forever, a numeric modifier may
-be placed directly before the '@' symbol to indicate the operation
-that prefers one of the digits not already represented.  Thus in files
-ending in '.5i', the permitted unary operators are '?', '^', '&', '@',
-\&'2@', '3@', and 'V'.  Use of such barbarisms as '0@' to represent '&'
-are not permitted, nor is the use of '@' or '^' in files with either
-of the extensions '.i' or '.2i'.  Why not?  You just can't, that's why.
+be placed directly before the @ to indicate the operation
+that prefers one of the digits not already represented. Thus in files
+ending in '.5i', the permitted unary operators are ?, ^, &, @, 2@, 3@,
+and V. Use of such barbarisms as 0@ to represent &
+are not permitted, nor is the use of @ or ^ in files with either
+of the extensions '.i' or '.2i'. Why not? You just can't, that's why.
 Don't ask so many questions.
 .P
 As a closing example, we note that in balanced quinary notation,
@@ -1842,6 +1953,24 @@ by 4, modulo 5.
 .P
 Now go beat your head against the wall for a while.\}
 .H 1 "SUBROUTINE LIBRARY"
+.if '\*c'y' \{\
+.DS I F
+"You don't know what you're talking about!" cried Humpty Dumpty. "How
+many days are there in a year?"
+.P
+"Three hundred and sixty-five," said Alice.
+.P
+"And how many birthdays have you?"
+.P
+"One."
+.P
+"And if you take one from three hundred and sixty-five, what remains?"
+.P
+"Three hundred and sixty-four, of course."
+.P
+Humpty Dumpty looked doubtful. "I'd rather see that done on paper," he
+said.
+.DE \}
 .SETR sublib
 .P
 INTERCAL provides several built-in subroutines to which control can be
@@ -1852,14 +1981,14 @@ addition, subtraction, etc.
 .P
 In general, the operands are .1, .2, etc., or :1, :2, etc., and the result(s)
 are stored in what would have been the next operand(s). For instance, one
-routine adds .1 to .2 and store the sum in .3, with .4 being used to indicate
+routine adds .1 to .2 and stores the sum in .3, with .4 being used to indicate
 overflow. All variables not used for results are left unchanged.
 .H 2 "Available Functions"
 .SETR functions
 .P
 At the time of this writing, only the most fundamental operations are offered
 in the library, as a more complete selection would require prohibitive time
-and coree to implement. These functions, along with their corresponding entry
+and core to implement. These functions, along with their corresponding entry
 points (entered via DO (entry) NEXT) are listed below.
 .DS L
 .cs R 24
@@ -1875,10 +2004,6 @@ points (entered via DO (entry) NEXT) are listed below.
         .3 <- #0 if .2 is #0
  (1050) .2 <- :1 divided by .1, error exit on overflow
         .2 <- #0 if .1 is #0
-.if '\*c'y' \{\
- (1060) .3 <- logical or of .1 and .2 
- (1070) .3 <- logical and of .1 and .2
- (1080) .3 <- logical xor of .1 and .2 \}
 
  (1500) :3 <- :1 plus :2, error exit on overflow
  (1509) :3 <- :1 plus :2
@@ -1906,9 +2031,23 @@ points (entered via DO (entry) NEXT) are listed below.
 .P
 The C-INTERCAL compiler will automatically include the system library if a DO
 (1xxx) NEXT statement is used, and if no (1xxx) labels are defined anywhere,
-where (1xxx) is a label in the 1000-1999 range, inclusive.  This was not
+where (1xxx) is a label in the 1000-1999 range, inclusive. This was not
 an INTERCAL-72 feature. \}
 .H 1 "PROGRAMMING HINTS"
+.if '\*c'y' \{\
+.DS I F
+"If any one of them can explain it," said Alice, "I'll give him
+sixpence. \fII\fR don't believe there's an atom of meaning in it."
+The jury all wrote down, on their slates, "\fIShe\fR doesn't
+believe there's an atom of meaning in it," but none of them attempted
+to explain the paper.
+.P
+"If there's no meaning in it," said the King, "that saves a world of
+trouble, you know, as we needn't try to find any. And yet, I don't
+know," he went on, spreading out the verses on one knee, and looking
+at them with one eye: "I seem to see some meaning in them, after
+all...."
+.DE \}
 .SETR proghints
 .P
 For the user looking to become more familiar with the INTERCAL language, we
@@ -1921,7 +2060,12 @@ for instructive analysis. Since there was only one such program available,
 we have proceeded to use it. It is known as the "INTERCAL System Library."
 .H 2 "Description"
 .P
-The program listing begins on the second page following. It is in the same
+.\" CORRECTION:
+.\" "is in section {section}" was "on the second page following"
+.\" We can't rely on the page breaks any more.
+The program listing is in section 
+.GETHN syslib
+\&. It is in the same
 format as would be produced by the Princeton INTERCAL compiler in FORMAT
 mode with WIDTH=62 (see section 
 .GETHN princeton
@@ -1947,8 +2091,15 @@ to #2 and leave #1 alone) use "\*(vb'exp'\*(ct#2"~#3.
 Certain conditions are easily checked. For example, to test for zero,
 select the value from itself and select the bottom bit (see statement 54).
 To test for all bits being 1's, select the value from itself and select the
-top bit (see statement 261). The test for greater than, performed in
-statements 192 and 193 on 32-bit values, employs binary logical operations,
+top bit.
+.\" CORRECTION:
+.\" "statements 219 and 220" were "statement 192 and 193", but there
+.\" is no such test there.
+.\" Also, last sentence had parenthetical "(see statement 261)".  Not
+.\" only does 261 contain no such test, the library as a whole doesn't
+.\" seem to either.
+The test for greater than, performed in
+statements 219 and 220 on 32-bit values, employs binary logical operations,
 which are performed as follows:
 .DS
 \&'\*(vb.1\*(ct.2'~'#0\*(ct#65535'
@@ -1964,7 +2115,7 @@ for 16-bit values or, for 32-bit values:
 Testing for greater-than with 16-bit values is somewhat simpler and is done
 with the pair of statements:
 .DS L
-        DO .C <- '\*(vb.Ac.B'~'#0\*(ct#65535'
+        DO .C <- '\*(vb.A\*(ct.B'~'#0\*(ct#65535'
         DO .C <- '&"'.A~.C'~'"\*(vb'\*(vb.C~.C'\*(ct#32768"
                 ~"#0\*(ct#65535"'"\*(ct".C~.C"'~#1
 .DE
@@ -1989,303 +2140,310 @@ shifting 16- and 32-bit variables logically one place to the left.
 Statement 231 demonstrates right-shifting for 32-bit variables.
 .bp
 .H 2 "Program Listing"
+.SETR syslib
 .DS L
 .cs R 24
-    1   (1000)  PLEASE IGNORE .4
-    2           PLEASE ABSTAIN FROM (1005)
-    3   (1009)  DO STASH .1 + .2 + .5 + .6
-    4           DO .4 <- #1
-    5           DO (1004) NEXT
-    6   (1004)  PLEASE FORGET #1
-    7           DO .3 <- '\*(vb.1\*(ct.2'~'#0\*(ct#65535'
-    8           DO .6 <- '&.1\*(ct.2'~'#0\*(ct#65535'
-    9           PLEASE DO .5 <- "\*(vb!6~#32768'\*(ct#1"~#3
-   10           DO (1002) NEXT
-   11           DO .4 <- #2
-   12   (1005)  DO (1006) NEXT
-*  13   (1999)  DOUBLE OR SINGLE PRECISION OVERFLOW
-   14   (1002)  DO (1001) NEXT
-   15   (1006)  PLEASE FORGET #1
-   16           DO .5 <- '\*(vb"!6~.6'~#1"\*(ct#1'~#3
-   17           DO (1003) NEXT
-   18           DO .1 <- .3
-   19           DO .2 <- !6\*(ct#0'~'#32767\*(ct#1'
-   20           DO (1004) NEXT
-   21   (1003)  DO (1001) NEXT
-   22           DO REINSTATE (1005)
-   23   (1007)  PLEASE RETRIEVE .1 + .2 + .5 + .6
-   24           DO REMEMBER .4
-   25           PLEASE RESUME #2
-   26   (1001)  DO RESUME .5
-   27   (1010)  DO STASH .1 + .2 + .4
-   28           DO .4 <- .1
-   29           DO .1 <- '\*(vb.2\*(ct#65535'~'#0\*(ct#65535'
-   30           DO (1020) NEXT
-   31           PLEASE DO .2 <- .4
-   32           PLEASE DO (1009) NEXT
-   33           DO RETRIEVE .1 + .2 + .4
-   34           PLEASE RESUME #1
-   35   (1020)  DO STASH .2 + .3
-   36           DO .2 <- #1
-   37           PLEASE DO (1021) NEXT
-   38   (1021)  DO FORGET #1
-   39           DO .3 <- "\*(vb!1~.2'\*(ct#1"~#3
-   40           PLEASE DO .1 <- '\*(vb.1\*(ct.2'~'#0\*(ct#65535'
-   41           DO (1022) NEXT
-   42           DO .2 <- !2\*(ct#0'~'#32767\*(ct#1'
-   43           DO (1021) NEXT
-   44   (1023)  PLEASE RESUME .3
-   45   (1022)  DO (1023) NEXT
-   46           PLEASE RETRIEVE .2 + .3
-   47           PLEASE RESUME #2
-   48   (1030)  DO ABSTAIN FROM (1033)
-   49           PLEASE ABSTAIN FROM (1032)
-   50   (1039)  DO STASH :1 + .5
-   51           DO (1530) NEXT
-   52           DO .3 <- :1~#65535
-   53           PLEASE DO .5 <- :1~'#65280\*(ct#65280'
-   54           DO .5 <- '\*(vb"!5~.5'~#1"\*(ct#1'~#3
-   55           DO (1031) NEXT
-   56   (1032)  DO (1033) NEXT
-   57           DO (1999) NEXT
-   58   (1031)  DO (1001) NEXT
-   59   (1033)  DO .4 <- .5
-   60           DO REINSTATE (1032)
-   61           PLEASE REINSTATE (1033)
-   62           DO RETRIEVE :1 + .5
-   63           PLEASE RESUME #2
-   64   (1040)  PLEASE STASH .1 + .2 + .2 + :1 + :2 + :3
-   65           DO .2 <- #0
-   66           DO (1520) NEXT
-   67           DO STASH :1
-   68           PLEASE RETRIEVE .2
-   69           DO .1 <- .2
-   70           DO .2 <- #0
-   71           PLEASE DO (1520) NEXT
-   72           DO :2 <- :1
-   73           DO RETRIEVE .1 + .2 + :1
-   74           DO (1550) NEXT
-   75           PLEASE DO .3 <- :3
-   76           DO RETRIEVE :1 + :2 + :3
-   77           DO RESUME #1
-   78   (1050)  PLEASE STASH :2 + :3 + .5
-   79           DO :2 <- .1
-   80           PLEASE DO (1550) NEXT
-   81           DO .5 <- :3~'#65280\*(ct#65280'
-   82           DO .5 <- '\*(vb"!5~.5'~#1"\*(ct#1'~#3
-   83           DO (1051) NEXT
-   84           DO (1999) NEXT
-   85   (1051)  DO (1001) NEXT
-   86           DO .2 <- :3
-   87           PLEASE RETRIEVE :2 + :3 + .5
-   88           DO RESUME #2
-   89   (1500)  PLEASE ABSTAIN FROM (1502)
-   90           PLEASE ABSTAIN FROM (1506)
-   91   (1509)  PLEASE STASH :1 + .1 + .2 + .3 + .4 + .5 + .6
-   92           DO .1 <- :1~#65535
-   93           PLEASE DO .2 <- :2~#65535
-   94           DO (1009) NEXT
-   95           DO .5 <- .3
-   96           PLEASE DO .6 <- .4
-   97           DO .1 <- :1~'#65280\*(ct#65280'
-   98           DO .2 <- :2~'#65280\*(ct#65280'
-   99           DO (1009) NEXT
-  100           DO .1 <- .3
-  101           PLEASE DO (1503) NEXT
-  102           DO .6 <- .4
-  103           DO .2 <- #1
-  104           DO (1009) NEXT
-  105           DO .1 <- .3
-  106           DO (1501) NEXT
-  107   (1504)  PLEASE RESUME .6
-  108   (1503)  DO (1504) NEXT
-  109   (1501)  DO .2 <- .5
-  110           DO .5 <- '\*(vb"'&.6\*(ct.4'~#1"\*(ct#2'~#3
-  111           DO (1505) NEXT
-  112   (1506)  DO (1502) NEXT
-  113           PLEASE DO (1999) NEXT
-  114   (1505)  DO (1001) NEXT
-  115   (1502)  DO :4 <- .5
-  116           DO (1520) NEXT
-  117           DO :3 <- :1
-  118           PLEASE RETRIEVE :1 + .1 + .2 + .3 + .4 + .5 + .6
-  119           DO REINSTATE (1502)
-  120           DO REINSTATE (1506)
-  121           PLEASE RESUME #3
-  122   (1510)  DO STASH :1 + :2 + :4
-  123           DO :1 <- "'\*(vb":2~'#65535\*(ct#0'"\*(ct#65535'~'#0\*(ct#6553
-            5'"\*(ct"'\*(vb":2~'#0\*(ct#65535'"\*(ct#65535'~'#0\*(ct#65535
-            '"
-  124           DO :2 <- #1
-  125           DO (1509) NEXT
-  126           PLEASE RETRIEVE :1
-  127           DO :2 <- :3
-  128           PLEASE DO (1509) NEXT
-  129           DO RETRIEVE :2 + :4
-  130           PLEASE RESUME #1
-  131   (1520)  PLEASE STASH .3 + .4
-  132           DO .3 <- .1~#43690
-  133           DO (1525) NEXT
-  134           PLEASE DO .4 <- 'V.3\*(ct".2~#43690"'~'#0\*(ct#65535'
-  135           DO .3 <- .1~#21845
-  136           PLEASE DO (1525) NEXT
-  137           DO :1 <- .4\*(ct"'V.3\*(ct".2~#21845"'~'#0\*(ct#65535'"
-  138           PLEASE RETRIEVE .3 + .4
-  139           DO RESUME #1
-  140   (1525)  DO .3 <- '"'"'"!3\*(ct#0'~'#32767\*(ct#1'"\*(ct#0'~'#32767
-            \*(ct#1'"\*(ct#0'~'#16383\*(ct#3'"\*(ct#0'~'#4095\*(ct#15'
-  141           PLEASE RESUME #1
-  142   (1530)  DO STASH :2 + :3 + .3 + .5
-  143           DO :1 <- #0
-  144           DO :2 <- .2
-  145           DO .3 <- #1
-  146           DO (1535) NEXT
-  147   (1535)  PLEASE FORGET #1
-  148           DO .5 <- "\*(vb!1~.3'\*(ct#1"~#3
-  149           DO (1531) NEXT
-  150           DO (1500) NEXT
-  151           DO :1 <- :3
-  152           PLEASE DO (1533) NEXT
-  153   (1531)  PLEASE DO (1001) NEXT
-  154   (1533)  DO FORGET #1
-  155           DO .3 <- !3\*(ct#0'~'#32767\*(ct#1'
-  156           DO :2 <- ":2~'#0\*(ct#65535'"\*(ct"'":2~'#32767\*(ct#0'"\*(ct#
-            0'~'#32767\*(ct#1'"
-  157           PLEASE DO .5 <- "\*(vb!3~.3'\*(ct#1"~#3
-  158           DO (1532) NEXT
-  159           DO (1535) NEXT
-  160   (1532)  DO (1001) NEXT
-  161           PLEASE RETRIEVE :2 + :3 + .3 + .5
-  162           DO RESUME #2
-  163   (1540)  PLEASE ABSTAIN FROM (1541)
-  164           DO ABSTAIN FROM (1542)
-  165   (1549)  PLEASE STASH :1 + :2 + :4 + :5 + .1 + .2 + .5
-  166           DO .1 <- :1~#65535
-  167           PLEASE DO .2 <- :2~'#65280\*(ct#65280'
-  168           DO .5 <- :1~'#65280\*(ct#65280'
-  169           DO (1530) NEXT
-  170           DO :3 <- :1
-  171           DO .2 <- :2~#65535
-  172           PLEASE DO (1530) NEXT
-  173           DO :5 <- :1
-  174           DO .1 <- .5
-  175           DO (1530) NEXT
-  176           DO :4 <- :1
-  177           PLEASE DO :1 <- ":3~'#65280\*(ct#65280'"\*(ct":5~'#652
-            80\*(ct#65280'"
-  178           DO .5 <- ':1~:1'~#1
-  179           DO .2 <- :2~'#65280\*(ct#65280'
-  180           DO (1530) NEXT
-  181           PLEASE DO .5 <- '"':1~:1'~#1"\*(ct.5'~#3
-  182           DO .1 <- :3~#65535
-  183           DO .2 <- #0
-  184           DO (1520) NEXT
-  185           PLEASE DO :2 <- :1
-  186           PLEASE DO .1 <- :4~#65535
-  187           DO (1520) NEXT
-  188           DO (1509) NEXT
-  189           DO .5 <- !5\*(ct":4~#3"'~#15
-  190           DO :1 <- :3
-  191           DO :2 <- :5
-  192           DO (1509) NEXT
-  193           PLEASE DO .5 <- !5\*(ct":4~#3"'~#63
-  194           DO .5 <- '\*(vb"!5~.5'~#1"\*(ct#1'~#3
-  195           PLEASE RETRIEVE :4
-  196   (1541)  DO :4 <- .5
-  197           DO (1543) NEXT
-  198   (1542)  DO (1544) NEXT
-  199           PLEASE DO (1999) NEXT
-  200   (1543)  DO (1001) NEXT
-  201   (1544)  DO REINSTATE (1541)
-  202           PLEASE REINSTATE (1542)
-  203           PLEASE RETRIEVE :1 + :2 + :5 + .1 + .2 + .5
-  204           DO RESUME #2
-  205   (1550)  DO STASH :1 + :4 + :5 + .5
-  206           DO :3 <- #0
-  207           DO .5 <- '\*(vb"':2~:2'~#1"\*(ct#1'~#3
-  208           PLEASE DO (1551) NEXT
-  209           DO :4 <- #1
-  210           PLEASE DO (1553) NEXT
-  211   (1553)  DO FORGET #1
-  212           DO .5 <- '\*(vb":2~'#32768\*(ct#0'"\*(ct#2'~#3
-  213           DO (1552) NEXT
-  214           DO :2 <- ":2~'#0\*(ct#65535'"\*(ct"'":2~'#32767\*(ct#0'"\*(ct#
-                   0'~'#32767\*(ct#1'"
-  215           PLEASE DO :4 <- ":4~'#0\*(ct#65535'"\*(ct"'":4~'#32767
-                     \*(ct#0'"\*(ct#0'~'#32767\*(ct#1'"
-  216           DO (1553) NEXT
-  217   (1552)  DO (1001) NEXT
-  218   (1556)  PLEASE FORGET #1
-  219           DO :5 <- "'\*(vb":1~'#65535\*(ct#0'"\*(ct":2~'#65535\*(ct#0'"'
-                     ~'#0\*(ct#65535'"\*(ct"'\*(vb":1~'#0\*(ct#65535'"\*(ct":2~'#0\*(ct
-                     #65535'"'~'#0\*(ct#65535'"
-  220           DO .5 <- '\*(vb"'&"':2~:5'~'"'\*(vb"'\*(vb":5~:5"~"#65535~
-                     #65535"'~'#65535\*(ct#0'"\*(ct#32768'~'#0\*(ct#65535'"
-                     \*(ct"'\*(vb":5~:5"~"#65535\*(ct#65535"'~'#0\*(ct#65535'"'
-                     "\*(ct"':5~:5'~#1"'~#1"\*(ct#2'~#3
-  221           DO (1554) NEXT
-  222           DO :5 <- :3
-  223           DO (1510) NEXT
-  224           PLEASE DO :1 <- :3
-  225           DO :3 <- "'V":4~'#65535\*(ct#0'"\*(ct":5~'#65535\*(ct#0'"'
-                     ~'#0\*(ct#65535'"\*(ct"'V":4~'#0\*(ct#65535'"\*(ct":5~'#0\*(ct
-                     #65535'"'~'#0\*(ct#65535'"
-  226           DO (1555) NEXT
-  227   (1554)  PLEASE DO (1001) NEXT
-  228   (1555)  DO FORGET #1
-  229           DO .5 <- "\*(vb':4~#1'\*(ct#2"~#3
-  230           DO (1551) NEXT
-  231           DO :2 <- ":2~'#0\*(ct#65534'"\*(ct":2~'#65535\*(ct#0'"
-  232           DO :4 <- ":4~'#0\*(ct#65534'"\*(ct":4~'#65535\*(ct#0'"
-  233           PLEASE DO (1556) NEXT
-  234   (1551)  DO (1001) NEXT
-  235           PLEASE RETRIEVE :1 + :4 + :5 + .5
-  236           PLEASE RESUME #2
-  237   (1900)  DO STASH .2 + .3 + .5
-  238           DO .1 <- #0
-  239           DO .2 <- #1
-  240           PLEASE DO (1901) NEXT
-  241   (1901)  DO FORGET #1
-  242           DO %50 .1 <- 'V.1\*(ct.2'~'#0\*(ct#65535'
-  243           DO .2 <- !2\*(ct#0'~'#32767\*(ct#1'
-  244           PLEASE DO .5 <- "\*(vb!2~.2'\*(ct#1"~#3
-  245           DO (1902) NEXT
-  246           DO (1901) NEXT
-  247   (1902)  DO (1001) NEXT
-  248           DO RETRIEVE .2 + .3 + .5
-  249           PLEASE RESUME #2
-  250   (1910)  PLEASE STASH .1 + .3 + .5 + :1 + :2 + :3
-  251           DO .3 <- #65524
-  252           DO :1 <- #6
-  253           DO (1911) NEXT
-* 254           PLEASE NOTE THAT YOU CAN'T GET THERE FROM HERE
-  255   (1912)  DO (1001) NEXT
-  256   (1911)  DO FORGET #1
-  257           PLEASE DO (1900) NEXT
-  258           DO :2 <- .1
-  259           DO (1500) NEXT
-  260           PLEASE DO :1 <- :3
-  261           DO .1 <- .3
-  262           DO (1020) NEXT
-  263           PLEASE DO .3 <- .1
-  264           DO .5 <- '\*(vb"!3~.3'~#1"\*(ct#2'~#3
-  265           DO (1912) NEXT
-  266           DO .1 <- #12
-  267           PLEASE DO (1050) NEXT
-  268           DO RETRIEVE .1
-  269           DO (1530) NEXT
-  270           DO :2 <- #32768
-  271           DO (1500) NEXT
-  272           PLEASE DO .2 <- :3~'#65280\*(ct#65280'
-  273           PLEASE RETRIEVE .3 + .5 + :1 + :2 + :3
-  274           DO RESUME #1
-.if '\*c'y' \{\
-  275   (1060)  DO .3<-'V".1\*(ct.2"'~'#0\*(ct#65535'
-  276           DO RESUME #1
-  277   (1070)  DO .3<-'&".1\*(ct.2"'~'#0\*(ct#65535'
-  278           DO RESUME #1
-  279   (1080)  DO .3<-'\*(vb".1\*(ct.2"'~'#0\*(ct#65535' \}
-  280           DO RESUME #1
+.\" CORRECTION:
+.\" This is the corrected system library, not the rather buggy original.
+.\" Can be semi-mechanically generated from the syslib.i file with
+.\"   sed syslib.i -e 1d -e '/\$/s//\\*(ct/g' -e '/?/s//\\*(vb/g' | nl | expand
+ \" but you have to 
+.\" (a) restore the splat on line 13  DOUBLE OR SINGLE PRECISION OVERFLOW
+.\" (b) restore the splat on line 254 PLEASE NOTE ....
+.\" (c) appropriately conditionalize lines 289-294
+.\" (d) manually break lines where they wrap
+     1          (1000)  PLEASE IGNORE .4
+     2                  PLEASE ABSTAIN FROM (1005)
+     3          (1009)  DO STASH .1 + .2 + .5 + .6
+     4                  DO .4 <- #1
+     5                  DO (1004) NEXT
+     6          (1004)  PLEASE FORGET #1
+     7                  DO .3 <- '\*(vb.1\*(ct.2'~'#0\*(ct#65535'
+     8                  DO .6 <- '&.1\*(ct.2'~'#0\*(ct#65535'
+     9                  PLEASE DO .5 <- "\*(vb!6~#32768'\*(ct#1"~#3
+    10                  DO (1002) NEXT
+    11                  DO .4 <- #2
+    12          (1005)  DO (1006) NEXT
+*   13          (1999)  DOUBLE OR SINGLE PRECISION OVERFLOW
+    14          (1002)  DO (1001) NEXT
+    15          (1006)  PLEASE FORGET #1
+    16                  DO .5 <- '\*(vb"!6~.6'~#1"\*(ct#1'~#3
+    17                  DO (1003) NEXT
+    18                  DO .1 <- .3
+    19                  DO .2 <- !6\*(ct#0'~'#32767\*(ct#1'
+    20                  DO (1004) NEXT
+    21          (1003)  DO (1001) NEXT
+    22                  DO REINSTATE (1005)
+    23          (1007)  PLEASE RETRIEVE .1 + .2 + .5 + .6
+    24                  DO REMEMBER .4
+    25                  PLEASE RESUME #2
+    26          (1001)  DO RESUME .5
+    27          (1010)  DO STASH .1 + .2 + .4
+    28                  DO .4 <- .1
+    29                  DO .1 <- '\*(vb.2\*(ct#65535'~'#0\*(ct#65535'
+    30                  DO (1020) NEXT
+    31                  PLEASE DO .2 <- .4
+    32                  PLEASE DO (1009) NEXT
+    33                  DO RETRIEVE .1 + .2 + .4
+    34                  PLEASE RESUME #1
+    35          (1020)  DO STASH .2 + .3
+    36                  DO .2 <- #1
+    37                  PLEASE DO (1021) NEXT
+    38          (1021)  DO FORGET #1
+    39                  DO .3 <- "\*(vb!1~.2'\*(ct#1"~#3
+    40                  PLEASE DO .1 <- '\*(vb.1\*(ct.2'~'#0\*(ct#65535'
+    41                  DO (1022) NEXT
+    42                  DO .2 <- !2\*(ct#0'~'#32767\*(ct#1'
+    43                  DO (1021) NEXT
+    44          (1023)  PLEASE RESUME .3
+    45          (1022)  DO (1023) NEXT
+    46                  PLEASE RETRIEVE .2 + .3
+    47                  PLEASE RESUME #2
+    48          (1030)  DO ABSTAIN FROM (1033)
+    49                  PLEASE ABSTAIN FROM (1032)
+    50          (1039)  DO STASH :1 + .5
+    51                  DO (1530) NEXT
+    52                  DO .3 <- :1~#65535
+    53                  PLEASE DO .5 <- :1~'#65280\*(ct#65280'
+    54                  DO .5 <- '\*(vb"!5~.5'~#1"\*(ct#1'~#3
+    55                  DO (1031) NEXT
+    56          (1032)  DO (1033) NEXT
+    57                  DO (1999) NEXT
+    58          (1031)  DO (1001) NEXT
+    59          (1033)  DO .4 <- .5
+    60                  DO REINSTATE (1032)
+    61                  PLEASE REINSTATE (1033)
+    62                  DO RETRIEVE :1 + .5
+    63                  PLEASE RESUME #2
+    64          (1040)  PLEASE STASH .1 + .2 + .2 + :1 + :2 + :3
+    65                  DO .2 <- #0
+    66                  DO (1520) NEXT
+    67                  DO STASH :1
+    68                  PLEASE RETRIEVE .2
+    69                  DO .1 <- .2
+    70                  DO .2 <- #0
+    71                  PLEASE DO (1520) NEXT
+    72                  DO :2 <- :1
+    73                  DO RETRIEVE .1 + .2 + :1
+    74                  DO (1550) NEXT
+    75                  PLEASE DO .3 <- :3
+    76                  DO RETRIEVE :1 + :2 + :3
+    77                  DO RESUME #1
+    78          (1050)  PLEASE STASH :2 + :3 + .5
+    79                  DO :2 <- .1
+    80                  PLEASE DO (1550) NEXT
+    81                  DO .5 <- :3~'#65280\*(ct#65280'
+    82                  DO .5 <- '\*(vb"!5~.5'~#1"\*(ct#1'~#3
+    83                  DO (1051) NEXT
+    84                  DO (1999) NEXT
+    85          (1051)  DO (1001) NEXT
+    86                  DO .2 <- :3
+    87                  PLEASE RETRIEVE :2 + :3 + .5
+    88                  DO RESUME #2
+    89          (1500)  PLEASE ABSTAIN FROM (1502)
+    90                  PLEASE ABSTAIN FROM (1506)
+    91          (1509)  PLEASE STASH :1 + .1 + .2 + .3 + .4 + .5 + .6
+    92                  DO .1 <- :1~#65535
+    93                  PLEASE DO .2 <- :2~#65535
+    94                  DO (1009) NEXT
+    95                  DO .5 <- .3
+    96                  PLEASE DO .6 <- .4
+    97                  DO .1 <- :1~'#65280\*(ct#65280'
+    98                  DO .2 <- :2~'#65280\*(ct#65280'
+    99                  DO (1009) NEXT
+   100                  DO .1 <- .3
+   101                  PLEASE DO (1503) NEXT
+   102                  DO .6 <- .4
+   103                  DO .2 <- #1
+   104                  DO (1009) NEXT
+   105                  DO .1 <- .3
+   106                  DO (1501) NEXT
+   107          (1504)  PLEASE RESUME .6
+   108          (1503)  DO (1504) NEXT
+   109          (1501)  DO .2 <- .5
+   110                  DO .5 <- '\*(vb"'&.6\*(ct.4'~#1"\*(ct#2'~#3
+   111                  DO (1505) NEXT
+   112          (1506)  DO (1502) NEXT
+   113                  PLEASE DO (1999) NEXT
+   114          (1505)  DO (1001) NEXT
+   115          (1502)  DO :4 <- .5
+   116                  DO (1520) NEXT
+   117                  DO :3 <- :1
+   118                  PLEASE RETRIEVE :1 + .1 + .2 + .3 + .4 + .5 + .6
+   119                  DO REINSTATE (1502)
+   120                  DO REINSTATE (1506)
+   121                  PLEASE RESUME #3
+   122          (1510)  DO STASH :1 + :2 + :4
+   123                  DO :1 <- "'\*(vb":2~'#65535\*(ct#0'"\*(ct#65535'
+                            ~'#0\*(ct#65535'"\*(ct"'\*(vb":2~'#0\*(ct#65535'
+                            "\*(ct#65535'~'#0\*(ct#65535'"
+   124                  DO :2 <- #1
+   125                  DO (1509) NEXT
+   126                  PLEASE RETRIEVE :1
+   127                  DO :2 <- :3
+   128                  PLEASE DO (1509) NEXT
+   129                  DO RETRIEVE :2 + :4
+   130                  PLEASE RESUME #1
+   131          (1520)  PLEASE STASH .3 + .4
+   132                  DO .3 <- .1~#43690
+   133                  DO (1525) NEXT
+   134                  PLEASE DO .4 <- 'V.3\*(ct".2~#43690"'~'#0\*(ct#65535'
+   135                  DO .3 <- .1~#21845
+   136                  PLEASE DO (1525) NEXT
+   137                  DO :1 <- .4\*(ct"'V.3\*(ct".2~#21845"'~'#0\*(ct#65535'"
+   138                  PLEASE RETRIEVE .3 + .4
+   139                  DO RESUME #1
+   140          (1525)  DO .3 <- '"'"'"!3\*(ct#0'~'#32767\*(ct#1'"\*(ct#0'
+                            ~'#32767\*(ct#1'"\*(ct#0'~'#16383\*(ct#3'"\*(ct#0'
+                            ~'#4095\*(ct#15'
+   141                  PLEASE RESUME #1
+   142          (1530)  DO STASH :2 + :3 + .3 + .5
+   143                  DO :1 <- #0
+   144                  DO :2 <- .2
+   145                  DO .3 <- #1
+   146                  DO (1535) NEXT
+   147          (1535)  PLEASE FORGET #1
+   148                  DO .5 <- "\*(vb!1~.3'\*(ct#1"~#3
+   149                  DO (1531) NEXT
+   150                  DO (1500) NEXT
+   151                  DO :1 <- :3
+   152                  PLEASE DO (1533) NEXT
+   153          (1531)  PLEASE DO (1001) NEXT
+   154          (1533)  DO FORGET #1
+   155                  DO .3 <- !3\*(ct#0'~'#32767\*(ct#1'
+   156                  DO :2 <- ":2~'#0\*(ct#65535'"\*(ct"'":2~'#32767
+                            \*(ct#0'"\*(ct#0'~'#32767\*(ct#1'"
+   157                  PLEASE DO .5 <- "\*(vb!3~.3'\*(ct#1"~#3
+   158                  DO (1532) NEXT
+   159                  DO (1535) NEXT
+   160          (1532)  DO (1001) NEXT
+   161                  PLEASE RETRIEVE :2 + :3 + .3 + .5
+   162                  DO RESUME #2
+   163          (1540)  PLEASE ABSTAIN FROM (1541)
+   164                  DO ABSTAIN FROM (1542)
+   165          (1549)  PLEASE STASH :1 + :2 + :4 + :5 + .1 + .2 + .5
+   166                  DO .1 <- :1~#65535
+   167                  PLEASE DO .2 <- :2~'#65280\*(ct#65280'
+   168                  DO .5 <- :1~'#65280\*(ct#65280'
+   169                  DO (1530) NEXT
+   170                  DO :3 <- :1
+   171                  DO .2 <- :2~#65535
+   172                  PLEASE DO (1530) NEXT
+   173                  DO :5 <- :1
+   174                  DO .1 <- .5
+   175                  DO (1530) NEXT
+   176                  DO :4 <- :1
+   177                  PLEASE DO :1 <- ":3~'#65280\*(ct#65280'"
+                            \*(ct":4~'#65280\*(ct#65280'"
+   178                  DO .5 <- ':1~:1'~#1
+   179                  DO .2 <- :2~'#65280\*(ct#65280'
+   180                  DO (1530) NEXT
+   181                  PLEASE DO .5 <- '"':1~:1'~#1"\*(ct.5'~#3
+   182                  DO .1 <- :3~#65535
+   183                  DO .2 <- #0
+   184                  DO (1520) NEXT
+   185                  PLEASE DO :2 <- :1
+   186                  PLEASE DO .1 <- :4~#65535
+   187                  DO (1520) NEXT
+   188                  DO (1509) NEXT
+   189                  DO .5 <- !5\*(ct":4~#3"'~#15
+   190                  DO :1 <- :3
+   191                  DO :2 <- :5
+   192                  DO (1509) NEXT
+   193                  PLEASE DO .5 <- !5\*(ct":4~#3"'~#172
+   194                  DO .5 <- '\*(vb"!5~.5'~#1"\*(ct#1'~#3
+   195                  PLEASE RETRIEVE :4
+   196          (1541)  DO :4 <- .5
+   197                  DO (1543) NEXT
+   198          (1542)  DO (1544) NEXT
+   199                  PLEASE DO (1999) NEXT
+   200          (1543)  DO (1001) NEXT
+   201          (1544)  DO REINSTATE (1541)
+   202                  PLEASE REINSTATE (1542)
+   203                  PLEASE RETRIEVE :1 + :2 + :5 + .1 + .2 + .5
+   204                  DO RESUME #2
+   205          (1550)  DO STASH :1 + :4 + :5 + .5
+   206                  DO :3 <- #0
+   207                  DO .5 <- '\*(vb"':2~:2'~#1"\*(ct#1'~#3
+   208                  PLEASE DO (1551) NEXT
+   209                  DO :4 <- #1
+   210                  PLEASE DO (1553) NEXT
+   211          (1553)  DO FORGET #1
+   212                  DO .5 <- '\*(vb":2~'#32768\*(ct#0'"\*(ct#2'~#3
+   213                  DO (1552) NEXT
+   214                  DO :2 <- ":2~'#0\*(ct#65535'"\*(ct"'":2~'#32767
+                            \*(ct#0'"\*(ct#0'~'#32767\*(ct#1'"
+   215                  PLEASE DO :4 <- ":4~'#0\*(ct#65535'"\*(ct"'":4
+                            ~'#32767\*(ct#0'"\*(ct#0'~'#32767\*(ct#1'"
+   216                  DO (1553) NEXT
+   217          (1552)  DO (1001) NEXT
+   218          (1556)  PLEASE FORGET #1
+   219                  DO :5 <- "'\*(vb":1~'#65535\*(ct#0'"\*(ct":2
+                            ~'#65535\*(ct#0'"'~'#0\*(ct#65535'"\*(ct"'
+                            \*(vb":1~'#0\*(ct#65535'"\*(ct":2~'#0\*(ct
+                            #65535'"'~'#0\*(ct#65535'"
+   220                  DO .5 <- '\*(vb"'&"':2~:5'~'"'\*(vb"'\*(vb":5~:5
+                            "~"#65535\*(ct#65535"'~'#65535\*(ct#0'"\*(ct
+                            #32768'~'#0\*(ct#65535'"\*(ct"'\*(vb":5~:5"
+                            ~"#65535\*(ct#65535"'~'#0\*(ct#65535'"'"\*(ct"'
+                            :5~:5'~#1"'~#1"\*(ct#2'~#3
+   221                  DO (1554) NEXT
+   222                  DO :5 <- :3
+   223                  DO (1510) NEXT
+   224                  PLEASE DO :1 <- :3
+   225                  DO :3 <- "'V":4~'#65535\*(ct#0'"\*(ct":5~'#65535
+                            \*(ct#0'"'~'#0\*(ct#65535'"\*(ct"'V":4~'#0
+                            \*(ct#65535'"\*(ct":5~'#0\*(ct#65535'"'~'#0
+                            \*(ct#65535'"
+   226                  DO (1555) NEXT
+   227          (1554)  PLEASE DO (1001) NEXT
+   228          (1555)  DO FORGET #1
+   229                  DO .5 <- "\*(vb':4~#1'\*(ct#2"~#3
+   230                  DO (1551) NEXT
+   231                  DO :2 <- ":2~'#0\*(ct#65534'"\*(ct":2~'#65535\*(ct#0'"
+   232                  DO :4 <- ":4~'#0\*(ct#65534'"\*(ct":4~'#65535\*(ct#0'"
+   233                  PLEASE DO (1556) NEXT
+   234          (1551)  DO (1001) NEXT
+   235                  PLEASE RETRIEVE :1 + :4 + :5 + .5
+   236                  PLEASE RESUME #2
+   237          (1900)  DO STASH .2 + .3 + .5
+   238                  DO .1 <- #0
+   239                  DO .2 <- #1
+   240                  PLEASE DO (1901) NEXT
+   241          (1901)  DO FORGET #1
+   242                  DO %50 .1 <- 'V.1\*(ct.2'~'#0\*(ct#65535'
+   243                  DO .2 <- !2\*(ct#0'~'#32767\*(ct#1'
+   244                  PLEASE DO .5 <- "\*(vb!2~.2'\*(ct#1"~#3
+   245                  DO (1902) NEXT
+   246                  DO (1901) NEXT
+   247          (1902)  DO (1001) NEXT
+   248                  DO RETRIEVE .2 + .3 + .5
+   249                  PLEASE RESUME #2
+   250          (1910)  PLEASE STASH .1 + .3 + .5 + :1 + :2 + :3
+   251                  DO .3 <- #65524
+   252                  DO :1 <- #6
+   253                  DO (1911) NEXT
+*  254                  PLEASE NOTE THAT YOU CAN'T GET THERE FROM HERE
+   255          (1912)  DO (1001) NEXT
+   256          (1911)  DO FORGET #1
+   257                  PLEASE DO (1900) NEXT
+   258                  DO :2 <- .1
+   259                  DO (1500) NEXT
+   260                  PLEASE DO :1 <- :3
+   261                  DO .1 <- .3
+   262                  DO (1020) NEXT
+   263                  PLEASE DO .3 <- .1
+   264                  DO .5 <- '\*(vb"!3~.3'~#1"\*(ct#2'~#3
+   265                  DO (1912) NEXT
+   266                  DO .1 <- #12
+   267                  PLEASE DO (1050) NEXT
+   268                  DO RETRIEVE .1
+   269                  DO (1530) NEXT
+   270                  DO :2 <- #32768
+   271                  DO (1500) NEXT
+   272                  PLEASE DO .2 <- :3~'#65280\*(ct#65280'
+   273                  PLEASE RETRIEVE .3 + .5 + :1 + :2 + :3
+   274                  DO RESUME #1
 .cs R
 .DE
 .bp
@@ -2314,12 +2472,16 @@ the writing of the floating-point library as well as sine and cosine functions.
 Calculate, to :1 places, the value of pi.
 .if '\*c'y' \{\
 .P
-(The first three and last one of the preceding suggested projects from
-the INTERCAL-72 manual are included in the C-INTERCAL distribution's 
-pit directory of sample code.  The floating-point library and FFT
-routine remain as worthy challenges...) \} 
+(Working programs for each of these projects are included in the
+C-INTERCAL distribution's pit directory of sample code.) \}
 .bp
 .H 1 "ERROR MESSAGES"
+.if '\*c'y' \{\
+.DS I F
+Alice felt dreadfully puzzled. The Hatter's remark seemed to her to
+have no sort of meaning in it, and yet it was certainly English. "I
+don't quite understand you," she said, as politely as she could.
+.DE \}
 .SETR error_messages
 .P
 Due to INTERCAL's implementation of comment lines (see section 4.5), most
@@ -2411,7 +2573,7 @@ You tried to use a C-INTERCAL extension with the `traditional' flag on.
 .LI 127
 Can't find syslib.i file when it's needed for magical inclusion.
 .LI 222
-Out of stash space.
+Out of stash space, or attempt to stash an undeclared array.
 .LI 333
 Too many variables.
 .LI 444
@@ -2423,23 +2585,46 @@ Too many source lines.
 .LI 777
 No such source file.
 .LI 888
-Can't open C output file
+Can't open C output file.
 .LI 999
 Can't open C skeleton file.
 .LI 998
-Source file name with invalid extension (use .i or .[3-7]i).
+Source file name with invalid extension (use .i or .[2-7]i).
 .LI 997
 Illegal possession of a controlled unary operator.
 .LE \}
 .if '\*c'y' \{\
 .H 1 "The C-INTERCAL Compiler"
+.if '\*c'y' \{\
+.DS I F
+"And yet it was a very clever pudding to invent."
+.P
+"What did you mean it to be made of?" Alice asked, hoping to cheer him
+up, for the poor Knight seemed quite low-spirited about it.
+.P
+"It began with blotting-paper," the Knight answered with a groan.
+.P
+"That wouldn't be very nice, I'm afraid --"
+.P
+"Not very nice \fIalone\fR," he interrupted, quite eagerly, "but
+you've no idea what a difference it makes, mixing it with other
+things -- such as gunpowder and sealing-wax."
+.DE \}
+.P
+This section describes the use of ick, the C-INTERCAL
+compiler. Information specific to the other known INTERCAL compilers
+appears in the following sections. These sections are less useful,
+since the other compilers are no longer available, but they are
+retained to provide a sense of history, and because any information
+regarding INTERCAL is really too scarce to discard.
 .H 2 "Character Set"
 .P
 The C-INTERCAL compiler uses ASCII rather than EBCDIC. We follow the
-Atari implementation by (a) replacing the change sign (\*(ct) with
+Atari implementation (see section 
+.GETHN atari
+) by (a) replacing the change sign (\*(ct) with
 big money ($) as the mingle operator, and (b) replacing the
-bookworm (\*(vb) symbol with what (?) as the exclusive-or
-operator.
+bookworm (\*(vb) symbol with what (?) as the XOR operator.
 .H 2 "Usage and Compilation Options"
 .P
 To compile an INTERCAL program `foo.i' to executable code, just do
@@ -2451,11 +2636,11 @@ inspection (suppressing compilation to machine code), a -d option that
 enables verbose parse reporting from the yacc/bison parser, a -t
 option that requires strict INTERCAL-72 compliance (rejecting COME
 FROM and the extensions for bases other than two), a -b option that
-disables the INTERCAL-72 random-bug feature (E774), and an -O option
-that enables the (hah!) optimizer.  Invoking ick -?  prints a usage
+disables the INTERCAL-72 random-bug feature (error 774), and an -O option
+that enables the (hah!) optimizer. Invoking ick -? prints a usage
 message.
 .P
-Another compilation switch affects C-INTERCAL's runtime behavior.  The `-C'
+Another compilation switch affects C-INTERCAL's runtime behavior. The `-C'
 option forces output in "clockface" mode, for superstitious users who
 believe writing "IV" upside-down offends IVPITER and would rather
 see IIII.
@@ -2469,29 +2654,37 @@ The help option (with either + or -) triggers a 'usage' message. The
 Steve explains: "The wimpmode option is the most interesting. I found
 myself always running my test programs with filters on both ends to
 work around the \&'nifty' INTERCAL number representations. This was so
-painful that I decided it would be LESS painful (and a lot less code)
-if I added a 'wimp' option.  With the +wimpmode option, the user is
-subjected to a humiliating message about what a wimp he or she is to
-use this mode, but after that is allowed to use conventional numerical
-notation.  While such a mode doubtless violates to some extent the
-INTERCAL philosophy, the fact that a 'unbutcher' command has been
-posted clearly indicates the need for it. Anyway... if you don't like
-it, don't use it... the default is -wimpmode (i.e. NOT wimp mode)."
+painful that I decided it would be \fIless\fR painful (and a lot less
+code) if I added a 'wimp' option. With the +wimpmode option, the user
+is subjected to a humiliating message about what a wimp he or she is
+to use this mode, but after that is allowed to use conventional
+numerical notation. While such a mode doubtless violates to some
+extent the INTERCAL philosophy, the fact that an 'unbutcher' command
+has been posted clearly indicates the need for it. Anyway ... if you
+don't like it, don't use it ... the default is -wimpmode
+(i.e. \fInot\fR wimp mode)."
 .H 2 "PLEASE Politesse Checking"
 .P
 A feature of INTERCAL-72 not documented in the original manual was that it
-required a certain level of politesse from the programmer.  If fewer than
+required a certain level of politesse from the programmer. If fewer than
 1/5th of the program statements included the PLEASE qualifier, the program
-would be rejected as insufficiently polite.  If more than 1/3rd of them
+would be rejected as insufficiently polite. If more than 1/3rd of them
 included PLEASE, the program would be rejected as excessively polite.
 .P
-This check has been implemented in C-INTERCAL.  To assist programmers in
+This check has been implemented in C-INTERCAL. To assist programmers in
 coping with it, the intercal.el mode included with the distribution randomly
-expands "do " in entered source to "DO PLEASE" or "PLEASE DO" 1/4th of the
-time. \}
+expands "do " in entered source to "PLEASE DO" 1/4th of the time. \}
 .if '\*c'y' \{\
 .\" This is the same text as the ATARI NOTES at the end of the manual.
 .H 1 "The Atari Implementation"
+.if '\*c'y' \{\
+.DS I F
+"Perhaps it doesn't understand English," thought Alice. "I daresay
+it's a French mouse, come over with William the Conqueror." (For, with
+all her knowledge of history, Alice had no very clear notion how long
+ago anything had happened.)
+.DE \}
+.SETR atari
 .P
 The Atari implementation of INTERCAL differs from the original Princeton
 version primarily in the use of ASCII rather than EBCDIC. Since there is no
@@ -2499,30 +2692,37 @@ version primarily in the use of ASCII rather than EBCDIC. Since there is no
 mingle operator. We feel that this correctly represents the increasing cost
 of software in relation to hardware. (Consider that in 1970 one could get
 RUNOFF for free, to run on a $20K machine, whereas today a not quite as
-powerful formatter costs $99 and runs on a $75 machine.)  We also feel that
+powerful formatter costs $99 and runs on a $75 machine.) We also feel that
 there should be no defensible contention that INTERCAL has any sense.
 Also, since overpunches are difficult to read on the average VDT, the
-exclusive-or operator may be written ?.  This correctly expresses the
+exclusive-or operator may be written ?. This correctly expresses the
 average person's reaction on first encountering exclusive-or, especially on
-a PDP-11.  Note that in both of these cases, the over-punched symbol may
+a PDP-11. Note that in both of these cases, the over-punched symbol may
 also be used if one is masochistic, or concerned with portability to the
-Princeton compiler.  The correct over-punch for "change" is "c<backspace>/"
-and the correct over-punch for \*(vb is "V<backspace>-".  These codes will be
+Princeton compiler. The correct over-punch for "change" is "c<backspace>/"
+and the correct over-punch for \*(vb is "V<backspace>-". These codes will be
 properly printed if you have a proper printer, and the corresponding EBCDIC
 code will be produced by the /IBM option on the LIST command. \}
-.ie '\*c'n' \{\
+.if '\*c'n' \{\
 .H 1 "JCL"
+.SETR princeton
 .P
 The information contained in the following section applies
 only to the Princeton compiler, run under OS/360.
 .H 2 "The Princeton Compiler" \}
-.el .H 1 "The Princeton Compiler"
+.if '\*c'y' \{\
+.H 1 "The Princeton Compiler"
+.DS I F
+"My name is Alice, so please your Majesty," said Alice very politely;
+but she added, to herself, "Why, they're only a pack of cards, after
+all. I needn't be afraid of them!"
+.DE \}
+.SETR princeton
 .P
 The Princeton compiler, written in SPITBOL (a variant of
 SNOBOL), performs the compilation in two stages. First the
 INTERCAL source is converted into SPITBOL source, then the
 latter is compiled and executed.
-.SETR princeton
 .P
 It should be noted that the Princeton compiler fails to
 properly interpret certain multiply-subscripted expressions,
@@ -2542,7 +2742,9 @@ are unreadable enough as is.
 .P
 Since there is currently no catalogued procedure for
 invoking the compiler, the user must include the in-line
-procedure shown on the following page in his job before the
+.\" CORRECTION:
+.\" "in Figure 3" was "on the following page"
+procedure shown in Figure 3 in his job before the
 compilation step. Copies of this in-line procedure may be
 obtained at any keypunch if the proper keys are struck.
 .P
@@ -2563,7 +2765,12 @@ procedure. At most one parameter from each set may apply to
 a given compilation; if more than one are specified, the
 results are undefined, and may vary depending upon the
 particular set of options. The default parameters are
-underlined.
+.if n \{\
+underlined.\}
+.if t \{\
+italicized.\}
+.\" CORRECTION:
+.\" In the original, the footnote was on the wrong line (one above).
 .DS L
         //INTERCAL PROC
         //COMPILE EXEC PGM=INTERCAL
@@ -2572,8 +2779,8 @@ underlined.
         //SYSPRINT DD SYSOUT=A,DCB=(BLKSIZE=992,LRECL=137,RECFM=VBA)
         //SYSPUNCH DD DUMMY
         //SCRATCH DD DSN=&COMPSET,UNIT=SYSDA,SPACE=(CYL,(3,1)),DISP=(,PASS)
-        //EXECUTE EXEC PGM=EXECUTE,COND=(4,LT)   \*F
-        //SOURCES DD DSN=U.INTERCAL.SOURCES,DISP=SHR
+        //EXECUTE EXEC PGM=EXECUTE,COND=(4,LT)
+        //SOURCES DD DSN=U.INTERCAL.SOURCES,DISP=SHR   \*F
         //STEPLIB DD DSN=U.INTERCAL.LIBRARY,DISP=SHR
         //             DD DSN=SYS5.SPITLIB,DISP=SHR
         //             DD DSN=SYS1.FORTLIB,DISP=SHR
@@ -2598,7 +2805,7 @@ DD card must be replaced by the five cards:
 Figure 3.  Inline procedure for using INTERCAL.
 .P
 .LB 5 0 " " 0 * 0 0
-.LI "\fBOPT\fR"
+.LI "\fIOPT\fR"
 .LI "NOOPT"
 .LI " "
 In the default mode, the compiler will print a
@@ -2608,19 +2815,20 @@ effective option for those sets where one was
 specified. If NOOPT is requested, it causes the
 default mode to be assumed.
 
-.LI "\fBOPTSUB\fR
+.LI "\fIOPTSUB\fR"
 .LI "NOOPTSUB"
 .LI "NOSUB"
 .LI " "
 Unless 'NOOPTSUB' is requested, the System Library
 is optimized, resulting in much more rapid
-NOSUB processing of function calls. Specifying NOOPTSUB
-causes the non-optimized INTERCAL code shown in
-section 6.3 to be used, whereas NOSUB requests
+processing of function calls. Specifying NOOPTSUB
+causes the non-optimized INTERCAL code shown in section
+.GETHN syslib
+ to be used, whereas NOSUB requests
 that the System Library be omitted altogether.
 
 .LI IAMBIC
-.LI "\fBPROSE\fR
+.LI "\fIPROSE\fR"
 .LI " "
 The IAMBIC parameter permits the programmer to use
 poetic license and thus write in verse. If the
@@ -2629,7 +2837,7 @@ in INTERCAL, he should send the authors a stamped,
 self-addressed envelope, along with any INTERCAL
 program, and they will provide one which is verse.
 
-.LI "\fBFORMAT\fR"
+.LI "\fIFORMAT\fR"
 .LI NOFORMAT
 .LI " "
 In FORMAT mode, each statement printed is put on a
@@ -2641,20 +2849,20 @@ and they may be only approximate. Also,
 unrecognizable statements are not flagged.
 
 .LI SEQ
-.LI "\fBNOSEQ\fR"
+.LI "\fINOSEQ\fR"
 .LI " "
 If the source deck has sequence numbers in columns
 73 through 80, specifying 'SEQ' will cause them to
 be ignored.
 
 .LI "SOURCE"
-.LI "\fBNOSOURCE\fR"
+.LI "\fINOSOURCE\fR"
 .LI " "
 If NOSOURCE is selected, all source listing is
 suppressed.
 
 .LI LIST
-.LI "\fBNOLIST\fR"
+.LI "\fINOLIST\fR"
 .LI " "
 If LIST is specified, the compiler will provide a
 list of statement numbers catalogued according to
@@ -2669,7 +2877,7 @@ default is
 .B 132.
 
 .LI "CODE"
-.LI "\fBNOCODE\fR"
+.LI "\fINOCODE\fR"
 .LI " "
 Include 'CODE' in the parameter list to obtain a
 listing of the SPITBOL code produced for each
@@ -2683,21 +2891,21 @@ default is
 .B 60.
 
 .LI DECK
-.LI "\fBNODECK\fR"
+.LI "\fINODECK\fR"
 .LI " "
 Selecting 'DECK' will cause the compiler to punch
 out a SPITBOL object deck which may then be run
 without reinvoking the INTERCAL (or SPITBOL)
 compiler.
 
-.LI "\fBKIDDING\fR"
+.LI "\fIKIDDING\fR"
 .LI NOKIDDING
 .LI " "
 Select NOKIDDING to eliminate the snide remarks
 which ordinarily accompany INTERCAL error
 messages.
 
-.LI "\fBGO\fR"
+.LI "\fIGO\fR"
 .LI NOGO
 .LI " "
 Specifying 'NOGO' will cause  the program to be
@@ -2705,14 +2913,16 @@ compiled but not executed. EXECUTE/NOEXECUTE may
 be substituted for GO/NOGO, but this will result
 in an error, and GO will be assumed.
 
-.LI "\fBBUG\fR"
+.LI "\fIBUG\fR"
 .LI NOBUG
 .LI " "
 Under the default, there is a fixed probability of
 a fatal compiler bug being worked at random into
 the program being compiled. Encountering this bug
 during execution results in error message 774 (see
-section 7.2). This probability is reduced to zero
+section
+.GETHN error_messages
+). This probability is reduced to zero
 under 'NOBUG'. This does not affect the
 probability (presumably negligible) of error
 message 778.
@@ -2726,13 +2936,29 @@ some notes on an Atari implementation included at the end of the manual.
 So, you expect compiler manuals to be consistent?
 .FE
 .ds App TONSIL
-.APP A ""
+.APP "A\*F" ""
+.if '\*c'y' \{\
+.DS I F
+"Of course they answer to their names?" the Gnat remarked carelessly.
+.P
+"I never knew them to do it."
+.P
+"What's the use of their having names," the Gnat said, "if they wo'n't
+answer to them?"
+.P
+"No use to \fIthem\fR," said Alice; "but it's useful to the people
+that name them, I suppose. If not, why do things have names at all?"
+.P
+"I ca'n't say," the Gnat replied. "Further on, in the wood down there,
+they've got no names -- however, go on with your list...."
+.DE \}
 .P
 The Official INTERCAL Character Set
 .FS
 Since all other reference manuals have Appendices, it was decided that
 the INTERCAL manual should contain some other type of removable organ.
 .FE
+.ps \n[@ps]
 .\".nr * \n*+1
 .nr PG \n%+1
 .P
@@ -2740,63 +2966,113 @@ Tabulated on page \n(PG are all the characters used in INTERCAL, excepting
 letters and digits, along with their names and interpretations. Also
 included are several characters not used in INTERCAL, which are presented
 for completeness and to allow for future expansion.
+.\" All we're doing here is evaluating \*F and throwing it away
+.fi \*F
 .FS
-\*F This footnote intentionally unreferenced.
+This footnote intentionally unreferenced.
 .FE
 .ds CH - % -
 .bp
 .\".nr * \n*-1
+.ps \n[@ps]
+.ie '\*c'n' \{\
 .TS
 box;
 c c c
 l l l.
-Character       Name    Use (if any)
-=
-\&.     spot    identify 16-bit variable
-:       two-spot        identify 32-bit variable
-,       tail    identify 16-bit array
-;       hybrid  identify 32-bit array
-#       mesh    identify constant
-\&=     half-mesh
-\'      spark   grouper
-`       backspark
-!       wow     equivalent to spark-spot
-?       what    \fIunary exlusive OR (ASCII)\fR
-"       rabbit-ears     grouper
-\o'".'  rabbit  equivalent to ears-spot
-|       spike
-%       double-oh-seven percentage qualifier
-\-      worm    used with angles
-<       angle   used with worms
->       right angle
-(       wax     precedes line label
-)       wane    follows line label
-[       U turn
-]       U turn back
-{       embrace
-}       bracelet
-*       splat   flags invalid statements
-&       ampersand\*F    unary logical AND
-V       V (or book)     unary logical OR
-\*(vb   bookworm (or universal qualifier)       unary exclusive OR
-$       big money       \fIbinary mingle (ASCII)\fR
-\*(ct   change  binary mingle
-~       sqiggle binary select
-\&_     flat worm
-\*(ov   overline        indicates "times 1000"
-+       intersection    separates list items
-/       slat
-\e      backslat
-@       whirlpool
-\*(no   hookworm
-^       shark (or simply sharkfin)
-\o"#*\(sq"      blotch
-.TE
+Character	Name	Use (if any)
+\&.	spot	identify 16-bit variable
+:	two-spot	identify 32-bit variable
+,	tail	identify 16-bit array
+;	hybrid	identify 32-bit array
+#	mesh	identify constant
+\&=	half-mesh
+\'	spark	grouper
+`	backspark
+!	wow	equivalent to spark-spot
+?	what	\fIunary exlusive OR (ASCII)\fR
+"	rabbit-ears	grouper
+\o'".'	rabbit	equivalent to ears-spot
+|	spike
+%	double-oh-seven	percentage qualifier
+\-	worm	used with angles
+<	angle	used with worms
+>	right angle
+(	wax	precedes line label
+)	wane	follows line label
+[	U turn
+]	U turn back
+{	embrace
+}	bracelet
+*	splat	flags invalid statements
+&	ampersand \*F	unary logical AND
+V	V (or book)	unary logical OR
+\*(vb	bookworm (or universal qualifier)	unary exclusive OR
+$	big money 	\fIbinary mingle (ASCII)\fR
+\*(ct	change  	binary mingle
+~	sqiggle  	binary select
+\&_	flat worm
+\*(ov	overline	indicates "times 1000"
++	intersection	separates list items
+/	slat
+\e	backslat
+@	whirlpool
+\*(no	hookworm
+^	shark (or simply sharkfin)
+\o"#*\(sq"	blotch
+.TE \}
+.el \{\
+.TS
+box;
+c c c
+l l l.
+Character	Name	Use (if any)
+\&.	spot	identify 16-bit variable
+:	two-spot	identify 32-bit variable
+,	tail	identify 16-bit array
+;	hybrid	identify 32-bit array
+#	mesh	identify constant
+\&=	half-mesh
+\'	spark	grouper
+`	backspark
+!	wow	equivalent to spark-spot
+?	what	unary logical XOR
+"	rabbit-ears	grouper
+\o'".'	rabbit	equivalent to ears-spot
+|	spike
+%	double-oh-seven	percentage qualifier
+\-	worm	used with angles
+<	angle	used with worms
+>	right angle
+(	wax	precedes line label
+)	wane	follows line label
+[	U turn
+]	U turn back
+{	embrace
+}	bracelet
+*	splat	flags invalid statements
+&	ampersand \*F	unary logical AND
+V	V (or book)	unary logical OR
+\*(vb	bookworm (universal qualifier)	unary logical XOR (INTERCAL-72)
+$	big money 	binary mingle
+\*(ct	change  	binary mingle (INTERCAL-72)
+~	sqiggle  	binary select
+\&_	flat worm
+\*(ov	overline	indicates "times 1000"
++	intersection	separates list items
+/	slat
+\e	backslat
+@	whirlpool	unary logical BUT (TriINTERCAL)
+\*(no	hookworm
+^	shark (or simply sharkfin)	unary logical XOR (TriINTERCAL)
+\o"#*\(sq"	blotch
+.TE \}
 .ce 1
 Table 2 (top view). INTERCAL character set.
 .FS
 Got any better ideas?
 .FE
+.ps \n[@ps]
 .if '\*c'n' \{\
 .APP "B" "NOTES ON THE ATARI IMPLEMENTATION"
 .P
@@ -2807,14 +3083,14 @@ version primarily in the use of ASCII rather than EBCDIC. Since there is no
 mingle operator. We feel that this correctly represents the increasing cost
 of software in relation to hardware. (Consider that in 1970 one could get
 RUNOFF for free, to run on a $20K machine, whereas today a not quite as
-powerful formatter costs $99 and runs on a $75 machine.)  We also feel that
+powerful formatter costs $99 and runs on a $75 machine.) We also feel that
 there should be no defensible contention that INTERCAL has any sense.
 Also, since overpunches are difficult to read on the average VDT, the
-exclusive-or operator may be written ?.  This correctly expresses the
+exclusive-or operator may be written ?. This correctly expresses the
 average person's reaction on first encountering exclusive-or, especially on
-a PDP-11.  Note that in both of these cases, the over-punched symbol may
+a PDP-11. Note that in both of these cases, the over-punched symbol may
 also be used if one is masochistic, or concerned with portability to the
-Princeton compiler.  The correct over-punch for "change" is "c<backspace>/"
-and the correct over-punch for \*(vb is "V<backspace>-".  These codes will be
+Princeton compiler. The correct over-punch for "change" is "c<backspace>/"
+and the correct over-punch for \*(vb is "V<backspace>-". These codes will be
 properly printed if you have a proper printer, and the corresponding EBCDIC
 code will be produced by the /IBM option on the LIST command. \}

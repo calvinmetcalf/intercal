@@ -12,9 +12,10 @@ Contents:
 
 from original manual:
   sample.i		Returns absolute value of a 16-bit 2s-complement number
+  lib/syslib.i		Standard library, with bugs fixed
   lib/syslib-orig.i	Standard library (original buggy version)
 
-by Jon Blow <blojo@ocf.berkeley.edu>
+by Jon Blow <jon@sampo.com>
   sink.i        Simple test program
   random.i      Random number program
   lib/plus.i    Increment .1
@@ -25,7 +26,7 @@ by Hans Olsson <f88ho@efd.lth.se>
 		it's there in our lib/syslib.i.  We keep this around as an
 		example.  (What? Throw away INTERCAL code? Perish the thought!)
 
-by Louis Howell <nazgul@llnl.gov>
+by Louis Howell <nazgul@netcom.com>
   life.i        Conway's game of Life, standard INTERCAL version
   life2.i       This version uses COME FROM and character output
     blinkers
@@ -34,35 +35,65 @@ by Louis Howell <nazgul@llnl.gov>
     gun         Input files for both Life programs
   bubble.i      Bubble sort
   icat.i        Sends input to output
-  lib/lib2.i    Currently contains only a decrement routine, see life.doc
+  lib/lib2.i	New library routines: decrement, decrement and branch on 0,
+                add bit, 16-bit division with remainder, exponentiation
   pi.i		Calculate pi
   primes.i	Find prime numbers
-  pow.i		prints a list of nth powers (test of exponentiation routine)
-  lib/syslib.i	Corrected version of system library.
+  pow.i		Prints a list of nth powers using old exponentiation routine
+  lib/syslib.i	Corrected version of system library
+  iching1.i     Generates I Ching hexagrams
+  iching2.i     This version uses a lookup table to find the sequence number
+  iching.doc    Description of the two I Ching programs
+  change.i      Count up different ways to make change
+  change.doc    Description of change.i
 
-by Matt Dimeo, via http://www.ionet.net/~timtroyr/funhouse/beer.html
+by Matt Dimeo <mdimeo@brooktree.com>
   beer.i        Print out the lyrics to "99 Bottles of Beer On The Wall"
 
 by Stinglai Ka'abi <stinglai@bureau.World.GOV>:
   random2.i	Another random-number generator
 
 by Jacob Mandelson <jlm@cco.caltech.edu>
-  rot13.i	a ROT13 filter in INTERCAL
+  rot13.i	Prints ROT-13 of its input
 
 by Jan-Pieter Cornet <johnpc@xs4all.nl>
-  hail_mary.3i	print 1,000,000 Hail Marys
-  count.3i	count from 1 to 10 in TriINTERCAL
+  hail_mary.3i	Print 1,000,000 Hail Marys
+  count.3i	Count from 1 to 10 in TriINTERCAL
+  iogerunds.i	Demonstrate gerund abstention
+
+by Clemens Meier <clmeier@lili.uni-bielefeld.de>
+  rot13b.i      Another ROT-13 program
 
 By Brian Raiter <breadbox@muppetlabs.com>
-  lib/numio.i	I/O routines 
-  lib/numio.doc	description of the I/O routines
+  lib/numio.i	    I/O routines 
+  lib/numio.doc	    Description of the I/O routines
+  lib/syslib.3i
+  lib/syslib.4i
+  lib/syslib.5i
+  lib/syslib.6i     Translations of the standard library to
+  lib/syslib.7i     C-INTERCAL's other bases.
+  lib/syslib3-7.doc Documentation for same
+  hello.i           The traditional hello world program
+  ins.i             Intersections & Splats, a Mastermind-style game
+  ins.doc           Documentation for I&S
+  yapp.i            Prints an INTERCAL program that prints
+  yapp.doc          Description of yapp.i
+  quine.i           Prints itself
+  lib/floatlib.i    Floating-point routines
+  lib/floatlib.doc  Documentation for the floating-point routines
+  flonck.i          An RPN calculator
+  flonck.doc        Documentation for flonck.i
+  fft.i             Fast Fourier Transform
+  fft.doc           Description of fft.i
+    delta.fft
+    tophat.fft      Sample input for FFT
 
 The subdirectory tests contains some programs written only to test the
 compiler.
 
 by David Moews
-  test1.i	prints DO THIS TEST HAS BEEN SUCCESSFULLY COMPLETED
-  test2.i	reads in two numbers and multiplies their product
+  test1.i	Prints DO THIS TEST HAS BEEN SUCCESSFULLY COMPLETED
+  test2.i	Reads in two numbers and multiplies their product
 
 David Moews wrote of the latter (test2.i):
 
@@ -72,10 +103,7 @@ of a portion of the INTERCAL subroutine library.  (Only a portion of
 the INTERCAL subroutine library is present in the posted manual, and 
 that portion is full of typos.)
 
-by Jan-Pieter Cornet <cornet@OTech.fgg.EUR.nl>
-  iogerunds.i	demonstrate gerund abstention
-
-The programs test16bit.i, testarray.i, testcf.i, testlib2.i,
+The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
 limits.{i,3i}, testops.{3i,5i}, testsplat.i, were all written by Louis
 Howell.  Of these, testcf.i might be considered an interesting
 puzzle---try to figure out what it's doing.  The others are pretty

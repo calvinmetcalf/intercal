@@ -64,14 +64,21 @@ static bool dooptimize;	/* do optimizations? (controlled by -O) */
 static bool clockface;	/* set up output to do IIII for IV */
 
 #define SKELETON	"ick-wrap.c"
-#define SYSLIB          "syslib.i"
+#define SYSLIB          "syslib"
 
 /* numeric base defaults, exported to other files */
-int Base = 2;
-int Small_digits = 16;
-int Large_digits = 32;
-unsigned int Max_small = 0xffff;
-unsigned int Max_large = 0xffffffff;
+
+#define DEFAULT_BASE 2
+#define DEFAULT_SMALL_DIGITS 16
+#define DEFAULT_LARGE_DIGITS 32
+#define DEFAULT_MAX_SMALL 0xffffL
+#define DEFAULT_MAX_LARGE 0xffffffffL
+
+int Base;
+int Small_digits;
+int Large_digits;
+unsigned int Max_small;
+unsigned int Max_large;
 
 int lineno;	/* after yyparse, this is the total number of statements */
 
@@ -83,10 +90,12 @@ static unsigned int maxsmalls[8] =
 
 static char *compiler;
 
-atom oblist[MAXVARS], *obdex;
+atom *oblist = NULL, *obdex;
+int obcount = 0;
 int nonespots, ntwospots, ntails, nhybrids;
 
-tuple tuples[MAXLINES];
+tuple *tuples = NULL;
+int tuplecount = 0;
 
 static void abend(int signim)
 {
@@ -113,11 +122,11 @@ int main(int argc, char *argv[])
     char	buf[BUFSIZ], buf2[BUFSIZ], *chp, *strrchr();
     tuple	*tp;
     atom	*op;
-    int	c;
+    int		c, i;
     char	*includedir, *libdir, *getenv();
     FILE	*ifp, *ofp;
-    int		maxabstain, nextcount;
-    bool        needsyslib;
+    int		maxabstain, nextcount, bugline;
+    bool        needsyslib, firstfile;
 
     if (!(includedir = getenv("ICKINCLUDEDIR")))
       includedir = ICKINCLUDEDIR;
@@ -183,7 +192,7 @@ int main(int argc, char *argv[])
 	lose(E999, 1, (char *)NULL);
     buf[strlen(buf) - 2] = '\0';
 
-    for (; optind < argc; optind++)
+    for (firstfile = TRUE; optind < argc; optind++, firstfile = FALSE)
     {
 	if (freopen(argv[optind], "r", stdin) == (FILE *)NULL)
 	    lose(E777, 1, (char *)NULL);
@@ -196,10 +205,21 @@ int main(int argc, char *argv[])
 	    }
 	    *chp++ = '\0';
 
+	    /* wwp: reset the base variables to defaults, because if the  */
+	    /* sourcefile has extension .i they will not be reset in the  */
+	    /* following chunk of code. but i don't want to modify the    */
+	    /* following chunk of code because i think it is very clever; */
+	    /* grabs the base on the first pass, then validates the rest  */
+	    /* of the extension on the second.                            */
+	    Base = DEFAULT_BASE;
+	    Small_digits = DEFAULT_SMALL_DIGITS;
+	    Large_digits = DEFAULT_LARGE_DIGITS;
+	    Max_small = DEFAULT_MAX_SMALL;
+	    Max_large = DEFAULT_MAX_LARGE;
+
 	    /* determine the file type from the extension */
 	    while (strcmp(chp,"i"))
 	    {
-		long strtol();
 		Base = strtol(chp,&chp,10);
 		if (Base < 2 || Base > maxbase)
 		    lose(E998, 1, (char *)NULL);
@@ -218,6 +238,17 @@ int main(int argc, char *argv[])
 	    treset();
 	    politesse = 0;
 
+	    /* reset the lex/yacc environment */
+	    if (!firstfile)
+	    {
+#ifdef NEED_YYRESTART
+	      yyrestart(stdin);
+#endif /* NEED_YYRESTART */
+#ifdef YYLINENO_BY_HAND
+	      yylineno = 1;
+#endif /* YYLINENO_BY_HAND */
+	    }
+
 	    /* compile tuples from current input source */
 	    yyparse();	
 
@@ -225,7 +256,7 @@ int main(int argc, char *argv[])
 	     * Miss Manners lives.
 	     */
 	    if (lineno > 2)
-		if (politesse == 0 || lineno / politesse > 5)
+		if (politesse == 0 || (lineno - 1) / politesse >= 5)
 		    lose(E079, yylineno, (char *)NULL);
 		else if (lineno / politesse < 3)
 		    lose(E099, yylineno, (char *)NULL);
@@ -253,7 +284,10 @@ int main(int argc, char *argv[])
 		needsyslib = TRUE;
 	    }
 	    if ( needsyslib ) {
-	      (void) sprintf(buf2, "%s/%s", ICKLIBDIR, SYSLIB);
+	      if (Base == 2)
+		(void) sprintf(buf2, "%s/%s.i", libdir, SYSLIB);
+	      else
+		(void) sprintf(buf2, "%s/%s.%di", libdir, SYSLIB, Base);
 	      if ( freopen(buf2, "r", stdin) == (FILE*) NULL ) {
 		lose(E127, 1, (char*) NULL);
 	      }
@@ -283,6 +317,17 @@ int main(int argc, char *argv[])
 		    if (tp->type == GETS || tp->type == RESIZE
 			|| tp->type == FORGET || tp->type == RESUME)
 			optimize(tp->u.node);
+
+	    /* decide if and where to place the compiler bug */
+#ifdef USG
+	    if (!nocompilerbug && lrand48() % 10 == 0)
+		bugline = (int)(lrand48() % lineno);
+#else
+	    if (!nocompilerbug && rand() % 10 == 0)
+		bugline = rand() % lineno;
+#endif
+	    else
+		bugline = -1;
 
 	    /* set up the generated C output file name */
 	    (void) strcpy(buf, argv[optind]);
@@ -331,8 +376,6 @@ int main(int argc, char *argv[])
 			    maxabstain++;
 		    if (maxabstain)
 		    {
-			int i;
-
 			(void) fprintf(ofp, "#define UNKNOWN\t\t0\n");
 			i = 0;
 			for (; i < (int)(sizeof(enablers)/sizeof(char *)); i++)
@@ -412,8 +455,13 @@ int main(int argc, char *argv[])
 		    break;
 
 		case 'G':	/* degenerated code */
-		    for (tp = tuples; tp->type; tp++)
+		    for (tp = tuples, i = 0; tp->type; tp++, i++)
+		    {
 			emit(tp, ofp);
+			if (i == bugline)
+			    (void) fprintf(ofp, "    lose(E774, lineno, "
+						"(char *)NULL);\n");
+		    }
 		    break;
 
 		case 'H':	/* dispatching for resumes */

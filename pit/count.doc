@@ -1,0 +1,71 @@
+
+From: johnpc@xs4all.nl (Jan-Pieter Cornet)
+Newsgroups: comp.lang.misc,comp.lang.perl.misc,comp.lang.tcl,comp.lang.c,comp.lang.java,alt.lang.intercal,alt.test
+Subject: Re: Readable Perl (was: Re: Relative Speed of Perl vs. Tcl vs. C)
+Date: 27 Feb 1996 02:44:19 GMT
+Organization: XS4ALL Internet
+Message-ID: <4gtr64$s7h@news.xs4all.nl>
+Summary: hit "n" now! quick!
+
+In article <4ge7bk$4vq@news.ox.ac.uk>,
+David Hopwood <lady0065@sable.ox.ac.uk> wrote:
+>In article <4gb3kp$lu7@gaia.ns.utk.edu>,
+>Matthew B. Kennel <kennel@msr.epm.ornl.gov> wrote:
+>>Randal L. Schwartz (merlyn@stonehenge.com) wrote:
+>>: >>>>> "John" == John Viega <jtv2j@mamba.cs.virginia.edu> writes:
+>>
+>>: John> People bitch about the readability of Perl non-stop.  In fact, I have
+>>: John> heard the joke, "Perl, the only language you can uuencode, and not
+>>: John> notice" twice this week around the department.
+>>
+>>: OK, now which do you find most readable...
+>
+>This (Haskell):
+>
+>cancount n = "I can count to "++(show n)++"\n"
+>concat (map cancount [1..10])
+
+No, you got it all totally wrong. I think this is the best readable
+(in Tri-INTERCAL):
+
+[Program moved to .3i file.]
+
+Now, I think the advantages of this are pretty clear. First, this is
+clearly a write-only language. There are only few people insane enough
+to actually understand the above drivel, and they wouldn't bother
+touching your petty code, as they are too busy filling bathtubs with
+brightly colored machine tools.
+
+Anyone else will simply be too scared to touch this code. So you can be
+pretty sure nobody changes it behind your back.
+
+In fact, you can be pretty sure you won't change it either after you
+wrote it, because you will probably have forgotten how the program
+works 5 minutes after you wrote it. So any luser nagging for extra
+features afterwards, is SOL.
+
+The other major advantage is... the above code took me about 3 hours
+to write. Compare this to the 10 to 30 seconds it takes to write a
+similar program in perl, BASIC, Haskell or what have you. But... that
+means that when you programmed it in that other language, you'd have to
+spend 2 hours 59 minutes and somewhere between 30 and 50 seconds
+answering the phone talking to clueless lusers, changing backup tapes,
+or doing other boring stuff. While you could have been programming
+Intercal instead! Just think about that!
+
+And last, but certainly not least, is: the above code is likely to
+impress your boss. Bosses are wont to be impressed by incomprehensible
+things. They won't be impressed by a three line perl program that anyone
+not wearing a diaper can understand.
+
+So that pretty much proves it.
+
+PS: this article contains some strange usage of the words "best readable"
+that you probably weren't previously aware of :)
+
+-- 
+Jan-Pieter Cornet  					<johnpc@xs4all.net>
+Actual quote: "Linux was made by foreign terrorists to steal money from true
+               AMERICAN companies like Microsoft who invented computing as we
+	       know it, and are being punished for their success..."
+Linux -- "It's computing, Jim, but not as we know it"

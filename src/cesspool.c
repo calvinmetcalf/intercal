@@ -90,10 +90,13 @@ unsigned int pin(void)
 
     if (fgets(buf, BUFSIZ, stdin) == (char *)NULL)
 	lose(E562, lineno, (char *)NULL);
-    buf[strlen(buf)-1] = '\0';
+    n = strlen(buf) - 1;
+    if (buf[n-1] == '\r')
+	--n;
+    buf[n] = '\0';
 
     if(wimp_mode) {
-	result = atoi(buf);
+	result = (unsigned int)strtoul(buf, (char **)NULL, 10);
 	n = 1;
     }
     else
@@ -318,6 +321,8 @@ void binout(unsigned int type, array *a)
     c = (c & 0x33) << 2 | (c & 0xcc) >> 2;
     c = (c & 0x55) << 1 | (c & 0xaa) >> 1;
     putchar(c);
+    if (c == '\n')
+      fflush(stdout);
   }
 }
 

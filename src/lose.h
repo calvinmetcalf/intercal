@@ -11,7 +11,7 @@
  * Analog magazine sometime in 1983 and later anthologized in the author's
  * "Infinite Dreams" (Ace 1985).
  */
-/* An undecodable statement has been encountered in the course of execution."*/
+/* An undecodable statement has been encountered in the course of execution. */
 #define E000 "000 %s\n\
 	ON THE WAY TO %d\n"
 /* An expression contains a syntax error. */

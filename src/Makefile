@@ -8,7 +8,8 @@
 # all over creation behind your back.
 # (/dev/null may be another good choice :-))
 
-DVMT=/home2/esr/WWW/intercal-0.15
+DVMT=~/WWW/intercal-0.16
+#DVMT=/usr/local
 
 BINDIR = $(DVMT)/bin
 INCDIR = $(DVMT)/lib
@@ -69,15 +70,9 @@ libick.a: cesspool.o lose.o fiddle.o arrgghh.o
 	-ranlib libick.a
 
 install: all
-	-mkdir $(BINDIR); rm -f $(BINDIR)/*
 	cp ick $(BINDIR)
-	-mkdir $(INCDIR)
-	(cd $(INCDIR); rm -f lose.h abcess.h fiddle.h ick-wrap.c)
 	cp lose.h abcess.h fiddle.h ick-wrap.c $(INCDIR)
-	-mkdir $(LIBDIR)
-	(cd $(LIBDIR); rm -f libick.a syslib.i)
-	cp libick.a ../pit/lib/syslib.i $(LIBDIR)
-	-ranlib $(LIBDIR)/libick.a
+	cp libick.a ../pit/lib/syslib.i ../pit/lib/syslib.?i $(LIBDIR)
 
 clean:
 	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick

@@ -1,0 +1,56 @@
+
+From: cornet@OTech.fgg.EUR.nl (Jan-Pieter Cornet)
+Newsgroups: alt.folklore.computers,alt.lang.intercal
+Subject: Re: 90% Cobol?!?
+Date: 30 Sep 1994 12:03:23 +0100
+Organization: Education Technology, Erasmus University, Rotterdam, The Netherlands
+Message-ID: <36gr9r$k4i@gaia.otech.fgg.eur.nl>
+
+[note -- alt.lang.intercal added to newsgroups line. rec.humor removed.
+no longer necessary, the added group is also a humor group :]
+
+In article <36evl6$e3m@fenris.hiof.no>,
+Gunnar Horrigmo <gunnar.horrigmo@hiof.no> wrote:
+>Once upon a time Adam Felson scribbled:
+>>>Forgive me father for I have programmed in COBOL.
+>>>>You are forgiven.  Go now and sin no more.
+>>>Thank you father.  Whats that?  1,000,000 Hail Mary's?
+>>>[COBOL 1,000,000 Hail-Mary's removed]
+>>FORTH:
+>
+>>: 1,000,000_hail_mary's  @ special characters in word defined
+>>  1000 0 DO	@ FORTH usually has a 16bit data stack
+>>    1000 0 DO
+>>      hail-mary!
+>>    LOOP
+>>  LOOP
+>>;
+>
+>Ok. I'll have a go at ML, since I'm trying to learn that anyway...
+>
+> function Hail_Mary (int i)
+>	if i < 1000000 then Hail_Mary(i+1)
+>
+>Probably way off, but I've just started, so please correct me.
+
+Fine. You've asked for it, you'll get it. Here it is, 1,000,000 Hail-Mary's
+in TriIntercal, which is of course a much better language for this
+than ML.
+
+BTW, there appears to be an anomaly in READING OUT tail variables, since
+the READ OUT does a bit reversal instead of (as one might expect in
+TriIntercal) a trit reversal.
+
+Helpful hint: before you run this through ick, change the loop constants
+to something sensible. Finding the loop constants is left as an exercise
+to the reader :)
+
+Helpful hint 2: This would not very likely be a winning ICICC entry :)
+
+[program moved to separate file]
+
+Have fun,
+
+-- 
+Jan-Pieter Cornet
+<cornet@otech.fgg.eur.nl>

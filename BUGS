@@ -6,16 +6,12 @@ TO DO agenda items through the current release.
 
 ESR = Eric S. Raymond
 SS  = Steve Swales
-LLH = Louis Howell
-BR = Brian Raiter
+LHH = Louis Howell
+BLR = Brian Raiter
 
 1) (ESR) INTERCAL would be intrinsically a crock even if it worked right.
 
-2) (SS) The system library syslib.i does not appear to work 100% as advertised.
-   (ESR) Louis has corrected several bugs.  The gods alone know what others
-   are lurking in there... 
-
-3) (LLH) The lexical analyzer is not completely independent of newlines.
+2) (LHH) The lexical analyzer is not completely independent of newlines.
    There is a conflict between the fact that newlines should be
    ignored almost everywhere, and the facts that the error mechanism
    wants to know about line numbers and the splat mechanism wants
@@ -41,7 +37,7 @@ BR = Brian Raiter
    relatively small gain, and anyone trying it should make sure
    the result isn't buggier than the current version.
 
-4) (BR) I have hacked up a fix to the problem with line numbers being off
+3) (BLR) I have hacked up a fix to the problem with line numbers being off
    due to statements sharing/spanning lines. The parser now stores the
    starting line number for all tuples, not just the splatted
    ones. Not only does this give synchronized lines in the comments in
@@ -59,7 +55,7 @@ BR = Brian Raiter
    statement proper. So if a statement has its preamble on one line
    and the rest of it on the next, the preamble will be beheaded.
 
-   Still, it's a vast improvement, and as LLH points out, it's not
+   Still, it's a vast improvement, and as LHH points out, it's not
    going to get much better without writing a preprocessing lexer that
    can actually separate out the statements before any real parsing
    begins. Until someone wants to do that, this will do nicely, I think.
@@ -69,6 +65,24 @@ BR = Brian Raiter
    line statement ends on the same line as the beginning of the next
    statement, the last part will get truncated. Again, not a case we
    want to be encouraging people to explore anyway.)
+
+4) (BLR) Interleave does not check the type of its arguments. The manual
+   insinuates that interleaving 32-bit values should result in error 533;
+   instead, C-INTERCAL silently truncates them to 16 bits. Unfortunately,
+   the modified behavior of select's return type depends on this, so
+   there's not much we can do about it as things stand.
+
+5) (BLR) An array can't have sparks or ears in its subscript list after the
+   first dimension. That is to say, this:
+
+	DO ,1SUB'#1'#1 <- #0
+
+   works fine, but this:
+
+	DO ,1SUB#1'#1' <- #0
+
+   doesn't parse, and gets treated as a syntax error (thus it is likely
+   to be a problem with the grammar).
 
 			TO DO
 

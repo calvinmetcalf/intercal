@@ -46,7 +46,8 @@ int 	yylineno = 1;
 YYSTYPE	yylval;
 #endif /* MAIN */
 
-char *textlines[MAXLINES];
+char **textlines = NULL;
+int textlinecount = 0;
 int politesse = 0;
 int stbeginline = 0;
 
@@ -93,7 +94,7 @@ int getc(FILE *fp)
     else if (backflag)	/* converting ctrl-H (backspace) to two chars "^H" */
     {
 	backflag = FALSE;
-	/*	*lineptr++ = '\010'; */
+	/*	*lineptr++ = '\b'; */
 	return('H');
     }
     else
@@ -123,10 +124,10 @@ int getc(FILE *fp)
 	    bangflag = TRUE;
 	    return(c = '\'');
 	}
-	else if (c == '\010')	/* convert ctrl-H (backspace) to
+	else if (c == '\b')	/* convert ctrl-H (backspace) to
 				   two chars "^" and "H" so lex can take it */
 	{
-	    *lineptr++ = '\010';
+	    *lineptr++ = '\b';
 	    backflag = TRUE;
 	    return(c = '^');
 	}
@@ -134,7 +135,21 @@ int getc(FILE *fp)
 	{
 	    *lineptr = '\0';
 	    lineptr = linebuf;
-	    textlines[yylineno] = strcpy((char *)malloc(1+strlen(linebuf)),linebuf);
+	    if (yylineno >= textlinecount)
+	    {
+		textlinecount += ALLOC_CHUNK;
+		if (textlines)
+		    textlines = realloc(textlines,
+					textlinecount * sizeof(char*));
+		else
+		    textlines = malloc(textlinecount * sizeof(char*));
+		if (!textlines)
+		    lose(E666, yylineno, (char *)NULL);
+	    }
+	    textlines[yylineno] = malloc(1 + strlen(linebuf));
+	    if (!textlines[yylineno])
+		lose(E666, yylineno, (char *)NULL);
+	    strcpy(textlines[yylineno], linebuf);
 #ifdef YYLINENO_BY_HAND
 	    yylineno++;
 #endif /* YYLINENO_BY_HAND */
@@ -198,7 +213,6 @@ V		{yylval.numval = OR; return(UNARY);}
 
 DO		{SETLINENO; return(DO);}
 PLEASE		{SETLINENO; politesse++; return(DO);}
-DO{W}PLEASE	{SETLINENO; politesse++; return(DO);}
 PLEASE{W}DO	{SETLINENO; politesse++; return(DO);}
 NOT		{return(NOT);}
 N\'T		{return(NOT);}

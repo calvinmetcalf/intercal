@@ -13,10 +13,9 @@ was used, is included at the end of the file.
 
 -----------------------------------------------------------------------------
 
-Article: 120 of alt.lang.intercal
-From: howell@grover.llnl.gov (Louis Howell)
-Newsgroups: alt.lang.intercal
 Subject: Bubble sort routine
+Newsgroups: alt.lang.intercal
+From: Louis Howell
 Date: Thu, 7 Feb 91 18:56:34 PST
 
 I am including below an Intercal bubble sort routine along with a

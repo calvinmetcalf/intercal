@@ -90,7 +90,7 @@ static tuple *splat(void);
  * will not conflict with the other tokens.  It is important that
  * WHIRL through WHIRL5 be a continuous sequence.
  */
-%token SPLATTERED TESTNZ C_AND C_OR C_XOR C_NOT EQUALS AND OR XOR FIN MESH32
+%token SPLATTERED C_AND C_OR C_XOR C_NOT AND OR XOR FIN MESH32
 %token WHIRL WHIRL2 WHIRL3 WHIRL4 WHIRL5
 
 %type <node> expr varlist variable constant lvalue inlist outlist

@@ -1,4 +1,4 @@
-/* sizes.h -- constants defining the numeric base for Intercal variations */
+/* sizes.h -- constants defining the numeric base for INTERCAL variations */
 
 extern int Base;
 extern int Small_digits;

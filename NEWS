@@ -1,9 +1,51 @@
 			NEW IN THIS RELEASE
 
+	Release 0.16 (by Brian Raiter and Eric S. Raymond) 26 May 1997
+
+This is the 25th-anniversary release of INTERCAL.  This language, conceived 
+in irony a quarter century ago today, has outlasted many more serious and
+high-minded essays in computer language design.  This fact should give us
+pause to reflect, or possibly frighten the crap out of us.  Or both.
+
+1. Corrected manual bugs.
+
+2. Fixed over-enthusiastic install production in the Makefile.
+
+3. DO PLEASE is no longer accepted (Brian Raiter pointed out that the
+   manual does not sanction it).
+
+4. Fixed various bugs in the optimizer.
+
+5. Incorporated fixes made by William Walter Patterson for bugs that
+   appeared when multiple files are given on the command line.
+
+(The following changes are due to Brian Raiter)
+
+6. The system library is now available for TriINTERCAL (all bases, 3 to 7).
+   The compiler has been updated to use the right library automagically.
+
+7. The error 774 feature has been brought into conformance with the
+   Princeton compiler. The odds are now a flat 10% (but still 0% with -b).
+
+8. The compiler has been modified to allocate memory dynamically, and
+   the hard-coded limits on program size and number of variables has
+   been removed. Programs are now only limited by the amount of
+   available memory.
+
+9. Array output now fflushes after outputting newlines.
+
+10. Two minor bug fixes: one in wimpmode input, which was clamping
+    input to the signed integer range, and one in politesse checking.
+    The latter was causing programs to be recognized as impolite only
+    if their ratio was less that one-sixth, not one-fifth. (Fixing this
+    also necessitated adding a few PLEASEs to pit/rot13.i.)
+
+11. Several new programs have been tossed into the pit.
+
 		Release 0.15 (by Eric S. Raymond) 20 Jun 1996
 
-1. Switched the intercal manual master to mgm in order to be able to handle
-   section crossrferences properly.  The manual has now been carefully
+1. Switched the INTERCAL manual master to mgm in order to be able to handle
+   section crossreferences properly.  The manual has now been carefully
    proofread against the paper version by ESR and seems to match.  It's
    also been independently proofread for typos by Brian Raiter.
 
@@ -15,7 +57,7 @@
 
 (The following changes are due to Brian Raiter)
 
-4. Every one of the INTERCAl-72 messages is now emitted when appropriate.
+4. Every one of the INTERCAL-72 messages is now emitted when appropriate.
    including the previously un-emitted E000, E197, and E200 (and see below).
 
 5. A close reading (while proofing) of the sections of the manual on
@@ -58,8 +100,8 @@
 		Release 0.13 (by Eric S. Raymond) 5 Jun 1996
 
 1. I folded in patches by Brian Raiter <breadbox@muppetlabs.com> that port
-   this code to Linux and enable it to use flex.  Note: This version has
-   been tested on Linux and SunOS but not yet elsewhere.
+   this code to Linux, ANSIfies it, and enables it to use flex.  Note: This 
+   version has been tested on Linux and SunOS but not yet elsewhere.
 
 2. Another piece of nontrivial INTERCAL code has been found!  (Doubtless
    hell is freezing over even as I write.)  We've added to the pit the

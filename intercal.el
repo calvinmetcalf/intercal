@@ -3,6 +3,7 @@
 ;; This mode was written by Eric S. Raymond <esr@snark.thyrsus.com>
 ;; for the C-INTERCAL distribution, and is copyrighted by him 1992.  Free
 ;; redistribution encouraged.  Someday, maybe, this will be made part of GNU.
+;; But probably not unless they take many mind-eroding drugs first.
 
 ;; This mode provides abbrevs for C-INTERCAL's statements, including COME FROM.
 ;; These abbrevs are context-sensitive and will generate either verb or gerund
@@ -13,13 +14,13 @@
 ;; INTERCAL-72 and C-INTERCAL releases after 0.7, no fewer than 1/5 and no
 ;; more than 1/3 of the program statements must contain a PLEASE to gratify
 ;; the iron whim of the INTERCAL compiler; this mode assists by randomly
-;; expanding some fraction of the "do" abbrevs typed to PLEASE DO or DO PLEASE.
+;; expanding some fraction of the "do" abbrevs typed to PLEASE DO.
 ;; The intercal-politesse-level constant is the denominator of this fraction.
 
-;; 	$Id: intercal.el,v 1.4 1994/09/22 09:08:00 esr Exp $
+;; 	$Id: intercal.el,v 1.5 1996/11/14 04:02:00 esr Exp $
 
 (defconst intercal-politesse-level 4
-  "Fraction of DOs that are automagically expanded to PLEASE DO, DO PLEASE.")
+  "Fraction of DOs that are automagically expanded to PLEASE DO.")
 
 (defvar intercal-mode-map nil 
   "Keymap for INTERCAL mode.")
@@ -96,10 +97,10 @@
 (make-intercal-abbrev intercal-co-abbrev "COMING FROM" "COME FROM")
 
 (defun intercal-do-abbrev ()
-  "Emit a DO (usually).  Occasionally, emit DO PLEASE or PLEASE DO."
+  "Emit a DO (usually).  Occasionally, emit PLEASE DO."
   (insert
    (if (zerop (% (random) intercal-politesse-level))
-       (if (% (random) 2) "PLEASE DO" "DO PLEASE")
+       "PLEASE DO"
      "DO")
    ))
 

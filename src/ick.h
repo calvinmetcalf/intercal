@@ -10,17 +10,14 @@ typedef int	bool;
 #define TRUE	1
 #define FALSE	0
 
-/*
- * We choose this value for maximum number of possible source lines on
- * the theory that no human mind could grok more lines of INTERCAL than
- * this and still retain any vestige of sanity.
- */
-#define MAXLINES	1000
+#define ALLOC_CHUNK	256
 
 /*
- * Similarly for maximum number of variables
- */
+ * We choose this value for maximum number of possible variables on
+ * the theory that no human mind could grok a more complex INTERCAL
+ * program than this and still retain any vestige of sanity.
 #define MAXVARS		100
+ */
 
 /*
  * Maximum supported statement types; should be equal to (COME_FROM - GETS + 1)
@@ -66,16 +63,18 @@ typedef struct
 }
 assoc;
 
-extern atom oblist[MAXVARS], *obdex;
-extern int nonespots, ntwospots, ntails, nhybrids;
+extern atom *oblist, *obdex;
+extern int obcount, nonespots, ntwospots, ntails, nhybrids;
 
-extern tuple tuples[MAXLINES];
+extern tuple *tuples;
+extern int tuplecount;
 
 extern char *enablers[MAXTYPES];
 extern assoc vartypes[];
 
 /* the lexical analyzer keeps copies of the source logical lines */
-extern char *textlines[MAXLINES];
+extern char **textlines;
+extern int textlinecount;
 extern int yylineno;
 
 /* compilation options */

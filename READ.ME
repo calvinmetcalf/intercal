@@ -9,9 +9,7 @@ live it down.
 This implementation was created by Eric S. Raymond <esr@snark.thyrsus.com>
 during a fit of lunacy from which he has since mostly recovered.  It has
 been considerably hacked upon and improved by Steve Swales, Michael Ernst,
-Louis Howell (who wrote the array support stubbed out in Eric's original
-version), and others.  Brian Raiter ported it to Linux (doing ANSI cleanup
-along the way), enabled it to use flex, and proofed the manual.
+Louis Howell, Brian Raiter, and others.  For detailed credits see NEWS.
 
 			FILES
 
@@ -38,13 +36,15 @@ src/ick.y		-- the grammar specification (in YACC)
 src/ick.h		-- compilation types and defines
 src/perpetrate.c	-- main routine for compiler
 src/feh.c		-- INTERCAL-to-C code generator
+src/feh.h		-- interface to INTERCAL-to-C code generator
 src/fiddle.c		-- the INTERCAL operators
 src/lose.[ch]		-- INTERCAL compile- and run-time error handling
 src/ick-wrap.c		-- the driver for generated C-from-INTERCAL code
 src/arrgghh.c		-- option argument parsing for generated programs
+src/abcess.h		-- interface to functions linked with programs
 src/cesspool.c		-- the INTERCAL runtime support code
-src/cesspool.h		-- interface to INTERCAL runtime support
 src/numerals.c		-- numerals table for INTERCAL input
+src/sizes.h		-- variables defining the numeric base
 
 pit/*			-- sample INTERCAL code; see pit/CATALOG
 
