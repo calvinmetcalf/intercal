@@ -1,15 +1,25 @@
 #
 # Utility productions for the INTERCAL distribution
 #
-VERSION = 0.18
+VERSION=0.19
 
-tgz: intercal-$(VERSION).tar.gz
-tar: intercal-$(VERSION).tar
+dist: intercal-$(VERSION).tar.gz
 
-# This requires my patch to tar-1.12, or a stock tar-1.13 (not yet released);
-# the version must implement the --name-prefix option.
-intercal-$(VERSION).tar.gz: $(all)
-	tar --name-prefix='intercal-$(VERSION)/' -czf intercal-$(VERSION).tar.gz `cat MANIFEST`
+intercal-$(VERSION).tar.gz:
+	sed "s:^:intercal-$(VERSION)/:" <MANIFEST >manifest
+	(cd ..; ln -s intercal intercal-$(VERSION))
+	(cd ..; tar -czvf intercal/intercal-$(VERSION).tar.gz `cat intercal/manifest`)
+	rm ../intercal-$(VERSION) manifest
+
+RPMROOT=/usr/src/redhat
+RPM = rpm
+RPMFLAGS = -ba
+rpm: dist
+	cp intercal-$(VERSION).tar.gz $(RPMROOT)/SOURCES;
+	cp intercal.spec $(RPMROOT)/SPECS
+	cd $(RPMROOT)/SPECS; $(RPM) $(RPMFLAGS) intercal.spec	
+	cp $(RPMROOT)/RPMS/`arch|sed 's/i[4-9]86/i386/'`/intercal-$(VERSION)*.rpm .
+	cp $(RPMROOT)/SRPMS/intercal-$(VERSION)*.src.rpm .
 
 
 
