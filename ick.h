@@ -41,6 +41,7 @@ typedef struct tuple_t
 	unsigned int	target;		/* for NEXT statements */
 	node		*node;		/* attached expression node(s) */
     } u;
+    int lineno; /*For splatters*/
 } tuple;
 
 /* the lexical analyzer keeps copies of the source logical lines */

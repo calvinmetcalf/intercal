@@ -27,10 +27,12 @@ int n;
 unsigned int popnext(n)
 int n;
 {
-    while (n--)
-	if (nextindex > 0)
-	    nextindex--;
-    return(nextindex ? next[nextindex - 1] : -1);
+    nextindex -= n;
+    if (nextindex < 0) {
+	nextindex = 0;
+	return(-1);
+    }
+    return(next[nextindex]);
 }
 
 unsigned int resume(n)
@@ -58,6 +60,7 @@ int width;
 
     if (fgets(buf, BUFSIZ, stdin) == (char *)NULL)
 	lose(lineno, E562);
+    buf[strlen(buf)-1] = '\0';
 
     cp = strtok(buf, " ");
     do {
@@ -90,8 +93,9 @@ int width;
     } while
 	(cp = strtok((char *)NULL, " "));
 
-    if (width = 16 && result > 0xffff)
+    if (width == 16 && result > 0xffff)
 	lose(lineno, E579);
+    return(result);
 }
 
 /**********************************************************************
@@ -225,7 +229,7 @@ unsigned int val;
 {
     char	result[2*MAXROMANS+1];
 
-    butchar(val, result);
+    butcher(val, result);
     (void) puts(result);
 }
 
@@ -309,7 +313,7 @@ static stashbox stashes[MAXSAVE];
 
 void stashinit()
 {
-    memset(stashes, sizeof(stashes));
+    memset(stashes, '\0', sizeof(stashes));
 }
 
 static stashbox *fetch(type, index)

@@ -58,6 +58,8 @@ node *car, *cdr;
     np->opcode = type;
     np->lval = car;
     np->rval = cdr;
+
+    return(np);
 }
 
 /*************************************************************************
@@ -331,7 +333,7 @@ node *np;
     }
 
     /* fold XOR operations on constants */
-    if (np->opcode == AND && np->rval->opcode == MESH)
+    if (np->opcode == XOR && np->rval->opcode == MESH)
     {
 	np->opcode = MESH;
 	np->constant = xor16(np->lval->constant, np->rval->constant);
@@ -516,7 +518,7 @@ node	*np;
 	break;
 
     case XOR:
-	(void) fprintf(fp, "or%d(", np->width);
+	(void) fprintf(fp, "xor%d(", np->width);
 	prexpr(np->rval, fp);
 	(void) fprintf(fp, ")");
 	break;
@@ -580,15 +582,15 @@ FILE	*fp;
     if (tn->exechance && tn->exechance < 100)
 	(void) fprintf(fp, "roll(%d) && ", tn->exechance);
     if (tn->type == GIVE_UP)
-	(void) fprintf(fp, "!abstained[lineno = %d])\n", tn - tuples + 1);
+	(void) fprintf(fp, "!abstained[(lineno = %d)-1])\n", tn - tuples + 1);
     else
-	(void) fprintf(fp, "!abstained[lineno = %d] && %s)\n",
+	(void) fprintf(fp, "!abstained[(lineno = %d)-1] && %s)\n",
 		  tn-tuples + 1, enablers[tn->type-GETS]);
     (void) fprintf(fp, "    {\n");
 
     if (tn->comefrom)
 	(void) fprintf(fp,
-	       "\tif (!abstained[%d] && comingfrom)\t/* COME FROM */\n\t    goto C%d;\n",
+	       "\tif (!abstained[%d-1] && comingfrom)\t/* COME FROM */\n\t    goto C%d;\n",
 	       tn->comefrom, tn->comefrom);
 
     /* now emit the code for the statement body */
@@ -599,7 +601,7 @@ FILE	*fp;
 	(void) fprintf(fp,"\tif (!%s[%d])\n\t    ",
 		       nameof(np->lval->opcode, forgetbits),
 		       np->constant);
-	if (np->opcode == ONESPOT || np->opcode == TWOSPOT)
+	if (np->lval->opcode == ONESPOT || np->lval->opcode == TWOSPOT)
 	{
 	    prvar(np->lval, fp);
 	    (void) fprintf(fp, " = ");
@@ -607,9 +609,9 @@ FILE	*fp;
 	}
 	else
 	{
-	    (void) fprintf("aput(");
+	    (void) fprintf(fp, "aput(");
 	    prexpr(tn->u.node->rval, fp);
-	    (void) fprintf(", ");
+	    (void) fprintf(fp, ", ");
 	    prvar(np->lval, fp);
 	    (void) fprintf(fp, ")");
 	}
@@ -679,11 +681,11 @@ FILE	*fp;
 	break;
 
     case ABSTAIN:
-	(void) fprintf(fp, "\tabstained[%d] = FALSE;\n", tn->u.target);
+	(void) fprintf(fp, "\tabstained[%d-1] = FALSE;\n", tn->u.target);
 	break;
 
     case REINSTATE:
-	(void) fprintf(fp, "\tabstained[%d] = TRUE;\n", tn->u.target);
+	(void) fprintf(fp, "\tabstained[%d-1] = TRUE;\n", tn->u.target);
 	break;
 
     case ENABLE:
@@ -707,14 +709,14 @@ FILE	*fp;
 	    (void) fprintf(fp,"\tif (!%s[%d])\n\t    ",
 			   nameof(np->lval->opcode, forgetbits),
 			   np->constant);
-	    if (np->opcode == ONESPOT || np->opcode == TWOSPOT)
+	    if (np->lval->opcode == ONESPOT || np->lval->opcode == TWOSPOT)
 	    {
 		prvar(np->lval, fp);
 		(void) fprintf(fp, " = pin()");
 	    }
 	    else
 	    {
-		(void) fprintf("aput(pin(), ");
+		(void) fprintf(fp, "aput(pin(), ");
 		prvar(np->lval, fp);
 		(void) fprintf(fp, ")");
 	    }
@@ -733,9 +735,9 @@ FILE	*fp;
 
     case SPLATTERED:
 	(void) fprintf(fp,
-		       "(void) puts(\"%s\");\n", textlines[tn - tuples]);
+		       "(void) puts(\"%s\");\n", textlines[tn->lineno]);
 	(void) fprintf(fp,
-		       "exit(%d);\n", tn - tuples);
+		       "exit(%d);\n", tn->lineno);
 	break;
 
     default:
@@ -811,7 +813,8 @@ char	*argv[];
 	     * deducible type of the operand.
 	     */
 	    for (tp = tuples; tp < tuples + lineno; tp++)
-		if (tp->type == GETS || tp->type == RESIZE)
+		if (tp->type == GETS || tp->type == RESIZE
+			|| tp->type == FORGET || tp->type == RESUME)
 		    typecast(tp->u.node);
 
 	    codecheck();	/* check for compile-time errors */
@@ -819,7 +822,8 @@ char	*argv[];
 	    /* perform optimizations */
 	    if (dooptimize)
 		for (tp = tuples; tp < tuples + lineno; tp++)
-		    if (tp->type == GETS || tp->type == RESIZE)
+		    if (tp->type == GETS || tp->type == RESIZE
+				|| tp->type == FORGET || tp->type == RESUME)
 			optimize(tp->u.node);
 
 	    /* strip off the file extension */

@@ -22,6 +22,7 @@ extern int yylineno;
 static node *rlist;	/* pointer to current right-hand node list */
 static node *llist;	/* pointer to current left-hand node list */
 static node *np;	/* variable for building node lists */
+static int whichline = 1;
 
 #define ACTION(x, nt, nn)	x = newtuple(); x->type = nt; x->u.node = nn
 #define TARGET(x, nt, nn)	x = newtuple(); x->type = nt; x->u.target = nn
@@ -62,6 +63,9 @@ static node *np;	/* variable for building node lists */
 /* A program description consists of a sequence of statements */
 program	:    /* EMPTY */
 	|    program statemnt NEWLINE
+	{
+		whichline++;
+	}
 	;
 
 statemnt:    command
@@ -98,7 +102,7 @@ please	:    DO			{$$ = 100;}
 perform :    lvalue GETS expr		{ACTION($$, GETS,cons(GETS,$1,$3));}
 	|    array GETS byexpr		{ACTION($$,RESIZE,cons(RESIZE,$1,$3));}
 	|    LABEL NEXT			{TARGET($$, NEXT,      $1);}
-	|    FORGET expr		{ACTION($$, RESUME,    $2);}
+	|    FORGET expr		{ACTION($$, FORGET,    $2);}
 	|    RESUME expr		{ACTION($$, RESUME,    $2);}
 	|    STASH varlist		{ACTION($$, STASH,     rlist);}
 	|    RETRIEVE varlist		{ACTION($$, RETRIEVE,  rlist);}

@@ -34,7 +34,7 @@ in the morning will become apparent in the course of this manual. It was
 inspired by one ambition; to have a compiler language which has nothing at 
 all in common with any other major language. By 'major' was meant anything
 with which the authors were at all familiar, e.g., FORTRAN, BASIC, COBOL,
-ALGOL, SNOBOL, SPITBOL, FOCAL, SOLVE, TEACH, APL, LISP, and PI/I. For the
+ALGOL, SNOBOL, SPITBOL, FOCAL, SOLVE, TEACH, APL, LISP, and PL/I. For the
 most part, INTERCAL has remained true to this goal, sharing only the basic
 elements such as variables, arrays, and the ability to do I/O, and eschewing 
 all conventional operations other than the assignment statement (FORTRAN
@@ -111,7 +111,7 @@ Perhaps surprising, than, is the fact that it would be more likely to
 initiate a novice into a search for another line of work. As it turns out,
 INTERCAL is more useful (which isn't saying much) as a challenge to
 professional programmers.  Those who doubt this need only refer back to the
-sample program in section 2.1. This 23-statement program took somewhere
+sample program in section 2.1. This 22-statement program took somewhere
 from 15 to 30 minutes to write, whereas the same objectives can be achieved
 by single-statement programs in either SNOBOL;
 
@@ -133,9 +133,9 @@ capacity for amazing one's fellow programmers, confounding programming shop
 managers, winning friends, and influencing people. It is a well-known and
 oft-demonstrated fact that a person whose work is incomprehensible is held
 in high esteem. For example, if one were to state that the simplest way to
-store a value of 65535 in a 32-bit INTERCAL variable is:
+store a value of 65536 in a 32-bit INTERCAL variable is:
 
-	DO :1 <- #0?#256
+	DO :1 <- #0$#256
 
 any sensible programmer would say that that was absurd. Since this is
 indeed the simplest method, the programmer would be made to look foolish in
@@ -212,7 +212,7 @@ binary form 101010....10 or 2863311530 decimal, while #0c/#65535 =
 #65535.
 
 The select operator takes from the first operand whichever bits correspond
-to 1's in the second operand, and packs these bits as the right in the result.
+to 1's in the second operand, and packs these bits to the right in the result.
 Both operands are automatically padded on the left with zeros to 32 bits
 before the selection takes place, so the variable types are unrestricted.
 If more than 16 bits are selected, the result is a 32-bit value, otherwise
@@ -229,9 +229,9 @@ are Warmenhovian logic gates, which means the outputs have four possible
 values: low, high, undefined (value of an uninitialized flip-flop), and
 oscillating (output of a NOR gate with one input low and the other input
 connected to the output). These values are represented symbolically by '0',
-'1', '2', and 'F'. Note in particular that, while NOT-0 is 1 and NOT-2 
+'1', '?', and 'F'. Note in particular that, while NOT-0 is 1 and NOT-1
 is 0 as in two-valued logic, NOT-? is ? and NOT-F is F. The functions 
-of the various gates are listed on Table 1.
+of the various gates are listed in Table 1.
 
 
 
@@ -252,7 +252,7 @@ result from the first and last bits going into the first bit of the result.
 The effect is that of rotating the operand one place to the right and
 ANDing, ORing, or XORing with its initial value. Thus, #&77 (binary =
 1001101) is binary 0000000000000100 = 4, #V77 is binary 1000000001101111 =
-32879, and #V77 is binary 1000000001101011 = 32875.
+32879, and #?77 is binary 1000000001101011 = 32875.
 
 3.4.3 PRECEDENCE
 
@@ -306,7 +306,7 @@ simplifying the sometimes overly-complex form of expressions, INTERCAL allows
 a spark-spot combination ('.) to be replaced with a wow (!). Thus '.1~.2'
 is equivalent to !1~.2', and 'V.1c.2' is equivalent to "V!1c.2'".
 
-Combining a rabbit-ears with a spot to form a rabbit (V) is not permitted,
+Combining a rabbit-ears with a spot to form a rabbit (".) is not permitted,
 although the programmer is free to use it should he find an EBCDIC reader
 which will properly translate a 12-3-7-8 punch.
 
@@ -350,7 +350,7 @@ statements could be interlaced.
 The above statements are obviously meaningless. (For that matter, so are
 the statements
 
-	DO .1 <- ".1c/"&:51~"#V1C!12~;&75SUB"V'V.1~
+	DO .1 <- ".1c/"&:51~"#V1c!12~;&75SUB"V'V.1~
 	.2'C,&1SUB:5~/333578"'"'"~#65535c/"V'V#&85'"'
 	DO .2 <- '"!1c/"&';V79SUB",&7SUB:173"'~!V9c
 	#8196'"'~.1"c.2'~'#&5c/"'#1279c!4351'~#65535"'
@@ -757,7 +757,7 @@ we have proceeded to use it. It is known as the "INTERCAL System Library."
 
 The program listing begins on the second page following. It is in the same
 format as would be produced by the Princeton INTERCAL compiler in FORMAT
-mode with WDITH=62 (see section 8). For a description of the functions
+mode with WIDTH=62 (see section 8). For a description of the functions
 performed by the Library, see section 5.2.
 
 6.2 Analysis
@@ -771,13 +771,13 @@ statement 10 is executed, control passes eventually to statement 16 or 11,
 depending on whether .5 contains #1 or #2, respectively. The value of .5
 is determined in statement 9, which demonstrates another handy technique.
 To turn an expression, exp, with value #0 or #1, into #1 or #2 (for use in
-a "GO TO"), use "V'exp'c/#1"~#3. To reverse the condition (i.e., convert #0
-to #2 and leave #1 alone) use "V'exp'c/#2"~#3.
+a "GO TO"), use "V-'exp'c/#1"~#3. To reverse the condition (i.e., convert #0
+to #2 and leave #1 alone) use "V-'exp'c/#2"~#3.
 
 Certain conditions are easily checked. For example, to test for zero,
 select the value from itself and select the bottom bit (see statement 54).
 To test for all bits being 1's, select the value from itself and select the
-top bit (see statement 261). The test to greater than, performed in
+top bit (see statement 261). The test for greater than, performed in
 statements 192 and 193 on 32-bit values, employs binary logical operations,
 which are performed as follows:
 
@@ -1229,9 +1229,9 @@ _______________________________________________________________________
 |    '		spark			grouper	       	              |
 |    `		backspark					      |
 |    !		wow			equivalent to spark-spot      |
-|    ? 		what			unary exlusive OR (ATARI only)|
+|    ? 		what			unary exlusive OR (ASCII)     |
 |    "		rabbit-ears		grouper                       |
-|    !`		rabbit			equivalent to ears-spot       |
+|    ".		rabbit			equivalent to ears-spot       |
 |    |		spike                                                 |
 |    %  	double-oh-seven		percentage qualifier	      |
 |    -		worm			used with angles	      |
@@ -1249,7 +1249,7 @@ _______________________________________________________________________
 |    		(or book)					      |
 |    V-		bookworm		unary exclusive OR	      |
 |		(or universal qualifier)			      |
-|    $		big money					      |
+|    $		big money		unary exclusive OR (ASCII)    |			      |
 |    c|		change			binary mingle		      |
 |    ~		sqiggle			binary select		      |
 |    _		flat worm					      |
@@ -1291,4 +1291,3 @@ Princeton compiler.  The correct over-punch for "change" is "c<backspace>/"
 and the correct over-punch for V is "V<backspace>-".  These codes will be
 properly printed if you have a proper printer, and the corresponding EBCDIC
 code will be produced by the /IBM option on the LIST command.
-

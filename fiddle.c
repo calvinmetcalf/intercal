@@ -51,7 +51,7 @@ unsigned int r, s;
 
     for (i = 0; i < 32; i++)
 	if (BIT(i, s))
-	    result |= ((1 << n++) & r);
+	    result |= BIT(i,r) << n++;
     return(result);
 }
 

@@ -3,6 +3,25 @@
 
 % This is the file ick.sty:  macros for typesetting the INTERCAL Manual.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TO DO
+%
+
+% Document this thing.
+
+% Make ASCII->EBCDIC translation settable by a switch.
+
+% Is this how the rabbit is really supposed to look?
+
+% ``lines 192 and 193'' is wrong
+
+% ICverbatim environment
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PAGE SIZE
+%
+
 \setlength{\textwidth}{6.5in}
 \setlength{\oddsidemargin}{0in}
 \setlength{\evensidemargin}{0in}
@@ -10,6 +29,17 @@
 \setlength{\topmargin}{0in}
 \setlength{\headsep}{0in}
 \setlength{\headheight}{0in}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TONSILS
+%
+
+\def\tonsil#1#2{\section*{Tonsil #1: #2}%
+		\addtonsilline{#1}{#2}}
+
+\def\addtonsilline#1#2{\addcontentsline{toc}{section}{\protect\numberline{#1}#2}}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SPECIAL INTERCAL CHARACTERS
@@ -33,12 +63,15 @@
 % \def\bookworm{\mathify{\forall}}
 \def\bookworm{\rlap V-}
 \def\change{\rlap c/}
+\def\Change{\change}
 %\def\altchange{\rlap /c}
 \def\zero{\={}}
 \def\spike{\verb+|+}
 \def\althookworm{-\llap '}
 \def\hookworm{'\llap -}
 \def\blotch{\#\llap I\llap [\llap ]}
+\def\blotCh{\blotch}
+\def\rabbit{\rlap".}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,15 +80,36 @@
 
 % Just surround the code with vertical bars.
 
-
 \catcode`|=\active  %  The `|' is active from now on.
 \def|{\ifmmode\vert%
         \else\bgroup\tt\usespecials\def|{\null\egroup}%
         \fi}
 
+% True if $ and c should become \change, and ? should become \bookworm
+\newif\ifasciitoebcdic
+
+\def\activateebcdicspecials{%
+  \catcode`$=\active
+  \catcode`?=\active
+  \catcode`c=\active}
+
+% I think these need to be global
+\def\Change{\change}
+\def\ativateebdispeials{\activateebcdicspecials}
+{% Now blow away the lowercase c.
+ \activateebcdicspecials
+ \gdef\useebdispeials{%
+  \def${\Change}%
+  \defc{\Change}%
+  \def?{\bookworm}%
+  \ativateebdispeials}}
+
+\def\useebcdicspecials{\useebdispeials}
+\def\useebcdicspecialsmaybe{\ifasciitoebcdic\useebcdicspecials\fi}
+
+
 % To get backslat, embrace, or bracelet in a | | environment, use the
 % respective macros.
-% I might want to translate $ and ? as in the verbatim macros.
 \def\activatespecials{%
   \catcode`\%=\active
   \catcode`\&=\active
@@ -76,7 +130,9 @@
   \def${\bigmoney}+
   \def^{\shark}+
   \def_{\flatworm}+
-  \def#{\mesh}}}
+  \def#{\mesh}+
+  \useebcdicspecialsmaybe}}
+
 
 % Typeset a one-line INTERCAL example.  This is pretty gross.
 \def\IConeline#1{\vspace\topsep\par\noindent{\tt\ \ \ \ \ \ \ \ }#1\vspace\topsep}
@@ -92,7 +148,7 @@
 % --- alien@uk.ac.essex.ese
 % --- ---and further latexification by Chris Rowley,
 % --- ca_rowley@uk.ac.open.acs.vax.
-% And finally, modified for INTERCAL by Michael Ernst.
+% And finally, ever-so-slightly modified for INTERCAL by Michael Ernst.
 
 \def\verbatimfile#1{\begingroup
                     \@verbatim \frenchspacing \@vobeyspaces
@@ -108,20 +164,21 @@
 % better to make \, clobbered by \@verbatim, the escape character again,
 % and then define a whole wad of escape sequences, with \^^M being one.
 
-\newif\ifnonumber
+\newif\ifnonumber % True if the next line shouldn't be numbered.
 
-\def\activateverbspecials{%
-  \catcode`$=\active
-  \catcode`?=\active}
+%\def\activateverbspecials{%
+%  \catcode`$=\active
+%  \catcode`?=\active}
 
-{\activateverbspecials
+{%\activateverbspecials
  \catcode`|=0
  \catcode`\\=\active
  |gdef|useverbspecials{%
   |def\{|nonumbertrue}%
-  |def${|change}%
-  |def?{|bookworm}%
-  |activateverbspecials}}
+  |useebcdicspecialsmaybe}}
+%  |def${|change}%
+%  |def?{|bookworm}%
+%  |activateverbspecials}}
 
 \def\ICverbatimlisting#1{\setcounter{lineno}{0}%
     \begingroup \@verbatim \frenchspacing \@vobeyspaces \parindent=20pt
@@ -134,4 +191,3 @@
     \input#1
     \endgroup
 }
-

@@ -1,11 +1,25 @@
 % -*- Mode: TeX -*- 
 % for LaTeX
-\documentstyle[ick]{article}
+\documentstyle[intercal]{article}
 
 \title{                 The INTERCAL Programming Language \\
                                 Reference Manual}
 \author{                        Donald R. Woods \& James M. Lyon}
 \date{                Copyright Donald R. Woods \& James M. Lyon 1973}
+
+% Online version provided by Ken Johnson (ken@aiai.ed.ac.uk)
+% Corrected and typeset by Michael Ernst (mernst@theory.lcs.mit.edu), with
+% help from the global INTERCAL community.
+% Please send corrections to Michael Ernst (mernst@theory.lcs.mit.edu).
+% If you don't have TeX, and so can't format this manual, I will send you
+% the postscript version.  If you have neither TeX nor Postscript, I'm
+% afraid I can't help you.
+
+% sample.i and syslib.i use the continuation character convention
+\continuationchartrue
+% Convert c,$ => \change and ? => \bookworm
+\asciitoebcdictrue
+
 
 \begin{document}
 
@@ -31,9 +45,9 @@ The INTERCAL programming language was designed the morning of May 26, 1972
 by Donald R. Woods and James M. Lyon, at Princeton University.  Exactly
 when in the morning will become apparent in the course of this manual.  It
 was inspired by one ambition; to have a compiler language which has nothing
-at all in common with any other major language.  By 'major' was meant
+at all in common with any other major language.  By ``major'' was meant
 anything with which the authors were at all familiar, e.g., FORTRAN, BASIC,
-COBOL, ALGOL, SNOBOL, SPITBOL, FOCAL, SOLVE, TEACH, APL, LISP, and PI/I.
+COBOL, ALGOL, SNOBOL, SPITBOL, FOCAL, SOLVE, TEACH, APL, LISP, and PL/I.
 For the most part, INTERCAL has remained true to this goal, sharing only
 the basic elements such as variables, arrays, and the ability to do I/O,
 and eschewing all conventional operations other than the assignment
@@ -42,7 +56,7 @@ statement (FORTRAN ``|=|'').
 \subsection{Acronym}
 
 The full name of the compiler is ``Compiler Language With No Pronounceable
-Acronym'', which is, for obvious reasons, abbreviated ``INTERCAL''.
+Acronym,'' which is, for obvious reasons, abbreviated ``INTERCAL.''
 
 \subsection{Acknowledgments}
 
@@ -73,7 +87,6 @@ section 5) were used.
 
 A more detailed analysis of a program is made in section 6 of this manual.
 
-\continuationchartrue % sample.i uses the continuation character convention
 \ICverbatimlisting{sample.i}
 
 
@@ -87,7 +100,7 @@ Perhaps surprising, than, is the fact that it would be more likely to
 initiate a novice into a search for another line of work.  As it turns out,
 INTERCAL is more useful (which isn't saying much) as a challenge to
 professional programmers.  Those who doubt this need only refer back to the
-sample program in section 2.1.  This 23-statement program took somewhere
+sample program in section 2.1.  This 22-statement program took somewhere
 from 15 to 30 minutes to write, whereas the same objectives can be achieved
 by single-statement programs in either SNOBOL;
 
@@ -110,10 +123,10 @@ capacity for amazing one's fellow programmers, confounding programming shop
 managers, winning friends, and influencing people.  It is a well-known and
 oft-demonstrated fact that a person whose work is incomprehensible is held
 in high esteem.  For example, if one were to state that the simplest way to
-store a value of 65535 in a 32-bit INTERCAL variable is:
+store a value of 65536 in a 32-bit INTERCAL variable is:
 
 \begin{verbatim}
-        DO :1 <- #0?#256
+        DO :1 <- #0$#256
 \end{verbatim}
 any sensible programmer would say that that was absurd.  Since this is
 indeed the simplest method, the programmer would be made to look foolish in
@@ -143,7 +156,7 @@ and the 32-bit integer.  These are represented by a spot (|.|) or two-spot
 These variables may contain only non-negative numbers; thus they have the
 respective ranges of values: 0 to 65535 and 0 to 4294967295.  Note: |.123|
 and |:123| are two distinct variables.  On the other hand, |.1| and |.0001|
-are identical.  Furthermore, the latter may NOT be written as |1E-3|.
+are identical.  Furthermore, the latter may {\em not} be written as |1E-3|.
 
 \subsection{Constants}
 
@@ -180,8 +193,9 @@ it is not our purpose here to quibble about bits of trivia.
 
 \subsubsection{Binary Operators}
 
-The binary operators are INTERLEAVE (also called MINGLE) and SELECT, which
-are represented by a change (|\change|) and a sqiggle (|~|), respectively.
+The binary operators are {\sl interleave} (also called {\sl mingle}) and
+{\sl select}, which are represented by a change (|$|) and a sqiggle
+(|~|), respectively.
 
 The interleave operator takes two 16-bit values and produces a 32-bit
 result by alternating the bits of the operands.  Thus, |#65535c#0| has the
@@ -190,7 +204,7 @@ result by alternating the bits of the operands.  Thus, |#65535c#0| has the
 |#65535|.
 
 The select operator takes from the first operand whichever bits correspond
-to 1's in the second operand, and packs these bits as the right in the
+to 1's in the second operand, and packs these bits to the right in the
 result.  Both operands are automatically padded on the left with zeros to
 32 bits before the selection takes place, so the variable types are
 unrestricted.  If more than 16 bits are selected, the result is a 32-bit
@@ -231,26 +245,29 @@ Multiple unary operators may not be concatenated, thus the form |#V&123| is
 invalid.  This will be covered later when precedence is discussed. These
 operators perform their respective logical operations on all pairs of
 adjacent bits, the result from the first and last bits going into the first
-bit of the result.  The effect is that of rotating the operand one place to
-the right and ANDing, ORing, or XORing with its initial value.  Thus,
-|#&77| (binary = 1001101) is binary 0000000000000100 = 4, |#V77| is binary
-1000000001101111 = 32879, and |#V77| is binary 1000000001101011 = 32875.
-\typeout{typo here}
+(most significant) bit of the result.  The effect is that of rotating the
+operand one place to the right and ANDing, ORing, or XORing with its
+initial value.  Thus, |#&77| (|#77| = binary 1001101) is binary 0000000000000100
+= 4, |#V77| is binary 1000000001101111 = 32879, and |#?77| is binary
+1000000001101011 = 32875.
 
 \subsubsection{Precedence}
 
-Precedence of operators is as follows:
-
-
-\vspace{2 in}
-\hspace{4 in}
-\footnote{Keep in mind that the aim in designing INTERCAL was to have no
+Precedence of operators is as follows:\footnote{Keep in mind that the aim in designing INTERCAL was to have no
 precedents.}
 \stepcounter{footnote}
-\vspace{1 in}
 
+
+% \vspace{2 in}
+% \hspace{4 in}
+% \footnote{Keep in mind that the aim in designing INTERCAL was to have no
+% precedents.}
+% \stepcounter{footnote}
+% \vspace{1 in}
+% (The remainder of this page intentionally left blank.)
+
+\vfill
 (The remainder of this page intentionally left blank.)
-
 \newpage
 
 
@@ -270,7 +287,7 @@ precedents.}
 
 
 
-
+%% This manual only strictly checked up to (but not including) the 34815.
 
 This precedence (or lack thereof) may be overruled by grouping expressions
 between pairs of sparks (|'|) or rabbit-ears (|"|).  Thus
@@ -285,8 +302,9 @@ expression |#V&123|, which was described earlier, could be coded as
 sometimes overly-complex form of expressions, INTERCAL allows a spark-spot
 combination (|'.|) to be replaced with a wow (|!|).  Thus |'.1~.2'| is
 equivalent to |!1~.2'|, and |'V.1c.2'| is equivalent to |"V!1c.2'"|.
+%\typeout{Note that unary ops must go INSIDE delimiters!}
 
-Combining a rabbit-ears with a spot to form a rabbit (|V|\typeout{Rabbit?})
+Combining a rabbit-ears with a spot to form a rabbit (|\rabbit|)
 is not permitted, although the programmer is free to use it should he find
 an EBCDIC reader which will properly translate a 12-3-7-8 punch.
 
@@ -334,7 +352,7 @@ The above statements are obviously meaningless.  (For that matter, so are
 the statements
 
 \begin{verbatim}
-        DO .1 <- ".1c"&:51~"#V1C!12~;&75SUB"V'V.1~
+        DO .1 <- ".1c"&:51~"#V1c!12~;&75SUB"V'V.1~
         .2'C,&1SUB:5~/333578"'"'"~#65535c"V'V#&85'"'
         DO .2 <- '"!1c"&';V79SUB",&7SUB:173"'~!V9c
         #8196'"'~.1"c.2'~'#&5c"'#1279c!4351'~#65535"'
@@ -347,7 +365,7 @@ identifier (see section 4.3) may contain any spaces.
 
 \subsection{Labels}
 
-A statement may begin with a LOGICAL LINE LABEL enclosed in wax-wane pairs
+A statement may begin with a {\sl logical line label} enclosed in wax-wane pairs
 (|()|).  A statement may not have more than one label, although it is
 possible to omit the label entirely.  A line label is any integer from 1 to
 65535, which must be unique within each program.  The user is cautioned,
@@ -637,8 +655,8 @@ Values may be output to the printer, one value per line, via the statement
 |DO READ OUT| {\em list}, where the list contains variables, array
 elements, and/or constants.  Output is in the form of ``extended'' Roman
 numerals (also called ``butchered'' Roman numerals), with an overline
-(\zero) indicating the value below is ``times 1000'', and lower-case
-letters indicating ``times 1000000''.  Zero is indicated by an overline
+(\zero) indicating the value below is ``times 1000,'' and lower-case
+letters indicating ``times 1000000.''  Zero is indicated by an overline
 with no character underneath.  Thus, the range of (32-bit) output values
 possible is from \zero\ through \=i\=vccxciv\=C\=M\=L\=X\=V\=I\=ICCXCV.
 Note: For values whose residues modulo 1000000 are less than 4000, M is
@@ -646,7 +664,8 @@ used to represent 1000; for values whose residues are 4000 or greater, \=I
 is used.  Thus |#3999| would read out as MMMIM while |#4000| would read out
 as \=I\=V.  Similar rules apply to the use of \=M and i for 1000000, and to
 that of \=m and \=i for 1000000000.
-\typeout{Do they really mean MMMIM and not MMMCMXCIX??}
+
+% \typeout{Do they mean MMMIM and not MMMCMXCIX??}
 
 
 
@@ -775,7 +794,7 @@ we have proceeded to use it.  It is known as the ``INTERCAL System Library.''
 
 The program listing begins on the second page following.  It is in the same
 format as would be produced by the Princeton INTERCAL compiler in FORMAT
-mode with WDITH=62 (see section 8).  For a description of the functions
+mode with WIDTH=62 (see section 8).  For a description of the functions
 performed by the Library, see section 5.2.
 
 \subsection{Analysis}
@@ -784,19 +803,19 @@ We shall not attempt to discuss here the algorithms used, but rather we
 shall point out some of the general techniques applicable to a wide range
 of problems.
 
-Statements 10, 14, 15, and 26 make up a virtual ``computed |GO TO|''.  When
+Statements 10, 14, 15, and 26 make up a virtual ``computed |GO TO|.''  When
 statement 10 is executed, control passes eventually to statement 16 or 11,
 depending on whether |.5| contains |#1| or |#2|, respectively.  The value
 of |.5| is determined in statement 9, which demonstrates another handy
 technique.  To turn an expression, {\em exp}, with value |#0| or |#1|, into
-|#1| or |#2| (for use in a ``|GO TO|''), use |"V'{\em exp}'c#1"~#3|.  To
+|#1| or |#2| (for use in a ``|GO TO|''), use |"?'{\em exp}'c#1"~#3|.  To
 reverse the condition (i.e., convert |#0| to |#2| and leave |#1| alone) use
-|"V'{\em exp}'c#2"~#3|.
+|"?'{\em exp}'c#2"~#3|.
 
 Certain conditions are easily checked.  For example, to test for zero,
 select the value from itself and select the bottom bit (see statement 54).
 To test for all bits being 1's, select the value from itself and select the
-top bit (see statement 261).  The test to greater than, performed in
+top bit (see statement 261).  The test for greater than, performed in
 statements 192 and 193 on 32-bit values, employs binary logical operations,
 which are performed as follows:
 
@@ -844,9 +863,10 @@ Statement 231 demonstrates right-shifting for 32-bit variables.
 
 \subsection{Program Listing}
 
-\continuationchartrue % syslib.i uses the continuation character convention
+% Thanks to David Moews (moews@math.berkeley.edu) for help debugging this.
+% There is still much to be done!
 \ICverbatimlisting{syslib.i}
-\typeout{Where's line 1551?  1900?  1910?}
+%\typeout{Where's line 1551?  1900?  1910?}
 
 
 
@@ -949,7 +969,7 @@ to message number.
 
 \ttitem{436} A retrieval has been attempted for an un|STASH|ed value.
 
-\ttitem{533} A |WRITE IN| statement or interleave (|\change|) operation has
+\ttitem{533} A |WRITE IN| statement or interleave (|$|) operation has
 produced a value requiring over 32 bits to represent.
 
 \ttitem{562} Insufficient data.
@@ -974,23 +994,22 @@ produced a value requiring over 32 bits to represent.
 \section*{Tonsil\footnote{Since all other reference manuals
 have Appendices, it was decided that the INTERCAL manual should contain
 some other type of removable organ.} A:  The Official INTERCAL Character Set}
+\addtonsilline{A}{The Official INTERCAL Character Set}
+%\addcontentsline{toc}{section}{\protect\numberline{A}The Official INTERCAL Character Set}
 
-
-
-
-
-
-Tabulated on page 18 are all the characters used in INTERCAL, excepting
-letters and digits, along with their names and interpretations.  Also
-included are several characters not used in INTERCAL, which are presented
-for completeness and to allow for future expansion.
+Tabulated on page~\pageref{Tonsil-A-table} are all the characters used in
+INTERCAL, excepting letters and digits, along with their names and
+interpretations.  Also included are several characters not used in
+INTERCAL, which are presented for completeness and to allow for future
+expansion.
 \stepcounter{footnote}
 \footnotetext{This footnote intentionally unreferenced.}
 
 {\catcode`.=\active \catcode`|=12  % Use . instead of | for code mode
 \def.{\bgroup\tt\usespecials\def.{\null\egroup}}
 \begin{table}
-\begin{minipage}{\textwidth} % so the footnote works out.
+\label{Tonsil-A-table}
+\begin{minipage}{\textwidth} % use a minipage so the footnote works
 \begin{tabular}{|r|l|p{3in}|}
 \hline
 Character &	Name &			Use (if any) \\
@@ -1006,7 +1025,7 @@ Character &	Name &			Use (if any) \\
 .!.	&	wow &			equivalent to spark-spot      \\
 \verb|?|&	what &			unary exlusive OR (ASCII)     \\
 .".	&	rabbit-ears &		grouper			      \\
-{\verb|!`|}&	rabbit &		equivalent to ears-spot	      \\
+.\rabbit.&	rabbit &		equivalent to ears-spot	      \\
 {\verb+|+}&	spike &						      \\
 .\%.	&	double-oh-seven &	percentage qualifier	      \\
 .-.	&	worm &			used with angles	      \\
@@ -1023,7 +1042,7 @@ Character &	Name &			Use (if any) \\
 .V.	&	V (or book) &		unary logical OR	      \\
 .\bookworm. &	bookworm (or universal qualifier) & unary exclusive OR      \\
 .\$.	&	big money &		binary mingle (ASCII)	      \\
-.\change.&	change &		binary mingle		      \\
+.\Change.&	change &		binary mingle		      \\
 .\~{}.	&	sqiggle &		binary select		      \\
 .\_.	&	flat worm &					      \\
 .\zero.	&	overline &		indicates ``times 1000''      \\
@@ -1033,12 +1052,11 @@ Character &	Name &			Use (if any) \\
 .@.	&	whirlpool &					      \\
 .\hookworm.& hookworm &					       \\
 {\verb|^|}&	shark (or simply sharkfin) &			      \\
-.\blotch.&	blotch						      \\
+.\blotCh.&	blotch						      \\
 \hline
 \end{tabular}
 \catcode`.=12
 \caption{		  INTERCAL character set (top view).}
-\typeout{What does Rabbit really look like?}
 \def\thempfootnote{\arabic{mpfootnote}}
 \footnotetext[\thefootnote]{Got any better ideas?}
 \label{character-set}
@@ -1047,22 +1065,25 @@ Character &	Name &			Use (if any) \\
 }
 
 
-\section*{Tonsil B: 
-Notes On The Atari Implementation}
+\tonsil{B}{Notes On The Atari Implementation}
+% \section*{Tonsil B: 
+% Notes On The Atari Implementation}
+% \addtonsilline{B}{Notes On The Atari Implementation}
+%\addcontentsline{toc}{section}{\protect\numberline{B}{Notes On The Atari Implementation}}
 
 The Atari implementation of INTERCAL differs from the original Princeton
 version primarily in the use of ASCII rather than EBCDIC.  Since there is
-no ``change'' sign (|\change|) in ASCII, we have substituted the ``big
-money'' (|$|) as the mingle operator.  We feel that this correctly
-represents the increasing cost of software in relation to hardware.
-(Consider that in 1970 one could get RUNOFF for free, to run on a \$20K
-machine, whereas today a not quite as powerful formatter costs \$99 and
-runs on a \$75 machine.)  We also feel that there should be no defensible
-contention that INTERCAL has any sense.  Also, since overpunches are
-difficult to read on the average VDT, the exclusive-or operator may be
-written ?.  This correctly expresses the average person's reaction on first
-encountering exclusive-or, especially on a PDP-11.  Note that in both of
-these cases, the over-punched symbol may also be used if one is
+no ``change'' sign ({\tt\change}) in ASCII, we have substituted the ``big
+money'' ({\tt\bigmoney}) as the mingle operator.  We feel that this
+correctly represents the increasing cost of software in relation to
+hardware.  (Consider that in 1970 one could get RUNOFF for free, to run on
+a \$20K machine, whereas today a not quite as powerful formatter costs \$99
+and runs on a \$75 machine.)  We also feel that there should be no
+defensible contention that INTERCAL has any sense.  Also, since overpunches
+are difficult to read on the average VDT, the exclusive-or operator may be
+written {\tt ?}.  This correctly expresses the average person's reaction on
+first encountering exclusive-or, especially on a PDP-11.  Note that in both
+of these cases, the over-punched symbol may also be used if one is
 masochistic, or concerned with portability to the Princeton compiler.  The
 correct over-punch for ``change'' is ``c{\sc
 $\langle$backspace$\rangle$}/'' and the correct over-punch for |\bookworm|
@@ -1071,4 +1092,3 @@ printed if you have a proper printer, and the corresponding EBCDIC code
 will be produced by the |/IBM| option on the |LIST| command.
 
 \end{document}
-

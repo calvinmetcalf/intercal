@@ -20,7 +20,7 @@
     (1) PLEASE DO (2) NEXT
         PLEASE FORGET #1
         DO READ OUT :1
-        PLEASE DO .1 <- 'V"':1~:1'~#1"$#1'~#3
+        PLEASE DO .1 <- '?"':1~:1'~#1"$#1'~#3
         DO (3) NEXT
         PLEASE DO (5) NEXT
     (3) DO (2) NEXT
