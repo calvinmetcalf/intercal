@@ -640,6 +640,8 @@ static void prexpr(node *np, FILE *fp)
 
     case ONESPOT:
     case TWOSPOT:
+    case TAIL:
+    case HYBRID:
 	prvar(np, fp);
 	break;
 
