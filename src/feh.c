@@ -698,6 +698,7 @@ static char *nice_text(char *texts[], int lines)
   if (lines < 1)
     lines = 1;
   for (cp = buf, i = 0 ; i < lines ; ++i) {
+    if (cp>buf+MAXNICEBUF-10) goto abort;
     if (i) {
       (*cp++) = '\\';
       (*cp++) = 'n';
@@ -706,12 +707,18 @@ static char *nice_text(char *texts[], int lines)
       (*cp++) = '\t';
     }
     for (text = texts[i] ; *text ; cp++, text++) {
+      if (cp>buf+MAXNICEBUF-10) goto abort;
       if(*text == '"' || *text == '\\') {
 	(*cp++) = '\\';
       }
       *cp = *text;
     }
   }
+  *cp = '\0';
+  return buf;
+abort: (*cp++) = '.';
+  (*cp++) = '.';
+  (*cp++) = '.';
   *cp = '\0';
   return buf;
 }

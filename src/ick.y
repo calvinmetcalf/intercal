@@ -143,9 +143,9 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
 	|    RETRIEVE varlist	{ACTION($$, RETRIEVE,  rlist);}
 	|    IGNORE varlist	{ACTION($$, IGNORE,    rlist);}
 	|    REMEMBER varlist	{ACTION($$, REMEMBER,  rlist);}
-	|    ABSTAIN LABEL	{TARGET($$, ABSTAIN,   $2);}
+	|    ABSTAIN LABEL	{stbeginline=0; TARGET($$, ABSTAIN,   $2);}
 	|    ABSTAIN gerunds	{ACTION($$, DISABLE,   rlist);}
-	|    REINSTATE LABEL	{TARGET($$, REINSTATE, $2);}
+	|    REINSTATE LABEL	{stbeginline=0; TARGET($$, REINSTATE, $2);}
 	|    REINSTATE gerunds	{ACTION($$, ENABLE,    rlist);}
 	|    WRITE_IN inlist	{ACTION($$, WRITE_IN,  $2);}
 	|    READ_OUT outlist	{ACTION($$, READ_OUT,  $2);}

@@ -1,6 +1,15 @@
 			NEW IN THIS RELEASE
 
-	Release 0.21 (by Eric S. Raymond)
+	Release 0.22  (by Eric S. Raymond) 4 Mar 2003
+
+1. Incorporated a minor fix patch from Donald Knuth.  Yes, *the*
+Donald Knuth.  Seems he found a weakness in the code for handling
+comments, and fixed it to do multiline comments properly.  He also made
+some improvements to intercal.el, and contributed a test program.
+
+2. Updated build machinery.  This package now uses GNU autoconf.
+
+	Release 0.21 (by Eric S. Raymond) 30 July 2002
 
 1. Jonathan Nieder sent a grammar fix for BLR's old bug #5 (a bad spark-ears
 interaction.)
