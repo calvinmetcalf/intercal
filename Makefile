@@ -1,7 +1,8 @@
 #
 # Utility productions for the INTERCAL distribution
 #
-VERSION=0.21
+# Don't forget to fix the spec file and index.html when you bump this.
+VERSION=0.22
 
 dist: intercal-$(VERSION).tar.gz
 
@@ -12,7 +13,7 @@ intercal-$(VERSION).tar.gz:
 	rm ../intercal-$(VERSION) manifest
 
 RPMROOT=/usr/src/redhat
-RPM = rpm
+RPM = rpmbuild
 RPMFLAGS = -ba
 rpm: dist
 	cp intercal-$(VERSION).tar.gz $(RPMROOT)/SOURCES;
