@@ -304,7 +304,8 @@ and \fBselect\fR, which
 are represented by a change (\*(ct) and a sqiggle [sic] (~), respectively.
 .if '\*c'y' \{\
 (In C-INTERCAL's ASCII environment, EBCDIC \*(ct is replaced by a big
-money ($), but \*(ct can be used if encoded in Latin-1 as \e0xA2.) \}
+money ($), but \*(ct can be used if encoded in Latin-1 as \e0xA2
+or UTF-8 as 0xC2A2.) \}
 .P
 The interleave operator takes two 16-bit values and produces a 32-bit result
 by alternating the bits of the operands. Thus, #65535\*(ct#0 has the 32-bit
@@ -1005,7 +1006,10 @@ and \*(vb (logical
 .if '\*c'y' \{\
 (In C-INTERCAL, \*(vb is replaced by what (?). The compiler recognizes
 V<backspace>- as a valid equivalent, in case you are concerned about
-compatibility with the Princeton compiler.) \}
+compatibility with the Princeton compiler.
+In version 0.20 and later, the Unicode character U+2200 FOR ALL,
+which looks exactly like V<backspace>- or an upside-down `A'
+is also accepted in UTF-8 form.) \}
 The operator is inserted between the spot, two-spot, mesh, or
 what-have-you, and the integer, thus: .&123, #\*(vb123. Multiple unary
 operators may not be concatenated, thus the form #\*(vb&123 is invalid. This
@@ -2625,6 +2629,23 @@ Atari implementation (see section
 ) by (a) replacing the change sign (\*(ct) with
 big money ($) as the mingle operator, and (b) replacing the
 bookworm (\*(vb) symbol with what (?) as the XOR operator.
+.P
+Version 0.18 and later versions accept the Latin-1 (ISO 8859-1)
+character set, which is a superset of ASCII.  As a result,
+0xA2 (\*(ct), 0xA3 (quid), and 0xA4 (zlotnik) are accepted as mingle
+operators.
+.P
+Version 0.20 and later versions also accept UTF-8 as an alternative
+to Latin-1.  The above three currency operators will be accepted in
+either Latin-1 or UTF-8 format.  UTF-8 format is required if you
+wish to use any of EURO-CURRENCY SIGN, COLON SIGN (that's Costa Rican dinero,
+not the Intercal two-spot),
+CRUZEIRO SIGN, FRENCH FRANC SIGN, LIRA SIGN, MILL SIGN, NAIRA SIGN,
+PESETA SIGN, RUPEE SIGN, WON SIGN, NEW SHEQEL SIGN, DONG SIGN, EURO SIGN,
+BENGALI RUPEE MARK, BENGALI RUPEE SIGN, or THAI CURRENCY SYMBOL BAHT.
+(Isn't internationalization wonderful?)
+Furthermore, you can use the Intercal character FOR ALL to represent
+the what operator.
 .H 2 "Usage and Compilation Options"
 .P
 To compile an INTERCAL program `foo.i' to executable code, just do
@@ -2673,7 +2694,14 @@ included PLEASE, the program would be rejected as excessively polite.
 .P
 This check has been implemented in C-INTERCAL. To assist programmers in
 coping with it, the intercal.el mode included with the distribution randomly
-expands "do " in entered source to "PLEASE DO" 1/4th of the time. \}
+expands "do " in entered source to "PLEASE DO" 1/4th of the time.
+.H 2 "Localization: Ancient Roman"
+Version 0.18 and later versions of C-Intercal have been
+localized for Ancient Roman as well as English-speaking locales.
+This means that Latin-language keywords are accepted as equivalents
+for the English-based ones traditionally used.
+See src/lexer.l for details, as we do not propose to break
+Priscian's head (publicly expose our ignorance of Latin) here.   \}
 .if '\*c'y' \{\
 .\" This is the same text as the ATARI NOTES at the end of the manual.
 .H 1 "The Atari Implementation"

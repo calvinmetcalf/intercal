@@ -30,6 +30,7 @@ LICENSE TERMS
 
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "sizes.h"
 #include "ick.h"
 #include "feh.h"

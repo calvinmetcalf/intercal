@@ -195,15 +195,36 @@ D	[0-9][\ \t\n0-9]*
 \;		{return(HYBRID);}
 \#		{return(MESH);}
 
-\$		{return(MINGLE);}
-\xA2		{return(MINGLE);}
-\xA3		{return(MINGLE);}
-\xA4		{return(MINGLE);}
+\$		|
+\xA2		|
+\xA3		|
+\xA4		|
+\xC2\xA2	|
+\xC2\xA3	|
+\xC2\xA4	|
+\xE2\x82\xA0	|
+\xE2\x82\xA1	|
+\xE2\x82\xA2	|
+\xE2\x82\xA3	|
+\xE2\x82\xA4	|
+\xE2\x82\xA5	|
+\xE2\x82\xA6	|
+\xE2\x82\xA7	|
+\xE2\x82\xA8	|
+\xE2\x82\xA9	|
+\xE2\x82\xAA	|
+\xE2\x82\xAB	|
+\xE2\x82\xAC	|
+\xE0\xA7\xB2	|
+\xE0\xA7\xB3	|
+\xE0\xB8\xBF	{return(MINGLE);}
+
 \~		{return(SELECT);}
 
 \&		{yylval.numval = AND; return(UNARY);}
 V		{yylval.numval = OR; return(UNARY);}
 "V^H-"		|
+\xE2\x88\x80	|
 \?		{yylval.numval = XOR; return(UNARY);}
 \^		{yylval.numval = FIN; return(UNARY);}
 @		{yylval.numval = WHIRL; return(UNARY);}
@@ -215,10 +236,14 @@ V		{yylval.numval = OR; return(UNARY);}
 \({W}{D}\)	{SETLINENO; yylval.numval = myatoi(yytext); return(LABEL);}
 
 DO		{SETLINENO; return(DO);}
+FAC		{SETLINENO; return(DO);}
 PLEASE		{SETLINENO; politesse++; return(DO);}
+PLACET		{SETLINENO; politesse++; return(DO);}
 PLEASE{W}DO	{SETLINENO; politesse++; return(DO);}
+PLACET{W}FACERE	{SETLINENO; politesse++; return(DO);}
 NOT		{return(NOT);}
 N\'T		{return(NOT);}
+NON		{return(NOT);}
 
 \%{W}{D}	{yylval.numval = myatoi(yytext);
                  if (yylval.numval && yylval.numval < 100)
@@ -226,35 +251,63 @@ N\'T		{return(NOT);}
 		 else
 		   lose(E017, yylineno, (char *)NULL);}
 SUB		{return(SUB);}
+MULTIPLICATUS{W}A	|
 BY		{return(BY);}
 
 \<-		{return(GETS);}
+CALCULANDUM	|
 CALCULATING	{yylval.numval = GETS; return(GERUND);}
 
+DEINDE		|
 NEXT		{stbeginline = 0; return(NEXT);}
+PROXIMANDUM	|
 NEXTING		{yylval.numval = NEXT; return(GERUND);}
+ALIENERE	|
 FORGET		{return(FORGET);}
+ALIENENDUM	|
 FORGETTING	{yylval.numval = FORGET; return(GERUND);}
+RECOLERE	|
 RESUME		{return(RESUME);}
+RECOLERENDUM	|
 RESUMING	{yylval.numval = RESUME; return(GERUND);}
+EXUERE		|
 STASH		{return(STASH);}
+EXUENDUM	|
 STASHING	{yylval.numval = STASH; return(GERUND);}
+INUERE		|
 RETRIEVE	{return(RETRIEVE);}
+INUENDUM	|
 RETRIEVING	{yylval.numval = RETRIEVE; return(GERUND);}
+DISSIMULARE	|
 IGNORE		{return(IGNORE);}
+DISSIMULANDUM	|
 IGNORING	{yylval.numval = IGNORE; return(GERUND);}
+MEMINISSE	|
 REMEMBER	{return(REMEMBER);}
+MEMINISSENDUM	|
 REMEMBERING	{yylval.numval = REMEMBER; return(GERUND);}
+ABSTINERE{W}A	|
 ABSTAIN{W}FROM	{return(ABSTAIN);}
+ABSTINENDUM	|
 ABSTAINING	{yylval.numval = ABSTAIN; return(GERUND);}
+REINSTARE	|
 REINSTATE	{return(REINSTATE);}
+REINSTATANDUM	|
 REINSTATING	{yylval.numval = REINSTATE; return(GERUND);}
+LEGERE{W}EX	|
 READ{W}OUT	{return(READ_OUT);}
+LEGENDUM	|
 READING{W}OUT	{yylval.numval = READ_OUT; return(GERUND);}
+SCRIBERE{W}IN	|
 WRITE{W}IN	{return(WRITE_IN);}
+SCRIBENDUM	|
 WRITING{W}IN	{yylval.numval = WRITE_IN; return(GERUND);}
+ADVENIRE{W}DE	|
 COME{W}FROM	{stbeginline = -stbeginline; return(COME_FROM);}
+ADVENENDUM	|
 COMING{W}FROM	{yylval.numval = COME_FROM; return(GERUND);}
+CONCEDERE	|
+DESPERARE	|
 GIVE{W}UP	{return(GIVE_UP);}
 
 \+		{return(INTERSECTION);}
