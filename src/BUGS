@@ -1,0 +1,91 @@
+			BUGS
+
+There are still some known bugs in INTERCAL (and no doubt many we don't even
+suspect as yet).  The following list accumulates current bug reports and
+TO DO agenda items through the current release.
+
+ESR = Eric S. Raymond
+SS  = Steve Swales
+LHH = Louis Howell
+BLR = Brian Raiter
+
+1) (ESR) INTERCAL would be intrinsically a crock even if it worked right.
+
+2) (LHH) The lexical analyzer is not completely independent of newlines.
+   There is a conflict between the fact that newlines should be
+   ignored almost everywhere, and the facts that the error mechanism
+   wants to know about line numbers and the splat mechanism wants
+   statements from the original program.
+
+   The way these issues are currently resolved by the compiler is
+   a bit over-complicated, but seems to work properly in almost
+   every respect.  I see only two problems:  First, splat operation
+   prints only the text line on which a typo was detected, not the
+   whole statement.  Second, for debugging purposes the text lines
+   are printed as comments in the degenerated C code.  These
+   comments are only properly aligned with the degenerated code
+   if the program has exactly one statement per line.  (See
+   pit/tests/testsplat.i for examples.)
+
+   Neither of these problems is a big deal, which is why I haven't
+   worried about them too much.  The best solution I can see is
+   to make "phase 1" of the lexer into a preprocessor able to
+   correctly separate statements.  It could then either add or
+   remove newlines to put the program into one statement per line
+   format, or put markers between statements for the main lexer
+   to detect.  Either way, it would be a good bit of work for a
+   relatively small gain, and anyone trying it should make sure
+   the result isn't buggier than the current version.
+
+3) (BLR) I have hacked up a fix to the problem with line numbers being off
+   due to statements sharing/spanning lines. The parser now stores the
+   starting line number for all tuples, not just the splatted
+   ones. Not only does this give synchronized lines in the comments in
+   the degenerated C code, but run-time error messages are just as
+   reliable as the parse/compile-time ones. The line number in the
+   error message is actually the line number of the next statement
+   (e.g., if the next statement is on the same line, the line number
+   of both statements will be used).
+
+   Note that I said "just as reliable," as opposed to "fully
+   reliable". Since the lexer doesn't know where the line ends until
+   after it's already parsed the preamble (DO-PLEASE combo, line
+   label, oh-oh-seven number, etc) of the following line, it actually
+   stores as the starting line number the first non-whitespace of the
+   statement proper. So if a statement has its preamble on one line
+   and the rest of it on the next, the preamble will be beheaded.
+
+   Still, it's a vast improvement, and as LHH points out, it's not
+   going to get much better without writing a preprocessing lexer that
+   can actually separate out the statements before any real parsing
+   begins. Until someone wants to do that, this will do nicely, I think.
+
+   As a side bonus, splatting now shows the entire statement. (Er,
+   except when the statement both spans and shares a line. If a multi-
+   line statement ends on the same line as the beginning of the next
+   statement, the last part will get truncated. Again, not a case we
+   want to be encouraging people to explore anyway.)
+
+4) (BLR) Interleave does not check the type of its arguments. The manual
+   insinuates that interleaving 32-bit values should result in error 533;
+   instead, C-INTERCAL silently truncates them to 16 bits. Unfortunately,
+   the modified behavior of select's return type depends on this, so
+   there's not much we can do about it as things stand.
+
+5) (BLR) An array can't have sparks or ears in its subscript list after the
+   first dimension. That is to say, this:
+
+	DO ,1SUB'#1'#1 <- #0
+
+   works fine, but this:
+
+	DO ,1SUB#1'#1' <- #0
+
+   doesn't parse, and gets treated as a syntax error (thus it is likely
+   to be a problem with the grammar).
+
+			TO DO
+
+1. (ESR) Add more optimization templates, esp. idioms for +, -, *, /.
+
+2. (ESR) Forget this @!%$#! crock and take a long vacation.
