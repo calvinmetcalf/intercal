@@ -10,7 +10,8 @@
 
 BINDIR = /usr/bin
 INCDIR = /usr/include/intercal
-LIBDIR = /usr/share/intercal
+SHAREDIR = /usr/share/intercal
+LIBDIR = /usr/share/intercal/lib
 #INCDIR = $(PWD)
 #LIBDIR = $(PWD)
 
@@ -18,7 +19,7 @@ YDEBUG = -vlt
 DEBUG	= -g -DDEBUG
 # DEBUG = -O
 
-# This version (0.18) is POSIX-compliant.  You should only set the POSIX
+# This version (from 0.18) is POSIX-compliant.  You should only set the POSIX
 # variable to null if you *need* to use the old <varargs.h> support;
 # otherwise, the ANSI-compliant <stdarg.h> library will be used.
 
@@ -77,11 +78,11 @@ install: all
 	cp ick $(BINDIR)
 	-mkdir $(INCDIR)
 	cp lose.h abcess.h fiddle.h ick-wrap.c $(INCDIR)
+	-mkdir $(SHAREDIR)
+	(cd ../pit; cp *.i *.3i  t_tet *.fft glider gun blinkers $(SHAREDIR))
 	-mkdir $(LIBDIR)
 	cp libick.a $(LIBDIR)
-	(cd ../pit; cp *.i *.3i  t_tet *.fft glider gun blinkers $(LIBDIR))
-	-mkdir $(LIBDIR)/lib
-	(cd ../pit/lib; cp *.*i $(LIBDIR)/lib) 
+	(cd ../pit/lib; cp *.*i $(LIBDIR)) 
 
 clean:
 	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick

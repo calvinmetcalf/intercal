@@ -1,300 +1,336 @@
-<!doctype HTML PUBLIC "-//W3O//DTD W3 HTML 3.2//EN">
-<HTML>
-<HEAD>
-<link rev=made href=mailto:esr@snark.thyrsus.com>
-<meta name="description" content="Charlie Stross's article about INTERCAL">
-<meta name="keywords" content="humor, satire, parody"> 
-<TITLE>INTERCAL -- the Language From Hell</TITLE>
-</HEAD>
-<table width="100%" cellpadding=0 summary="Canned page header"><tr>
-<td width="30%">Back to <a href="index">Intercal Resources</a>
-<td width="30%"align=center>Up to <a href="/~esr/sitemap.html">Site Map</a>
-<td width="30%" align=right>$Date: 2002-07-11 21:59:17 $
-</tr></table>
-<HR>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="generator"
+content="HTML Tidy for Linux/x86 (vers 1st February 2002), see www.w3.org" />
+<link rev="made" href="mailto:esr@snark.thyrsus.com" />
+<meta name="description"
+content="Charlie Stross's article about INTERCAL" />
+<meta name="keywords" content="humor, satire, parody" />
+<title>INTERCAL -- the Language From Hell</title>
+<style type="text/css">
+/*<![CDATA[*/
+ p.c2 {font-style: italic}
+ h1.c1 {text-align: center}
+/*]]>*/
+</style>
+</head>
+<body>
+<table width="100%" cellpadding="0" summary="Canned page header">
+<tr>
+<td width="30%">Back to <a href="index">Intercal Resources</a></td>
+<td width="30%" align="center">Up to <a
+href="/~esr/sitemap.html">Site Map</a></td>
+<td width="30%" align="right">$Date: 2002-07-30 23:39:23 $</td>
+</tr>
+</table>
 
-<i>The following article appeared in Computer Shopper (the British magazine
-of that name, not the Ziff-Davis title) around September 1992.</i>
+<hr />
+<em>The following article appeared in Computer Shopper (the British
+magazine of that name, not the Ziff-Davis title) around September
+1992.</em> 
 
-<H1 ALIGN=CENTER>Intercal -- the Language From Hell</H1>
+<h1 class="c1">Intercal -- the Language From Hell</h1>
 
-<p><I>Where would we be without effective programming languages?</I></p>
+<p class="c2">Where would we be without effective programming
+languages?</p>
 
-<p>Wait, don't turn the page; that was a rhetorical question.  (The
-answer isn't: word-processing on slide rules.) Every once in a while
-it's worth thinking about the matter.  Most of us (the lucky ones,
-that is) don't come within spitting distance of programming from one
-day to the next.  Those who do, usually don't give any thought to
-them: it's time to write that function so do it, in C or Cobol or
-dBase whatever comes to hand.  We don't waste time contemplating the
-deeper significance of the tools we use to do the job.  But what would
-we do without well-designed, efficient programming languages? </p>
+<p>Wait, don't turn the page; that was a rhetorical question. (The
+answer isn't: word-processing on slide rules.) Every once in a
+while it's worth thinking about the matter. Most of us (the lucky
+ones, that is) don't come within spitting distance of programming
+from one day to the next. Those who do, usually don't give any
+thought to them: it's time to write that function so do it, in C or
+Cobol or dBase whatever comes to hand. We don't waste time
+contemplating the deeper significance of the tools we use to do the
+job. But what would we do without well-designed, efficient
+programming languages?</p>
 
 <p>Go back to slide rules, maybe.</p>
 
-<p>A computer, in a very real sense, is its language.  The processor
-speaks in a native tongue, its own machine code: unreadable by humans
-and next to impossible to program in, but nevertheless essential.
-It's the existence of this language which makes the computer such a
-general purpose tool; a hardware platform upon which we layer the
-abstractions, the virtual machines, of our operating systems.  Which
-are, when you stop to think about it, simply a set of grammatically
-correct expressions in the computer's internal language.  Take the
-humble 386 PC for example.  Feed it one set of instructions and it
-pretends to be a cute little Windows machine; feed it another set, and
-something hairy happens -- it turns into a big, bad file server and
-starts demanding passwords and issuing threats.  </p>
+<p>A computer, in a very real sense, is its language. The processor
+speaks in a native tongue, its own machine code: unreadable by
+humans and next to impossible to program in, but nevertheless
+essential. It's the existence of this language which makes the
+computer such a general purpose tool; a hardware platform upon
+which we layer the abstractions, the virtual machines, of our
+operating systems. Which are, when you stop to think about it,
+simply a set of grammatically correct expressions in the computer's
+internal language. Take the humble 386 PC for example. Feed it one
+set of instructions and it pretends to be a cute little Windows
+machine; feed it another set, and something hairy happens -- it
+turns into a big, bad file server and starts demanding passwords
+and issuing threats.</p>
 
-<p>This flexibility is not an accident.  Almost from the start, the
-feature which distinguished computers from their complex calculating
-predecessors was the fact that they were programmable -- indeed,
-universally programmable, capable of tackling any computationally
-tractable problem.  Strip away the programmability of the machine and
-you lose the universality.  Not to mention the usefulness.</p>
+<p>This flexibility is not an accident. Almost from the start, the
+feature which distinguished computers from their complex
+calculating predecessors was the fact that they were programmable
+-- indeed, universally programmable, capable of tackling any
+computationally tractable problem. Strip away the programmability
+of the machine and you lose the universality. Not to mention the
+usefulness.</p>
 
 <p>Programming languages, as any fule kno, originated in the
-nineteen-fifties as a partial solution to a major difficulty; machine
-code is difficult to write and maintain and next to impossible to move
-(or port) from one computer to another of a different type.
-Assemblers, which allowed the programmers to write machine code using
-relatively simple mnemonic commands (which were then "assembled" into
-machine code) were an early innovation, but still failed to address
-the portability issue.  The solution that finally took off was the
-concept of an abstract "high level" language: and the first to achieve
-widespread use was Fortran.</p>
+nineteen-fifties as a partial solution to a major difficulty;
+machine code is difficult to write and maintain and next to
+impossible to move (or port) from one computer to another of a
+different type. Assemblers, which allowed the programmers to write
+machine code using relatively simple mnemonic commands (which were
+then "assembled" into machine code) were an early innovation, but
+still failed to address the portability issue. The solution that
+finally took off was the concept of an abstract "high level"
+language: and the first to achieve widespread use was Fortran.</p>
 
 <p>A high level language is an artificial language with a rigidly
 specified grammar, which can be translated into machine code via a
-program called a "compiler".  Statements in the high level language
+program called a "compiler". Statements in the high level language
 may correspond to individual statements, or whole series of
-statements, in the machine language ofthe computer.  Indeed, the only
-thing that makes compilation practical is the fact that all computer
-language systems are effectively equivalent; any algorithm which can
-be expressed in one language can be solved in any other, in principle.
-So why are there so many languages?</p>
+statements, in the machine language ofthe computer. Indeed, the
+only thing that makes compilation practical is the fact that all
+computer language systems are effectively equivalent; any algorithm
+which can be expressed in one language can be solved in any other,
+in principle. So why are there so many languages?</p>
 
-<H2>A load of old cobol'ers</H2>
+<h2>A load of old cobol'ers</h2>
 
-<p>There are several answers to the question of language proliferation.
-Besides the facetious (some of us don't like Cobol) and the obvious
-(designing languages looks like a Fun Thing to a certain type of
-warped personality), there's the pragmatic reason.  Simply put, some
-languages are excellent for expressing certain types of problem, but
-are lousy at dealing with other situations.  Take Prolog, for example.
-Prolog is a brilliant language for resolving formal logic propositions
-expressable in the first order predicate calculus, but you'd need your
-head examining if you tried to write an operating system in it.  (The
-Japanese MITI tried to do something similar with their Fifth
-Generation Project, and when was the last time you heard of them?
-Right.) Alternatively, take C.  C is a wonderful language.  It
-combines the flexibility and speed of raw machine code with the
-readability of ...  er.  Yes, you can re-jig a C compiler to run on
-anything.  You can fine-tune it to produce tight, fast machine code
-that will execute on your toaster.  Yes, you can write wonderful
-device drivers in it.  But, again, you'd need your head examining if
-you set out to write a humongous database application in it.  That's
-what Cobol is for; or SQL.  So to the point of this article ...
-INTERCAL.</p>
+<p>There are several answers to the question of language
+proliferation. Besides the facetious (some of us don't like Cobol)
+and the obvious (designing languages looks like a Fun Thing to a
+certain type of warped personality), there's the pragmatic reason.
+Simply put, some languages are excellent for expressing certain
+types of problem, but are lousy at dealing with other situations.
+Take Prolog, for example. Prolog is a brilliant language for
+resolving formal logic propositions expressable in the first order
+predicate calculus, but you'd need your head examining if you tried
+to write an operating system in it. (The Japanese MITI tried to do
+something similar with their Fifth Generation Project, and when was
+the last time you heard of them? Right.) Alternatively, take C. C
+is a wonderful language. It combines the flexibility and speed of
+raw machine code with the readability of ... er. Yes, you can
+re-jig a C compiler to run on anything. You can fine-tune it to
+produce tight, fast machine code that will execute on your toaster.
+Yes, you can write wonderful device drivers in it. But, again,
+you'd need your head examining if you set out to write a humongous
+database application in it. That's what Cobol is for; or SQL. So to
+the point of this article ... INTERCAL.</p>
 
-<H2>An icky mess</H2>
+<h2>An icky mess</h2>
 
-<p>INTERCAL is a programming language which is to other languages as
-elephants are to deep-sea fishing -- it has nothing whatsoever to do
-with them.  Nothing ...  except that it's a programming language.  And
-it serves as a wonderful example of the fact that, despite their
-theoretical, abstract interchangeability, not all languages are born
-equal.  Here's a potted history of the offender:</p>
+<p>INTERCAL is a programming language which is to other languages
+as elephants are to deep-sea fishing -- it has nothing whatsoever
+to do with them. Nothing ... except that it's a programming
+language. And it serves as a wonderful example of the fact that,
+despite their theoretical, abstract interchangeability, not all
+languages are born equal. Here's a potted history of the
+offender:</p>
 
-<p>INTERCAL is short for "Computer Language With No Readily Pronouncable
-Acronym".  It was not so much designed as perpetrated at Princeton
-University, on the morning of May 26th, 1972, by Donald R.  Woods and
-James M.  Lyon.  They have been trying to live it down ever since.
-The current implementation, C-INTERCAL, was written by Eric S.
-Raymond (also the author of The New Hacker's Dictionary), and -- god
-help us -- runs on anything that supports C (and the C programming
-tools lex and yacc).</p>
+<p>INTERCAL is short for "Computer Language With No Readily
+Pronouncable Acronym". It was not so much designed as perpetrated
+at Princeton University, on the morning of May 26th, 1972, by
+Donald R. Woods and James M. Lyon. They have been trying to live it
+down ever since. The current implementation, C-INTERCAL, was
+written by Eric S. Raymond (also the author of The New Hacker's
+Dictionary), and -- god help us -- runs on anything that supports C
+(and the C programming tools lex and yacc).</p>
 
-<p>INTERCAL is, in its own terms, elegant, simple and concise.  It is
-also flexible and forgiving; if the compiler (called, appropriately
-enough, ick) encounters something it doesn't understand it simply
-ignores it and carries on.  In order to insert a comment, just type in
-something that ick thinks is wrong; but be careful not to embed any
-valid INTERCAL code in your comments, or ick will get all excited and
-compile it.  There are only two variable types: 16-bit integers, and
-32-bit integers, denoted by .1 (for the 16-bit variable called "1") or
-:1 (for the 32-bit variable named "1"); note that .1 is not equivalent
-to :1 and definitely has nothing to do with 0.1 (unless it happens to
-be storing a value of 0.1).</p>
+<p>INTERCAL is, in its own terms, elegant, simple and concise. It
+is also flexible and forgiving; if the compiler (called,
+appropriately enough, ick) encounters something it doesn't
+understand it simply ignores it and carries on. In order to insert
+a comment, just type in something that ick thinks is wrong; but be
+careful not to embed any valid INTERCAL code in your comments, or
+ick will get all excited and compile it. There are only two
+variable types: 16-bit integers, and 32-bit integers, denoted by .1
+(for the 16-bit variable called "1") or :1 (for the 32-bit variable
+named "1"); note that .1 is not equivalent to :1 and definitely has
+nothing to do with 0.1 (unless it happens to be storing a value of
+0.1).</p>
 
-<p>INTERCAL supports two unique bitwise operators, interleave (or mingle)
-and select, denoted by the "^" and "~" symbols respectively.  You
-interleave two variables by alternating the bits in the two operands;
-you select two variables by taking from the first operand whichever
-bits correspond to 1's in the second operand, then pack these bits to
-the right in the result.  There are also numerous unary bitwise
-operators, and in order to resolve matters of precedence the pedantic
-may use sparks (') or rabbit-ears (&quot;) to group expressions (Don't
-blame me for the silly names: INTERCAL has a character set which is
-best described as creative.) It is not surprising that these operators
-are unique to INTERCAL; the parlous readability of C would not be
-enhanced by the addition of syntax like:</p>
+<p>INTERCAL supports two unique bitwise operators, interleave (or
+mingle) and select, denoted by the "^" and "~" symbols
+respectively. You interleave two variables by alternating the bits
+in the two operands; you select two variables by taking from the
+first operand whichever bits correspond to 1's in the second
+operand, then pack these bits to the right in the result. There are
+also numerous unary bitwise operators, and in order to resolve
+matters of precedence the pedantic may use sparks (') or
+rabbit-ears (") to group expressions (Don't blame me for the silly
+names: INTERCAL has a character set which is best described as
+creative.) It is not surprising that these operators are unique to
+INTERCAL; the parlous readability of C would not be enhanced by the
+addition of syntax like:</p>
 
-<p><TT>PLEASE DO IGNORE .1 <-".1^C'&amp;:51~"#V1^C!12~;&amp;75SUB&quot;V'V.1~</TT></p>
+<p><tt>PLEASE DO IGNORE .1
+&lt;-".1^C'&amp;:51~"#V1^C!12~;&amp;75SUB"V'V.1~</tt></p>
 
-<p>Like any other language, INTERCAL has flow-of-control statements and
-input and output statements.  To write something or other into a
-variable, you need the WRITE IN list statement, where list is a string
-of variables and/or array elements.  The format of the input data
-should be as numbers, the digits of which are spelt out in english in
-the range ZERO (or OH) to FOUR TWO NINE FOUR NINE SIX SEVEN TWO NINE
-FIVE.  To output some information, you need the READ OUT list
-statement, where list again consists of variables.  Numbers are
-printed, by default, in the form of "extended" Roman numerals (the
-syntax of which I will draw a merciful veil over), although the
-scholarly may make use of the standard library, which contains
+<p>Like any other language, INTERCAL has flow-of-control statements
+and input and output statements. To write something or other into a
+variable, you need the WRITE IN list statement, where list is a
+string of variables and/or array elements. The format of the input
+data should be as numbers, the digits of which are spelt out in
+english in the range ZERO (or OH) to FOUR TWO NINE FOUR NINE SIX
+SEVEN TWO NINE FIVE. To output some information, you need the READ
+OUT list statement, where list again consists of variables. Numbers
+are printed, by default, in the form of "extended" Roman numerals
+(the syntax of which I will draw a merciful veil over), although
+the scholarly may make use of the standard library, which contains
 routines for formatting output in Sanskrit.</p>
 
-<p>Like FORTRAN, INTERCAL uses line numbers which are optional and follow
-in no particular order.  Unlike FORTRAN, INTERCAL has no evil,
-unspeakable GOTO command, and not even an IF statement.  However, you
-would be wrong to ascribe this to INTERCAL being designed for
-structured programming; it is actually because C-INTERCAL is the only
-known language that implements the legendary COME FROM ...  control
-statement (originally described by R.  L.  Clark in "A Linguistic
-contribution to GOTO-less programming", Comm.  ACM 27 (1984), pp.
-349-350).  For many years the GOTO statement -- once the primary means
-of controlling the sequence of execution of a program -- has been
-reviled as contributing to unreadable, unpredictable code that is
-virtually impossible to follow because it jumps about the place like a
-kangaroo on amphetamines.  The COME FROM statement enables INTERCAL to
-do away with nasty GOTO's, while still preserving for the programmer
-that sense of warm self-esteem and achievement that comes from
+<p>Like FORTRAN, INTERCAL uses line numbers which are optional and
+follow in no particular order. Unlike FORTRAN, INTERCAL has no
+evil, unspeakable GOTO command, and not even an IF statement.
+However, you would be wrong to ascribe this to INTERCAL being
+designed for structured programming; it is actually because
+C-INTERCAL is the only known language that implements the legendary
+COME FROM ... control statement (originally described by R. L.
+Clark in "A Linguistic contribution to GOTO-less programming",
+Comm. ACM 27 (1984), pp. 349-350). For many years the GOTO
+statement -- once the primary means of controlling the sequence of
+execution of a program -- has been reviled as contributing to
+unreadable, unpredictable code that is virtually impossible to
+follow because it jumps about the place like a kangaroo on
+amphetamines. The COME FROM statement enables INTERCAL to do away
+with nasty GOTO's, while still preserving for the programmer that
+sense of warm self-esteem and achievement that comes from
 successfully writing a really nasty piece of self-modifying code
-involving computed GOTO's in FORTRAN (Or, for the terminally hip and
-hacker-ish, involving a triple-indirect pointer to a union of UNIX
-kernel data structures in C.  Capisce?) Basically, the COME FROM
-statement specifies a line, or lines, which -- when the program
-executes them -- will jump to the COME FROM: effectively the opposite
-of GOTO.</p>
+involving computed GOTO's in FORTRAN (Or, for the terminally hip
+and hacker-ish, involving a triple-indirect pointer to a union of
+UNIX kernel data structures in C. Capisce?) Basically, the COME
+FROM statement specifies a line, or lines, which -- when the
+program executes them -- will jump to the COME FROM: effectively
+the opposite of GOTO.</p>
 
-<p>Because INTERCAL contains no equivalent of the NEXT statement for 
-controlling whether or not some statement is executed, it provides a 
-creative, endearing and unique substitute; abstention.  For example, you 
-can abstain from executing a given line of code with the ABSTAIN FROM 
-(label) form of the command.  Alternatively, and more uselessly, you can 
-abstain from executing all statements of a specified type; for example, you 
-can say</p>
+<p>Because INTERCAL contains no equivalent of the NEXT statement
+for controlling whether or not some statement is executed, it
+provides a creative, endearing and unique substitute; abstention.
+For example, you can abstain from executing a given line of code
+with the ABSTAIN FROM (label) form of the command. Alternatively,
+and more uselessly, you can abstain from executing all statements
+of a specified type; for example, you can say</p>
 
-<p><TT>PLEASE ABSTAIN FROM IGNORING + FORGETTING</TT></p>
+<p><tt>PLEASE ABSTAIN FROM IGNORING + FORGETTING</tt></p>
+
 <p>or</p>
 
-<p><TT>DO ABSTAIN FROM ABSTAINING</TT></p>
+<p><tt>DO ABSTAIN FROM ABSTAINING</tt></p>
 
-<p>The abstention command is revoked by the REINSTATE statement. It is
-a Bad Idea to ABSTAIN FROM REINSTATING. It is also worth noting that
-the ABSTAIN syntax is rather confusing; for example, DO ABSTAIN FROM
-GIVING UP is not accepted, although a valid synonym for this is DON'T
-GIVE UP. (GIVE UP is the statement that terminates execution of a
-program. You are encouraged to use this statement at every
-opportunity.  It is your only hope of escape.)</p>
+<p>The abstention command is revoked by the REINSTATE statement. It
+is a Bad Idea to ABSTAIN FROM REINSTATING. It is also worth noting
+that the ABSTAIN syntax is rather confusing; for example, DO
+ABSTAIN FROM GIVING UP is not accepted, although a valid synonym
+for this is DON'T GIVE UP. (GIVE UP is the statement that
+terminates execution of a program. You are encouraged to use this
+statement at every opportunity. It is your only hope of
+escape.)</p>
 
 <p>The designers of the INTERCAL language believed that source code
-should be easy to understand or, failing that, friendly; in extremis,
-good old-fashioned politeness will do.  Consequently, the syntax of
-the language looks a bit odd at first. After the line label (if any)
-there should be a statement identifier; this can be one of DO, PLEASE,
-or PLEASE DO.  Programs which are insufficiently polite to the
-compiler may be rejected with the error message PROGRAMMER IS
-INSUFFICIENTLY POLITE; likewise, programs which spend too much time
-grovelling to the compiler will be terminated with extreme
-prejudice. The DO, PLEASE or PLEASE DO is then followed by
+should be easy to understand or, failing that, friendly; in
+extremis, good old-fashioned politeness will do. Consequently, the
+syntax of the language looks a bit odd at first. After the line
+label (if any) there should be a statement identifier; this can be
+one of DO, PLEASE, or PLEASE DO. Programs which are insufficiently
+polite to the compiler may be rejected with the error message
+PROGRAMMER IS INSUFFICIENTLY POLITE; likewise, programs which spend
+too much time grovelling to the compiler will be terminated with
+extreme prejudice. The DO, PLEASE or PLEASE DO is then followed by
 (optionally) one of NOT, N'T, or %n, then a statement: the NOT or
 N'T's meaning should be self-evident, while the %n is merely the
 percentage probability that the following statement will be
 executed.</p>
 
 <p>Of course, with only two binary and three unary operators, it is
-rather difficult for programmers to get to grips with the
-language. Therefore, in a fit of quite uncharacteristic generosity,
-the designers have supplied -- and even partially documented -- a
+rather difficult for programmers to get to grips with the language.
+Therefore, in a fit of quite uncharacteristic generosity, the
+designers have supplied -- and even partially documented -- a
 library of rather outre subroutines that carry out such esoteric
 operations as addition, subtraction, logical comparison, and
 generation of random numbers. The subroutines will be charmingly
-familiar to those PDP-11 assembly-language hackers among you who are
-also fluent in FORTRAN and SPITBOL.</p>
+familiar to those PDP-11 assembly-language hackers among you who
+are also fluent in FORTRAN and SPITBOL.</p>
 
-<H2>Why you should program in Intercal</H2>
+<h2>Why you should program in Intercal</h2>
 
-<p>INTERCAL, despite being afflicted with these unique features (which,
-arguably, should remain that way) has survived for twenty years and is
-indeed thriving. The relatively recent C-INTERCAL dialect (which
-introduced the COME FROM statement, among other things) has spread it
-far beyond its original domain; the infamy continues, transmitted like
-a malign influence across the Internet. It is a matter of record that
-no computer language has ever succeeded in gaining widespread
-acceptance on the basis of elegance, comprehensibility or
-necessity. Look at FORTRAN, Cobol or C; all of them spread despite the
-fact that better alternatives were available. In fact, there are
-reasons to believe that INTERCAL is the language of the future.</p>
+<p>INTERCAL, despite being afflicted with these unique features
+(which, arguably, should remain that way) has survived for twenty
+years and is indeed thriving. The relatively recent C-INTERCAL
+dialect (which introduced the COME FROM statement, among other
+things) has spread it far beyond its original domain; the infamy
+continues, transmitted like a malign influence across the Internet.
+It is a matter of record that no computer language has ever
+succeeded in gaining widespread acceptance on the basis of
+elegance, comprehensibility or necessity. Look at FORTRAN, Cobol or
+C; all of them spread despite the fact that better alternatives
+were available. In fact, there are reasons to believe that INTERCAL
+is the language of the future.</p>
 
 <p>Firstly, INTERCAL creates jobs. Yes, it's true. In general, if a
 particular programming tool is unfriendly, ugly, and absolutely
-essential, the response of management is to throw more programmers at
-it instead of replacing it. INTERCAL is so monumentally difficult to
-use for anything sensible that it is surely destined to be the cause
-of full employment, massive increases in the DP budget of every
-company where it is used, and general prosperity for programmers.</p>
+essential, the response of management is to throw more programmers
+at it instead of replacing it. INTERCAL is so monumentally
+difficult to use for anything sensible that it is surely destined
+to be the cause of full employment, massive increases in the DP
+budget of every company where it is used, and general prosperity
+for programmers.</p>
 
 <p>Secondly, once you have learned INTERCAL you will be able to win
-friends and influence people. As the authors point out, if you were to
-state that the simplest way to store a value of 65536 in a 32-bit
-variable is</p>
+friends and influence people. As the authors point out, if you were
+to state that the simplest way to store a value of 65536 in a
+32-bit variable is</p>
 
-<p><TT>DO :1 <- #0$#256</TT></p>
+<p><tt>DO :1 &lt;- #0$#256</tt></p>
 
-<p>any sensible programmer would say that this was absurd. Since this is
-indeed the simplest way of doing this, they'd be made to look like a
-fool in front of their boss (who, by Murphy's law, would have turned
-up at just that moment). This will have a devastating effect on their
-ego and simultaneously make you look brilliant (until they realise
-that you cribbed this example from the manual, like me. Deep shame.)</p>
+<p>any sensible programmer would say that this was absurd. Since
+this is indeed the simplest way of doing this, they'd be made to
+look like a fool in front of their boss (who, by Murphy's law,
+would have turned up at just that moment). This will have a
+devastating effect on their ego and simultaneously make you look
+brilliant (until they realise that you cribbed this example from
+the manual, like me. Deep shame.)</p>
 
-<p>Thirdly, INTERCAL helps sell hardware. There's been a lot of fuss
-recently about big corporations inventing gigantic, bloated windowing
-and operating systems that require monstrously powerful computers to
-run on; some cynics suggest that this is because personal computers
-are now so powerful that they can already do anything any reasonable
-individual would want them to, and it's necessary to invent warm furry
-buttons that soak up millions of processor cycles in order to sell new
-equipment. With INTERCAL, you no longer need Windows or OS/2 to slow
-your 486 PC to a crawl! A Sieve of Eratosthenes benchmark (that
-computes all the prime numbers less than 65536), when coded in
-INTERCAL, clocked over seventeen hours on a SPARCStation-1. The same
-program, in C, took less than 0.5 seconds -- thus proving, quite
-clearly, that INTERCAL software is so slow that you absolutely must
-buy a CRAY-3 or equivalent in order to have any hope of getting any
-work out of it.</p>
+<p>Thirdly, INTERCAL helps sell hardware. There's been a lot of
+fuss recently about big corporations inventing gigantic, bloated
+windowing and operating systems that require monstrously powerful
+computers to run on; some cynics suggest that this is because
+personal computers are now so powerful that they can already do
+anything any reasonable individual would want them to, and it's
+necessary to invent warm furry buttons that soak up millions of
+processor cycles in order to sell new equipment. With INTERCAL, you
+no longer need Windows or OS/2 to slow your 486 PC to a crawl! A
+Sieve of Eratosthenes benchmark (that computes all the prime
+numbers less than 65536), when coded in INTERCAL, clocked over
+seventeen hours on a SPARCStation-1. The same program, in C, took
+less than 0.5 seconds -- thus proving, quite clearly, that INTERCAL
+software is so slow that you absolutely must buy a CRAY-3 or
+equivalent in order to have any hope of getting any work out of
+it.</p>
 
 <p>Consequently, it is quite clear that INTERCAL represents a major
-alternative to conventional programming languages. Anyone who learns
-this language is going to go far -- at least as far as the nearest
-psychiatric institution. Rumour has it that INTERCAL was not entirely
-unrelated to the collapse of the Soviet Union and the success of the
-Apollo missions. It is even reported to improve your sex life and
-restore hair loss! So we warmly advise you to take this utterly
-unbiased report at face value and go forth and get your friendly
-neighbourhood software company to switch to INTERCAL, wherever or
-whatever they may be using right now. You know it makes sense ...</p>
+alternative to conventional programming languages. Anyone who
+learns this language is going to go far -- at least as far as the
+nearest psychiatric institution. Rumour has it that INTERCAL was
+not entirely unrelated to the collapse of the Soviet Union and the
+success of the Apollo missions. It is even reported to improve your
+sex life and restore hair loss! So we warmly advise you to take
+this utterly unbiased report at face value and go forth and get
+your friendly neighbourhood software company to switch to INTERCAL,
+wherever or whatever they may be using right now. You know it makes
+sense ...</p>
 
-<HR>
-<table width="100%" cellpadding=0 summary="Canned page footer"><tr>
-<td width="30%">Back to <a href="index">Intercal Resources</a>
-<td width="30%"align=center>Up to <a href="/~esr/sitemap.html">Site Map</a>
-<td width="30%" align=right>$Date: 2002-07-11 21:59:17 $
-</tr></table>
+<hr />
+<table width="100%" cellpadding="0" summary="Canned page footer">
+<tr>
+<td width="30%">Back to <a href="index">Intercal Resources</a></td>
+<td width="30%" align="center">Up to <a
+href="/~esr/sitemap.html">Site Map</a></td>
+<td width="30%" align="right">$Date: 2002-07-30 23:39:23 $</td>
+</tr>
+</table>
 
-<br clear="left">
-<ADDRESS>Eric S. Raymond <A HREF="mailto:esr@thyrsus.com">&lt;esr@snark.thyrsus.com&gt;</A></ADDRESS>
-</BODY>
-</HTML>
+<br clear="left" />
+<address>Eric S. Raymond <a
+href="mailto:esr@thyrsus.com">&lt;esr@snark.thyrsus.com&gt;</a></address>
+</body>
+</html>
 
