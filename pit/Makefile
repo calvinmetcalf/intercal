@@ -2,7 +2,7 @@
 # Torture-tester for the INTERCAL compiler
 #
 
-ICK = ../src/ick -b
+ICK = ../ick -b
 
 SOURCES = \
 	./sample.i \

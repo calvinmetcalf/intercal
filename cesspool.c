@@ -24,6 +24,7 @@ LICENSE TERMS
 /* LINTLIBRARY */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _POSIX_SOURCE
 #include <stdarg.h>

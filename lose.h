@@ -8,7 +8,7 @@
  * ESR's "THE NEXT STACK HAS RUPTURED!..." has been retained on the grounds
  * that it is more obscure and much funnier.  For context, find a copy of
  * Joe Haldeman's SF short story "A !Tangled Web", first published in 
- * Analog magazine sometime in 1983 and later anthologized in the author's
+ * Analog magazine in September 1981 and later anthologized in the author's
  * "Infinite Dreams" (Ace 1985).
  */
 /* An undecodable statement has been encountered in the course of execution. */

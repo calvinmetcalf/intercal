@@ -34,11 +34,11 @@ YACCFLAGS = -d # -t
 LOADLIBS = @LIBS@ @INTLLIBS@ @LEXLIB@
 
 CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c
-ISOURCES = cesspool.c arrgghh.c ick-wrap.c
+ISOURCES = cesspool.c arrgghh.c ick-wrap.c numerals.c
 HEADERS = ick.h lose.h sizes.h abcess.h fiddle.h feh.h
-BUILD = Makefile.in Makefile configure.ac config.h.in specgen.sh intercal.spec
+BUILD = Makefile.in Makefile configure.ac configure config.h.in specgen.sh intercal.spec install.sh
 MISC = intercal.el
-DOCS = BUGS COPYING NEWS READ.ME
+DOCS = BUGS COPYING NEWS README
 SOURCES = $(CSOURCES) $(ISOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
 
 all: ick libick.a
@@ -77,7 +77,7 @@ install: all
 	-mkdir -p $(incdir)
 	cp lose.h abcess.h fiddle.h $(incdir)
 	-mkdir $(datadir)
-	(cp -r pit $(datadir)/pit)
+	(cp -r pit $(datadir))
 	cp ick-wrap.c $(datadir)
 
 uninstall:
@@ -98,17 +98,18 @@ intercal-@PACKAGE_VERSION@.tar.gz: $(SOURCES)
 	(cd ..; tar -czvf intercal/intercal-@PACKAGE_VERSION@.tar.gz `cat intercal/MANIFEST`)
 	@(cd ..; rm intercal-@PACKAGE_VERSION@)
 
+VERS=@PACKAGE_VERSION@
 RPMROOT=/usr/src/redhat
 RPM = rpmbuild
 RPMFLAGS = -ba
 rpm: dist
-	cp intercal-@PACKAGE_VERSION@.tar.gz $(RPMROOT)/SOURCES;
+	cp intercal-$(VERS).tar.gz $(RPMROOT)/SOURCES;
 	cp intercal.spec $(RPMROOT)/SPECS
-	cd $(RPMROOT)/SPECS; $(RPM) $(RPMFLAGS) intercal.spec	
-	cp $(RPMROOT)/RPMS/`arch|sed 's/i[4-9]86/i386/'`/intercal-@PACKAGE_VERSION@*.rpm .
-	cp $(RPMROOT)/SRPMS/intercal-@PACKAGE_VERSION@*.src.rpm .
+	-cd $(RPMROOT)/SPECS; $(RPM) $(RPMFLAGS) intercal.spec	
+	cp $(RPMROOT)/RPMS/`arch|sed 's/i[4-9]86/i386/'`/intercal-$(VERS)*.rpm .
+	cp $(RPMROOT)/SRPMS/intercal-$(VERS)*.src.rpm .
 
 clean:
 	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick
-	rm -f intercal-@PACKAGE_VERSION@.shar intercal-@PACKAGE_VERSION@.tar intercal-@PACKAGE_VERSION@.tar.gz intercal.spec
+	rm -f intercal-@PACKAGE_VERSION@.tar.gz intercal.spec
 

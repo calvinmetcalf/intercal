@@ -242,6 +242,7 @@ varlist :   variable				{rlist = np = $1;}
 initem	:    scalar | subscr | array;
 inlist	:    initem INTERSECTION inlist		{$$=cons(INTERSECTION,$1,$3);}
 	|    initem				{$$=cons(INTERSECTION,$1,0);}
+	;
 
 /* scalars, subscript exprs & constants are permitted in READ OUT lists */
 /* new: arrays are also permitted to allow for bitwise I/0 */
