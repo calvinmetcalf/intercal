@@ -259,10 +259,12 @@ int main(int argc, char *argv[])
 	     * Miss Manners lives.
 	     */
 	    if (lineno > 2)
+	    {
 		if (politesse == 0 || (lineno - 1) / politesse >= 5)
 		    lose(E079, yylineno, (char *)NULL);
 		else if (lineno / politesse < 3)
 		    lose(E099, yylineno, (char *)NULL);
+	    }
 
 	    /*
 	     * check if we need to magically include the system library

@@ -1,5 +1,22 @@
 			NEW IN THIS RELEASE
 
+	Release 0.20 (by Eric S. Raymond) 16 September 1999
+
+  (The following changes are due to John Cowan <cowan@ccil.org>)
+
+1.  In addition to Latin-1, UTF-8 is now acceptable in source code as well.
+All the numerous currency symbols of Unicode (ISO 10646) can be used as
+big-money alternatives in their UTF-8 format.  Indeed, a random mixture of
+Latin-1 and UTF-8 also works fine; this seems very much in the spirit of
+Intercal.
+ 
+2.  Intercal has now been localized for the Ancient Roman as well as the
+Posix/C locale.  You may input numbers in Latin and write Intercal programs
+using Latin keywords.  See lexer.l for a list of equivalences.
+
+3.  The Makefile in the pit directory now works like a real Makefile, and
+won't compile anything that's already been compiled.
+ 
 	Release 0.19 (by Eric S. Raymond) 16 August 1998
 
 1. Fixed a code-generation error in assignments from tail and hybrid
