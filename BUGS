@@ -1,0 +1,57 @@
+		NEW FEATURES IN C-INTERCAL
+
+1. As a convenience to all you junior birdmen out there, `NINER' is accepted as
+   a synonym for `NINE' in INTERCAL input.
+
+2. The COME FROM statement is now compiled. You may write
+
+   PLEASE COME FROM (n) 
+
+   and the effect will be that whenever execution reaches statement label n,
+   it will immediately transfer control to the statement following the
+   COME FROM. Conditional COME FROM is possible; ABSTAIN FROM COMING FROM and
+   REINSTATE COMING FROM are both valid. DON'T COME FROM is a no-op (until
+   reinstated). Finally; NEXTING to the label `target' of an un-abstained
+   COME FROM *will* cause control to be transferred to the statement following
+   the COME FROM.
+
+			BUGS
+
+1) INTERCAL would be intrinsically a crock even if it worked right.
+
+2) The INTERCAL-72 handling of invalid statements isn't implemented; instead
+   they raise a normal compile-time error. This is because I haven't figured
+   out how to force YACC to do the needed thing yet. It means C-INTERCAL
+   can't compile the INTERCAL-72 system library yet. Isn't compatibility
+   wonderful? I may have to go to a handcrafted LL(1) parser to fix this...
+
+3) Error-checking could be improved. Not all the errors listed in the
+   manual are actually detected (of those listed in lose.h, E123, E621, E632,
+   E562, E579, E436, E017, E275, E182, E129, E139, and E778 are implemented).
+   In this respect C-INTERCAL follows nobly in the tradition of many production
+   compilers.
+
+4) Proper C code is generated for array operations, but the runtime-library
+   hooks for the dynamic memory management needed to make the code work are
+   stubbed out. I'm poor at array-bashing. Rachel Millian has promised to
+   implement this for the next release.
+
+5) The Roman-numeral output from INTERCAL isn't quite as butchered as it ought
+   to be, because neither I nor the implementor could figure out what the frotz
+   the note in the INTERCAL-72 manual about modulo 4000 and I and M and all
+   that was really supposed to mean.
+
+6) The manual is mangled in spots. I'm in touch with the INTERCAL-72 authors
+   and we'll try to fix this in the next release, assuming there *is* a next
+   release.
+
+			TO DO
+
+1. Test this loser on something other than the sample program.
+
+2. Add more optimization templates, esp. the idioms for &, |, ^, ~.
+
+3. Input format internationalization -- allow WRITE IN input digits in
+   major languages such as Nahuatl, Tagalog, Sanskrit, and Basque.
+
+4. Forget this @!%$#! crock and take a long vacation.

@@ -1,0 +1,50 @@
+			C-INTERCAL (v 0.3)
+
+	NOTE! THIS IS A PRE-RELEASE VERSION WITH SOME KNOWN BUGS!
+	SEE THE `BUGS' FILE FOR DETAILS, AND EARN THE ETERNAL GRATITUDE
+	OF THE HUGE, BUSTLING INTERCAL COMMUNITY BY FIXING THEM!
+
+This package is an implementation of the language INTERCAL designed by Don
+Woods and James Lyon, who have since spent most of twenty years trying to
+live it down.
+
+The implementation was created by Eric S. Raymond (...!uunet!snark!eric)
+during a fit of lunacy from which he has since mostly recovered. The files
+included are:
+
+READ.ME		-- this file
+intercal.man	-- The INTERCAL manual (read this next!)
+intercal.tex	-- TeX source form
+intercal.sty	-- TeX style file
+THEORY		-- some notes on the internals of the INTERCAL compiler
+BUGS		-- notes pertaining to this release
+
+Makefile	-- makefile for the INTERCAL compiler
+lexer.l		-- the lexical analyzer specification (in LEX)
+ick.y		-- the grammar specification (in YACC)
+ick.h		-- compilation types and defines
+feh.c		-- INTERCAL-to-C code generator
+fiddle.c	-- the INTERCAL operators
+lose.[ch]	-- INTERCAL compile- and run-time error handling
+ick-wrapper.c	-- the driver for generated C-from-INTERCAL code
+cesspool.c	-- the INTERCAL runtime support code
+cesspool.h	-- interface fr. generated code to the INTERCAL runtime support
+
+sample.i	-- a sample INTERCAL program (from the manual)
+
+You want a man page? Man pages are for wimps. To compile an INTERCAL
+program `foo.i' to executable code, just do
+
+	ick foo.i
+
+There's a -d option that leaves the generated `foo.c' in place for
+inspection (suppressing compilation to machine code), and an -O option
+that enables the (hah!) optimizer. Other than that, yer on yer own.
+
+One other switch affects C-intercal's runtime behavior. The `-C'
+option forces output in "clockface" mode, for superstitious users who
+believe writing "IV" upside-down offends IVPITER and would rather
+see IIII.
+
+Report bugs, if you absolutely must, to the author. Or post them to
+alt.lang.intercal. Or something.
