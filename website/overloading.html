@@ -1,95 +1,120 @@
-<!doctype HTML public "-//W3O//DTD W3 HTML 3.2//EN">
-<HTML>
-<HEAD>
-<link rev=made href=mailto:esr@snark.thyrsus.com>
-<meta name="description" content="Overloading proposal for INTERCAL">
-<meta name="keywords" content="INTERCAL"> 
-<TITLE>Overloading proposal for INTERCAL</TITLE>
-</HEAD>
-<BODY>
-<table width="100%" cellpadding=0><tr>
-<td width="30%">Back to <a href="index.html">Intercal Home Page</a>
-<td width="30%" align=center>Up to <a href="/~esr/sitemap.html">Site Map</a>
-<td width="30%" align=right>$Date: 1998-08-17 13:28:05 $
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="generator"
+content="HTML Tidy for Linux/x86 (vers 1st February 2002), see www.w3.org" />
+<link rev="made" href="mailto:esr@snark.thyrsus.com" />
+<meta name="description"
+content="Overloading proposal for INTERCAL" />
+<meta name="keywords" content="INTERCAL" />
+<title>Overloading proposal for INTERCAL</title>
+<style type="text/css">
+/*<![CDATA[*/
+ h1.c1 {text-align: center}
+/*]]>*/
+</style>
+</head>
+<body>
+<table width="100%" cellpadding="0" summary="Canned page header">
+<tr>
+<td width="30%">Back to <a href="index.html">Intercal Home
+Page</a></td>
+<td width="30%" align="center">Up to <a
+href="/~esr/sitemap.html">Site Map</a></td>
+<td width="30%" align="right">$Date: 2002-07-30 23:30:43 $</td>
+</tr>
 </table>
-<HR>
-<H1 ALIGN=CENTER>Operand Overloading in INTERCAL</H1>
 
-Andrew Arensburger &lt;arensb@cfar.umd.edu&gt; writes:<P>
+<hr />
+<h1 class="c1">Operand Overloading in INTERCAL</h1>
 
-While rereading the INTERCAL reference manual, it occurred to me that
-INTERCAL is a bit dated, since the languages whose features it avoids
-(Fortran, COBOL, etc.) are pretty much dead. Shouldn't INTERCAL start
-avoiding features found in some more modern languages, like C++, Java
-and Perl?<P>
-  
-In this vein, let me suggest a direction for future
-development: overloaded operands. I suggest the following syntax:<P>
+<p>Andrew Arensburger &lt;arensb@cfar.umd.edu&gt; writes:</p>
+
+<p>While rereading the INTERCAL reference manual, it occurred to me
+that INTERCAL is a bit dated, since the languages whose features it
+avoids (Fortran, COBOL, etc.) are pretty much dead. Shouldn't
+INTERCAL start avoiding features found in some more modern
+languages, like C++, Java and Perl?</p>
+
+<p>In this vein, let me suggest a direction for future development:
+overloaded operands. I suggest the following syntax:</p>
 
 <pre>
         &lt;var&gt;/&lt;expr&gt;
         &lt;expr1&gt;\&lt;expr2&gt;
 </pre>
 
-In the first form, &lt;var&gt; is a variable (16- or 32-bit, scalar or
-array). Subsequently, any time it appears as an operand to $ , ~ , & ,
-V , or ? , it will be silently replaced by &lt;expr&gt;. Thus,<P>
+<p>In the first form, &lt;var&gt; is a variable (16- or 32-bit,
+scalar or array). Subsequently, any time it appears as an operand
+to $ , ~ , &amp; , V , or ? , it will be silently replaced by
+&lt;expr&gt;. Thus,</p>
 
 <pre>
-        DO .7/#&77
-        DO :8<-.7
+        DO .7/#&amp;77
+        DO :8&lt;-.7
 </pre>
 
-will have the same effect as<P>
+<p>will have the same effect as</p>
 
 <pre>
-        DO :8<-#&77
+        DO :8&lt;-#&amp;77
 </pre>
 
-In the second form, &lt;expr1&gt; is a 32-bit expression, divided into two
-16-bit numbers (high 16 bits and low 16 bite). This defines a range.
-Any time a variable whose number is in the range thus defined appears
-as an operand, it is replaced with the value of &lt;expr2&gt;.<P>
+<p>In the second form, &lt;expr1&gt; is a 32-bit expression,
+divided into two 16-bit numbers (high 16 bits and low 16 bite).
+This defines a range. Any time a variable whose number is in the
+range thus defined appears as an operand, it is replaced with the
+value of &lt;expr2&gt;.</p>
 
-Furthermore, any time the special token ) appears in &lt;expr2&gt;,
-it is replaced with the number of the variable being affected. Thus,<P>
+<p>Furthermore, any time the special token ) appears in
+&lt;expr2&gt;, it is replaced with the number of the variable being
+affected. Thus,</p>
 
 <pre>
         DO #196608\#99
 </pre>
 
-will affect variables .3 through .10, :3 through :10, ,3 through ,10 ,
-and ;3 through ;10 , replacing them with #99 whenever they appear as
-an operand to $ , ~ , & , V , or ? .<P>
+<p>will affect variables .3 through .10, :3 through :10, ,3 through
+,10 , and ;3 through ;10 , replacing them with #99 whenever they
+appear as an operand to $ , ~ , &amp; , V , or ? .</p>
 
 <pre>
-        DO #196608\;)SUB".&)"
-        DO :1<-.9
+        DO #196608\;)SUB".&amp;)"
+        DO :1&lt;-.9
 </pre>
 
-has the same effect as<P>
+<p>has the same effect as</p>
 
 <pre>
-        DO :1<-;9SUB".&9"
+        DO :1&lt;-;9SUB".&amp;9"
 </pre>
-  
-Since overloading is not indicated by a keyword, there can be
-no PLEASE ABSTAIN FROM OVERLOADING directive, but overloading can be
-undone by mapping variable numbers back to their original values.<P>
 
-There are, of course, various issues that still need to be
+<p>Since overloading is not indicated by a keyword, there can be no
+PLEASE ABSTAIN FROM OVERLOADING directive, but overloading can be
+undone by mapping variable numbers back to their original
+values.</p>
+
+<p>There are, of course, various issues that still need to be
 ironed out, but it seems to me that operand overloading can be a
-powerful technique, on a par with Perl closures or Java's on-the-fly
-class definitions.<P>
+powerful technique, on a par with Perl closures or Java's
+on-the-fly class definitions.</p>
 
-<HR>
-<table width="100%" cellpadding=0><tr>
-<td width="30%">Back to <a href="index.html">INTERCAL Home Page</a>
-<td width="30%" align=center>Up to <a href="/~esr/sitemap.html">Site Map</a>
-<td width="30%" align=right>$Date: 1998-08-17 13:28:05 $
+<hr />
+<table width="100%" cellpadding="0" summary="Canned page footer">
+<tr>
+<td width="30%">Back to <a href="index.html">INTERCAL Home
+Page</a></td>
+<td width="30%" align="center">Up to <a
+href="/~esr/sitemap.html">Site Map</a></td>
+<td width="30%" align="right">$Date: 2002-07-30 23:30:43 $</td>
+</tr>
 </table>
 
-<P><ADDRESS>Eric S. Raymond <A HREF="mailto:esr@thyrsus.com">&lt;esr@snark.thyrsus.com&gt;</A></ADDRESS>
-</BODY>
-</HTML>
+<br clear="left" />
+<address>Eric S. Raymond <a
+href="mailto:esr@thyrsus.com">&lt;esr@snark.thyrsus.com&gt;</a></address>
+</body>
+</html>
 
