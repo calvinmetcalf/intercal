@@ -1,6 +1,6 @@
 			NEW IN THIS RELEASE
 
-	Release 0.23  (by Eric S. Raymond) 4 Mar 2003
+	Release 0.23  (by Eric S. Raymond) 9 Mar 2003
 
 1. More fixes by Don Knith.  He found a bug in the type-propagation logic.
 
