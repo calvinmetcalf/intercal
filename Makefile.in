@@ -39,7 +39,7 @@ LOADLIBS = @LIBS@ @INTLLIBS@ @LEXLIB@
 CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c
 ISOURCES = cesspool.c arrgghh.c ick-wrap.c numerals.c
 HEADERS = ick.h lose.h sizes.h abcess.h fiddle.h feh.h
-BUILD = Makefile.in Makefile configure.ac configure config.h.in specgen.sh intercal.spec install.sh
+BUILD = Makefile.in Makefile configure.ac configure config.h.in intercal.spec.in intercal.spec install.sh
 MISC = intercal.el
 DOCS = BUGS COPYING NEWS README
 SOURCES = $(CSOURCES) $(ISOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
@@ -87,9 +87,6 @@ uninstall:
 	rm -f $(DESTDIR)$(bindir)/ick $(DESTDIR)$(libdir)/libick.a
 	rm -fr $(DESTDIR)$(incdir) $(DESTDIR)$(datadir)
 
-intercal.spec:
-	specgen.sh @PACKAGE_VERSION@ >intercal.spec
-
 TAGS: $(SOURCES)
 	etags $(SOURCES)
 
@@ -100,17 +97,6 @@ intercal-@PACKAGE_VERSION@.tar.gz: $(SOURCES)
 	@(cd ..; ln -s intercal intercal-@PACKAGE_VERSION@)
 	(cd ..; tar -czvf intercal/intercal-@PACKAGE_VERSION@.tar.gz `cat intercal/MANIFEST`)
 	@(cd ..; rm intercal-@PACKAGE_VERSION@)
-
-VERS=@PACKAGE_VERSION@
-RPMROOT=/usr/src/redhat
-RPM = rpmbuild
-RPMFLAGS = -ba
-rpm: dist
-	cp intercal-$(VERS).tar.gz $(RPMROOT)/SOURCES;
-	cp intercal.spec $(RPMROOT)/SPECS
-	-cd $(RPMROOT)/SPECS; $(RPM) $(RPMFLAGS) intercal.spec	
-	cp $(RPMROOT)/RPMS/`arch|sed 's/i[4-9]86/i386/'`/intercal-$(VERS)*.rpm .
-	cp $(RPMROOT)/SRPMS/intercal-$(VERS)*.src.rpm .
 
 clean:
 	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick
