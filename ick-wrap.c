@@ -16,6 +16,8 @@ static int abstained[$B]$C;
 $D
 $E
 
+#define OK(d) !abstained[d]
+
 int main(int argc, char *argv[])
 {
     int skipto = 0;

@@ -92,8 +92,8 @@
 (make-intercal-abbrev intercal-ab-abbrev "ABSTAINING" "ABSTAIN FROM")
 (make-intercal-abbrev intercal-rei-abbrev "REINSTATING" "REINSTATE")
 (make-intercal-abbrev intercal-gi-abbrev "GIVING UP" "GIVE UP")
-(make-intercal-abbrev intercal-rea-abbrev "READING IN" "READ IN")
-(make-intercal-abbrev intercal-wr-abbrev "WRITING OUT" "WRITE OUT")
+(make-intercal-abbrev intercal-rea-abbrev "READING OUT" "READ OUT")
+(make-intercal-abbrev intercal-wr-abbrev "WRITING IN" "WRITE IN")
 (make-intercal-abbrev intercal-co-abbrev "COMING FROM" "COME FROM")
 
 (defun intercal-do-abbrev ()
@@ -142,9 +142,9 @@ gerund if it occurs on a line with ABSTAIN or REINSTATE).
 
 ab   ABSTAIN	co   COME FROM	fo   FORGET	
 gi   GIVE UP	ig   IGNORE	ne   NEXT	
-rea  READ IN	rei  REINSTATE	rem  REMEMBER	
+rea  READ OUT	rei  REINSTATE	rem  REMEMBER	
 res  RESUME	ret  RETRIEVE	st   STASH	
-wr   WRITE OUT	pl   PLEASE
+wr   WRITE IN	pl   PLEASE
 
 Carriage return takes you to the first tab stop (code indent level).
 Certain other single keys are bound to things which may or may not be useful.  

@@ -23,10 +23,14 @@ LICENSE TERMS
 
 #include "fiddle.h"
 #include "sizes.h"
+#include "lose.h"
+#include <stdio.h>
 
 unsigned int mingle(register unsigned int r, register unsigned int s)
 {
   if (Base == 2) {
+    if (r>0xffff || s>0xffff)
+		lose(E533, lineno, (char *)NULL);
     r = ((r & 0x0000ff00) << 8) | (r & 0x000000ff);
     r = ((r & 0x00f000f0) << 4) | (r & 0x000f000f);
     r = ((r & 0x0c0c0c0c) << 2) | (r & 0x03030303);

@@ -26,7 +26,7 @@ BUGS			-- current bug and to-do list
 NEWS			-- info on features and fixes new in this release
 intercal.el		-- elisp for editing INTERCAL code under GNU Emacs
 
-doc/READ.ME		-- historical notes on the docs
+doc/README		-- historical notes on the docs
 doc/intercal.mm		-- the manual in groffable form
 doc/THEORY		-- some notes on the internals of the INTERCAL compiler
 

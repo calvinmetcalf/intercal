@@ -1,0 +1,55 @@
+Name: intercal
+Version: @PACKAGE_VERSION@
+Release: 1
+URL: http://www.catb.org/~esr/intercal/
+Source: intercal-@PACKAGE_VERSION@.tar.gz
+License: GPL
+Group: Development/Languages
+Summary: the language that kills the weak and drives mad the strong
+BuildRoot: %{_tmppath}/%{name}-root
+
+%description
+An implementation of the language INTERCAL, legendary for
+its perversity and horribleness (this version adds COME FROM
+for extra flavor).  Comes with language manual and examples
+including possibly the entire extant body of INTERCAL code.
+Now supports i18n and l14n (to Ancient Roman locale only)
+Now with fix patch by Donald Knuth.
+
+%prep
+%setup -q
+
+%build
+configure --prefix=/usr
+make
+
+%clean
+[ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
+
+%install
+[ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
+mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
+cp ick "$RPM_BUILD_ROOT"%{_bindir}
+mkdir -p "$RPM_BUILD_ROOT"%{_libdir}
+cp libick.a "$RPM_BUILD_ROOT"%{_libdir}
+mkdir -p "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
+cp lose.h abcess.h fiddle.h "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
+
+%files
+%doc README BUGS NEWS
+%{_bindir}/ick
+%{_libdir}/libick.a
+%{_includedir}/intercal-@PACKAGE_VERSION@/lose.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/abcess.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/fiddle.h
+
+%changelog
+* Wed Dec 31 2003 Eric S. Raymond <esr@snark.thyrsus.com> 0.24-1
+- Non-root users can now build RPMs.
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:rpm-spec
+# End:
+
+
