@@ -855,10 +855,12 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case ENABLE:
+        (void) fprintf(fp,
+		       "\tint i;\n");
 	for (np = tn->u.node; np; np = np->rval)
 	{
 	    (void) fprintf(fp,
-			   "\tint i;\n\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
+			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
 	    (void) fprintf(fp,
 			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
 	    (void) fprintf(fp,
@@ -867,10 +869,12 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case DISABLE:
+        (void) fprintf(fp,
+		       "\tint i;\n");
 	for (np = tn->u.node; np; np = np->rval)
 	{
 	    (void) fprintf(fp,
-			   "\tint i;\n\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
+			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
 	    (void) fprintf(fp,
 			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
 	    (void) fprintf(fp,

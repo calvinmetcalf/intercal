@@ -1,7 +1,7 @@
 Begin3
 Title:		intercal
-Version:	0.16
-Entered-date:	26MAY97
+Version:	0.17
+Entered-date:	27FEB98
 Description:	An implementation of the language INTERCAL, legendary for
 		its perversity and horribleness (this version adds COME FROM
 		for extra flavor).  Comes with language manual and examples
@@ -10,7 +10,7 @@ Keywords:	language, compiler, retrocomputing, geek humor
 Author: 	esr@snark.thyrsus.com (Eric S. Raymond)
 Maintained-by:	esr@snark.thyrsus.com (Eric S. Raymond)
 Primary-site:	locke.ccil.org /pub/esr
-		166K intercal-0.16.tar.gz
+		166K intercal-0.17.tar.gz
 Platforms:	All
 Copying-policy:	GPL
 End

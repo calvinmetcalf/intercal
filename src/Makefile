@@ -8,7 +8,7 @@
 # all over creation behind your back.
 # (/dev/null may be another good choice :-))
 
-DVMT=~/WWW/intercal-0.16
+DVMT=~/WWW/intercal-0.17
 #DVMT=/usr/local
 
 BINDIR = $(DVMT)/bin
