@@ -91,6 +91,9 @@ By Brian Raiter <breadbox@muppetlabs.com>
 The subdirectory tests contains some programs written only to test the
 compiler.
 
+by Donald Knuth
+  knuth.i       Demonstrates Don Knuth's patch for handling multiline comments
+
 by David Moews
   test1.i	Prints DO THIS TEST HAS BEEN SUCCESSFULLY COMPLETED
   test2.i	Reads in two numbers and multiplies their product
