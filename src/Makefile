@@ -8,13 +8,9 @@
 # all over creation behind your back.
 # (/dev/null may be another good choice :-))
 
-DVMT=~/WWW/intercal-0.18
-#DVMT=/usr/local
-DVMT=/intercal-0.18
-
-BINDIR = $(DVMT)/bin
-INCDIR = $(DVMT)/lib
-LIBDIR = $(DVMT)/lib
+BINDIR = /usr/bin
+INCDIR = /usr/include/intercal
+LIBDIR = /usr/share/intercal
 #INCDIR = $(PWD)
 #LIBDIR = $(PWD)
 
@@ -79,8 +75,13 @@ libick.a: cesspool.o lose.o fiddle.o arrgghh.o
 
 install: all
 	cp ick $(BINDIR)
+	-mkdir $(INCDIR)
 	cp lose.h abcess.h fiddle.h ick-wrap.c $(INCDIR)
-	cp libick.a ../pit/lib/syslib.i ../pit/lib/syslib.?i $(LIBDIR)
+	-mkdir $(LIBDIR)
+	cp libick.a $(LIBDIR)
+	(cd ../pit; cp *.i *.3i  t_tet *.fft glider gun blinkers $(LIBDIR))
+	-mkdir $(LIBDIR)/lib
+	(cd ../pit/lib; cp *.*i $(LIBDIR)/lib) 
 
 clean:
 	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick

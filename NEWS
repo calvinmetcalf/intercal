@@ -1,6 +1,11 @@
 			NEW IN THIS RELEASE
 
-	Release 0.18 (by Eric S. Raymond) 04 April 1998
+	Release 0.19 (by Eric S. Raymond) 16 August 1998
+
+1. Fixed a code-generation error in assignments from tail and hybrid
+variables. (Error pointed out by Malcom Ryan.)
+
+	Release 0.18 (by Eric S. Raymond) 29 April 1998
 
 (The following changes are due to John Cowan <cowan@ccil.org>)
 
