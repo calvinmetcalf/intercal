@@ -6,15 +6,16 @@
  *	PURPOSE: 	Parse arguments for INTERCAL programs.
  */
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "abcess.h"
 #include "lose.h"
 
-int traditional = 1;
+int traditional = 0;
 int wimp_mode = 0;
 
 void
-parseargs(argc,argv)
-int argc;
-char **argv;
+parseargs(int argc, char **argv)
 {
     register int i, j;
     static int helpflag = -1;
@@ -28,7 +29,7 @@ char **argv;
 	&wimp_mode,
 	&traditional
       };
-    static nflags = (sizeof(flags)/sizeof(flags[0]));
+    static int nflags = (int)(sizeof(flags)/sizeof(flags[0]));
 
     for(i = 1;i < argc;i++) {
 	if(argv[i][0] != '+' && argv[i][0] != '-') {

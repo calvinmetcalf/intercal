@@ -1,9 +1,10 @@
 /* cesspool.c -- storage management and runtime support for INTERCAL */
 /* LINTLIBRARY */
 #include <stdio.h>
+#include <stdlib.h>
 #include <varargs.h>
 #include "sizes.h"
-#include "cesspool.h"
+#include "abcess.h"
 #include "lose.h"
 
 #include "numerals.c"
@@ -19,8 +20,7 @@
 int next[MAXNEXT];
 int nextindex = 0;
 
-void pushnext(n)
-int n;
+void pushnext(int n)
 {
     if (nextindex < MAXNEXT)
 	next[nextindex++] = n;
@@ -28,26 +28,29 @@ int n;
 	lose(E123, lineno, (char *)NULL);
 }
 
-unsigned int popnext(n)
-int n;
+unsigned int popnext(int n)
 {
     nextindex -= n;
     if (nextindex < 0) {
 	nextindex = 0;
-	return(-1);
+	return (unsigned int)-1;
     }
     return(next[nextindex]);
 }
 
-unsigned int resume(n)
-unsigned int n;
+unsigned int resume(unsigned int n)
 {
     if (n == 0)
+    {
 	lose(E621, lineno, (char *)NULL);
-    else if ((n = popnext(n)) == -1)
+	return 0;
+    }
+    else if ((n = popnext(n)) == (unsigned int)-1)
+    {
 	lose(E632, lineno, (char *)NULL);
-    else
-	return(n);
+	return 0;
+    }
+    return(n);
 }
 
 /**********************************************************************
@@ -56,7 +59,7 @@ unsigned int n;
  *
  *********************************************************************/
 
-unsigned int pin()
+unsigned int pin(void)
 {
     char		buf[BUFSIZ], *cp, *strtok();
     unsigned int	result = 0;
@@ -88,7 +91,7 @@ unsigned int pin()
 	    if (digit == -1)
 		lose(E579, lineno, cp);
 
-	    if (result < 429496729 || result == 429496729 && digit < 6)
+	    if (result < 429496729 || (result == 429496729 && digit < 6))
 		result = result * 10 + digit;
 	    else
 		lose(E533, lineno, (char *)NULL);
@@ -96,7 +99,7 @@ unsigned int pin()
     }
     if (!n)
 	lose(E562, lineno, (char *)NULL);
-    if (result > Max_large)
+    if (result > (unsigned int)Max_large)
 	lose(E533, lineno, (char *)NULL);
     return(result);
 }
@@ -142,9 +145,7 @@ static int br_trans[10][5] =
  * 11/24/91 LHH:  Removed unnecessary final newline.
  */
 
-static void butcher(val, result)
-unsigned long val;
-char	*result;
+static void butcher(unsigned long val, char *result)
 {
     int i, j;
     int digitsig, digitval;
@@ -199,12 +200,12 @@ char	*result;
 	}
 
 	j = i;
-	while (*result++ = ovb[j++])
+	while ((*result++ = ovb[j++]))
 	    continue;
 	*--result = '\n';
 
 	j = i;
-	while (*++result = res[j++])
+	while ((*++result = res[j++]))
 	    continue;
 /* Final newline will be added by puts.
 	*result++ = '\n';
@@ -213,9 +214,8 @@ char	*result;
     }
 }
 
-void clockface(mode)
+void clockface(bool mode)
 /* enable or disable clockface mode (output IIII instead of IV) */
-bool mode;
 {
     if (mode)
     {
@@ -233,15 +233,14 @@ bool mode;
     }
 }
 
-void pout(val)
+void pout(unsigned int val)
 /* output in `butchered' Roman numerals; see manual, part 4.4.13 */
-unsigned int val;
 {
     char	result[2*MAXROMANS+1];
     extern int wimp_mode;
 
     if(wimp_mode) {
-	printf("%d\n",val);
+	printf("%u\n",val);
     }
     else {
 	butcher(val, result);
@@ -258,13 +257,11 @@ unsigned int val;
  *
  *********************************************************************/
 
-void binin(type,a,forget)
-unsigned int type;
-array *a;
-bool forget;
+void binin(unsigned int type, array *a, bool forget)
 {
-  static unsigned lastin = 0;
-  int i, c, v;
+  static unsigned int lastin = 0;
+  int c, v;
+  unsigned int i;
 
   if (a->rank != 1)
     lose(E241, lineno, (char *)NULL);
@@ -281,13 +278,10 @@ bool forget;
   }
 }
 
-void binout(type,a)
-unsigned int type;
-array *a;
+void binout(unsigned int type, array *a)
 {
-  static unsigned lastout = 0;
-  unsigned c;
-  int i;
+  static unsigned int lastout = 0;
+  unsigned int i, c;
 
   if (a->rank != 1)
     lose(E241, lineno, (char *)NULL);
@@ -311,14 +305,12 @@ array *a;
  *
  *********************************************************************/
 
-unsigned int assign(dest,type,forget,value)
-char *dest;
-unsigned int type, value;
-bool forget;
+unsigned int assign(char *dest, unsigned int type, bool forget,
+		    unsigned int value)
 {
   unsigned int retval;
   if (type == ONESPOT || type == TAIL) {
-    if (value > Max_small)
+    if (value > (unsigned int)Max_small)
       lose(E275, lineno, (char *)NULL);
     if (forget)
       retval = value;
@@ -351,7 +343,8 @@ char *aref(va_alist) va_dcl
   array *a;
   unsigned int v;
   va_list ap;
-  int i, address = 0;
+  int address = 0;
+  unsigned int i;
 
   va_start(ap);
   type = va_arg(ap, unsigned int);
@@ -381,9 +374,9 @@ void resize(va_alist) va_dcl
   unsigned int type;
   array *a;
   bool forget;
-  unsigned int r, v;
+  unsigned int i, r, v;
   va_list ap;
-  int i, prod = 1;
+  int prod = 1;
 
   va_start(ap);
   type = va_arg(ap, unsigned int);
@@ -438,8 +431,8 @@ void resize(va_alist) va_dcl
 
 typedef struct stashbox_t     /* this is a save-stack element */
 {
-    int	type;		      /* variable type */
-    int index;		      /* variable's index within the type */
+    unsigned int type;	      /* variable type */
+    unsigned int index;       /* variable's index within the type */
     union		      /* the data itself */
     {
 	type16	onespot;
@@ -451,14 +444,13 @@ typedef struct stashbox_t     /* this is a save-stack element */
 
 static stashbox *first;
 
-void stashinit()
+void stashinit(void)
 {
   first = NULL;
 }
 
-static stashbox *fetch(type, index)
+static stashbox *fetch(unsigned int type, unsigned int index)
 /* find a stashed variable in the save stack and extract it */
-unsigned int	type, index;
 {
   stashbox **pp = &first, *sp = first;
 
@@ -472,10 +464,8 @@ unsigned int	type, index;
   return (sp);
 }
 
-void stash(type, index, from)
+void stash(unsigned int type, unsigned int index, void *from)
 /* stash away the variable's value */
-char		*from;
-unsigned int	type, index;
 {
   /* create a new stashbox and push it onto the stack */
   stashbox *sp = (stashbox*)malloc(sizeof(stashbox));
@@ -490,9 +480,10 @@ unsigned int	type, index;
     memcpy((char *)&sp->save.onespot, from, sizeof(type16));
   else if (type == TWOSPOT)
     memcpy((char *)&sp->save.twospot, from, sizeof(type32));
-  else if (type == TAIL | type == HYBRID) {
+  else if (type == TAIL || type == HYBRID) {
     array *a = (array*)from;
-    int i, prod;
+    int prod;
+    unsigned int i;
     sp->save.a = (array*)malloc(sizeof(array));
     if (sp->save.a == NULL) lose(E222, lineno, (char *)NULL);
     sp->save.a->rank = a->rank;
@@ -522,11 +513,8 @@ unsigned int	type, index;
   return;
 }
 
-void retrieve(to, type, index, forget)
+void retrieve(void *to, int type, unsigned int index, bool forget)
 /* restore the value of a variable from the save stack */
-char		*to;
-unsigned int	type, index;
-bool            forget;
 {
   stashbox *sp;
 
@@ -537,7 +525,7 @@ bool            forget;
       memcpy(to, (char *)&sp->save.onespot, sizeof(type16));
     else if (type == TWOSPOT)
       memcpy(to, (char *)&sp->save.twospot, sizeof(type32));
-    else if (type == TAIL | type == HYBRID) {
+    else if (type == TAIL || type == HYBRID) {
       array *a = (array*)to;
       if (a->rank) {
 	free(a->dims);
@@ -550,7 +538,7 @@ bool            forget;
       free(sp->save.a);
     }
   }
-  else if (type == TAIL | type == HYBRID) {
+  else if (type == TAIL || type == HYBRID) {
     free(sp->save.a->dims);
     if (type == TAIL)
       free(sp->save.a->data.tail);
@@ -567,14 +555,13 @@ bool            forget;
  *
  *********************************************************************/
 
-unsigned int roll(n)
+unsigned int roll(unsigned int n)
 /* return TRUE on n% chance, FALSE otherwise */
-unsigned int n;
 {
 #ifdef USG
-   return(lrand48() % 100 < n);
+   return((unsigned int)(lrand48() % 100) < n);
 #else
-   return(rand() % 100 < n);
+   return((unsigned int)(rand() % 100) < n);
 #endif /* UNIX */
 }
 

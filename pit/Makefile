@@ -51,7 +51,7 @@ TARGETS = \
 	./sink
 
 test:
-	testcompile $(SOURCES)
+	for x in $(SOURCES); do	echo "Test-compiling $$x"; ../src/ick $$x; done
 
 lines:
 	wc -l $(SOURCES)

@@ -3,11 +3,10 @@
  */
 /*LINTLIBRARY*/
 #include <stdio.h>
+#include <stdlib.h>
+#include "lose.h"
 
-void lose(m, n, s)
-char	*m;
-int	n;
-char	*s;
+void lose(char *m, int n, char *s)
 {
     (void) fprintf(stderr,
 		   "ICL%c%c%cI\t",

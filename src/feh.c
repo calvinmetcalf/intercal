@@ -10,15 +10,14 @@ and optimizations of dubious value for the INTERCAL compiler.
 ****************************************************************************/
 /*LINTLIBRARY */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "sizes.h"
 #include "ick.h"
 #include "y.tab.h"
+#include "fiddle.h"
 #include "lose.h"
-
-int yyerror()
-{
-    /* lose(E017, yylineno, (char *)NULL); */
-}
+#include "feh.h"
 
 /*************************************************************************
  *
@@ -29,15 +28,13 @@ int yyerror()
  *
  **************************************************************************/
 
-node *newnode()
+node *newnode(void)
 /* allocate and zero out a new expression node */
 {
     return((node *)calloc(sizeof(node), 1));
 }
 
-node *cons(type, car, cdr)
-int type;
-node *car, *cdr;
+node *cons(int type, node *car, node *cdr)
 {
     node *np = newnode();
 
@@ -56,7 +53,7 @@ node *car, *cdr;
  *
  **************************************************************************/
 
-unsigned int intern(type, index)
+unsigned int intern(int type, int index)
 {
     atom	*x;
 
@@ -89,7 +86,7 @@ unsigned int intern(type, index)
  *
  **************************************************************************/
 
-void treset()
+void treset(void)
 {
     memset(tuples, '\0', sizeof(tuple) * MAXLINES);
     nonespots = ntwospots = ntails = nhybrids = 0;
@@ -97,11 +94,14 @@ void treset()
     lineno = 0;
 }
 
-tuple *newtuple()
+tuple *newtuple(void)
 /* allocate and zero out a new expression tuple */
 {
     if (lineno >= MAXLINES)
+    {
 	lose(E666, yylineno, (char *)NULL);
+	return NULL;
+    }
     else
 	return(tuples + lineno++);
 }
@@ -115,8 +115,7 @@ tuple *newtuple()
  *
  **************************************************************************/
 
-void typecast(np)
-node *np;
+void typecast(node *np)
 {
     /* recurse so we typecast each node after all its subnodes */
     if (np == (node *)NULL)
@@ -155,7 +154,7 @@ node *np;
  *
  **************************************************************************/
 
-void codecheck()
+void codecheck(void)
 {
     tuple	*tp, *up;
 
@@ -228,9 +227,8 @@ void codecheck()
 
 #define ISCONSTANT(np, v)	((np->opcode == MESH || np->opcode == MESH32) && np->constant == v)
 
-void rfree(np)
+static void rfree(node *np)
 /* recursively free the given node and all nodes underneath */
-node	*np;
 {
     if (np->lval != (node *)NULL)
 	rfree(np->lval);
@@ -239,9 +237,8 @@ node	*np;
     free(np);    
 }
 
-int requal(mp, np)
+static int requal(node *mp, node *np)
 /* do two node trees represent the same expression? */
-node *mp, *np;
 {
     if (mp == (node *)NULL && np == (node *)NULL)
 	return(TRUE);
@@ -255,8 +252,7 @@ node *mp, *np;
 	return(TRUE);
 }
 
-void optimize(np)
-node *np;
+void optimize(node *np)
 {
     /* recurse so we simplify each node after all its subnodes */
     if (np == (node *)NULL)
@@ -310,7 +306,7 @@ node *np;
     if (np->opcode == AND && np->rval->opcode == MESH)
     {
 	np->opcode = MESH;
-	np->constant = and16(np->lval->constant, np->rval->constant);
+	np->constant = and16(np->lval->constant);
 	free(np->rval);
     }
 
@@ -318,7 +314,7 @@ node *np;
     if (np->opcode == OR && np->rval->opcode == MESH)
     {
 	np->opcode = MESH;
-	np->constant = or16(np->lval->constant, np->rval->constant);
+	np->constant = or16(np->lval->constant);
 	free(np->rval);
     }
 
@@ -326,7 +322,7 @@ node *np;
     if (np->opcode == XOR && np->rval->opcode == MESH)
     {
 	np->opcode = MESH;
-	np->constant = xor16(np->lval->constant, np->rval->constant);
+	np->constant = xor16(np->lval->constant);
 	free(np->rval);
     }
 }
@@ -372,44 +368,42 @@ char *enablers[MAXTYPES] =
 
 assoc vartypes[] =
 {
-    ONESPOT,	"ONESPOT",
-    TWOSPOT,	"TWOSPOT",
-    TAIL,	"TAIL",
-    HYBRID,	"HYBRID",
-    0,		(char *)NULL
+    { ONESPOT,	"ONESPOT" },
+    { TWOSPOT,	"TWOSPOT" },
+    { TAIL,	"TAIL" },
+    { HYBRID,	"HYBRID" },
+    { 0,	(char *)NULL }
 };
 
-assoc forgetbits[] =
+static assoc forgetbits[] =
 {
-    ONESPOT,	"oneforget",
-    TWOSPOT,	"twoforget",
-    TAIL,	"tailforget",
-    HYBRID,	"hyforget",
-    0,		(char *)NULL
+    { ONESPOT,	"oneforget" },
+    { TWOSPOT,	"twoforget" },
+    { TAIL,	"tailforget" },
+    { HYBRID,	"hyforget" },
+    { 0,	(char *)NULL }
 };
 
-assoc varstores[] =
+static assoc varstores[] =
 {
-    ONESPOT,	"onespots",
-    TWOSPOT,	"twospots",
-    TAIL,	"tails",
-    HYBRID,	"hybrids",
-    0,		(char *)NULL
+    { ONESPOT,	"onespots" },
+    { TWOSPOT,	"twospots" },
+    { TAIL,	"tails" },
+    { HYBRID,	"hybrids" },
+    { 0,	(char *)NULL }
 };
 
-assoc typedefs[] =
+static assoc typedefs[] =
 {
-    ONESPOT,	"type16",
-    TWOSPOT,	"type32",
-    TAIL,	"type16",
-    HYBRID,	"type32",
-    0,		(char *)NULL
+    { ONESPOT,	"type16" },
+    { TWOSPOT,	"type32" },
+    { TAIL,	"type16" },
+    { HYBRID,	"type32" },
+    { 0,	(char *)NULL }
 };
 
-char *nameof(value, table)
+char *nameof(int value, assoc table[])
 /* return string corresponding to value in table */
-int	value;
-assoc	table[];
 {
     assoc	*ap;
 
@@ -419,10 +413,10 @@ assoc	table[];
     return((char *)NULL);
 }
 
-void prvar(np, fp)
+static void prexpr(node *np, FILE *fp);
+
+static void prvar(node *np, FILE *fp)
 /* print out args to pass to storage manager for reference */
-node	*np;
-FILE	*fp;
 {
     node	*sp;
     int		dim;
@@ -430,26 +424,23 @@ FILE	*fp;
     switch (np->opcode)
     {
     case ONESPOT:
-	(void) fprintf(fp, "onespots[%d]", np->constant);
+	(void) fprintf(fp, "onespots[%lu]", np->constant);
 	break;
 
     case TWOSPOT:
-	(void) fprintf(fp, "twospots[%d]", np->constant);
+	(void) fprintf(fp, "twospots[%lu]", np->constant);
 	break;
 
     case TAIL:
-	(void) fprintf(fp, "TAIL, &tails[%d]", np->constant);
+	(void) fprintf(fp, "TAIL, &tails[%lu]", np->constant);
 	break;
 
     case HYBRID:
-	(void) fprintf(fp, "HYBRID, &hybrids[%d]", np->constant);
+	(void) fprintf(fp, "HYBRID, &hybrids[%lu]", np->constant);
 	break;
 
     case SUB:
 	{
-	  void prexpr();
-	  node *sp;
-
 	  (void) fprintf(fp, "aref(");
 	  prvar(np->lval, fp);
 
@@ -468,10 +459,8 @@ FILE	*fp;
     }
 }
 
-void prexpr(np, fp)
+static void prexpr(node *np, FILE *fp)
 /* print out C-function equivalent of an expression */
-FILE	*fp;
-node	*np;
 {
     switch (np->opcode)
     {
@@ -538,7 +527,7 @@ node	*np;
 	break;
 
     case MESH:
-	(void) fprintf(fp, "0x%x", np->constant);
+	(void) fprintf(fp, "0x%lx", np->constant);
 	break;
 
     case MESH32:
@@ -566,8 +555,7 @@ node	*np;
     (void) free(np);
 }
 
-char *nice_text(text)
-char *text;
+static char *nice_text(char *text)
 {
 #define MAXNICEBUF	512
   static char buf[MAXNICEBUF];
@@ -583,14 +571,11 @@ char *text;
   return buf;
 }
 
-void emit(tn, fp)
+void emit(tuple *tn, FILE *fp)
 /* emit code for the given tuple */
-tuple	*tn;
-FILE	*fp;
 {
     node *np, *sp;
     int	dim;
-    char *name;
     static int make_cf_target = 0;
 
     if (yydebug || compile_only)
@@ -633,7 +618,7 @@ FILE	*fp;
 	}
 	prvar(np->lval, fp);
 	(void) fprintf(fp,", %s", nameof(sp->opcode, vartypes));
-	(void) fprintf(fp,", %s[%d], ", nameof(sp->opcode, forgetbits),
+	(void) fprintf(fp,", %s[%lu], ", nameof(sp->opcode, forgetbits),
 			   sp->constant);
 	prexpr(np->rval, fp);
 	(void) fprintf(fp,");\n");
@@ -646,7 +631,7 @@ FILE	*fp;
 	  dim++;
 	(void) fprintf(fp, "\tresize(");
 	prvar(np->lval, fp);
-	(void) fprintf(fp, ", %s[%d]", nameof(np->lval->opcode, forgetbits),
+	(void) fprintf(fp, ", %s[%lu]", nameof(np->lval->opcode, forgetbits),
 		       np->lval->constant);
 	(void) fprintf(fp, ", %d", dim);
 	for (sp = np->rval; sp; sp = sp->rval) {
@@ -676,7 +661,7 @@ FILE	*fp;
 
     case STASH:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp, "\tstash(%s, %d, %s+%d);\n",
+	    (void) fprintf(fp, "\tstash(%s, %lu, %s+%lu);\n",
 			  nameof(np->opcode, vartypes),
 			  np->constant,
 			  nameof(np->opcode, varstores), np->constant);
@@ -684,7 +669,7 @@ FILE	*fp;
 
     case RETRIEVE:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp, "\tretrieve(%s+%d, %s, %d, %s[%d]);\n",
+	    (void) fprintf(fp, "\tretrieve(%s+%lu, %s, %lu, %s[%lu]);\n",
 			   nameof(np->opcode, varstores), np->constant,
 			   nameof(np->opcode, vartypes),
 			   np->constant,
@@ -694,14 +679,14 @@ FILE	*fp;
 
     case IGNORE:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp,"\t%s[%d] = TRUE;\n",
+	    (void) fprintf(fp,"\t%s[%lu] = TRUE;\n",
 		       nameof(np->opcode, forgetbits),
 		       np->constant);
 	break;
 
     case REMEMBER:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp,"\t%s[%d] = FALSE;\n",
+	    (void) fprintf(fp,"\t%s[%lu] = FALSE;\n",
 		       nameof(np->opcode, forgetbits),
 		       np->constant);
 	break;
@@ -718,7 +703,7 @@ FILE	*fp;
 	for (np = tn->u.node; np; np = np->rval)
 	{
 	    (void) fprintf(fp,
-			   "\tint i;\n\n\tfor (i = 0; i < sizeof(linetype)/sizeof(int); i++)\n");
+			   "\tint i;\n\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
 	    (void) fprintf(fp,
 			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
 	    (void) fprintf(fp,
@@ -730,7 +715,7 @@ FILE	*fp;
 	for (np = tn->u.node; np; np = np->rval)
 	{
 	    (void) fprintf(fp,
-			   "\tint i;\n\n\tfor (i = 0; i < sizeof(linetype)/sizeof(int); i++)\n");
+			   "\tint i;\n\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
 	    (void) fprintf(fp,
 			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
 	    (void) fprintf(fp,
@@ -747,7 +732,7 @@ FILE	*fp;
 	  if (np->lval->opcode == TAIL || np->lval->opcode == HYBRID) {
 	    (void) fprintf(fp,"\tbinin(");
 	    prvar(np->lval, fp);
-	    (void) fprintf(fp, ", %s[%d]",
+	    (void) fprintf(fp, ", %s[%lu]",
 			   nameof(np->lval->opcode, forgetbits),
 			   np->lval->constant);
 	    (void) fprintf(fp,");\n");
@@ -763,7 +748,7 @@ FILE	*fp;
 	    }
 	    prvar(np->lval, fp);
 	    (void) fprintf(fp,", %s", nameof(sp->opcode, vartypes));
-	    (void) fprintf(fp,", %s[%d]", nameof(sp->opcode, forgetbits),
+	    (void) fprintf(fp,", %s[%lu]", nameof(sp->opcode, forgetbits),
 			   sp->constant);
 	    (void) fprintf(fp,", pin());\n");
 	  }
@@ -795,7 +780,7 @@ FILE	*fp;
 	fprintf(stderr,"compiling a splat... line = %d (%s)\n",
 		tn->lineno,textlines[tn->lineno]);
 		*/
-	(void) fprintf(fp,"\t(void) puts(\"%s\");\n",
+	(void) fprintf(fp,"\t(void) puts(\"*%s\");\n",
 		       nice_text(textlines[tn->lineno]));
 	(void) fprintf(fp,
 		       "\texit(%d);\n", tn->lineno);

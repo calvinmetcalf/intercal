@@ -9,9 +9,14 @@ DESCRIPTION
 ****************************************************************************/
 /*LINTLIBRARY */
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <signal.h>
 #include "ick.h"
+#include "feh.h"
 #include "y.tab.h"
+#include "sizes.h"
 #include "lose.h"
 
 #ifndef ICKINCLUDEDIR
@@ -21,14 +26,23 @@ DESCRIPTION
 #define ICKLIBDIR "/usr/local/lib"
 #endif
 #ifndef CC
-#define CC "cc"
+#define CC "gcc"
 #endif
 
+#ifdef USE_YYRESTART
+/* function supplied by lex */
+extern void yyrestart(FILE*);
+#endif /* USE_YYRESTART */
+
+/* function created by yacc */
+extern int yyparse(void);
+
 /* compilation options */
-bool dooptimize;	/* do optimizations? (controlled by -O) */
-bool clockface;		/* set up output to do IIII for IV */
 bool compile_only; 	/* just compile into C, don't run the linker */
-bool traditional;		/* insist on strict INTERCAL-72 conformance */
+bool traditional;	/* insist on strict INTERCAL-72 conformance */
+
+static bool dooptimize;	/* do optimizations? (controlled by -O) */
+static bool clockface;	/* set up output to do IIII for IV */
 
 #define SKELETON	"ick-wrap.c"
 #define SYSLIB          "syslib.i"
@@ -58,13 +72,23 @@ tuple tuples[MAXLINES];
 static void abend(int signim)
 {
     lose(E778, yylineno, (char *)NULL);
+    (void) signim;
 }
 
-main(argc, argv)
-int	argc;
-char	*argv[];
+static void print_usage(char *prog, char *options)
 {
-    extern char	*optarg;	/* set by getopt */
+    fprintf(stderr,"Usage: %s [-%s] <file> [<file> ... ]\n",prog,options);
+    fprintf(stderr,"\t-c\t:compile INTERCAL to C, but don't compile C\n");
+    fprintf(stderr,"\t-d\t:print debugging information (implies -c)\n");
+    fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
+    fprintf(stderr,"\t-C\t:clockface output (e.g. use IIII instead of IV)\n");
+    fprintf(stderr,"\t-O\t:attempt to optimize generated code\n");
+    fprintf(stderr,"\t<file>\tINTERCAL source file(s) (use extension .i)\n");
+    fprintf(stderr,"\t\teach file produces a separate output program.\n");
+}
+
+int main(int argc, char *argv[])
+{
     extern int	optind;		/* set by getopt */
     char	buf[BUFSIZ], buf2[BUFSIZ], *chp, *strrchr();
     tuple	*tp;
@@ -74,7 +98,6 @@ char	*argv[];
     FILE	*ifp, *ofp;
     int		maxabstain;
     bool        needsyslib;
-    void	print_usage();
 
     if (!(includedir = getenv("ICKINCLUDEDIR")))
       includedir = ICKINCLUDEDIR;
@@ -88,11 +111,11 @@ char	*argv[];
 	switch (c)
 	{
 	case 'c':
-	    compile_only = 1;
+	    compile_only = TRUE;
 	    break;
 
 	case 'd':
-	    yydebug = compile_only = 1;
+	    yydebug = compile_only = TRUE;
 	    break;
 
 	case 'C':
@@ -100,7 +123,7 @@ char	*argv[];
 	    break;
 
 	case 't':
-	    traditional = 1;
+	    traditional = TRUE;
 	    break;
 
 	case 'O':
@@ -117,9 +140,9 @@ char	*argv[];
     }
 
     (void) signal(SIGSEGV, abend);
-#ifdef	SIGBUS
+#ifdef SIGBUS
     (void) signal(SIGBUS, abend);
-#endif	/* SIGBUS */
+#endif /* SIGBUS */
 
     (void) sprintf(buf2,"%s/%s",includedir,SKELETON);
 
@@ -202,6 +225,9 @@ char	*argv[];
 	      if ( freopen(buf2, "r", stdin) == (FILE*) NULL ) {
 		lose(E127, 0, (char*) NULL);
 	      }
+#ifdef USE_YYRESTART
+	      yyrestart(stdin);
+#endif /* USE_YYRESTART */
 	      yyparse();
 	    }
 
@@ -273,10 +299,11 @@ char	*argv[];
 			    maxabstain++;
 		    if (maxabstain)
 		    {
-			int	i;
+			int i;
 
 			(void) fprintf(ofp, "#define UNKNOWN\t\t0\n");
-			for (i = 0; i < sizeof(enablers)/sizeof(char *); i++)
+			i = 0;
+			for (; i < (int)(sizeof(enablers)/sizeof(char *)); i++)
 			    (void) fprintf(ofp,
 					   "#define %s\t%d\n",
 					   enablers[i], i+1);
@@ -339,7 +366,7 @@ char	*argv[];
 				       "static bool hyforget[%d];\n",
 				       nhybrids);
 		    }
-		    if (yydebug | compile_only)
+		    if (yydebug || compile_only)
 			for (op = oblist; op < obdex; op++)
 			    (void) fprintf(ofp, " /* %s %d -> %d */\n",
 					   nameof(op->type, vartypes),
@@ -381,19 +408,7 @@ char	*argv[];
 	}
     }
     (void) fclose(ifp);
-}
-
-void print_usage(prog,options)
-char *prog, *options;
-{
-    fprintf(stderr,"Usage: %s [-%s] <file> [<file> ... ]\n",prog,options);
-    fprintf(stderr,"\t-c\t:compile INTERCAL to C, but don't compile C\n");
-    fprintf(stderr,"\t-d\t:print debugging information (implies -c)\n");
-    fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
-    fprintf(stderr,"\t-C\t:clockface output (e.g. use IIII instead of IV)\n");
-    fprintf(stderr,"\t-O\t:attempt to optimize generated code\n");
-    fprintf(stderr,"\t<file>\tINTERCAL source file(s) (use extension .i)\n");
-    fprintf(stderr,"\t\teach file produces a separate output program.\n");
+    return 0;
 }
 
 /* perpetrate.c ends here */

@@ -1,4 +1,4 @@
-/* lose.h --- error message strings
+/* lose.h --- error message strings */
 
 /*
  * Note: these error message texts, with one exception, are direct from 
@@ -121,6 +121,8 @@
 #define E997 "997 ILLEGAL POSSESSION OF A CONTROLLED UNARY OPERATOR.\n\
 	ON THE WAY TO %d\n"
 
-extern void lose();
+extern int lineno;
+
+extern void lose(char *m, int n, char *s);
 
 /* lose.h ends here */

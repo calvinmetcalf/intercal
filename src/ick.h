@@ -1,5 +1,11 @@
 /* ick.h -- compilation types for intercal parser */
 
+/* Comment this out if your version of lex automatically supplies yylineno. */
+#define YYLINENO_BY_HAND
+
+/* Comment this out if your version of lex doesn't use yyrestart(). */
+#define USE_YYRESTART
+
 typedef int	bool;
 #define TRUE	1
 #define FALSE	0
@@ -71,17 +77,11 @@ extern assoc vartypes[];
 extern char *textlines[MAXLINES];
 extern int yylineno;
 
-extern unsigned int mingle(), iselect();
-extern unsigned int and16(), or16(), xor16(), and32(), or32(), xor32();
-extern unsigned int whirl16(), whirl32(), fin16(), fin32();
-
-extern int yydebug;
-extern int yylineno;
-extern int politesse;
-
 /* compilation options */
 extern bool compile_only; /* just compile into C, don't run the linker */
+extern int yydebug;       /* print debugging information while parsing */
+extern int traditional;   /* compile as INTERCAL-72 */
 
-extern int lineno;	/* current source line number; lose() uses it */
+extern int politesse;
 
 /* ick.h ends here */

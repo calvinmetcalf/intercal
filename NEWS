@@ -1,5 +1,11 @@
 			NEW IN THIS RELEASE
 
+		Release 0.13 (by Eric S. Raymond)
+
+1. I folded in patches by Brian Raiter <breadbox@muppetlabs.com> that port
+   this code to Linux and enable it to use flex.  Note: This version has
+   been tested on Linux and SunOS but not yet elsewhere.
+
 		Release 0.12 (by Eric S. Raymond)
 
 1. The code now compiles and runs under Linux, using bison and lex.  It does

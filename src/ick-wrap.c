@@ -1,11 +1,12 @@
 /* $A.c -- generated C-code file for INTERCAL program $A.i */
 
-#include <cesspool.h>
-#include <lose.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-extern unsigned int mingle(), iselect();
-extern unsigned int and16(), or16(), xor16(), and32(), or32(), xor32();
-extern unsigned int whirl16(), whirl32(), fin16(), fin32();
+#include <fiddle.h>
+#include <abcess.h>
+#include <lose.h>
 
 int lineno;
 
@@ -13,9 +14,7 @@ static int abstained[$B]$C;
 $D
 $E
 
-main(argc,argv)
-int argc;
-char **argv;
+int main(int argc, char *argv[])
 {
     int skipto = 0;
 
@@ -43,6 +42,8 @@ $G
     {
     $H
     }
+
+    return 0;
 }
 
 /* Generated code for $A.i ends here */

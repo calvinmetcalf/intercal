@@ -2,7 +2,7 @@
 # Utility productions for the INTERCAL distribution
 #
 ick.tar:
-	(cd ..; tar cvf ick.tar `cat intercal-0.12/MANIFEST`)
+	(cd ..; tar cvf ick.tar `cat intercal-0.13/MANIFEST`)
 	mv ../ick.tar .
 
 ick.tar.Z: ick.tar
@@ -13,4 +13,4 @@ ick.tar.gz: ick.tar
 
 SHAROPTS = -l63 -n intercal -o intercal -a -s esr@snark.thyrsus.com 
 ick.shar:
-	(cd ..; shar $(SHAROPTS) `cat intercal-0.12/MANIFEST` >ick.shar)
+	(cd ..; shar $(SHAROPTS) `cat intercal-0.13/MANIFEST` >ick.shar)

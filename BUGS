@@ -2,7 +2,7 @@
 
 There are still some known bugs in INTERCAL (and no doubt many we don't even
 suspect as yet).  The following list accumulates current bug reports and
-TO DO agenda items from the major INTERCAL hackers through version 0.10.
+TO DO agenda items from the major INTERCAL hackers through version 0.13.
 
 ESR = Eric S. Raymond
 SS  = Steve Swales
@@ -42,12 +42,6 @@ LLH = Louis Howell
    to detect.  Either way, it would be a good bit of work for a
    relatively small gain, and anyone trying it should make sure
    the result isn't buggier than the current version.
-
-5) (ESR) We can't use flex to generate the lexical analyzer.  The
-   frustrating thing is that it *almost* works; only some sources 
-   (including icat.i, pi.i and both life programs) fail.  Looking
-   at the parsing trace suggests that flex is returning something to
-   yacc/bison that does not cause it to terminate as it should.
 
 			TO DO
 

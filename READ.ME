@@ -1,5 +1,5 @@
 		Release Notes for C-INTERCAL
-			version 0.12
+			version 0.13
 
 			DISCREDITS
 
@@ -11,7 +11,8 @@ This implementation was created by Eric S. Raymond <esr@snark.thyrsus.com>
 during a fit of lunacy from which he has since mostly recovered.  It has
 been considerably hacked upon and improved by Steve Swales, Michael Ernst,
 Louis Howell (who wrote the array support stubbed out in Eric's original
-version), and others.
+version), and others.  Brian Raiter ported it to Linux and enabled it to use
+flex.
 
 You can surf to the latest version of this package, and related resources, from
 http://www.ccil.org/~esr/home.html.
@@ -63,7 +64,7 @@ program `foo.i' to executable code, just do
 
 There's a -c option that leaves the generated `foo.c' in place for inspection
 (suppressing compilation to machine code), a -d option that enables verbose
-parse reporting from the YACC parser, a -t option that requires strict
+parse reporting from the yacc/bison parser, a -t option that requires strict
 INTERCAL-72 compliance (rejecting COME FROM and the extensions for bases other
 than two) and an -O option that enables the (hah!) optimizer.  Invoking ick -?
 prints a usage message.  Other than that, yer on yer own.
@@ -73,11 +74,10 @@ option forces output in "clockface" mode, for superstitious users who
 believe writing "IV" upside-down offends IVPITER and would rather
 see IIII.
 
-Steve Swales added [+/-]help, [+/-]traditional, and [+/-]wimpmode options in
-the 0.6 release.  The help option (with either + or -) triggers a 'usage'
-message.
-
-The +traditional option is presently a no-op.
+Every INTERCAL runtime also accepts certain options at runtime (code by 
+Steve Swales).  These include [+/-]help, [+/-]traditional, and [+/-]wimpmode. 
+The help option (with either + or -) triggers a 'usage' message. The
++traditional option is presently a no-op.
 
 Steve writes: "The wimpmode option is the most interesting. I found myself
 always running my test programs with filters on both ends to work around the
@@ -93,9 +93,32 @@ use it... the default is -wimpmode (i.e. NOT wimp mode)."
 			SPREADING THE BLAME
 
 The latest version of INTERCAL is kept available at the Retrocomputing Museun,
-ftp:locke.ccil.org:pub/retro.
+http://www.ccil.org/retro.
 
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal.
+
+			NOTES ON THE LINUX BUILD
+
+At the top of ick.h are two defines that you may need to remove if you
+are using lex instead of flex.
+
+Many lexes export a yylineno variable, an undocumented feature that is
+not in flex (by default). If your build fails because of redecleration
+of yylineno, comment out the define of YYLINENO_BY_HAND.
+
+Some lexes also supply a yyrestart function to begin parsing a second
+file, while others automatically restart after seeing an EOF. (This is
+the case with flex.) If your build fails at link time because
+yyrestart is not defined, comment out the define of USE_YYRESTART.
+
+If you are using gcc in an non-ANSI environment, such as SunOS, it is
+strongly recommended that you add "-Wno-unused -Wimplicit" to the gcc
+command in the makefile. If you are in an ANSI environment and are
+using the current versions of gcc, flex, and bison, C-INTERCAL should
+build with no warnings.
+
+
+
 
 

@@ -15,22 +15,25 @@ WHIRL operator.
 #include <stdio.h>
 #include "sizes.h"
 #include "ick.h"
+#include "feh.h"
 #include "lose.h"
 
+extern int yyerror(char*);
+
+/* Intervene our first-stage lexer. */
+extern int lexer(void);
 #define yylex() lexer()
 
-extern node *newnode(), *cons();
-extern tuple *newtuple();
-extern unsigned int intern();
-extern int yylineno, traditional;
-
 static node *rlist;	/* pointer to current right-hand node list */
-static node *llist;	/* pointer to current left-hand node list */
+/* static node *llist; */ /* pointer to current left-hand node list */
 static node *np;	/* variable for building node lists */
 
 #define ACTION(x, nt, nn)	{x = newtuple(); x->type = nt; x->u.node=nn;}
 #define TARGET(x, nt, nn)	{x = newtuple(); x->type = nt; x->u.target=nn;}
 #define NEWFANGLED	if (traditional) lose(E111,yylineno,(char*)NULL); else
+
+static tuple *splat(void);
+
 %}
 
 %start program
@@ -194,7 +197,7 @@ oparray :    TAIL UNARY NUMBER
 constant:   MESH NUMBER
 		{
 		    /* enforce the 16-bit constant constraint */
-		    if ($2 > Max_small)
+		    if ((unsigned int)$2 > Max_small)
 			lose(E017, yylineno, (char *)NULL);
 		    $$ = newnode();
 		    $$->opcode = MESH;
@@ -277,7 +280,7 @@ unambig	:   variable	{$$ = $1;}
 		    $$->rval->opcode = $1;
 		    if($1 == MESH) {
 			    /* enforce the 16-bit constant constraint */
-			    if ($3 > Max_small)
+			    if ((unsigned int)$3 > Max_small)
 				lose(E017, yylineno, (char *)NULL);
 			    $$->rval->constant = $3;
 		    }
@@ -306,11 +309,10 @@ unambig	:   variable	{$$ = $1;}
 
 %%
 
-tuple *splat()
+static tuple *splat(void)
 /* try to recover from an invalid statement. */
 {
-    extern FILE	*yyin;
-    tuple	*sp;
+    tuple *sp;
     int tok, i, lineno;
     extern bool re_send_token;
 

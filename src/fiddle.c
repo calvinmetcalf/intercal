@@ -4,10 +4,10 @@
  * We link these to the compiler, too, in order to do constant folding
  */
 
+#include "fiddle.h"
 #include "sizes.h"
 
-unsigned int mingle(r, s)
-register unsigned int r, s;
+unsigned int mingle(register unsigned int r, register unsigned int s)
 {
   if (Base == 2) {
     r = ((r & 0x0000ff00) << 8) | (r & 0x000000ff);
@@ -21,7 +21,8 @@ register unsigned int r, s;
     return (r << 1) | s;
   }
   else {
-    unsigned int i, result = 0, fac = 1;
+    unsigned int result = 0, fac = 1;
+    int i;
     for (i = 0 ; i < Small_digits ; i++) {
       result += fac * (s % Base);
       s /= Base;
@@ -34,8 +35,7 @@ register unsigned int r, s;
   }
 }
 
-unsigned int iselect(r, s)
-register unsigned int r, s;
+unsigned int iselect(register unsigned int r, register unsigned int s)
 {
   if (Base == 2) {
     register unsigned int i = 1, t = 0;
@@ -53,8 +53,9 @@ register unsigned int r, s;
     return(t);
   }
   else {
-    unsigned int i, j, result = 0, fac, digit, ofac = 1;
+    unsigned int j, result = 0, fac, digit, ofac = 1;
     for (j = Base - 1 ; j > 0 ; j--) {
+      int i;
       fac = 1;
       for (i = 0; i < Large_digits ; i++) {
 	if ((s / fac) % Base == j) {
@@ -70,8 +71,7 @@ register unsigned int r, s;
   }
 }
 
-unsigned int whirl(len,p,n)
-unsigned int len,p,n;
+static unsigned int whirl(unsigned int len, unsigned int p, unsigned int n)
 {
   unsigned int i, fac = 1, result = 0, d1, d2, dsave;
   d1 = n % Base;
@@ -88,8 +88,7 @@ unsigned int len,p,n;
   return result;
 }
 
-unsigned int and16(n)
-unsigned int n;
+unsigned int and16(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -102,8 +101,7 @@ unsigned int n;
   }
 }
 
-unsigned int or16(n)
-unsigned int n;
+unsigned int or16(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -116,14 +114,12 @@ unsigned int n;
   }
 }
 
-unsigned int whirl16(p,n)
-unsigned int p,n;
+unsigned int whirl16(unsigned int p, unsigned int n)
 {
   return whirl(Small_digits,p,n);
 }
 
-unsigned int and32(n)
-unsigned int n;
+unsigned int and32(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -136,8 +132,7 @@ unsigned int n;
   }
 }
 
-unsigned int or32(n)
-unsigned int n;
+unsigned int or32(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -150,14 +145,12 @@ unsigned int n;
   }
 }
 
-unsigned int whirl32(p,n)
-unsigned int p,n;
+unsigned int whirl32(unsigned int p, unsigned int n)
 {
   return whirl(Large_digits,p,n);
 }
 
-unsigned int xor(len,n)
-unsigned int len,n;
+unsigned int xor(unsigned int len, unsigned int n)
 {
   unsigned int i, fac = 1, result = 0, d1, d2, dsave;
   d1 = n % Base;
@@ -171,8 +164,7 @@ unsigned int len,n;
   return result;
 }
 
-unsigned int xor16(n)
-unsigned int n;
+unsigned int xor16(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -185,8 +177,7 @@ unsigned int n;
   }
 }
 
-unsigned int xor32(n)
-unsigned int n;
+unsigned int xor32(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -199,8 +190,7 @@ unsigned int n;
   }
 }
 
-unsigned int fin(len,n)
-unsigned int len,n;
+static unsigned int fin(unsigned int len, unsigned int n)
 {
   unsigned int i, fac = 1, result = 0, d1, d2, dsave;
   d1 = n % Base;
@@ -214,8 +204,7 @@ unsigned int len,n;
   return result;
 }
 
-unsigned int fin16(n)
-unsigned int n;
+unsigned int fin16(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);
@@ -228,8 +217,7 @@ unsigned int n;
   }
 }
 
-unsigned int fin32(n)
-unsigned int n;
+unsigned int fin32(unsigned int n)
 {
   if (Base == 2) {
     unsigned int m = (n >> 1);

@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <memory.h>
@@ -7,9 +8,18 @@
 #include "y.tab.h"
 #include "lose.h"
 
-#ifdef	YYLINENO_BY_HAND
-int	yylineno = 1;
-#endif	/* YYLINENO_BY_HAND */
+#define YY_NO_UNPUT
+
+#ifndef yywrap
+static int yywrap(void)
+{
+    return 1;
+}
+#endif /* yywrap */
+
+#ifdef YYLINENO_BY_HAND
+int 	yylineno = 1;
+#endif /* YYLINENO_BY_HAND */
 
 #ifdef MAIN
 YYSTYPE	yylval;
@@ -18,48 +28,18 @@ YYSTYPE	yylval;
 char *textlines[MAXLINES];
 int politesse = 0;
 
+#ifdef FLEX_SCANNER
+static char linebuf[YY_BUF_SIZE];
+#else /* FLEX_SCANNER */
 static char linebuf[YYLMAX];
+#endif /* FLEX_SCANNER */
+
 static char *lineptr = linebuf;
 
 bool re_send_token = FALSE;
 
-int lexer()
-{
-    static int tok = BADCHAR;
-
-    if (re_send_token)
-	re_send_token = FALSE;
-    else 
-    {
-	tok = yylex();
-#ifdef YYDEBUG
-	if (yydebug)
-	    (void) (void) fprintf(stdout, "yylex: returning token %d\n", tok); 
-#endif /* YYDEBUG */
-    }
-
-#ifdef YYDEBUG
-    if (yydebug)
-	(void) (void) fprintf(stdout, "lexer: returning token %d\n", tok); 
-#endif /* YYDEBUG */
-    return(tok);
-}
-
-int myatoi(text)
-char *text;
-{
-#define MAXTEXT 100
-    static char buf[MAXTEXT];
-    register int i;
-
-    for(buf[i = 0] = '\0';*text && i < MAXTEXT;text++) {
-	if(isdigit(*text)) {
-	    buf[i++] = *text;
-	}
-    }
-    buf[i] = '\0';
-    return atoi(buf);
-}
+int lexer(void);
+static int myatoi(char *text);
 	
 /*
  * The spectacular ugliness of INTERCAL syntax requires that the lexical
@@ -71,9 +51,10 @@ char *text;
  */
 
 #undef getc
-int getc(fp)
-FILE	*fp;
+int getc(FILE *fp)
 {
+    extern FILE* yyin;
+
     static bool bangflag = FALSE;
     static bool backflag = FALSE;
 
@@ -135,12 +116,29 @@ FILE	*fp;
 	}
 	else
 	{
+#ifdef ACCEPT_LOWERCASE
 	    if (islower(c))
 		c = toupper(c);
+#endif /* ACCEPT_LOWERCASE */
 	    return(*lineptr++ = c);
 	}
     }
 }
+
+/* replace YY_INPUT so that it uses our getc function. */
+#undef YY_INPUT
+#define YY_INPUT(buf,result,max_size) \
+	{ \
+	  int c = getc(yyin); \
+	  if (c == EOF) { \
+	    if (ferror(yyin)) \
+	      YY_FATAL_ERROR("input in flex scanner failed"); \
+	    result = YY_NULL; \
+	  } else { \
+	    buf[0] = c; \
+	    result = 1; \
+	  } \
+	}
 
 %}
 
@@ -225,13 +223,55 @@ GIVE{W}UP	{return(GIVE_UP);}
 
 %%
 
-#ifdef MAIN
-int yyerror()
+int lexer(void)
 {
-    (void) printf("lextest: lexer error.\n");
+    static int tok = BADCHAR;
+
+    if (re_send_token)
+	re_send_token = FALSE;
+    else 
+    {
+	tok = yylex();
+#ifdef YYDEBUG
+	if (yydebug)
+	    (void) fprintf(stdout, "yylex: returning token %d\n", tok); 
+#endif /* YYDEBUG */
+    }
+
+#ifdef YYDEBUG
+    if (yydebug)
+	(void) fprintf(stdout, "lexer: returning token %d\n", tok); 
+#endif /* YYDEBUG */
+    return(tok);
 }
 
-main()
+static int myatoi(char *text)
+{
+#define MAXTEXT 100
+    static char buf[MAXTEXT];
+    register int i;
+
+    for(buf[i = 0] = '\0';*text && i < MAXTEXT;text++) {
+	if(isdigit(*text)) {
+	    buf[i++] = *text;
+	}
+    }
+    buf[i] = '\0';
+    return atoi(buf);
+}
+
+void yyerror(char *errtype)
+{
+#ifdef MAIN
+    (void) printf("lextest: lexer error: %s.\n", errtype);
+#else /* MAIN */
+    /* lose(E017, yylineno, (char *)NULL); */
+    (void) errtype;
+#endif /* MAIN */
+}
+
+#ifdef MAIN
+int main(void)
 {
 	int	t;
 
@@ -240,10 +280,6 @@ main()
 		(void) printf("%03d %09d\n", t, yylval.numval);
 		yylval.numval = 0;
 	}
+	return 0;
 }
 #endif /* MAIN */
-
-int yywrap()
-{
-    return(EOF);
-}
