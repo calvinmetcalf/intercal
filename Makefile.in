@@ -23,6 +23,9 @@ INSTALL_DATA = @INSTALL_DATA@
 # Generic install program.
 INSTALL = @INSTALL@
 
+# This can be overridden from the command line
+DESTDIR=
+
 CC = @CC@
 CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DYYDEBUG
 LDFLAGS = @LDFLAGS@
@@ -72,17 +75,17 @@ libick.a: cesspool.o lose.o fiddle.o arrgghh.o
 	-ranlib libick.a
 
 install: all
-	cp ick $(bindir)
-	cp libick.a $(libdir)
-	-mkdir -p $(incdir)
-	cp lose.h abcess.h fiddle.h $(incdir)
-	-mkdir $(datadir)
-	(cp -r pit $(datadir))
-	cp ick-wrap.c $(datadir)
+	cp ick $(DESTDIR)$(bindir)
+	cp libick.a $(DESTDIR)$(libdir)
+	-mkdir -p $(DESTDIR)$(incdir)
+	cp lose.h abcess.h fiddle.h $(DESTDIR)$(incdir)
+	-mkdir $(DESTDIR)$(datadir)
+	(cp -r pit $(DESTDIR)$(datadir))
+	cp ick-wrap.c $(DESTDIR)$(datadir)
 
 uninstall:
-	rm -f $(bindir)/ick $(libdir)/libick.a
-	rm -fr $(incdir) $(datadir)
+	rm -f $(DESTDIR)$(bindir)/ick $(DESTDIR)$(libdir)/libick.a
+	rm -fr $(DESTDIR)$(incdir) $(DESTDIR)$(datadir)
 
 intercal.spec:
 	specgen.sh @PACKAGE_VERSION@ >intercal.spec
