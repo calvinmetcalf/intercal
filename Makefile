@@ -36,8 +36,10 @@ LOADLIBS = @LIBS@ @INTLLIBS@ @LEXLIB@
 CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c
 ISOURCES = cesspool.c arrgghh.c ick-wrap.c
 HEADERS = ick.h lose.h sizes.h abcess.h fiddle.h feh.h
-MISC = configure.ac config.h.in specgen.sh
-SOURCES = $(CSOURCES) $(ISOURCES) $(HEADERS) $(MISC)
+BUILD = Makefile.in Makefile configure.ac config.h.in specgen.sh intercal.spec
+MISC = intercal.el
+DOCS = BUGS COPYING NEWS READ.ME
+SOURCES = $(CSOURCES) $(ISOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
 
 all: ick libick.a
 
@@ -82,19 +84,19 @@ uninstall:
 	rm -f $(bindir)/ick $(libdir)/libick.a
 	rm -fr $(incdir) $(datadir)
 
+intercal.spec:
+	specgen.sh @PACKAGE_VERSION@ >intercal.spec
+
 TAGS: $(SOURCES)
 	etags $(SOURCES)
 
 dist: intercal-@PACKAGE_VERSION@.tar.gz
 
-intercal-@PACKAGE_VERSION@.tar.gz:
-	sed "s:^:intercal-@PACKAGE_VERSION@/:" <MANIFEST >manifest
-	(cd ..; ln -s intercal intercal-@PACKAGE_VERSION@)
-	(cd ..; tar -czvf intercal/intercal-@PACKAGE_VERSION@.tar.gz `cat intercal/manifest`)
-	rm ../intercal-@PACKAGE_VERSION@ manifest
-
-intercal.spec:
-	specgen.sh @PACKAGE_VERSION@ >intercal.spec
+intercal-@PACKAGE_VERSION@.tar.gz: $(SOURCES)
+	@find $(SOURCES) -type f -print | grep -v RCS | sed s:^:intercal-@PACKAGE_VERSION@/: >MANIFEST
+	@(cd ..; ln -s intercal intercal-@PACKAGE_VERSION@)
+	(cd ..; tar -czvf intercal/intercal-@PACKAGE_VERSION@.tar.gz `cat intercal/MANIFEST`)
+	@(cd ..; rm intercal-@PACKAGE_VERSION@)
 
 RPMROOT=/usr/src/redhat
 RPM = rpmbuild
