@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<HTML>
+<HEAD>
+
+<TITLE>Abstraction and Modularity in INTERCAL</TITLE>
+
+
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<BR><BR><BR>
+<TT>
+<BLOCKQUOTE>
+<img src="notfunny.png" align=right>
+Abstraction and Modularity in INTERCAL<br>
+D. Alexander Garrett<br>
+CS-538: Theory and Design of Programming Languages.<br clear=all>
+<P>
+"<em>And remember, when you look into the pit, the pit looks back into
+you.</em>"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- Anonymous INTERCAL hacker
+<P>
+
+On May 26, 1972, two students at Princeton University took the
+programming community if not by storm, at least by mild sprinkle when
+they released INTERCAL[<A HREF="#note1">1</A>]. They were summarily
+dismissed from Princeton and forced to flee to a small banana republic
+where they refine the finer points of the language on political
+prisoners. This is, of course, strictly against the Geneva Convention,
+but as you will see, INTERCAL strives to be an unconventional
+language.
+<P>
+Eighteen years later, while suffering from a paralytic attack of
+ennui, the Mad Malvernite J. Lapin perpetrated a hack of untold
+consequences upon the world by rereleasing INTERCAL under UN*X, which
+he renamed C-INTERCAL. Unfortunately, J. Lapin appears to be a
+pseudonym, so nobody can determine upon whose shoulders the blame
+should rest for such malfeasance. However, some people suspect that
+the rerelease of INTERCAL heralds the time when the Old Ones shall
+wake from their sleep deep beneath the sea and shall rule over the
+earth for 2^32 years, befuddling men's minds and forcing them to use
+buggy overpriced software[<A href="#note2">2</A>].
+<P>
+But I'm not here to talk about eschatology, I'm here to talk about
+modularity and abstraction. Well, believe me, you couldn't have
+designed a language more abstract than INTERCAL. To begin with, one of
+the most important aspects of abstraction is information
+hiding. Information hiding is a time honoured tradition of computer
+programmers, although sometimes it goes by its other name, "job
+security". The idea is to make your code as obscure as possible,
+hiding any possible information, so your employer couldn't fire you
+and hire some junior birdman mailboy to maintain your code. INTERCAL
+doesn't only hide information it actively distorts it. For example,
+the easiest way to store the value of 65536 in a 32-bit INTERCAL
+variable is: <P><BLOCKQUOTE> DO:1&lt;-#0$#256
+</BLOCKQUOTE>
+<P>
+If that's the easiest way, imagine the power at your fingertips if
+you're trying to be deliberately obscure! To further demonstrate, if
+you were to write a program in INTERCAL which reads in 32-bit unsigned
+integers, treats them as signed 2's complement numbers, and prints out
+their absolute values, it would take about 22 lines of code and
+between 15 and 30 minutes to write, whereas the same program could be
+written in a single line of SNOBOL or APL requiring about a minute to
+write both[<A HREF="#note3">3</A>]. So not only does INTERCAL allow
+the programmer to generate twenty times as much code as most other
+languages, making the programmer appear much more productive than his
+colleagues forced to program in a terse language, an INTERCAL program
+also takes much longer to write, allowing for more Quake-breaks. And
+as an added bonus, when the programmer is done, the information is so
+cleverly hidden that not even Sparky the Wonder Dog could find it, and
+she can find gravy in a cesspool! This allows the programmer to take
+even more Quake-breaks, as management doesn't dare fire such an
+important asset to the company.
+<P>
+In addition to information hiding, multinational support is also an
+important part of abstraction. As information exchange causes the
+globe to shrink,[<A HREF="#note4">4</A>] it's important that
+programming languages are able to support a wide variety of different
+cultures. To that end, INTERCAL took the obvious step. Since the
+number systems of different countries are different from other
+different countries where the relationship between the different
+countries can be symmetric or transitive, it cannot, for obvious
+reasons, be reflexive, INTERCAL has implemented a different number
+system.  Instead of using numerals, all input is done by typing in the
+name of the number.  For example, if you wanted to feed the value of
+523 to an INTERCAL program, the input would look like "FIVE TWO
+THREE."[<A HREF="#note5">5</A>] Additionally, INTERCAL will also
+accept the value of OH for zero and NINER for 9. Recognising that
+INTERCAL would have multicultural scope, the implementors implemented
+number support for input digits in Sanskrit, Basque, Tagalog,
+Classical Nahuatl, Georgian, Kwakiutl, and Volapuk.
+<P>
+Until the new INTERCAL compiler with better RYM[<A
+HREF="#note6">6</A>] access comes out, the old compiler has no way of
+knowing which language you are familiar with and thus it doesn't know
+what language to produce its output in[<A
+HREF="#note7">7</A>]. INTERCAL elegantly solves this problem by
+producing its output in Roman numerals, under the assumption that when
+Rome was at the height of its strength, half the world was under its
+dominion, so the comprehension of Roman numerals is part of our racial
+memory.
+<P>
+In addition to being a versatile and truly international language,
+INTERCAL is also very simple. For example, in most languages the
+logical operators AND, OR, and XOR are binary, i.e., they require two
+operands to operate on. In INTERCAL, AND, OR, and XOR are unary
+operators, thereby halving the potential for pernicious logical
+errors. AND is represented by the ampersand (&amp;), OR by the
+inverted, baseless isoceles triangle (V) and XOR by the what[<A
+HREF="#note8">8</A>] (?). The way the unary operators work is to
+perform the required operation on adjacent bits in the variable. Thus,
+#&amp;77 (binary = 1001101) is binary 0000000000000100 = 4, #V77 is
+binary 1000000001101111 = 32879, and #?77 is binary 1000000001101011 =
+32875.[<A HREF="#note9">9</A>]
+<P>
+Ever since Dijkstra's seminal paper "Use of GOTO Considered Harmful"
+was published in Communications of the ACM, there has been a hue and
+cry against the use of GOTO. INTERCAL recognises the importance of
+structured programming and rebukes the GOTO, saying <EM>retro me
+iad</EM>[<A HREF="#note10">10</A>]. In fact, the implementors of
+INTERCAL feel so strongly about the poor programming habits that GOTO
+encourages, that they implemented GOTO's opposite number, COME
+FROM. Thus if you had a program which looked similar to below:
+<BLOCKQUOTE>
+(1)	PLEASE <YOUR STATEMENT HERE><BR> 
+<BLOCKQUOTE>
+.<BR> 
+.<BR> 
+.
+</BLOCKQUOTE>
+(2)	DO COME FROM (1)
+</BLOCKQUOTE>
+anytime the program executed the statement at label 1, it would
+immediately jump to the statement at label 2 without executing any of
+the intervening statements.  This is very difficult to follow and
+requires considerable expertise to use correctly and makes the code
+almost impossible to follow. That's right, baby -- information hiding.
+<P>
+One of the big changes to C that Stroustroup made when he created C++
+was the use of const data types, which kept the programmer from
+inadvertently changing the values of variables which shouldn't.[<A
+HREF="#note11">11</A>] The creators of INTERCAL recognised the need
+for this way before Stroustroup became Mr. Fancy Pants and so they put
+the IGNORE statement into the language. Any variables or arrays named
+in a list following the DO IGNORE directive will effectively become
+read-only. Their value can be used in operations and assigned to other
+variables, but any attempt to assign a value to a variable being
+IGNOREd will be met with a contempt so profound that the compiler will
+pass over it in utter silence. Of course, there may be a time when you
+want to cast away the constancy of variable, and in that case, you
+would use the REMEMBER directive. Any variable which is REMEMBERed
+will stay so until it is IGNORED. Future versions of the language may
+have a SNUB directive which when used upon a variable will cause it to
+IGNORE any attempts to write to it, even if it is REMEMBERed. The only
+way to make a SNUBbed variable writeable again is through the use of
+the APOLOGIZE statement which has roughly a fifty percent chance of
+working[<A HREF="#note12">12</A>]. The DON'T BE LIKE THAT. YOU REMIND
+ME OF MY MOTHER statement is currently a valid statement in INTERCAL
+though if used upon an IGNOREd variable will not cause a change of
+state in that variable, i.e., it will still be IGNOREd.[<A
+HREF="#note13">13</A>]
+<P>
+INTERCAL is not even vaguely modular and nothing I can say would
+persuade you that it was.<P> INTERCAL is a very dynamic, constantly
+evolving[<A HREF="#note14">14</A>] language which shows much promise
+for future generations of programmers. With languages like Visual
+Basic and Java out there which allow people who can hardly tie their
+shoes to write complicated GUI WWW browsers, people will begin to
+think that programmers aren't wizards and should be earning less than
+that nice young man at the local fast food joint who asks them if
+they'd like fries with that.  Hmmm... as long as I have a couple of
+paragraphs left, I may as well mention that INTERCAL is fully
+portable, as the INTERCAL compiler first generates native C code and
+then compiles that. The INTERCAL compiler, itself, is written in C and
+is easily portable. There's even an INTERCAL major mode for emacs
+which will help you maintain the proper balance of PLEASE, DO, and
+PLEASE DO statements.[<A HREF="#note15">15</A>]
+<P>
+References<BR>
+<BLOCKQUOTE>
+ THE INTERCAL PROGRAMMING LANGUAGE REVISED REFERENCE MANUAL, Woods,
+Donald R. and Lyon, James M.  Revised by Howell, Louis and Raymond, Eric S.
+<BR>
+My pineal gland.
+</blockquote>
+<P>
+Afterword<BR>
+<blockquote>
+The author of this paper is currently residing in a home for the
+criminally insane after attempting to rewrite the Linux kernel in Object
+Disoriented INTERCAL. 
+</blockquote>
+<br><br><br>
+<HR WIDTH="30%">
+<FONT SIZE=2>
+[<A NAME="note1">1</A>] which stands for "Compiler Language With No Pronouncable Acronym", obviously.<BR>
+[<A NAME="note2">2</A>] There's a small sect of Billyites who, pointing to Microsoft, claim that this has already happened.<br>
+[<A NAME="note3">3</A>]These examples shamelessly cribbed from THE INTERCAL PROGRAMMING LANGUAGE REVISED REFERENCE MANUAL, page 2.<br>
+[<A NAME="note4">4</A>]It has been demonstrated that information exchange causes the release of a virtual particle called a metron. As the metron leaves the local system it was originally a part of, the system shrinks by an arbitrary amount which is directly proportional to the tightness of Tom Jones' pants. As more and more information is exchanged, an increasing number of metrons are released, and as Tom Jones' pants keep getting tighter and tighter, the local system, in this case, the planet, is shrinking without bound. What does this mean to you? Not much, really. Actually, I'm kind of sorry I brought it up. Just forget I mentioned it.<br>
+[<A NAME="note5">5</A>]It might also look different, depending on the font your terminal uses.<br>
+[<A NAME="note6">6</A>]Read Your Mind<br>
+[<A NAME="note7">7</A>]True, it could a) look at your input and produce output that matches the language or b) you could include compiler directives mandating an output language. Well, a) would require doubling the size of the system library which is definitely the Wrong Thing and b) would require adding more to the compiler which is definitely the Wrong Thing.<br>
+[<A NAME="note8">8</A>]Which due to the popularity of the movie, The Usual Suspects, may have its name changed to the "what the fuh", pending the creation of an ANSI committee to look into the matter, cubic cubits upon cubic cubits of jargonised deliberations interspersed with sheets of paper saying, "this page intensionally left blank", and at least one best selling pulp novelisation of the process written either by Jackie Collins or Donald Knuth (or both).<br>
+[<A NAME="note9">9</A>]You may be wondering about the splat (#) in front of each number. That's good. It shows that you have a curious mind. However, I'm not going to tell you what it means. That's called "information hiding".<br>
+[<A NAME="note10">10</A>]"get thee behind me, GOTO," obviously<br>
+[<A NAME="note11">11</A>]Somebody's law of programming seen on fortune: "Constants aren't; Variables don't."<br>
+[<A NAME="note12">12</A>]The surest way to get a SNUBbed variable to listen to you, again, is to offer it hot dogs without any buns. Hail Eris!<br>
+[<A NAME="note13">13</A>]Incidentally, INTERCAL is fully compliant with the military's view of female officers and supports the DON'T ASK, DON'T TELL ME YOU DON'T WANT IT, BABY statement.<br>
+[<A NAME="note14">14</A>]"constantly evolving" is a characteristic shared by most things that you put in a dark, cool place and pretend they don't exist, vide my refrigerator.<br>
+[<A NAME="note15">15</A>]Confused? Good. Information hiding.<br>
+
+
+</BLOCKQUOTE>
+<BR><BR><BR>
+</BODY>
+</HTML>
