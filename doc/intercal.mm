@@ -190,7 +190,7 @@ INTERCAL's main advantage over other programming languages is its strict
 simplicity. It has few capabilities, and thus there are few restrictions to
 be kept in mind. Since it is an exceedingly easy language to learn, one
 might expect it would be a good language for initiating novice programmers.
-Perhaps surprising, than, is the fact that it would be more likely to
+Perhaps surprising, then, is the fact that it would be more likely to
 initiate a novice into a search for another line of work. As it turns out,
 INTERCAL is more useful (which isn't saying much) as a challenge to
 professional programmers.  Those who doubt this need only refer back to the
