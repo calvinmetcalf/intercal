@@ -7,6 +7,23 @@ DESCRIPTION
    This module provides storage manglement, code degeneration,
 and optimizations of dubious value for the INTERCAL compiler.
 
+LICENSE TERMS
+    Copyright (C) 1996 Eric S. Raymond 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 ****************************************************************************/
 /*LINTLIBRARY */
 #include <stdio.h>
@@ -18,6 +35,8 @@ and optimizations of dubious value for the INTERCAL compiler.
 #include "fiddle.h"
 #include "lose.h"
 #include "feh.h"
+
+static int emitlineno;   /* line number for errors encountered during emit */
 
 /*************************************************************************
  *
@@ -57,6 +76,9 @@ unsigned int intern(int type, int index)
 {
     atom	*x;
 
+    if (index < 1 || index > 65535)
+	lose(E200, yylineno, (char *)NULL);
+
     /* if it's already on the oblist, return its intindex */
     for (x = oblist; x < obdex; x++)
 	if (x->type == type && x->extindex == index)
@@ -78,6 +100,18 @@ unsigned int intern(int type, int index)
     ++obdex;
 
     return(obdex[-1].intindex);
+}
+
+/*************************************************************************
+ *
+ * This function insures a label is valid.
+ *
+ **************************************************************************/
+
+void checklabel(int label)
+{
+    if (label < 1 || label > 65535)
+	lose(E197, yylineno, (char *)NULL);
 }
 
 /*************************************************************************
@@ -254,6 +288,8 @@ static int requal(node *mp, node *np)
 
 void optimize(node *np)
 {
+    node	*mingleop, *op;
+
     /* recurse so we simplify each node after all its subnodes */
     if (np == (node *)NULL)
 	return;
@@ -262,16 +298,81 @@ void optimize(node *np)
     if (np->rval != (node *)NULL)
 	optimize(np->rval);
 
-    /* check for non-zeroness test */
-    if (np->opcode == SELECT && ISCONSTANT(np->rval, 1) && requal(np->lval->rval, np->lval->lval))
+    /*
+     * OK, now do complete folding of constant expressions.
+     */
+
+    /* fold MINGLE operations on constants */
+    if (np->opcode==MINGLE && (np->lval->opcode==MESH&&np->rval->opcode==MESH))
     {
-	rfree(np->rval);
-	np->rval = np->lval->rval;
-	rfree(np->lval->lval);
-	np->lval = (node *)NULL;
-	np->opcode = TESTNZ;
-	np->width = 16;
+	np->opcode = MESH32;
+	np->constant = mingle(np->lval->constant, np->rval->constant);
+	free(np->lval);
+	free(np->rval);
     }
+
+    /* fold SELECT operations on constants */
+    if (np->opcode == SELECT
+	&& ((np->lval->opcode==MESH || np->lval->opcode==MESH32)
+	    && (np->rval->opcode==MESH || np->rval->opcode==MESH32)))
+    {
+	np->opcode = np->rval->opcode;
+	np->constant = iselect(np->lval->constant, np->rval->constant);
+	free(np->lval);
+	free(np->rval);
+    }
+
+    /* fold AND operations on 16-bit constants */
+    if (np->opcode == AND && np->rval->opcode == MESH)
+    {
+	np->opcode = MESH;
+	np->constant = and16(np->rval->constant);
+	free(np->rval);
+    }
+
+    /* fold AND operations on 32-bit constants */
+    if (np->opcode == AND && np->rval->opcode == MESH32)
+    {
+	np->opcode = MESH32;
+	np->constant = and32(np->rval->constant);
+	free(np->rval);
+    }
+
+    /* fold OR operations on 16-bit constants */
+    if (np->opcode == OR && np->rval->opcode == MESH)
+    {
+	np->opcode = MESH;
+	np->constant = or16(np->rval->constant);
+	free(np->rval);
+    }
+
+    /* fold OR operations on 32-bit constants */
+    if (np->opcode == OR && np->rval->opcode == MESH32)
+    {
+	np->opcode = MESH32;
+	np->constant = or32(np->rval->constant);
+	free(np->rval);
+    }
+
+    /* fold XOR operations on 16-bit constants */
+    if (np->opcode == XOR && np->rval->opcode == MESH)
+    {
+	np->opcode = MESH;
+	np->constant = xor16(np->rval->constant);
+	free(np->rval);
+    }
+
+    /* fold XOR operations on 32-bit constants */
+    if (np->opcode == XOR && np->rval->opcode == MESH32)
+    {
+	np->opcode = MESH32;
+	np->constant = xor32(np->rval->constant);
+	free(np->rval);
+    }
+
+    /*
+     * Less trivial stuff begins here
+     */
 
     /* equality test by XOR */
     if (np->opcode == TESTNZ && np->rval->opcode == XOR)
@@ -284,46 +385,76 @@ void optimize(node *np)
 	free(np->rval);
     }
 
-    /* fold MINGLE operations on constants */
-    if (np->opcode==MINGLE && (np->lval->opcode==MESH&&np->rval->opcode==MESH))
+    /* check for non-zeroness test */
+    if (np->opcode == SELECT && ISCONSTANT(np->rval, 1) && requal(np->lval->rval, np->lval->lval))
     {
-	np->opcode = MESH32;
-	np->constant = mingle(np->lval->constant, np->rval->constant);
-	free(np->lval);
-	free(np->rval);
+	rfree(np->rval);
+	np->rval = np->lval->rval;
+	rfree(np->lval->lval);
+	np->lval = (node *)NULL;
+	np->opcode = TESTNZ;
+	np->width = 16;
     }
 
-    /* fold SELECT operations on constants */
-    if (np->opcode == SELECT && (np->lval->opcode==MESH && np->rval->opcode==MESH))
+    /* following optimizations only work in binary */
+    if (Base != 2)
+      return;
+
+    /* recognize the idioms for various C binary logical operations */
+    if (np->opcode == SELECT
+	&& np->rval->opcode == MESH32 && np->rval->constant == 0x55555555
+	&& (op = np->lval) 
+	    && (op->opcode == AND || op->opcode == OR || op->opcode == XOR)
+	&& (mingleop = op->rval) && mingleop->opcode == MINGLE
+	&& mingleop->rval->width == 16
+	&& mingleop->lval->width == 16)
     {
-	np->opcode = MESH;
-	np->constant = iselect(np->lval->constant, np->rval->constant);
-	free(np->lval);
-	free(np->rval);
+	np->lval = mingleop->lval;
+	np->rval = mingleop->rval;
+
+	switch(op->opcode)
+        {
+	case AND: np->opcode = C_AND; break;
+	case OR: np->opcode = C_OR; break;
+	case XOR: np->opcode = C_XOR; break;
+	default: lose(E778, yylineno, (char *)NULL);
+        }
+
+	free(mingleop); free(op);
     }
 
-    /* fold AND operations on constants */
-    if (np->opcode == AND && np->rval->opcode == MESH)
+    /* recognize idioms for ~ */
+    if (np->opcode == XOR)
     {
-	np->opcode = MESH;
-	np->constant = and16(np->lval->constant);
-	free(np->rval);
-    }
+	if (np->rval->width == 16
+	    && np->lval->opcode == MESH &&np->lval->constant == 0xffff)
+	{
+	    np->opcode = C_NOT;
+	    free(np->lval);
+	}
 
-    /* fold OR operations on constants */
-    if (np->opcode == OR && np->rval->opcode == MESH)
-    {
-	np->opcode = MESH;
-	np->constant = or16(np->lval->constant);
-	free(np->rval);
-    }
+	if (np->lval->width == 16
+	    && np->rval->opcode == MESH && np->rval->constant == 0xffff)
+	{
+	    np->opcode = C_NOT;
+	    np->rval = np->lval;
+	    free(np->rval);
+	}
 
-    /* fold XOR operations on constants */
-    if (np->opcode == XOR && np->rval->opcode == MESH)
-    {
-	np->opcode = MESH;
-	np->constant = xor16(np->lval->constant);
-	free(np->rval);
+	if (np->rval->width == 32
+	    && np->lval->opcode == MESH32 && np->lval->constant == 0xffffffffL)
+	{
+	    np->opcode = C_NOT;
+	    free(np->lval);
+	}
+
+	if (np->lval->width == 32
+	    && np->rval->opcode == MESH32 && np->rval->constant == 0xffffffffL)
+	{
+	    np->opcode = C_NOT;
+	    np->rval = np->lval;
+	    free(np->rval);
+	}
     }
 }
 
@@ -508,7 +639,7 @@ static void prexpr(node *np, FILE *fp)
 
     case FIN:
 	if (Base < 3)
-	  lose(E997, lineno, (char *)NULL);
+	  lose(E997, emitlineno, (char *)NULL);
 	(void) fprintf(fp, "fin%d(", np->width);
 	prexpr(np->rval, fp);
 	(void) fprintf(fp, ")");
@@ -520,7 +651,7 @@ static void prexpr(node *np, FILE *fp)
     case WHIRL4:
     case WHIRL5:
 	if (np->opcode - WHIRL + 3 > Base)
-	  lose(E997, lineno, (char *)NULL);
+	  lose(E997, emitlineno, (char *)NULL);
 	(void) fprintf(fp, "whirl%d(%d, ", np->width, np->opcode - WHIRL + 1);
 	prexpr(np->rval, fp);
 	(void) fprintf(fp, ")");
@@ -550,25 +681,73 @@ static void prexpr(node *np, FILE *fp)
 	prexpr(np->rval, fp);
 	(void) fprintf(fp, " != 0)");
 	break;
+
+    case C_AND:
+	(void) fprintf(fp, "(");
+	prexpr(np->lval, fp);
+	(void) fprintf(fp, " & ");
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
+
+    case C_OR:
+	(void) fprintf(fp, "(");
+	prexpr(np->lval, fp);
+	(void) fprintf(fp, " | ");
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
+
+    case C_XOR:
+	(void) fprintf(fp, "(");
+	prexpr(np->lval, fp);
+	(void) fprintf(fp, " ^ ");
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
+
+    case C_NOT:
+	(void) fprintf(fp, "(~");
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
     }
 
     (void) free(np);
 }
 
-static char *nice_text(char *text)
+static char *nice_text(char *texts[], int lines)
 {
 #define MAXNICEBUF	512
   static char buf[MAXNICEBUF];
-  char *cp;
-  
-  for(cp = buf;*text;cp++,text++) {
+  char *cp, *text;
+  int i;
+
+  if (lines < 1)
+    lines = 1;
+  for (cp = buf, i = 0 ; i < lines ; ++i) {
+    if (i) {
+      (*cp++) = '\n';
+      (*cp++) = '\t';
+    }
+    for (text = texts[i] ; *text ; cp++, text++) {
       if(*text == '"' || *text == '\\') {
-	  (*cp++) = '\\';
+	(*cp++) = '\\';
       }
       *cp = *text;
+    }
   }
   *cp = '\0';
   return buf;
+}
+
+static void emit_guard(tuple *tn, FILE *fp)
+/* emit execution guard for giiven tuple (note the unbalanced trailing {!) */
+{
+    (void) fprintf(fp, "    if (");
+    if (tn->exechance < 100)
+	(void) fprintf(fp, "roll(%d) && ", tn->exechance);
+    (void) fprintf(fp, "!abstained[%d]) {\n", tn - tuples);
 }
 
 void emit(tuple *tn, FILE *fp)
@@ -576,32 +755,46 @@ void emit(tuple *tn, FILE *fp)
 {
     node *np, *sp;
     int	dim;
-    static int make_cf_target = 0;
 
+    /* grind out label and source dump */
     if (yydebug || compile_only)
-	(void) fprintf(fp, "    /* line %03d: %s */\n",
-		   tn - tuples + 1,
-		   textlines[tn-tuples+1]);
-
-    /* don't make a label if we are emitting the jump to a COME FROM */
-    if (make_cf_target)
-	tn->label = 0;
+	(void) fprintf(fp, "    /* line %03d */\n", tn->lineno);
     if (tn->label)
-	(void) fprintf(fp, "L%d:\n", tn->label);
+	(void) fprintf(fp, "L%d:", tn->label);
+    if (yydebug || compile_only)
+	(void) fprintf(fp, "\t/* %s */", textlines[tn->lineno]);
+    (void) fputc('\n', fp);
 
-    /* if this is a COME FROM statement, just make a label and jump to end */
-    if (tn->type == COME_FROM && !make_cf_target)
+    /* set up the "next" lexical line number for error messages */
+    if (tn->type == NEXT) {
+	tuple *up;
+	for (up = tuples; up < tuples + lineno; up++)
+	    if (tn->u.target == up->label) {
+		emitlineno = up->lineno;
+		break;
+	    }
+    } else if (tn->comefrom)
+	emitlineno = tuples[tn->comefrom-1].lineno;
+    else if (tn < tuples + lineno - 1)
+	emitlineno = tn[1].lineno;
+    else
+	emitlineno = yylineno;
+    (void) fprintf(fp, "    lineno = %d;\n", emitlineno);
+
+    /* emit random compiler bug */
+    if (!nocompilerbug)
     {
-	(void) fprintf(fp, "C%d:\n", tn->u.target);
-	goto comefrom;
+#ifdef USG
+	if ((lrand48() & 127) == 127)
+#else
+	if ((rand() & 127) == 127)
+#endif
+	    (void) fprintf(fp, "    lose(E774, lineno, (char *)0);\n");
     }
 
     /* emit conditional-execution prefixes */
-    (void) fprintf(fp, "    if (");
-    if (tn->exechance < 100)
-	(void) fprintf(fp, "roll(%d) && ", tn->exechance);
-    (void) fprintf(fp, "!abstained[(lineno = %d)-1])\n", tn - tuples + 1);
-    (void) fprintf(fp, "    {\n");
+    if (tn->type != COME_FROM)
+	emit_guard(tn, fp);
 
     /* now emit the code for the statement body */
     switch(tn->type)
@@ -692,11 +885,11 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case ABSTAIN:
-	(void) fprintf(fp, "\tabstained[%d-1] = TRUE;\n", tn->u.target);
+	(void) fprintf(fp, "\tabstained[%d] = TRUE;\n", tn->u.target - 1);
 	break;
 
     case REINSTATE:
-	(void) fprintf(fp, "\tabstained[%d-1] = FALSE;\n", tn->u.target);
+	(void) fprintf(fp, "\tabstained[%d] = FALSE;\n", tn->u.target - 1);
 	break;
 
     case ENABLE:
@@ -771,37 +964,39 @@ void emit(tuple *tn, FILE *fp)
 	}
 	break;
 
-    case COME_FROM:
-	(void) fprintf(fp,"\tgoto C%d;\n", tn->u.target);
+    case SPLATTERED:
+	dim = emitlineno - tn->lineno;
+	if (tn->sharedline)
+	    ++dim;
+	(void) fprintf(fp, "\tlose(E000, %d, \"%s\");\n",
+		       emitlineno, nice_text(textlines + tn->lineno, dim));
 	break;
 
-    case SPLATTERED:
-	/*
-	fprintf(stderr,"compiling a splat... line = %d (%s)\n",
-		tn->lineno,textlines[tn->lineno]);
-		*/
-	(void) fprintf(fp,"\t(void) puts(\"*%s\");\n",
-		       nice_text(textlines[tn->lineno]));
-	(void) fprintf(fp,
-		       "\texit(%d);\n", tn->lineno);
+    case COME_FROM:
+	(void) fprintf(fp, "C%d:\n", tn->u.target);
 	break;
 
     default:
-	lose(E778, tn - tuples + 1, (char *)NULL);
+	lose(E778, emitlineno, (char *)NULL);
 	break;
     }
 
-    (void) fprintf(fp, "    }\n");
+    if (tn->type != COME_FROM)
+	(void) fprintf(fp, "    }\n");
 
-  comefrom:
-
-    /* if the statement that was just degenerated was a COME FROM target,
-       emit the code for the jump to the COME FROM. */
-
-    if (tn->comefrom && !make_cf_target) {
-      make_cf_target = 1;
-      emit(tuples + tn->comefrom - 1, fp);
-      make_cf_target = 0;
+    /*
+     * If the statement that was just degenerated was a COME FROM target,
+     * emit the code for the jump to the COME FROM.
+     */
+    if (tn->comefrom) {
+	if (yydebug || compile_only)
+	    (void) fprintf(fp,
+			   "    /* line %03d is a suck point for the COME FROM at line %03d */\n",
+			   tn->lineno, tuples[tn->comefrom-1].lineno);
+	emit_guard(tuples + tn->comefrom - 1, fp);
+	(void) fprintf(fp,
+		       "\tgoto C%d;\n    }\n",
+		       tuples[tn->comefrom-1].u.target);
     }
 }
 

@@ -4,7 +4,10 @@
 
 SOURCES = \
 	./sample.i \
+	./beer.i \
 	./bubble.i \
+	./count.3i \
+	./hail_mary.3i \
 	./icat.i \
 	./tests/limits.i \
 	./tests/test1.i \
@@ -15,10 +18,14 @@ SOURCES = \
 	./tests/test2.i \
 	./tests/testlimits.i \
 	./tests/testsplat.i \
+	./pow.i \
 	./random.i \
+	./random2.i \
+	./rot13.i \
 	./iogerunds.i \
 	./pi.i \
 	./lib/lib2.i \
+	./lib/numio.i \
 	./lib/syslib.i \
 	./lib/plus.i \
 	./primes.i \
@@ -28,7 +35,10 @@ SOURCES = \
 
 TARGETS = \
 	./sample \
+	./beer \
 	./bubble \
+	./count \
+	./hail_mary \
 	./icat \
 	./tests/limits \
 	./tests/test1 \
@@ -39,10 +49,14 @@ TARGETS = \
 	./tests/test2 \
 	./tests/testlimits \
 	./tests/testsplat \
+	./pow \
 	./random \
+	./random2 \
+	./rot13 \
 	./iogerunds \
 	./pi \
 	./lib/lib2 \
+	./lib/numio \
 	./lib/syslib \
 	./lib/plus \
 	./primes \
@@ -51,7 +65,7 @@ TARGETS = \
 	./sink
 
 test:
-	for x in $(SOURCES); do	echo "Test-compiling $$x"; ../src/ick $$x; done
+	for x in $(SOURCES); do	echo "Test-compiling $$x"; ../src/ick -b $$x; done
 
 lines:
 	wc -l $(SOURCES)

@@ -46,7 +46,8 @@ typedef struct tuple_t
 	unsigned int	target;		/* for NEXT statements */
 	node		*node;		/* attached expression node(s) */
     } u;
-    int lineno; 			/* for splatters*/
+    int lineno; 			/* source line for error messages */
+    bool sharedline;			/* if NZ, two statements on a line */
 } tuple;
 
 /* this maps the `external' name of a variable to an internal array index */
@@ -78,9 +79,10 @@ extern char *textlines[MAXLINES];
 extern int yylineno;
 
 /* compilation options */
-extern bool compile_only; /* just compile into C, don't run the linker */
-extern int yydebug;       /* print debugging information while parsing */
-extern int traditional;   /* compile as INTERCAL-72 */
+extern bool compile_only;  /* just compile into C, don't run the linker */
+extern bool nocompilerbug; /* set possibility of E774 to zero */
+extern int traditional;    /* compile as INTERCAL-72 */
+extern int yydebug;        /* print debugging information while parsing */
 
 extern int politesse;
 

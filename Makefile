@@ -1,16 +1,22 @@
 #
 # Utility productions for the INTERCAL distribution
 #
-ick.tar:
-	(cd ..; tar cvf ick.tar `cat intercal-0.13/MANIFEST`)
-	mv ../ick.tar .
+VERSION = 0.15
+MANIFEST = `sed <intercal-$(VERSION)/MANIFEST -e "s/^/intercal-$(VERSION)\//"`
 
-ick.tar.Z: ick.tar
-	compress ick.tar
+tgz: intercal-$(VERSION).tar.gz
+tar: intercal-$(VERSION).tar
 
-ick.tar.gz: ick.tar
-	gzip ick.tar
+intercal-$(VERSION).tar.gz: intercal-$(VERSION).tar
+	gzip -f intercal-$(VERSION).tar
+intercal-$(VERSION).tar:
+	(cd ..; tar cvf ick.tar $(MANIFEST))
+	mv ../ick.tar ./intercal-$(VERSION).tar
 
 SHAROPTS = -l63 -n intercal -o intercal -a -s esr@snark.thyrsus.com 
-ick.shar:
-	(cd ..; shar $(SHAROPTS) `cat intercal-0.13/MANIFEST` >ick.shar)
+shar:
+	(cd ..; shar $(SHAROPTS) $(MANIFEST) >intercal-$(VERSION).shar)
+
+clean:
+	rm -f intercal-$(VERSION).shar intercal-$(VERSION).tar intercal-$(VERSION).tar.gz
+

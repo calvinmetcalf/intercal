@@ -1,5 +1,7 @@
 /* $A.c -- generated C-code file for INTERCAL program $A.i */
 
+/* This code is explicitly *not* GPLed.  Use, abuse, and redistribute freely */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -31,18 +33,11 @@ int main(int argc, char *argv[])
     stashinit();
 
     $F
-
     /* degenerated code */
 $G
-    lose(E633, $B+1, (char *)0);
+    lose(E633, $J, (char *)0);
 
-    /* generated switch for resumes */
- top:
-    switch(skipto)
-    {
-    $H
-    }
-
+$H
     return 0;
 }
 

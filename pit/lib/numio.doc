@@ -1,0 +1,70 @@
+Summary of routines in numio.i:
+
+(3000)   .1 <- character from input
+(3001)   Prints .2 as a character
+(3080)   .1 <- a 16-bit number from the user
+(3089)   .1 <- a 16-bit number from the user, with an error message if
+         non-digits are encountered
+(3090)   Displays the value in .1
+(3099)   Displays the value in .1 and prints a newline
+(3080)   :1 <- a 32-bit number from the user
+(3089)   :1 <- a 32-bit number from the user, with an error message if
+         non-digits are encountered
+(3090)   Displays the value in :1
+(3099)   Displays the value in :1 and prints a newline
+(3990)   Initializes internal arrays.
+
+The file numio.i contains routines for doing "wimpmode"-style I/O - or
+in other words, the C-INTERCAL equivalent of atoi and itoa. (3080) and
+(3090) translate the ASCII input as a number (yes, a number as in
+[0-9]*), and (3090) and (3190) do the same for displaying numbers in
+ASCII. (By the way, the routines can also be made to support EBCDIC:
+simply replace #3 with #15 on lines 41, 81, and 107.)
+
+Each routine also has a "niner" variation. For itoa, (3099) and (3190)
+print a newline at the end of the number. In the case of atoi, (3089)
+and (3189) make sure that the number ends with a newline. In other
+words, they ensure there are no other non-numeric characters in the
+input line. If there are, a typically snide INTERCAL error message is
+displayed. (The regular versions work like C's atoi in that they
+return as soon as they see any non-digit.)
+
+There's not too much to note about these routines. The atoi versions
+use the shift-and-add trick to avoid multiplying by 10, so they should
+be pretty efficient (snort). itoa has no such shortcuts, and the
+routines use the modified division routine which also returns the
+remainder. The 16-bit version is at (2030), and is the familiar one
+created by Louis Howell, copied from syslib2.i. The 32-bit version is
+at (2530), and is just a copy of the standard library routine without
+the lines that throw away the remainder at the end.
+
+The library reserves the use of two arrays - ,3000 and ,3001 - for
+input and output respectively. Each array has one dimension of one
+element, and they are used to provide a getchar and putchar: routines
+(3000) and (3001).
+
+The arrays are initialized by routine (3990); this should be called
+before using any other routines in this file.
+
+Note also that for these routines to work properly, they must be used
+more or less exclusively in regards to other array I/O. Otherwise, the
+getchar and putchar subroutines will get out of synch with the
+Turing-text character loop. If you do want to do other I/O while using
+these routines, you can use (3000) and (3001) as a getchar and putchar
+(note that the latter expects that the character values have already
+been reversed). Or, you can simply re-initialize the ,3000 and/or
+,3001 values after you are done, by storing in them the ASCII value of
+the last character that you wrote in and/or read out. For example,
+if you have displayed some strings and the last thing to be printed
+was a newline, then:
+
+	DO ,3001SUB#1 <- #80
+
+would allow you to safely call the itoa routines, since 80 is the
+bit-reversal of 10.
+
+
+It is my earnest hope that C-INTERCAL programmers everywhere will
+flock to these handy routines, and C-INTERCAL users will thus no
+longer need to fear that they might succumb to the foul and awful
+temptation to use the dastardly +wimpmode option.

@@ -1,5 +1,4 @@
 		Release Notes for C-INTERCAL
-			version 0.13
 
 			DISCREDITS
 
@@ -11,11 +10,8 @@ This implementation was created by Eric S. Raymond <esr@snark.thyrsus.com>
 during a fit of lunacy from which he has since mostly recovered.  It has
 been considerably hacked upon and improved by Steve Swales, Michael Ernst,
 Louis Howell (who wrote the array support stubbed out in Eric's original
-version), and others.  Brian Raiter ported it to Linux and enabled it to use
-flex.
-
-You can surf to the latest version of this package, and related resources, from
-http://www.ccil.org/~esr/home.html.
+version), and others.  Brian Raiter ported it to Linux (doing ANSI cleanup
+along the way), enabled it to use flex, and proofed the manual.
 
 			FILES
 
@@ -32,11 +28,8 @@ BUGS			-- current bug and to-do list
 NEWS			-- info on features and fixes new in this release
 intercal.el		-- elisp for editing INTERCAL code under GNU Emacs
 
-doc/intercal.txt	-- The INTERCAL manual (read this next!)
-doc/intercal.tex	-- TeX source form
-doc/intercal.sty	-- TeX style file
-doc/intercal.ms		-- the manual in nroffable form
-doc/ick.txt		-- new features in C-INTERCAL
+doc/READ.ME		-- historical notes on the docs
+doc/intercal.mm		-- the manual in groffable form
 doc/THEORY		-- some notes on the internals of the INTERCAL compiler
 
 src/Makefile		-- makefile for the INTERCAL compiler
@@ -66,7 +59,8 @@ There's a -c option that leaves the generated `foo.c' in place for inspection
 (suppressing compilation to machine code), a -d option that enables verbose
 parse reporting from the yacc/bison parser, a -t option that requires strict
 INTERCAL-72 compliance (rejecting COME FROM and the extensions for bases other
-than two) and an -O option that enables the (hah!) optimizer.  Invoking ick -?
+than two), a -b option that disables the INTERCAL-72 random-bug feature,
+and an -O option that enables the (hah!) optimizer.  Invoking ick -?
 prints a usage message.  Other than that, yer on yer own.
 
 Another switch affects C-INTERCAL's runtime behavior.  The `-C'
@@ -81,7 +75,7 @@ The help option (with either + or -) triggers a 'usage' message. The
 
 Steve writes: "The wimpmode option is the most interesting. I found myself
 always running my test programs with filters on both ends to work around the
-'nifty' intercal number representations. This was so painful that I decided it
+'nifty' INTERCAL number representations. This was so painful that I decided it
 would be LESS painful (and a lot less code) if I added a 'wimp' option.  With
 the +wimpmode option, the user is subjected to a humiliating message about what
 a wimp he or she is to use this mode, but after that is allowed to use
@@ -92,8 +86,10 @@ use it... the default is -wimpmode (i.e. NOT wimp mode)."
 
 			SPREADING THE BLAME
 
-The latest version of INTERCAL is kept available at the Retrocomputing Museun,
-http://www.ccil.org/retro.
+There is an INTERCAL Resource Page at http://www.ccil.org/intercal
+
+The latest version of INTERCAL is also kept available at the
+Retrocomputing Museun, http://www.ccil.org/retro.
 
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal.
@@ -118,7 +114,9 @@ command in the makefile. If you are in an ANSI environment and are
 using the current versions of gcc, flex, and bison, C-INTERCAL should
 build with no warnings.
 
+				LICENSING
 
-
-
-
+C-INTERCAL is now distributed under the General Public License,
+except for the C skeleton file which is explicitly *not* GPLed
+in order to avoid the (possibly mythical) "license virus" effect.
+See the file COPYING for details on the General Public License.

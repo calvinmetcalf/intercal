@@ -9,6 +9,23 @@ and James M. Lyon.  There are two syntax extensions over the original
 INTERCAL-72 language; the COME FROM statement, and the prefixed forms of the
 WHIRL operator.
 
+LICENSE TERMS
+    Copyright (C) 1996 Eric S. Raymond 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 *****************************************************************************/
 
 %{
@@ -25,14 +42,22 @@ extern int lexer(void);
 #define yylex() lexer()
 
 static node *rlist;	/* pointer to current right-hand node list */
-/* static node *llist; */ /* pointer to current left-hand node list */
+/*static node *llist;*/	/* pointer to current left-hand node list */
 static node *np;	/* variable for building node lists */
 
-#define ACTION(x, nt, nn)	{x = newtuple(); x->type = nt; x->u.node=nn;}
-#define TARGET(x, nt, nn)	{x = newtuple(); x->type = nt; x->u.target=nn;}
-#define NEWFANGLED	if (traditional) lose(E111,yylineno,(char*)NULL); else
-
+extern int stbeginline;	/* line number of last seen preamble */
+static int thisline;	/* line number of beginning of current statement */
 static tuple *splat(void);
+
+#define GETLINENO					\
+    {if (stbeginline < 0) thisline = -stbeginline;	\
+     else {thisline = stbeginline; stbeginline = 0;}}
+
+#define ACTION(x, nt, nn)	\
+    {x = newtuple(); x->type = nt; x->lineno = thisline; x->u.node = nn;}
+#define TARGET(x, nt, nn)	\
+    {x = newtuple(); x->type = nt; x->lineno = thisline; x->u.target = nn;}
+#define NEWFANGLED	if (traditional) lose(E111,yylineno,(char*)NULL); else
 
 %}
 
@@ -65,7 +90,7 @@ static tuple *splat(void);
  * will not conflict with the other tokens.  It is important that
  * WHIRL through WHIRL5 be a continuous sequence.
  */
-%token SPLATTERED TESTNZ EQUALS AND OR XOR FIN MESH32
+%token SPLATTERED TESTNZ C_AND C_OR C_XOR C_NOT EQUALS AND OR XOR FIN MESH32
 %token WHIRL WHIRL2 WHIRL3 WHIRL4 WHIRL5
 
 %type <node> expr varlist variable constant lvalue inlist outlist
@@ -95,16 +120,16 @@ command	:    please perform
 	|    please OHOHSEVEN perform
 		{$3->label = 0; $3->exechance = $1 * $2;}
 	|    LABEL please perform
-		{$3->label = $1; $3->exechance = $2 * 100;}
+		{checklabel($1); $3->label = $1; $3->exechance = $2 * 100;}
 	|    LABEL please OHOHSEVEN perform
-		{$4->label = $1; $4->exechance = $2 * $3;}
+		{checklabel($1); $4->label = $1; $4->exechance = $2 * $3;}
 	|    error
 		{lose(E017, yylineno, (char *)NULL);}
 	;
 
 /* There are two forms of preamble returned by the lexer */
-please	:    DO			{$$ = 1;}
-	|    DO NOT		{$$ = -1;}
+please	:    DO			{GETLINENO; $$ = 1;}
+	|    DO NOT		{GETLINENO; $$ = -1;}
 	;
 
 /* Here's how to parse statement bodies */
@@ -254,7 +279,7 @@ osubscr1:   oparray SUB sublist1
 		{$$ = $1; $$->rval = cons(SUB, $$->rval, $3);}
 	;
 
-/* here goes the general expession syntax */
+/* here goes the general expression syntax */
 expr    :   unambig	        	{$$ = $1;}
 	|   unambig SELECT unambig	{$$ = cons(SELECT, $1, $3);}
 	|   unambig SELECT subscr	{$$ = cons(SELECT, $1, $3);}
@@ -313,7 +338,7 @@ static tuple *splat(void)
 /* try to recover from an invalid statement. */
 {
     tuple *sp;
-    int tok, i, lineno;
+    int tok, i;
     extern bool re_send_token;
 
     /*
@@ -321,9 +346,8 @@ static tuple *splat(void)
      * here is to skip to the next DO, PLEASE or label, then unget that token.
      * which we can do with a tricky flag on the lexer (re_send_token).
      */
-    lineno = yylineno;
 
-    /*	fprintf(stderr,"attempting to splat at line %d....\n",lineno); */
+    /*	fprintf(stderr,"attempting to splat at line %d....\n",yylineno); */
     for(i = 0,re_send_token = FALSE;;i++) {
 	tok = lexer();
 	if (!tok)
@@ -344,7 +368,7 @@ static tuple *splat(void)
 
     /* generate a placeholder tuple for the text line */
     TARGET(sp, SPLATTERED, 0);
-    sp->lineno = lineno;
+
     return(sp);
 }
 

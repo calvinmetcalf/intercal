@@ -2,22 +2,20 @@
 
 There are still some known bugs in INTERCAL (and no doubt many we don't even
 suspect as yet).  The following list accumulates current bug reports and
-TO DO agenda items from the major INTERCAL hackers through version 0.13.
+TO DO agenda items through the current release.
 
 ESR = Eric S. Raymond
 SS  = Steve Swales
 LLH = Louis Howell
+BR = Brian Raiter
 
 1) (ESR) INTERCAL would be intrinsically a crock even if it worked right.
 
-2) (ESR) Error-checking could be improved.  Not all the errors listed in the
-   manual are actually detected (of those listed in lose.h, E000, E197, E200,
-   and E774 are never emitted).  In this respect C-INTERCAL follows
-   nobly in the tradition of many production compilers.
+2) (SS) The system library syslib.i does not appear to work 100% as advertised.
+   (ESR) Louis has corrected several bugs.  The gods alone know what others
+   are lurking in there... 
 
-3) (SS) The system library syslib.i does not appear to work 100% as advertised.
-
-4) (LLH) The lexical analyzer is not completely independent of newlines.
+3) (LLH) The lexical analyzer is not completely independent of newlines.
    There is a conflict between the fact that newlines should be
    ignored almost everywhere, and the facts that the error mechanism
    wants to know about line numbers and the splat mechanism wants
@@ -43,8 +41,37 @@ LLH = Louis Howell
    relatively small gain, and anyone trying it should make sure
    the result isn't buggier than the current version.
 
+4) (BR) I have hacked up a fix to the problem with line numbers being off
+   due to statements sharing/spanning lines. The parser now stores the
+   starting line number for all tuples, not just the splatted
+   ones. Not only does this give synchronized lines in the comments in
+   the degenerated C code, but run-time error messages are just as
+   reliable as the parse/compile-time ones. The line number in the
+   error message is actually the line number of the next statement
+   (e.g., if the next statement is on the same line, the line number
+   of both statements will be used).
+
+   Note that I said "just as reliable," as opposed to "fully
+   reliable". Since the lexer doesn't know where the line ends until
+   after it's already parsed the preamble (DO-PLEASE combo, line
+   label, oh-oh-seven number, etc) of the following line, it actually
+   stores as the starting line number the first non-whitespace of the
+   statement proper. So if a statement has its preamble on one line
+   and the rest of it on the next, the preamble will be beheaded.
+
+   Still, it's a vast improvement, and as LLH points out, it's not
+   going to get much better without writing a preprocessing lexer that
+   can actually separate out the statements before any real parsing
+   begins. Until someone wants to do that, this will do nicely, I think.
+
+   As a side bonus, splatting now shows the entire statement. (Er,
+   except when the statement both spans and shares a line. If a multi-
+   line statement ends on the same line as the beginning of the next
+   statement, the last part will get truncated. Again, not a case we
+   want to be encouraging people to explore anyway.)
+
 			TO DO
 
-1. (ESR) Add more optimization templates, esp. the idioms for &, |, ^, ~.
+1. (ESR) Add more optimization templates, esp. idioms for +, -, *, /.
 
 2. (ESR) Forget this @!%$#! crock and take a long vacation.

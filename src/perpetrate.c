@@ -6,6 +6,23 @@ NAME
 DESCRIPTION
    This is where all the dirty work begins and ends.
 
+LICENSE TERMS
+    Copyright (C) 1996 Eric S. Raymond 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 ****************************************************************************/
 /*LINTLIBRARY */
 #include <stdio.h>
@@ -13,6 +30,7 @@ DESCRIPTION
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <time.h>
 #include "ick.h"
 #include "feh.h"
 #include "y.tab.h"
@@ -40,6 +58,7 @@ extern int yyparse(void);
 /* compilation options */
 bool compile_only; 	/* just compile into C, don't run the linker */
 bool traditional;	/* insist on strict INTERCAL-72 conformance */
+bool nocompilerbug;	/* disable error E774 */
 
 static bool dooptimize;	/* do optimizations? (controlled by -O) */
 static bool clockface;	/* set up output to do IIII for IV */
@@ -54,7 +73,7 @@ int Large_digits = 32;
 unsigned int Max_small = 0xffff;
 unsigned int Max_large = 0xffffffff;
 
-int lineno;	/* current source line number; lose() uses it */
+int lineno;	/* after yyparse, this is the total number of statements */
 
 /* currently supported numeric bases, not exported */
 static int maxbase = 7;
@@ -78,6 +97,7 @@ static void abend(int signim)
 static void print_usage(char *prog, char *options)
 {
     fprintf(stderr,"Usage: %s [-%s] <file> [<file> ... ]\n",prog,options);
+    fprintf(stderr,"\t-b\t:reduce the probability of E774 to zero\n");
     fprintf(stderr,"\t-c\t:compile INTERCAL to C, but don't compile C\n");
     fprintf(stderr,"\t-d\t:print debugging information (implies -c)\n");
     fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
@@ -96,7 +116,7 @@ int main(int argc, char *argv[])
     int	c;
     char	*includedir, *libdir, *getenv();
     FILE	*ifp, *ofp;
-    int		maxabstain;
+    int		maxabstain, nextcount;
     bool        needsyslib;
 
     if (!(includedir = getenv("ICKINCLUDEDIR")))
@@ -106,10 +126,14 @@ int main(int argc, char *argv[])
     if (!(compiler = getenv("CC")))
       compiler = CC;
 
-    while ((c = getopt(argc, argv, "cdtOC@")) != EOF)
+    while ((c = getopt(argc, argv, "bcdtOC@")) != EOF)
     {
 	switch (c)
 	{
+	case 'b':
+	    nocompilerbug = TRUE;
+	    break;
+
 	case 'c':
 	    compile_only = TRUE;
 	    break;
@@ -133,7 +157,7 @@ int main(int argc, char *argv[])
 	case '?':
 	default:
 	case '@':
-	    print_usage(argv[0],"cdtCO");
+	    print_usage(argv[0],"bcdtCO");
 	    exit(1);
 	    break;
 	}
@@ -144,23 +168,31 @@ int main(int argc, char *argv[])
     (void) signal(SIGBUS, abend);
 #endif /* SIGBUS */
 
+    if (!nocompilerbug) {
+#ifdef USG
+	srand48(time(NULL) + getpid());
+#else
+	srand(time(NULL));
+#endif /* UNIX */
+    }
+
     (void) sprintf(buf2,"%s/%s",includedir,SKELETON);
 
     /* now substitute in tokens in the skeleton */
     if ((ifp = fopen(buf2, "r")) == (FILE *)NULL)
-	lose(E999, 0, (char *)NULL);
+	lose(E999, 1, (char *)NULL);
     buf[strlen(buf) - 2] = '\0';
 
     for (; optind < argc; optind++)
     {
 	if (freopen(argv[optind], "r", stdin) == (FILE *)NULL)
-	    lose(E777, 0, (char *)NULL);
+	    lose(E777, 1, (char *)NULL);
 	else
 	{
 	    /* strip off the file extension */
 	    if(!(chp = strrchr(argv[optind],'.')))
 	    {
-		lose(E998, 0, (char *)NULL);
+		lose(E998, 1, (char *)NULL);
 	    }
 	    *chp++ = '\0';
 
@@ -170,9 +202,9 @@ int main(int argc, char *argv[])
 		long strtol();
 		Base = strtol(chp,&chp,10);
 		if (Base < 2 || Base > maxbase)
-		    lose(E998, 0, (char *)NULL);
+		    lose(E998, 1, (char *)NULL);
 		else if (traditional && Base != 2)
-		    lose(E111, 0, (char *)NULL);
+		    lose(E111, 1, (char *)NULL);
 		Small_digits = smallsizes[Base];
 		Large_digits = 2 * Small_digits;
 		Max_small = maxsmalls[Base];
@@ -192,17 +224,17 @@ int main(int argc, char *argv[])
 	    /*
 	     * Miss Manners lives.
 	     */
-	    if (yylineno > 2)
-		if (politesse == 0 || yylineno / politesse > 5)
+	    if (lineno > 2)
+		if (politesse == 0 || lineno / politesse > 5)
 		    lose(E079, yylineno, (char *)NULL);
-		else if (yylineno / politesse < 3)
+		else if (lineno / politesse < 3)
 		    lose(E099, yylineno, (char *)NULL);
 
 	    /*
 	     * check if we need to magically include the system library
 	     */
 	    needsyslib = FALSE;
-	    for (tp = tuples; tp < tuples + lineno; tp++) {
+	    for (tp = tuples; tp->type; tp++) {
 	      /*
 	       * If some label in the (1000)-(2000) range is defined,
 	       * then clearly the syslib is already there, so we
@@ -217,13 +249,13 @@ int main(int argc, char *argv[])
 	       * called, we might need the system library.
 	       */
 	      if (tp->type == NEXT && tp->u.target >= 1000 &&
-		  tp->u.target <= 1999 )
+		  tp->u.target <= 1999)
 		needsyslib = TRUE;
 	    }
 	    if ( needsyslib ) {
 	      (void) sprintf(buf2, "%s/%s", ICKLIBDIR, SYSLIB);
 	      if ( freopen(buf2, "r", stdin) == (FILE*) NULL ) {
-		lose(E127, 0, (char*) NULL);
+		lose(E127, 1, (char*) NULL);
 	      }
 #ifdef USE_YYRESTART
 	      yyrestart(stdin);
@@ -238,7 +270,7 @@ int main(int argc, char *argv[])
 	     * we have to generate different code depending on the
 	     * deducible type of the operand.
 	     */
-	    for (tp = tuples; tp < tuples + lineno; tp++)
+	    for (tp = tuples; tp->type; tp++)
 		if (tp->type == GETS || tp->type == RESIZE
 		    || tp->type == FORGET || tp->type == RESUME)
 		    typecast(tp->u.node);
@@ -247,7 +279,7 @@ int main(int argc, char *argv[])
 
 	    /* perform optimizations */
 	    if (dooptimize)
-		for (tp = tuples; tp < tuples + lineno; tp++)
+		for (tp = tuples; tp->type; tp++)
 		    if (tp->type == GETS || tp->type == RESIZE
 			|| tp->type == FORGET || tp->type == RESUME)
 			optimize(tp->u.node);
@@ -256,7 +288,7 @@ int main(int argc, char *argv[])
 	    (void) strcpy(buf, argv[optind]);
 	    (void) strcat(buf, ".c");
 	    if ((ofp = fopen(buf, "w")) == (FILE *)NULL)
-		lose(E888, 0, (char *)NULL);
+		lose(E888, 1, (char *)NULL);
 	    
 	    fseek(ifp,0L,0);	/* rewind skeleton file */
 
@@ -269,13 +301,13 @@ int main(int argc, char *argv[])
 		    (void) fputs(argv[optind], ofp);
 		    break;
 
-		case 'B':	/* # of source lines */
+		case 'B':	/* # of statements */
 		    (void) fprintf(ofp, "%d", lineno);
 		    break;
 
 		case 'C':	/* initial abstentions */
 		    maxabstain = 0;
-		    for (tp = tuples; tp < tuples + lineno; tp++)
+		    for (tp = tuples; tp->type; tp++)
 			if (tp->exechance <= 0 && tp - tuples + 1 > maxabstain)
 			    maxabstain = tp - tuples + 1;
 		    if (maxabstain)
@@ -294,7 +326,7 @@ int main(int argc, char *argv[])
 
 		case 'D':	/* linetypes array for abstention handling */
 		    maxabstain = 0;
-		    for (tp = tuples; tp < tuples + lineno; tp++)
+		    for (tp = tuples; tp->type; tp++)
 			if (tp->type == ENABLE || tp->type == DISABLE)
 			    maxabstain++;
 		    if (maxabstain)
@@ -309,7 +341,7 @@ int main(int argc, char *argv[])
 					   enablers[i], i+1);
 
 			(void) fprintf(ofp, "int linetype[] = {\n");
-			for (tp = tuples; tp < tuples + lineno; tp++)
+			for (tp = tuples; tp->type; tp++)
 			    if (tp->type >= GETS && tp->type <= COME_FROM)
 				(void) fprintf(ofp,
 					       "    %s,\n",
@@ -374,22 +406,36 @@ int main(int argc, char *argv[])
 					   op->intindex);
 		    break;
 
-		case 'F':
+		case 'F':	/* set clockface option? */
 		    if (clockface)
 			(void) fprintf(ofp, "clockface(TRUE);");
 		    break;
 
 		case 'G':	/* degenerated code */
-		    for (tp = tuples; tp < tuples + lineno; tp++)
+		    for (tp = tuples; tp->type; tp++)
 			emit(tp, ofp);
 		    break;
 
-		case 'H':
-		    for (tp = tuples; tp < tuples + lineno; tp++)
+		case 'H':	/* dispatching for resumes */
+		    nextcount = 0;
+		    for (tp = tuples; tp->type; tp++)
 			if (tp->type == NEXT)
-			    (void) fprintf(ofp,
-					   "\tcase %d: goto N%d; break;\n",
-					   tp - tuples + 1, tp - tuples + 1);
+			    nextcount++;
+		    if (nextcount)
+		    {
+			(void) fputs("/* generated switch for resumes */",ofp);
+			(void) fputs("top:\n    switch(skipto)\n    {\n", ofp);
+			for (tp = tuples; tp->type; tp++)
+			    if (tp->type == NEXT)
+				(void) fprintf(ofp,
+					       "\tcase %d: goto N%d; break;\n",
+					       tp-tuples+1, tp-tuples+1);
+			(void) fprintf(ofp, "    }");
+		    }
+		    break;
+
+		case 'J':	/* # of source file lines */
+		    (void) fprintf(ofp, "%d", yylineno);
 		    break;
 		}
 

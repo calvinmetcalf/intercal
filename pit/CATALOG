@@ -11,8 +11,8 @@ programs.
 Contents:
 
 from original manual:
-  sample.i      Returns absolute value of a 16-bit 2s-complement number
-  lib/syslib.i  Standard library
+  sample.i		Returns absolute value of a 16-bit 2s-complement number
+  lib/syslib-orig.i	Standard library (original buggy version)
 
 by Jon Blow <blojo@ocf.berkeley.edu>
   sink.i        Simple test program
@@ -37,6 +37,25 @@ by Louis Howell <nazgul@llnl.gov>
   lib/lib2.i    Currently contains only a decrement routine, see life.doc
   pi.i		Calculate pi
   primes.i	Find prime numbers
+  pow.i		prints a list of nth powers (test of exponentiation routine)
+  lib/syslib.i	Corrected version of system library.
+
+by Matt Dimeo, via http://www.ionet.net/~timtroyr/funhouse/beer.html
+  beer.i        Print out the lyrics to "99 Bottles of Beer On The Wall"
+
+by Stinglai Ka'abi <stinglai@bureau.World.GOV>:
+  random2.i	Another random-number generator
+
+by Jacob Mandelson <jlm@cco.caltech.edu>
+  rot13.i	a ROT13 filter in INTERCAL
+
+by Jan-Pieter Cornet <johnpc@xs4all.nl>
+  hail_mary.3i	print 1,000,000 Hail Marys
+  count.3i	count from 1 to 10 in TriINTERCAL
+
+By Brian Raiter <breadbox@muppetlabs.com>
+  lib/numio.i	I/O routines 
+  lib/numio.doc	description of the I/O routines
 
 The subdirectory tests contains some programs written only to test the
 compiler.

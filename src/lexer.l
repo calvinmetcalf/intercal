@@ -1,4 +1,25 @@
 %{
+/*
+ * NAME
+ *   lexer.l -- source for the C-INTERCAL lexical analyzer.
+ *
+LICENSE TERMS
+    Copyright (C) 1996 Eric S. Raymond 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -27,6 +48,7 @@ YYSTYPE	yylval;
 
 char *textlines[MAXLINES];
 int politesse = 0;
+int stbeginline = 0;
 
 #ifdef FLEX_SCANNER
 static char linebuf[YY_BUF_SIZE];
@@ -40,7 +62,11 @@ bool re_send_token = FALSE;
 
 int lexer(void);
 static int myatoi(char *text);
-	
+
+#define SETLINENO					\
+    {if (stbeginline == 0)	stbeginline = yylineno;	\
+     else if (stbeginline < 0)	stbeginline = 0;}
+
 /*
  * The spectacular ugliness of INTERCAL syntax requires that the lexical
  * analyzer have two levels. One, embedded in the getc() function, handles
@@ -154,7 +180,6 @@ D	[0-9][\ \t\n0-9]*
 \;		{return(HYBRID);}
 \#		{return(MESH);}
 
-"C^H/"	|
 \$		{return(MINGLE);}
 \~		{return(SELECT);}
 
@@ -169,12 +194,12 @@ V		{yylval.numval = OR; return(UNARY);}
 \'		{return(SPARK);}
 \"		{return(EARS);}
 
-\({W}{D}\)	{yylval.numval = myatoi(yytext); return(LABEL);}
+\({W}{D}\)	{SETLINENO; yylval.numval = myatoi(yytext); return(LABEL);}
 
-DO		{return(DO);}
-PLEASE		{politesse++; return(DO);}
-DO{W}PLEASE	{politesse++; return(DO);}
-PLEASE{W}DO	{politesse++; return(DO);}
+DO		{SETLINENO; return(DO);}
+PLEASE		{SETLINENO; politesse++; return(DO);}
+DO{W}PLEASE	{SETLINENO; politesse++; return(DO);}
+PLEASE{W}DO	{SETLINENO; politesse++; return(DO);}
 NOT		{return(NOT);}
 N\'T		{return(NOT);}
 
@@ -189,7 +214,7 @@ BY		{return(BY);}
 \<-		{return(GETS);}
 CALCULATING	{yylval.numval = GETS; return(GERUND);}
 
-NEXT		{return(NEXT);}
+NEXT		{stbeginline = 0; return(NEXT);}
 NEXTING		{yylval.numval = NEXT; return(GERUND);}
 FORGET		{return(FORGET);}
 FORGETTING	{yylval.numval = FORGET; return(GERUND);}
@@ -211,7 +236,7 @@ READ{W}OUT	{return(READ_OUT);}
 READING{W}OUT	{yylval.numval = READ_OUT; return(GERUND);}
 WRITE{W}IN	{return(WRITE_IN);}
 WRITING{W}IN	{yylval.numval = WRITE_IN; return(GERUND);}
-COME{W}FROM	{return(COME_FROM);}
+COME{W}FROM	{stbeginline = -stbeginline; return(COME_FROM);}
 COMING{W}FROM	{yylval.numval = COME_FROM; return(GERUND);}
 GIVE{W}UP	{return(GIVE_UP);}
 

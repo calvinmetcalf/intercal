@@ -71,7 +71,7 @@
 #define E632 "632 THE NEXT STACK RUPTURES.  ALL DIE.  OH, THE EMBARRASSMENT!\n\
 	ON THE WAY TO %d\n"
 /* Execution has passed beyond the last statement of the program. */
-#define E633 "633 PROGRAM FELL OFF THE EDGE\n\n\
+#define E633 "633 PROGRAM FELL OFF THE EDGE\n\
 	ON THE WAY TO THE NEW WORLD\n"
 /* A compiler error has occurred (see section 8.1). */
 #define E774 "774 RANDOM COMPILER BUG\n\
@@ -81,8 +81,7 @@
 	ON THE WAY TO %d\n"
 
 /*
- * These errors are unique to C-INTERCAL.  They ought to be documented in
- * the revised manual.
+ * These errors are unique to C-INTERCAL.
  */
 /* You tried to use a C-INTERCAL extension with the `traditional' flag on */
 #define E111 "111 COMMUNIST PLOT DETECTED, COMPILER IS SUICIDING\n\

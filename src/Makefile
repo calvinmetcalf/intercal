@@ -8,7 +8,7 @@
 # all over creation behind your back.
 # (/dev/null may be another good choice :-))
 
-DVMT=/home2/esr/WWW/intercal-0.13
+DVMT=/home2/esr/WWW/intercal-0.15
 
 BINDIR = $(DVMT)/bin
 INCDIR = $(DVMT)/lib
@@ -23,11 +23,13 @@ CFLAGS = -I. $(DEBUG) -DICKINCLUDEDIR=\"$(INCDIR)\" \
 	-DICKLIBDIR=\"$(LIBDIR)\" -DYYDEBUG
 LDFLAGS =
 
-# Warning: using flex does not work yet!
+CC = gcc -Wall -W
+
+# You can use lex or flex
 #LEX = lex
 LEX = flex
 
-# However, you can use either yacc or bison
+# You can use either yacc or bison
 #YACC = yacc
 YACC = bison -y
 
@@ -41,11 +43,11 @@ all: ick libick.a
 ick: ick.o lexer.o feh.o lose.o fiddle.o perpetrate.o
 	$(CC) perpetrate.o ick.o lexer.o feh.o lose.o fiddle.o $(LDFLAGS) -o ick
 
-y.tab.h ick.c: ick.y
+y.tab.h ick.c: ick.y ick.h sizes.h feh.h lose.h
 	$(YACC) -d $(YDEBUG) ick.y
 	mv y.tab.c ick.c
 
-lexer.c: lexer.l ick.h
+lexer.c: lexer.l ick.h lose.h
 	$(LEX) $(LFLAGS) lexer.l
 	mv lex.yy.c lexer.c 
 
@@ -67,8 +69,13 @@ libick.a: cesspool.o lose.o fiddle.o arrgghh.o
 	-ranlib libick.a
 
 install: all
+	-mkdir $(BINDIR); rm -f $(BINDIR)/*
 	cp ick $(BINDIR)
+	-mkdir $(INCDIR)
+	(cd $(INCDIR); rm -f lose.h abcess.h fiddle.h ick-wrap.c)
 	cp lose.h abcess.h fiddle.h ick-wrap.c $(INCDIR)
+	-mkdir $(LIBDIR)
+	(cd $(LIBDIR); rm -f libick.a syslib.i)
 	cp libick.a ../pit/lib/syslib.i $(LIBDIR)
 	-ranlib $(LIBDIR)/libick.a
 

@@ -1,7 +1,7 @@
 	PLEASE DO ,1 <- #1
 	DO .4 <- #0
 	DO .5 <- #0
-	PLEASE DO COME FROM (30)
+	DO COME FROM (30)
 	DO WRITE IN ,1
 	DO .1 <- ,1SUB#1
 	DO (10) NEXT

@@ -3,6 +3,7 @@
 extern node *newnode(void);
 extern node *cons(int type, node *car, node *cdr);
 extern unsigned int intern(int type, int index);
+extern void checklabel(int label);
 extern void treset(void);
 extern tuple *newtuple(void);
 extern void typecast(node *np);
