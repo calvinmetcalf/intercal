@@ -41,7 +41,7 @@ LICENSE TERMS
 #define ICKINCLUDEDIR "/usr/local/include"
 #endif
 #ifndef ICKLIBDIR
-#define ICKLIBDIR "/usr/local/lib"
+#define ICKLIBDIR "/usr/local/share"
 #endif
 #ifndef CC
 #define CC "gcc"
@@ -55,8 +55,7 @@ extern void yyrestart(FILE*);
 /* function created by yacc */
 extern int yyparse(void);
 
-/* getopt declaration */
-int getopt(int, char**, char*);
+int yydebug;
 
 /* compilation options */
 bool compile_only; 	/* just compile into C, don't run the linker */
@@ -67,7 +66,7 @@ static bool dooptimize;	/* do optimizations? (controlled by -O) */
 static bool clockface;	/* set up output to do IIII for IV */
 
 #define SKELETON	"ick-wrap.c"
-#define SYSLIB          "syslib"
+#define SYSLIB          "lib/syslib"
 
 /* numeric base defaults, exported to other files */
 
@@ -188,7 +187,7 @@ int main(int argc, char *argv[])
 #endif /* UNIX */
     }
 
-    (void) sprintf(buf2,"%s/%s",includedir,SKELETON);
+    (void) sprintf(buf2,"%s/%s",libdir,SKELETON);
 
     /* now substitute in tokens in the skeleton */
     if ((ifp = fopen(buf2, "r")) == (FILE *)NULL)
