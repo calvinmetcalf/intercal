@@ -66,7 +66,7 @@ static bool dooptimize;	/* do optimizations? (controlled by -O) */
 static bool clockface;	/* set up output to do IIII for IV */
 
 #define SKELETON	"ick-wrap.c"
-#define SYSLIB          "lib/syslib"
+#define SYSLIB          "pit/lib/syslib"
 
 /* numeric base defaults, exported to other files */
 

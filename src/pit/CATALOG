@@ -1,9 +1,6 @@
-This is the directory of programs written in INTERCAL.  It is named
-pit because src was already taken---that's where source code for the
-compiler lives---and pit seemed an appropriate place to throw
-INTERCAL programs anyway.  Most of these are no doubt full of bugs.
-Don't complain, you're lucky if anything written in INTERCAL works
-at all.
+This is the directory of programs written in INTERCAL.  Most of these
+are no doubt full of bugs.  Don't complain, you're lucky if anything
+written in INTERCAL works at all.
 
 The subdirectory lib contains code fragments that are not complete
 programs.

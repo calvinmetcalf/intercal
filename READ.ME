@@ -30,21 +30,21 @@ doc/READ.ME		-- historical notes on the docs
 doc/intercal.mm		-- the manual in groffable form
 doc/THEORY		-- some notes on the internals of the INTERCAL compiler
 
-src/Makefile		-- makefile for the INTERCAL compiler
-src/lexer.l		-- the lexical analyzer specification (in LEX)
-src/ick.y		-- the grammar specification (in YACC)
-src/ick.h		-- compilation types and defines
-src/perpetrate.c	-- main routine for compiler
-src/feh.c		-- INTERCAL-to-C code generator
-src/feh.h		-- interface to INTERCAL-to-C code generator
-src/fiddle.c		-- the INTERCAL operators
-src/lose.[ch]		-- INTERCAL compile- and run-time error handling
-src/ick-wrap.c		-- the driver for generated C-from-INTERCAL code
-src/arrgghh.c		-- option argument parsing for generated programs
-src/abcess.h		-- interface to functions linked with programs
-src/cesspool.c		-- the INTERCAL runtime support code
-src/numerals.c		-- numerals table for INTERCAL input
-src/sizes.h		-- variables defining the numeric base
+Makefile.in		-- makefile for the INTERCAL compiler
+lexer.l			-- the lexical analyzer specification (in LEX)
+ick.y			-- the grammar specification (in YACC)
+ick.h			-- compilation types and defines
+perpetrate.c		-- main routine for compiler
+feh.c			-- INTERCAL-to-C code generator
+feh.h			-- interface to INTERCAL-to-C code generator
+fiddle.c		-- the INTERCAL operators
+lose.[ch]		-- INTERCAL compile- and run-time error handling
+ick-wrap.c		-- the driver for generated C-from-INTERCAL code
+arrgghh.c		-- option argument parsing for generated programs
+abcess.h		-- interface to functions linked with programs
+cesspool.c		-- the INTERCAL runtime support code
+numerals.c		-- numerals table for INTERCAL input
+sizes.h			-- variables defining the numeric base
 
 pit/*			-- sample INTERCAL code; see pit/CATALOG
 
@@ -124,6 +124,5 @@ See the file COPYING for details on the General Public License.
 				APOCALYPSE
 
 INTERCAL is fully Y2K-compliant.  Indeed, it is Y2K-obsequious, and
-loves nothing better than to be punished by relays of leather-clad, 
+loves nothing better than to be punished by relays of leather-clad and 
 spike-heeled calendricists.  Bite me and go buy your own shotgun.
-

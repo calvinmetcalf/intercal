@@ -76,12 +76,11 @@ install: all
 	cp lose.h abcess.h fiddle.h $(incdir)
 	-mkdir $(datadir)
 	(cp -r pit $(datadir)/pit)
-	(cp -r lib $(datadir)/lib)
 	cp ick-wrap.c $(datadir)
 
 uninstall:
 	rm -f $(bindir)/ick $(libdir)/libick.a
-	rm -f $(incdir) $(datadir)
+	rm -fr $(incdir) $(datadir)
 
 TAGS: $(SOURCES)
 	etags $(SOURCES)
