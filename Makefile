@@ -1,7 +1,7 @@
 #
 # Utility productions for the INTERCAL distribution
 #
-VERSION = 0.17
+VERSION = 0.18
 
 tgz: intercal-$(VERSION).tar.gz
 tar: intercal-$(VERSION).tar

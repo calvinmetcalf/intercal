@@ -14,6 +14,9 @@
  * Nahuatl, Tagalog, Sanskrit, Basque, Georgian, Kwakiutl, and
  * Volap\"uk are now supported in addition to English.
  *
+ * As of release 0.18, Volap\"uk digits can be entered in either TeX or
+ * Latin-1 format.
+ *
 LICENSE TERMS
     Copyright (C) 1996 Eric S. Raymond 
 
@@ -129,9 +132,12 @@ static numeral numerals[] =
     { "FOL",		4 },
     { "LUL",		5 },
     { "M\\\"AL",	6 },
+    { "M\0xC4L",	6 },	/* Latin-1 support */
     { "VEL",		7 },
     { "J\\\"OL",	8 },
+    { "J\0xD6L",	8 },	/* Latin-1 support */
     { "Z\\\"UL",	9 },
+    { "Z\0xDCL",	9 },	/* Latin-1 support */
 };
 
 /* numeral.c ends here */

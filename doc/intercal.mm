@@ -60,7 +60,7 @@ and James M. Lyon\fR
 Redistribution encouraged under GPL\}
 .sp
 .ce 1
-(This version distributed with C-INTERCAL 0.16)
+(This version distributed with C-INTERCAL 0.18)
 .AE
 .MT 4
 .nr % 0
@@ -304,7 +304,7 @@ and \fBselect\fR, which
 are represented by a change (\*(ct) and a sqiggle [sic] (~), respectively.
 .if '\*c'y' \{\
 (In C-INTERCAL's ASCII environment, EBCDIC \*(ct is replaced by a big
-money ($).) \}
+money ($), but \*(ct can be used if encoded in Latin-1 as \e0xA2.) \}
 .P
 The interleave operator takes two 16-bit values and produces a 32-bit result
 by alternating the bits of the operands. Thus, #65535\*(ct#0 has the 32-bit
@@ -3020,6 +3020,19 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 \*(no	hookworm
 ^	shark (or simply sharkfin)
 \o"#*\(sq"	blotch
+.if '\*c'y' \{\
+\*(de	bunghole
+\*(rg	name grabber
+\*(mu	andrew cross
+\*(di	norwegian minus
+\*(co	text grabber
+\*(sc	swash
+\*(*m	microscope
+\*(+-	interworm
+\*(no	half turn
+0xA3	quid	binary mingle
+0xA4	zlotnik	binary mingle
+\}
 .TE \}
 .el \{\
 .TS
@@ -3066,6 +3079,19 @@ $	big money 	binary mingle
 \*(no	hookworm
 ^	shark (or simply sharkfin)	unary logical XOR (TriINTERCAL)
 \o"#*\(sq"	blotch
+.if '\*c'y' \{\
+\*(de	bunghole
+\*(rg	name grabber
+\*(mu	andrew cross
+\*(di	norwegian minus
+\*(co	text grabber
+\*(sc	swash
+\*(*m	microscope
+\*(+-	interworm
+\*(no	half turn
+0xA3	quid	binary mingle
+0xA4	zlotnik	binary mingle
+\}
 .TE \}
 .ce 1
 Table 2 (top view). INTERCAL character set.

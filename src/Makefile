@@ -8,8 +8,9 @@
 # all over creation behind your back.
 # (/dev/null may be another good choice :-))
 
-DVMT=~/WWW/intercal-0.17
+DVMT=~/WWW/intercal-0.18
 #DVMT=/usr/local
+DVMT=/intercal-0.18
 
 BINDIR = $(DVMT)/bin
 INCDIR = $(DVMT)/lib
@@ -20,8 +21,16 @@ LIBDIR = $(DVMT)/lib
 YDEBUG = -vlt
 DEBUG	= -g -DDEBUG
 # DEBUG = -O
+
+# This version (0.18) is POSIX-compliant.  You should only set the POSIX
+# variable to null if you *need* to use the old <varargs.h> support;
+# otherwise, the ANSI-compliant <stdarg.h> library will be used.
+
+# POSIX = 
+POSIX = -D_POSIX_SOURCE
+
 CFLAGS = -I. $(DEBUG) -DICKINCLUDEDIR=\"$(INCDIR)\" \
-	-DICKLIBDIR=\"$(LIBDIR)\" -DYYDEBUG
+	-DICKLIBDIR=\"$(LIBDIR)\" -DYYDEBUG $(POSIX)
 LDFLAGS =
 
 CC = gcc -Wall -W
@@ -30,8 +39,7 @@ CC = gcc -Wall -W
 #LEX = lex
 LEX = flex
 
-# You can use either yacc or bison
-#YACC = yacc
+# You should use bison, because some yaccs won't work correctly
 YACC = bison -y
 
 CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c

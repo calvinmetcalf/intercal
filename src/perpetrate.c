@@ -55,6 +55,9 @@ extern void yyrestart(FILE*);
 /* function created by yacc */
 extern int yyparse(void);
 
+/* getopt declaration */
+int getopt(int, char**, char*);
+
 /* compilation options */
 bool compile_only; 	/* just compile into C, don't run the linker */
 bool traditional;	/* insist on strict INTERCAL-72 conformance */
@@ -477,7 +480,7 @@ int main(int argc, char *argv[])
 			    if (tp->type == NEXT)
 				(void) fprintf(ofp,
 					       "\tcase %d: goto N%d; break;\n",
-					       tp-tuples+1, tp-tuples+1);
+					       (int)(tp-tuples+1), (int)(tp-tuples+1));
 			(void) fprintf(ofp, "    }");
 		    }
 		    break;

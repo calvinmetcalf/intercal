@@ -196,6 +196,9 @@ D	[0-9][\ \t\n0-9]*
 \#		{return(MESH);}
 
 \$		{return(MINGLE);}
+\xA2		{return(MINGLE);}
+\xA3		{return(MINGLE);}
+\xA4		{return(MINGLE);}
 \~		{return(SELECT);}
 
 \&		{yylval.numval = AND; return(UNARY);}

@@ -24,7 +24,13 @@ LICENSE TERMS
 /* LINTLIBRARY */
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef _POSIX_SOURCE
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
+
 #include "sizes.h"
 #include "abcess.h"
 #include "lose.h"
@@ -360,21 +366,33 @@ unsigned int assign(char *dest, unsigned int type, bool forget,
 /**********************************************************************
  *
  * The following functions implement the INTERCAL array model
+ * If _POSIX_SOURCE is defined, stdarg is used, otherwise varargs.
  *
  *********************************************************************/
 
+
+#ifdef _POSIX_SOURCE
+char *aref(unsigned int type, ...)
+#else
 char *aref(va_alist) va_dcl
+#endif
 /* return a pointer to the array location specified by args */
 {
+#ifndef _POSIX_SOURCE
   unsigned int type;
+#endif
   array *a;
   unsigned int v;
   va_list ap;
   int address = 0;
   unsigned int i;
 
+#ifdef _POSIX_SOURCE
+  va_start(ap, type);
+#else
   va_start(ap);
   type = va_arg(ap, unsigned int);
+#endif
   a = va_arg(ap, array*);
 
   if (va_arg(ap, unsigned int) != a->rank)
@@ -395,18 +413,28 @@ char *aref(va_alist) va_dcl
     return (char*)&a->data.hybrid[address];
 }
 
+#ifdef _POSIX_SOURCE
+void resize(unsigned int type, ...)
+#else
 void resize(va_alist) va_dcl
+#endif
 /* resize an array to the given shape */
 {
+#ifndef _POSIX_SOURCE
   unsigned int type;
+#endif
   array *a;
   bool forget;
   unsigned int i, r, v;
   va_list ap;
   int prod = 1;
 
+#ifdef _POSIX_SOURCE
+ va_start(ap, type);
+#else
   va_start(ap);
   type = va_arg(ap, unsigned int);
+#endif
   a = va_arg(ap, array*);
   forget = va_arg(ap, bool);
 

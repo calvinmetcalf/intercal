@@ -36,8 +36,15 @@ extern void binin(unsigned int type, array *a, bool forget);
 extern void binout(unsigned int type, array *a);
 extern unsigned int assign(char *dest, unsigned int type, bool forget,
 			   unsigned int value);
+
+#ifdef _POSIX_SOURCE
+extern char *aref(unsigned int type, ...);
+extern void resize(unsigned int type, ...);
+#else
 extern char *aref();
 extern void resize();
+#endif
+
 extern void stashinit(void);
 extern void stash(unsigned int type, unsigned int index, void *from);
 extern void retrieve(void *to, int type, unsigned int index, bool forget);

@@ -1,5 +1,28 @@
 			NEW IN THIS RELEASE
 
+	Release 0.18 (by Eric S. Raymond) 04 April 1998
+
+(The following changes are due to John Cowan <cowan@ccil.org>)
+
+1.  The source code is now POSIXly correct.  By making the POSIX
+variable in the Makefile undefined, you can restore the use of
+<varargs.h>, but otherwise <stdarg.h> is now used.
+
+2.  Latin-1 (ISO 8859-1) is now the standard input charset of C-INTERCAL.
+This means that the change operator (0xA2) has returned as an alternative to
+big money ($).  Furthermore, the quid (0xA3) and zlotnik (0xA4) are also
+acceptable.  For those using Latin-9 (ISO 8859-15), the euro (0xA4) will also
+work.  ("Euro", like "ampersand", cannot be sillified further.)
+New names have been added to intercal.mm.
+
+3. A fortiori, input of Volap\"uk digits may now be in Latin-1 or TeX format.
+
+4. Yacc is now deprecated in favor of bison; some old yaccs don't do proper
+error recovery, and lines like "DO ~ ERROR" failed at compile time.
+
+5.  Some minor portability bugs on systems where ptr_diff is not the same
+as int were removed by casting expressions of the form (ptr - ptr) to int.
+
 	Release 0.17 (by Eric S. Raymond) 27 Feb 1998
 
 Incorporates a minor bug fix by Jeff Uphoff <juphoff@tarsier.cv.nrao.edu>.

@@ -720,7 +720,7 @@ static void emit_guard(tuple *tn, FILE *fp)
     (void) fprintf(fp, "    if (");
     if (tn->exechance < 100)
 	(void) fprintf(fp, "roll(%d) && ", tn->exechance);
-    (void) fprintf(fp, "!abstained[%d]) {\n", tn - tuples);
+    (void) fprintf(fp, "!abstained[%d]) {\n", (int)(tn - tuples));
 }
 
 void emit(tuple *tn, FILE *fp)
@@ -799,7 +799,7 @@ void emit(tuple *tn, FILE *fp)
     case NEXT:
 	(void) fprintf(fp,
 		       "\tpushnext(%d); goto L%d; N%d:;\n",
-		       tn - tuples + 1, tn->u.target, tn - tuples + 1);
+		       (int)(tn - tuples + 1), tn->u.target, (int)(tn - tuples + 1));
 	break;
 
     case RESUME:
@@ -861,8 +861,13 @@ void emit(tuple *tn, FILE *fp)
 	{
 	    (void) fprintf(fp,
 			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
-	    (void) fprintf(fp,
-			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
+	    if (np->constant == ABSTAIN || np->constant == REINSTATE) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
+	    } else {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
+	    }
 	    (void) fprintf(fp,
 			   "\t\tabstained[i] = FALSE;\n");
 	}
@@ -875,8 +880,13 @@ void emit(tuple *tn, FILE *fp)
 	{
 	    (void) fprintf(fp,
 			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
-	    (void) fprintf(fp,
-			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
+	    if (np->constant == ABSTAIN || np->constant == REINSTATE) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
+	    } else {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
+	    }
 	    (void) fprintf(fp,
 			   "\t\tabstained[i] = TRUE;\n");
 	}
