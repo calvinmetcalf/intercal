@@ -1,0 +1,577 @@
+
+
+               THE C-INTERCAL SUPPLEMENTAL REFERENCE MANUAL
+
+                   Version 0.7 by Louis Howell, 12/16/91
+                   Version 0.8 info by Eric S. Raymond, 01/18/92
+
+
+1. CONTRADICTION (with apologies to A. A. Milne)
+
+In which we attempt to justify the existence of this file to you,
+the reader, who since you are reading the file have probably already
+accepted, at least provisionally, its right to exist.
+
+1.1 JUSTIFICATION
+
+Verily it is written, "When a program is useful it must be changed,
+when it is useless it must be documented."
+
+The intention is that, unlike the original manual, this file should
+not be cast in stone, but rather should change to reflect later
+additions or modifications to the language.  Just keep it neat and
+accurate, ok?
+
+
+2. CONSTRUCTS FROM INTERCAL-72
+
+In which we discuss the detailed behavior of some features that have
+either changed from the original version of the language, or were not
+completely specified in the original manual.
+
+2.1 SELECT
+
+The original manual defines the return type of a SELECT operation
+to depend on the number of bits SELECTed.  The present compiler
+takes the easier route of defining the return type to be that of
+the right operand, independent of its actual value.  This form has
+the advantage that all types can be determined at compile time.
+Putting in run time type checking would add significant overhead and
+complication, to effect a very minor change in language semantics.
+
+The only time this distinction makes any difference is when a
+unary operator is applied to the SELECT result.  This happens
+extremely rarely in practice, the only known instance being the
+32-bit greater-than test in the standard library, where an XOR
+operator is applied to the result of SELECTing a number against
+itself.  The authors first SELECT the result against #65535$#65535
+to insure that XOR sees a 32-bit value.  With the current compiler
+this extra step is unnecessary, but harmless.
+
+The cautious programmer should write code that does not depend on
+the compiler version being used.  We therefore suggest the following
+guideline for determining the SELECT return type:
+
+  A SELECT operation with a 16-bit right operand returns a 16-bit
+  value.  The return type of a SELECT operation with a 32-bit right
+  operand is undefined, but is guaranteed to be an acceptable input
+  to a MINGLE operation so long as 16 or fewer bits are actually
+  selected.  Correct code should not depend on whether the return
+  type is 16 or 32 bits.
+
+2.2 IGNORE
+
+Though the manual states that the value of an IGNOREd variable cannot
+change, it is unclear about whether or not a statement which appears
+to change an IGNOREd variable is executed or not.  This may appear to
+be a "If a tree falls in the forest..." type of question, but if the
+statement in question has other side effects it is not.
+
+Since another mechanism already exists for ABSTAINing from a
+statement, we suggest that IGNORE only prevent the changing of the
+specific variable in question, not the execution of the entire
+statement.  In the present version of the language this only makes
+a difference for the WRITE IN statement.  Attempting to WRITE IN
+to an IGNOREd variable will cause a number to be read from the input,
+which will be discarded since it cannot be stored in the variable.
+
+Various proposals to make assignment an operator, unlike the '='
+operator in C, would depend more heavily on this condition.  It's
+not clear whether such a feature is worth adding to the language, but
+if it is it should be done right.
+
+
+3. COME FROM
+
+In which we try to precisely define a statement that should never
+have been born, but is nevertheless one of the more useful statements
+in INTERCAL.
+
+3.1 BACKGROUND
+
+The earliest known description of the COME FROM statement in the computing
+literature is in [R. L. Clark, "A linguistic contribution to GOTO-less
+programming," Commun. ACM 27 (1984), pp. 349--350], part of the famous April
+Fools issue of CACM.  The subsequent rush by language designers to include the
+statement in their languages was underwhelming, one might even say nonexistent.
+Eric Raymond therefore decided that COME FROM would be an appropriate addition
+to INTERCAL, and proceeded to implement it in his C-INTERCAL compiler.  Louis
+Howell tested the implementation by actually using it for the life2.i program
+included in this distribution and fixed some bugs.
+
+3.2 DESCRIPTION
+
+There are two useful ways to visualize the action of the COME FROM
+statement.  The simpler is to see that it acts like a GOTO when the
+program is traced backwards in time.  More precisely, the statements
+
+(1)	DO <any statement>
+	.
+	.
+	.
+(2)	DO COME FROM (1)
+
+should be thought of as being equivalent to
+
+(1)	DO <any statement>
+(2)	DO GOTO (3)
+	.
+	.
+	.
+(3)	DO NOTHING
+
+if INTERCAL actually had a GOTO statement at all, which of course it
+doesn't.
+
+What this boils down to is that the statement DO COME FROM (label),
+anywhere in the program, places a kind of invisible trap door
+immediately after statement (label).  Execution or abstention of that
+statement is immediately followed by an unconditional jump to the
+COME FROM, unless the (label)ed statement is an executed NEXT, in which
+case the jump occurs if the program attempts to RESUME back to that
+NEXT statement.  It is an error for more than one COME FROM to refer
+to the same (label).
+
+Modification of the target statement by ABSTAIN or by the % qualifier
+affects only that statement, not the subsequent jump.  Such
+modifications to the COME FROM itself, however, do affect the jump.
+Encountering the COME FROM statement itself, rather than its target,
+has no effect.
+
+In the current C-INTERCAL implementation, the compiler places a simple
+label at the location of the COME FROM in the program, while all of the
+machinery for checking for abstention and conditional execution and
+actually performing the jump is placed immediately after the code for
+the target statement.
+
+
+4. OUTSIDE COMMUNICATION
+
+In which we try to remedy the fact that, due to I/O limitations, INTERCAL
+can not even in principle perform the same tasks as other languages.  It
+is hoped that this addition will permit INTERCAL users to waste vast
+quantities of computer time well into the 21st century.
+
+4.1 MOTIVATION
+
+One of the goals of INTERCAL was to provide a language which, though
+different from all other languages, is nevertheless theoretically
+capable of all the same tasks.  The original version failed to
+accomplish this because its I/O functions could not handle arbitrary
+streams of bits, or even arbitrary sequences of characters.  A
+language which can't even send its input directly to its output
+can hardly be considered as capable as other languages.
+
+4.2 TURING TEXT MODEL
+
+To remedy this problem, character I/O is now provided in a form based
+on the "Turing Text" model, originally proposed by Jon Blow.  The
+INTERCAL programmer can access this capability by placing a one-
+dimensional array in the list of items given to a WRITE IN or READ OUT
+statement.  On execution of the statement, the elements of the array
+will, from first to last, be either loaded from the input or sent
+to the output, as appropriate, in the manner described below.  There
+is currently no support for I/O involving higher-dimensional arrays,
+but some form of graphics might be a possible 2-D interpretation.
+
+The heart of the Turing Text model is the idea of a continuous loop
+of tape containing, in order, all the characters in the machine's
+character set.  When a character is received by the input routine,
+the tape is advanced the appropriate number of spaces to bring
+that character under the tape head, and the number of spaces the
+tape was moved is the number that is actually seen by the INTERCAL
+program.  Another way to say this is that the number placed in an
+INTERCAL array is the difference between the character just
+received and the previous character, modulo the number of characters
+in the machine character set.
+
+Output works in just the opposite fashion, except that the characters
+being output come from the other side of the tape.  From this position
+the characters on the tape appear to be in reverse order, and are
+individually backwards as well.  (We would show you what it looks
+like, but we don't have a font with backwards letters available.
+Use your imagination.)  The effect is that a number is taken out
+of an INTERCAL array, subtracted from the last character output---
+i.e., the result of the last subtraction---and then sent on down
+the output channel.  The only catch is that the character as seen
+by the INTERCAL program is the mirror-image of the character as
+seen by the machine and the user.  The bits of the character are
+therefore taken in reverse order as it is sent to the output.
+Note that this bit reversal affects only the character seen by
+the outside world; it does not affect the character stored internally
+by the program, from which the next output number will be subtracted.
+All subtractions are done modulo the number of characters in the
+character set.
+
+Two different tapes are used for input and for output to allow for
+future expansion of the language to include multiple input and
+output channels.  Both tapes start at character 0 when a program
+begins execution.  On input, when an end of file marker is reached
+the number placed in the array is one greater than the highest-
+numbered character on the tape.
+
+4.3 EXAMPLE PROGRAM
+
+If all this seems terribly complicated, it should be made perfectly
+clear by the following example program, which simply maps its input
+to its output (like a simplified UN*X "cat").  It assumes that
+characters are 8 bits long, but that's fine since the current version
+of the compiler does too.  Standard library routines for addition
+and subtraction are not included here, as they are listed in the
+original manual.
+
+	DO ,1 <- #1
+	DO .4 <- #0
+	DO .5 <- #0
+	DO COME FROM (30)
+	DO WRITE IN ,1
+	DO .1 <- ,1SUB#1
+	DO (10) NEXT
+	PLEASE GIVE UP
+(20)	PLEASE RESUME '?.1$#256'~'#256$#256'
+(10)	DO (20) NEXT
+	DO FORGET #1
+	DO .2 <- .4
+	DO (1000) NEXT
+	DO .4 <- .3~#255
+	DO .3 <- !3~#15'$!3~#240'
+	DO .3 <- !3~#15'$!3~#240'
+	DO .2 <- !3~#15'$!3~#240'
+	DO .1 <- .5
+	DO (1010) NEXT
+	DO .5 <- .2
+	DO ,1SUB#1 <- .3
+(30)	PLEASE READ OUT ,1
+
+For each number received in the input array, the program first tests
+the #256 bit to see if the end of file has been reached.  If not, the
+previous input character is subtracted off to obtain the current
+input character.  Then the order of the bits is reversed to find
+out what character should be sent to the output, and the result
+is subtracted from the last character sent.  Finally, the difference
+is placed in an array and given to a READ OUT statement.  See?
+We told you it was simple!
+
+
+5. TriINTERCAL
+
+In which it is revealed that bitwise operations are too ordinary for
+hard-core INTERCAL programmers, and extensions to other bases are
+discussed.  These are not, strictly speaking, extensions to INTERCAL
+itself, but rather new dialects sharing most of the features of the
+parent language.
+
+5.1 MOTIVATION
+
+INTERCAL is really a pretty sissy language.  It tries hard to be
+different, but when you get right down to its roots, what do you find?
+You find bits, that's what.  Plain old ones and zeroes, in groups of
+16 and 32, just like every other language you've ever heard of.  And
+what operations can you perform on these bits?  The INTERCAL operators
+may arrange and permute them in weird and wonderful ways, but at the
+bit level the operators are the same AND, OR and XOR you've seen
+countless times before.
+
+Once the prospective INTERCAL programmer masters the unusual syntax,
+she finds herself working with the familiar Boolean operators on
+perfectly ordinary unsigned integer words.  Even the constants she uses
+are familiar.  After all, who would not immediately recognize #65535
+and #32768?  It may take a just a moment more to figure out #65280,
+and #21845 and #43690 could be puzzles until she notices that they
+sum to #65535, but basically she's still on her home turf.  The 16-bit
+limit on constants actually works in the programmer's favor by insuring
+that very long anonymous constants can not appear in INTERCAL programs.
+And this is in a language that is supposed to be different from any
+other!
+
+5.2 ABANDON ALL HOPE...
+
+Standard INTERCAL is based on variables consisting of ordinary bits
+and familiar Boolean operations on those bits.  In pursuit of uniqueness,
+it seems appropriate to provide a new dialect, otherwise identical to
+INTERCAL, which instead uses variables consisting of trits, i.e. ternary
+digits, and operators based on tritwise logical operations.  This is
+intended to be a separate dialect, rather than an extension to INTERCAL
+itself, for a number of reasons.  Doing it this way avoids word-length
+conflicts, does not spoil the elegance of the Spartan INTERCAL operator
+set, and dodges the objections of those who might feel it too great an
+alteration to the original language.  Primarily, though, giving INTERCAL
+programmers the ability to switch numeric base at will amounts to
+excessive functionality.  So much better that a programmer choose a base
+at the outset and then be forced to stick with it for the remainder of
+the program.
+
+5.3 COMPILER OPERATION
+
+The same compiler, ick, supports both INTERCAL and TriINTERCAL.
+This has the advantage that future bug fixes and additions to the
+language not related to arithmetic immediately apply to both versions.
+The compiler recognizes INTERCAL source files by the extension '.i',
+and TriINTERCAL source files by the extension '.3i'.  It's as simple
+as that.  There is no way to mix INTERCAL and TriINTERCAL source in
+the same program, and it is not always possible to determine which
+dialect a program is written in just by looking at the source code.
+
+5.4 DATA TYPES
+
+The two TriINTERCAL data types are 10-trit unsigned integers and
+20-trit unsigned integers.  All INTERCAL syntax for distinguishing
+data types is ported to these new types in the obvious way.  Small
+words may contain numbers from #0 to #59048, large words may contain
+numbers from #0$#0 to #59048$#59048.  Errors are signaled for constants
+greater than #59048 and for attempts to WRITE IN numbers too large
+for a given variable or array element to hold.
+
+Note that though TriINTERCAL considers all numbers to be unsigned,
+nothing prevents the programmer from implementing arithmetic operations
+that treat their operands as signed.  Three's complement is one obvious
+choice, but balanced ternary notation is also a possibility.  This
+latter is a very pretty and symmetrical system in which all 2 trits
+are treated as if they had the value -1.
+
+5.5 OPERATORS
+
+The TriINTERCAL operators are designed to inherit the relevant properties
+of the standard INTERCAL operators, so that both can be considered as
+merely different aspects of the same Platonic ideal.  (Not that the word
+"ideal" is ever particularly relevant when used in connection with
+INTERCAL.)
+
+5.5.1 BINARY OPERATORS I
+
+The binary operators carry over from the original language with only
+minor changes.  The MINGLE operator ($) creates a 20-trit word by
+alternating trits from its two 10-trit operands.  The SELECT operator (~)
+is a little more complicated, since the ternary tritmask may contain 0, 1,
+and 2 trits.  If we observe that the SELECT operation on binary operands
+amounts to a bitwise AND and some rearrangement of bits, it seems
+appropriate to base the SELECT for ternary operands on a tritwise AND in
+the analogous fashion.  We therefore postpone the definition of SELECT
+until we know what a tritwise AND looks like.
+
+5.5.2 UNARY OPERATORS
+
+The unary operators in INTERCAL are all derived from the familiar
+Boolean operations on single bits.  To extend these operations to trits,
+we first ask ourselves what the important properties of these operations
+are that we wish to be preserved, then design the tritwise operators so
+that they behave in a similar fashion.
+
+5.5.2.1 UNARY LOGICAL OPERATORS
+
+Let's start with AND and OR.  To begin with, these can be considered
+"choice" or "preference" operators, as they always return one of their
+operands.  AND can be described as wanting to return 0, but returning 1
+if it is given no other choice, i.e., if both operands are 1.  Similarly,
+OR wants to return 1 but returns 0 if that is its only choice.  From
+this it is immediately apparent that each operator has an identity
+element that "always loses", and a dominator element that "always wins".
+
+AND and OR are commutative and associative, and each distributes
+over the other.  They are also symmetric with each other, in the sense
+that AND looks like OR and OR looks like AND when the roles of 0 and 1
+are interchanged (De Morgan's Laws).  This symmetry property seems to be
+a key element to the idea that these are logical, rather than arithmetic,
+operators.  In a three-valued logic we would similarly expect a three-
+way symmetry among the three values 0, 1 and 2 and the three operators
+AND, OR and (of course) BUT.
+
+The following tritwise operations have all the desired properties:
+OR returns the greater of its two operands.  That is, it returns 2 if
+it can get it, else it tries to return 1, and it returns 0 only if both
+operands are 0.  AND wants to return 0, will return 2 if it can't get
+0, and returns 1 only if forced.  BUT wants 1, will take 0, and tries
+to avoid 2.  The equivalents to De Morgan's Laws apply to rotations
+of the three elements, e.g., 0 -> 1, 1 -> 2, 2 -> 0.  Each operator
+distributes over exactly one other operator, so the property
+"X distributes over Y" is not transitive.  The question of which way
+this distributivity ring goes around is left as an exercise for the
+student.
+
+In TriINTERCAL programs the '@' (whirlpool) symbol denotes the unary
+tritwise BUT operation.  You can think of the whirlpool as drawing
+values preferentially towards the central value 1.  Alternatively,
+you can think of it as drawing your soul and your sanity inexorably
+down...
+
+On the other hand, maybe it's best you NOT think of it that way.
+
+A few comments about how these operators can be used.  OR acts like
+a tritwise maximum operation.  AND can be used with tritmasks.  0's
+in a mask wipe out the corresponding elements in the other operand,
+while 1's let the corresponding elements pass through unchanged.  2's
+in a mask consolidate the values of nonzero elements, as both 1's and
+2's in the other operand yield 2's in the output.  BUT can be used to
+create "partial tritmasks".  0's in a mask let BUT eliminate 2's from
+the other operand while leaving other values unchanged.  Of course,
+the symmetry property guarantees that the operators don't really
+behave differently from each other in any fundamental way; the apparent
+differences come from the intuitive view that a 0 trit is "not set"
+while a 1 or 2 trit is "set".
+
+5.5.2.1.1 BINARY OPERATORS II
+
+At this point we can define SELECT, since we now know what the
+tritwise AND looks like.  SELECT takes the binary tritwise AND of
+its two operands.  It shifts all the trits of the result corresponding
+to 2's in the right operand over to the right (low) end of the result,
+then follows them with all the output trits corresponding to 1's in
+the right operand.  Trits corresponding to 0's in the right operand,
+which are all 0 anyway, occupy the remaining space at the left end of
+the output word.  Both 10-trit and 20-trit operands are accepted,
+and are padded with zeroes on the left if necessary.  The output
+type is determined the same way as in standard INTERCAL.
+
+5.5.2.2 UNARY ARITHMETIC OPERATORS
+
+Now that we've got all that settled, what about XOR?  This is
+easily the most-useful of the three unary INTERCAL operators,
+because it combines in one package the operations ADD WITHOUT CARRY,
+SUBTRACT WITHOUT BORROW, BITWISE NOT-EQUAL, and BITWISE NOT.  In
+TriINTERCAL we can't have all of these in the same operator, since
+addition and subtraction are no longer the same thing.  The solution
+is to split the XOR concept into two operators.  The ADD WITHOUT CARRY
+operation is represented by the new '^' (sharkfin) symbol, while the
+old '?' symbol represents SUBTRACT WITHOUT BORROW.  The reason for
+this choice is so that '?' will also represent the TRITWISE NOT-EQUAL
+operation.
+
+Note that '?', unlike the other four unary operators, is not
+symmetrical.  It should be thought of as rotating its operand one trit
+to the right (with wraparound) and then subtracting off the trits of
+the original number.  These subtractions are done without borrowing,
+i.e., trit-by-trit modulo 3.
+
+5.5.3 EXAMPLES
+
+The TriINTERCAL operators really aren't all that bad once you get
+used to them.  Let's look at a few examples to show how they can
+be used in practice.  In all of these examples the input value is
+contained in the 10-trit variable .3.
+
+In INTERCAL, single-bit values often have to be converted from
+{0,1} to {1,2} for use in RESUME statements.  Examples of how to do
+this appear in the original manual.  In TriINTERCAL the expression
+"^.3$#1"~#1 sends 0 -> 1 and 1 -> 2.  If the 1-trit input value can
+take on any of its three possible states, however, we will also have
+to deal with the 2 case.  The expression "V.3$#1"~#1 sends {0,1} -> 1
+and 2 -> 2.  To test if a trit is set, we can use "V'"&.3$#2"~#1'$#1"~#1,
+sending 0 -> 1 and {1,2} -> 2.  To reverse the test we use
+"?'"&.3$#2"~#1'$#1"~#1, sending 0 -> 2 and {1,2} -> 1.  Note that we
+have not been taking full advantage of the new SELECT operator.  These
+last two expressions can be simplified into "V!3~#2'$#1"~#1 and
+"?!3~#2'$#1"~#1, which perform exactly the same mappings.  Finally, if
+we need a 3-way test, we can use "@'"^.3$#7"~#4'$#2"~#10, which
+obviously sends 0 -> 1, 1 -> 2, and 2 -> 3.
+
+For an unrelated example, the expression "^.3$.3"~"#0$#29524"
+converts all of the 1-trits of .3 into 2's and all of the 2-trits
+into 1's.  In balanced ternary, where 2-trits represent -1 values,
+this is the negation operation.
+
+5.6 BEYOND TERNARY...
+
+While we're at it, we might as well extend this multiple bases
+business a little farther.  The ick compiler actually recognizes
+filename suffixes of the form '.Ni', where N is any number from 2
+to 7.  2 of course gives standard INTERCAL, while 3 gives TriINTERCAL.
+We cut off before 8 because octal notation is the smallest base used
+to facilitate human-to-machine communication, and this seems quite
+contrary to the basic principles behind INTERCAL.  The small data
+types hold 16 bits, 10 trits, 8 quarts, 6 quints, 6 sexts, or 5 septs,
+and the large types are always twice this size.
+
+As for operators, '?' is always SUBTRACT WITHOUT BORROW, and '^'
+is always ADD WITHOUT CARRY.  'V' is the OR operation and always
+returns the max of its inputs.  '&' is the AND operation, which chooses
+0 if possible but otherwise returns the max of the inputs.  '@' is BUT,
+which prefers 1, then 0, then the max of the remaining possibilities.
+Rather than add more special symbols forever, a numeric modifier may
+be placed directly before the '@' symbol to indicate the operation
+that prefers one of the digits not already represented.  Thus in files
+ending in '.5i', the permitted unary operators are '?', '^', '&', '@',
+'2@', '3@', and 'V'.  Use of such barbarisms as '0@' to represent '&'
+are not permitted, nor is the use of '@' or '^' in files with either
+of the extensions '.i' or '.2i'.  Why not?  You just can't, that's why.
+Don't ask so many questions.
+
+As a closing example, we note that in balanced quinary notation,
+where 3 means -2 and 4 means -1, the negation operation can be written
+as either
+
+  DO .1 <- "^'"^.3$.3"~"#0$#3906"'$'"^.3$.3"~"#0$#3906"'"~"#0$#3906"
+
+or as
+
+  DO .1 <- "^.3$.3"~"#0$#3906"
+  DO .1 <- "^.1$.1"~"#0$#3906"
+
+These work because multiplication by -1 is the same as multiplication
+by 4, modulo 5.
+
+Now go beat your head up against the wall for a while.
+
+
+6. UNDOCUMENTED FEATURES FROM INTERCAL-72
+
+A feature of INTERCAL-72 not documented in the manual was that it
+required a certain level of politesse from the programmer.  If fewer than
+1/5th of the program statements included the PLEASE qualifier, the program
+would be rejected as insufficiently polite.  If more than 1/3rd of them
+included PLEASE, the program would be rejected as excessively polite.
+
+This check has been implemented in C-INTERCAL.  To assist programmers in
+coping with it, the intercal.el mode included with the distribution randomly
+expands "do " in entered source to "DO PLEASE" or "PLEASE DO" 1/4th of the
+time.
+
+
+7. AUTOMAGICAL INCLUSION OF THE SYSTEM LIBRARY
+
+The C-INTERCAL compiler will automatically include the system library if a DO
+(1xxx) NEXT statement is used, and if no (1xxx) labels are defined anywhere,
+where (1xxx) is a label in the 1000-1999 range, inclusive.  This was not
+an INTERCAL-72 feature.
+
+
+8. MODIFIED INPUT BEHAVIOR
+
+The INTERCAL-72 implementation, instead of accepting an entire multiple-digit
+number per line of input,  expected one digit per *card image* (input line).
+It is unclear how INTERCAL-72 programs ever managed to input more than one
+number.
+
+
+9. NEW ERROR MESSAGES IN C-INTERCAL
+
+The following error codes are new in C-INTERCAL.
+
+111 You tried to use a C-INTERCAL extension with the `traditional' flag on.
+
+127 Can't find syslib.i file when it's needed for magical inclusion.
+
+222 Out of stash space.
+
+333 Too many variables.
+
+444 A COME FROM statement references a non-existent line label.
+
+555 More than one COME FROM references the same label.
+
+666 Too many source lines.
+
+777 No such source file.
+
+888 Can't open C output file
+
+999 Can't open C skeleton file.
+
+998 Source file name with invalid extension (use .i or .[3-7]i).
+
+997 Illegal possession of a controlled unary operator.
+
+
+9. END OF FILE
+
+Can't you read?  Beat it!  There's nothing left.  Why don't you lie
+down and take a stress pill?

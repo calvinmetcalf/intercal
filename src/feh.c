@@ -4,34 +4,20 @@ NAME
    feh.c -- code-generator back-end for ick parser
 
 DESCRIPTION
-   This module provides storage manglement and code degeneration
-for the INTERCAL compiler.
+   This module provides storage manglement, code degeneration,
+and optimizations of dubious value for the INTERCAL compiler.
 
 ****************************************************************************/
 /*LINTLIBRARY */
 #include <stdio.h>
-#include <signal.h>
+#include "sizes.h"
 #include "ick.h"
 #include "y.tab.h"
 #include "lose.h"
 
-extern unsigned int mingle(), select();
-extern unsigned int and16(), or16(), xor16(), and32(), or32(), xor32();
-
-extern char linebuf[];
-extern int  yydebug, yylineno;
-
-/* compilation options */
-static bool dooptimize;	/* do optimizations? (controlled by -O) */
-static bool clockface;	/* set up output to do IIII for IV */
-
-#define SKELETON	"ick-wrapper.c"
-
-int lineno;	/* current source line number; lose() uses it */
-
 int yyerror()
 {
-    lose(yylineno, E017);
+    /* lose(E017, yylineno, (char *)NULL); */
 }
 
 /*************************************************************************
@@ -70,18 +56,6 @@ node *car, *cdr;
  *
  **************************************************************************/
 
-/* this maps the `external' name of a variable to an internal array index */
-typedef struct
-{
-    int	type;
-    int extindex;
-    int intindex;
-}
-atom;
-
-static atom oblist[MAXSTASHES], *obdex;
-static int nonespots, ntwospots, ntails, nhybrids;
-
 unsigned int intern(type, index)
 {
     atom	*x;
@@ -92,8 +66,8 @@ unsigned int intern(type, index)
 	    return(x->intindex);
 
     /* else we must intern a new symbol */
-    if (obdex >= oblist + MAXSTASHES)
-	lose(yylineno, E333);
+    if (obdex >= oblist + MAXVARS)
+	lose(E333, yylineno, (char *)NULL);
     obdex->type = type;
     obdex->extindex = index;
     if (type == ONESPOT)
@@ -115,9 +89,7 @@ unsigned int intern(type, index)
  *
  **************************************************************************/
 
-static tuple tuples[MAXLINES];
-
-static void treset()
+void treset()
 {
     memset(tuples, '\0', sizeof(tuple) * MAXLINES);
     nonespots = ntwospots = ntails = nhybrids = 0;
@@ -129,7 +101,7 @@ tuple *newtuple()
 /* allocate and zero out a new expression tuple */
 {
     if (lineno >= MAXLINES)
-	lose(yylineno, E666);
+	lose(E666, yylineno, (char *)NULL);
     else
 	return(tuples + lineno++);
 }
@@ -143,7 +115,7 @@ tuple *newtuple()
  *
  **************************************************************************/
 
-static void typecast(np)
+void typecast(np)
 node *np;
 {
     /* recurse so we typecast each node after all its subnodes */
@@ -159,14 +131,17 @@ node *np;
      */
     if (np->opcode == MESH || np->opcode == ONESPOT || np->opcode == TAIL)
 	np->width = 16;
-    else if (np->opcode==TWOSPOT ||np->opcode==HYBRID ||np->opcode==MINGLE)
+    else if (np->opcode == TWOSPOT || np->opcode == HYBRID
+		|| np->opcode == MINGLE || np->opcode == MESH32)
 	np->width = 32;
-    else if (np->opcode == AND || np->opcode == OR || np->opcode == XOR)
+    else if (np->opcode == AND || np->opcode == OR || np->opcode == XOR ||
+	     np->opcode == FIN ||
+	     (np->opcode >= WHIRL && np->opcode <= WHIRL5))
 	np->width = np->rval->width;
     else if (np->opcode == SELECT)
 	np->width = np->rval->width;	/* n-bit select has an n-bit result */
     else if (np->opcode == SUB)
-	np->width = np->rval->width;	/* tpe of the array */
+	np->width = np->lval->width;	/* type of the array */
 }
 
 /*************************************************************************
@@ -180,22 +155,25 @@ node *np;
  *
  **************************************************************************/
 
-static void codecheck()
+void codecheck()
 {
     tuple	*tp, *up;
 
     /* check for assignment type mismatches */
+    /* This check can't be done at compile time---RTFM.  [LHH] */
+/*
     for (tp = tuples; tp < tuples + lineno; tp++)
 	if (tp->type == GETS)
-	    if (tp->u.node->lval->width == 16 && tp->u.node->lval->width == 32)
-		lose(tp - tuples + 1, E275);
+	    if (tp->u.node->lval->width == 16 && tp->u.node->rval->width == 32)
+		lose(E275, tp - tuples + 1, (char *)NULL);
+*/
 
     /* check for duplicate labels */
     for (tp = tuples; tp < tuples + lineno; tp++)
 	if (tp->label)
 	    for (up = tuples; up < tuples + lineno; up++)
 		if (tp != up && tp->label == up->label)
-		    lose(tp - tuples + 1, E182);
+		    lose(E182, tp - tuples + 1, (char *)NULL);
 
     /*
      * Check that every NEXT, ABSTAIN, REINSTATE and COME_FROM actually has a
@@ -214,23 +192,27 @@ static void codecheck()
 		    foundit = TRUE;
 		    break;
 		}
+
 	    if (!foundit)
 	    {
 		if (tp->type == NEXT)
-		    lose(tp - tuples + 1, E129);
+		    lose(E129, tp - tuples + 1, (char *)NULL);
 		else if (tp->type == COME_FROM)
-		    lose(tp - tuples + 1, E444);
+		    lose(E444, tp - tuples + 1, (char *)NULL);
 		else
-		    lose(tp - tuples + 1, E139);
+		    lose(E139, tp - tuples + 1, (char *)NULL);
+	    }
+	    /* tell the other tuple if it is a COME FROM target */
+	    else if (tp->type == COME_FROM)
+	    {
+	        if (up->comefrom)
+		    lose(E555, yylineno, (char *)NULL);
+		else
+		    up->comefrom = tp - tuples + 1;
 	    }
 	    /* this substitutes line numbers for label numbers */
 	    else if (tp->type != NEXT)
 	    {
-		if (tp->type == COME_FROM)
-		    if (up->comefrom)
-			lose(yylineno, E555);
-		    else
-			up->comefrom = tp - tuples + 1;
 		tp->u.target = up - tuples + 1;
 	    }
 	}
@@ -244,12 +226,9 @@ static void codecheck()
  *
  **************************************************************************/
 
-/* optimizer node codes -- must make sure these don't collide with y.tab.h */
-#define TESTNZ	300	/* test for non-zero */
+#define ISCONSTANT(np, v)	((np->opcode == MESH || np->opcode == MESH32) && np->constant == v)
 
-#define ISCONSTANT(np, v)	(np->opcode == MESH && np->constant == v)
-
-static void rfree(np)
+void rfree(np)
 /* recursively free the given node and all nodes underneath */
 node	*np;
 {
@@ -260,7 +239,7 @@ node	*np;
     free(np);    
 }
 
-static int requal(mp, np)
+int requal(mp, np)
 /* do two node trees represent the same expression? */
 node *mp, *np;
 {
@@ -276,7 +255,7 @@ node *mp, *np;
 	return(TRUE);
 }
 
-static void optimize(np)
+void optimize(np)
 node *np;
 {
     /* recurse so we simplify each node after all its subnodes */
@@ -298,10 +277,21 @@ node *np;
 	np->width = 16;
     }
 
+    /* equality test by XOR */
+    if (np->opcode == TESTNZ && np->rval->opcode == XOR)
+    {
+	node	*tp = np->rval;
+
+	np->opcode = EQUALS;
+	np->lval = tp->lval;
+	np->rval = tp->rval;
+	free(np->rval);
+    }
+
     /* fold MINGLE operations on constants */
     if (np->opcode==MINGLE && (np->lval->opcode==MESH&&np->rval->opcode==MESH))
     {
-	np->opcode = MESH;
+	np->opcode = MESH32;
 	np->constant = mingle(np->lval->constant, np->rval->constant);
 	free(np->lval);
 	free(np->rval);
@@ -311,7 +301,7 @@ node *np;
     if (np->opcode == SELECT && (np->lval->opcode==MESH && np->rval->opcode==MESH))
     {
 	np->opcode = MESH;
-	np->constant = select(np->lval->constant, np->rval->constant);
+	np->constant = iselect(np->lval->constant, np->rval->constant);
 	free(np->lval);
 	free(np->rval);
     }
@@ -343,7 +333,7 @@ node *np;
 
 /*************************************************************************
  *
- * Code generation
+ * Code degeneration
  *
  * The theory behind this crock is that we've been handed a pointer to
  * a tuple representing a single INTERCAL statement, possibly with an
@@ -355,39 +345,32 @@ node *np;
  *
  **************************************************************************/
 
-typedef struct
-{
-    int	value;
-    char *name;
-}
-assoc;
-
 /*
  * If the order of statement-token defines in ick.y ever changes,
- * this will need to be resolved.
+ * this will need to be reordered.
  */
-static char *enablers[] =
+char *enablers[MAXTYPES] =
 {
-    /* GETS      */	"calculating",
-    /* RESIZE    */	"calculating",
-    /* NEXT      */	"nexting",
-    /* FORGET    */	"forgetting",
-    /* RESUME    */	"resuming",
-    /* STASH     */	"stashing",
-    /* RETRIEVE  */	"retrieving",
-    /* IGNORE    */	"ignoring",
-    /* REMEMBER  */	"remembering",
-    /* ABSTAIN   */	"abstaining",
-    /* REINSTATE */	"reinstating",
-    /* DISABLE   */	"abstaining",
-    /* ENABLE    */	"reinstating",
-    /* GIVE_UP   */	"givingup",	/* never used */
-    /* READ_OUT  */	"readingout",
-    /* WRITE_IN  */	"writingin",
-    /* COME_FROM */	"comingfrom",
+    "GETS",
+    "RESIZE",
+    "NEXT",
+    "FORGET",
+    "RESUME",
+    "STASH",
+    "RETRIEVE",
+    "IGNORE",
+    "REMEMBER",
+    "ABSTAIN",
+    "REINSTATE",
+    "DISABLE",
+    "ENABLE",
+    "GIVE_UP",
+    "READ_OUT",
+    "WRITE_IN",
+    "COME_FROM",
 };
 
-static assoc vartypes[] =
+assoc vartypes[] =
 {
     ONESPOT,	"ONESPOT",
     TWOSPOT,	"TWOSPOT",
@@ -396,7 +379,7 @@ static assoc vartypes[] =
     0,		(char *)NULL
 };
 
-static assoc forgetbits[] =
+assoc forgetbits[] =
 {
     ONESPOT,	"oneforget",
     TWOSPOT,	"twoforget",
@@ -405,25 +388,25 @@ static assoc forgetbits[] =
     0,		(char *)NULL
 };
 
-static assoc varstores[] =
+assoc varstores[] =
 {
-    ONESPOT,	"onespot",
-    TWOSPOT,	"twospot",
+    ONESPOT,	"onespots",
+    TWOSPOT,	"twospots",
     TAIL,	"tails",
     HYBRID,	"hybrids",
     0,		(char *)NULL
 };
 
-static assoc typedefs[] =
+assoc typedefs[] =
 {
-    ONESPOT,	"short",
-    TWOSPOT,	"int",
-    TAIL,	"unsigned short *",
-    HYBRID,	"unsigned int *",
+    ONESPOT,	"type16",
+    TWOSPOT,	"type32",
+    TAIL,	"type16",
+    HYBRID,	"type32",
     0,		(char *)NULL
 };
 
-static char *nameof(value, table)
+char *nameof(value, table)
 /* return string corresponding to value in table */
 int	value;
 assoc	table[];
@@ -436,7 +419,7 @@ assoc	table[];
     return((char *)NULL);
 }
 
-static void prvar(np, fp)
+void prvar(np, fp)
 /* print out args to pass to storage manager for reference */
 node	*np;
 FILE	*fp;
@@ -455,34 +438,37 @@ FILE	*fp;
 	break;
 
     case TAIL:
-	(void) fprintf(fp, "TAIL, %d", np->constant);
+	(void) fprintf(fp, "TAIL, &tails[%d]", np->constant);
 	break;
 
     case HYBRID:
-	(void) fprintf(fp, "HYBRID, %d", np->constant);
+	(void) fprintf(fp, "HYBRID, &hybrids[%d]", np->constant);
 	break;
 
     case SUB:
-	dim = 0;
-	for (sp = np->rval; sp; sp = sp->rval)
-	    dim++;
-	(void) fprintf(fp, "%s, %d, %d, ",
-		       nameof(np->lval->opcode, vartypes),
-		       np->lval->constant,
-		       dim);
-	for (np = np->rval; np; np = np->rval)
 	{
-	    extern void prexpr();
+	  void prexpr();
+	  node *sp;
 
-	    prexpr(np->lval, fp);
+	  (void) fprintf(fp, "aref(");
+	  prvar(np->lval, fp);
+
+	  dim = 0;
+	  for (sp = np->rval ; sp ; sp = sp->rval)
+	    dim++;
+	  (void) fprintf(fp, ", %d", dim);
+
+	  for (sp = np->rval ; sp ; sp = sp->rval) {
 	    (void) fprintf(fp, ", ");
-        }
-	(void) fprintf(" 0");
+	    prexpr(sp->lval, fp);
+	  }
+	  (void) fprintf(fp, ")");
+	}
 	break;
     }
 }
 
-static void prexpr(np, fp)
+void prexpr(np, fp)
 /* print out C-function equivalent of an expression */
 FILE	*fp;
 node	*np;
@@ -498,7 +484,7 @@ node	*np;
 	break;
 
     case SELECT:
-	(void) fprintf(fp, "select(");
+	(void) fprintf(fp, "iselect(");
 	prexpr(np->lval, fp);
 	(void) fprintf(fp, ", ");
 	prexpr(np->rval, fp);
@@ -523,8 +509,40 @@ node	*np;
 	(void) fprintf(fp, ")");
 	break;
 
+    case EQUALS:
+	(void) fprintf(fp, "(");
+	prexpr(np->lval, fp);
+	(void) fprintf(fp, " == ");
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
+
+    case FIN:
+	if (Base < 3)
+	  lose(E997, lineno, (char *)NULL);
+	(void) fprintf(fp, "fin%d(", np->width);
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
+
+    case WHIRL:
+    case WHIRL2:
+    case WHIRL3:
+    case WHIRL4:
+    case WHIRL5:
+	if (np->opcode - WHIRL + 3 > Base)
+	  lose(E997, lineno, (char *)NULL);
+	(void) fprintf(fp, "whirl%d(%d, ", np->width, np->opcode - WHIRL + 1);
+	prexpr(np->rval, fp);
+	(void) fprintf(fp, ")");
+	break;
+
     case MESH:
 	(void) fprintf(fp, "0x%x", np->constant);
+	break;
+
+    case MESH32:
+	(void) fprintf(fp, "0x%lx", np->constant);
 	break;
 
     case ONESPOT:
@@ -533,9 +551,8 @@ node	*np;
 	break;
 
     case SUB:
-	(void) fprintf(fp, "aget(%s");
+	(void) fprintf(fp, "*(%s*)", nameof(np->lval->opcode, typedefs));
 	prvar(np, fp);
-	(void) fprintf(fp, ")");
 	break;
 
 	/* cases from here down are generated by the optimizer */
@@ -549,6 +566,23 @@ node	*np;
     (void) free(np);
 }
 
+char *nice_text(text)
+char *text;
+{
+#define MAXNICEBUF	512
+  static char buf[MAXNICEBUF];
+  char *cp;
+  
+  for(cp = buf;*text;cp++,text++) {
+      if(*text == '"' || *text == '\\') {
+	  (*cp++) = '\\';
+      }
+      *cp = *text;
+  }
+  *cp = '\0';
+  return buf;
+}
+
 void emit(tn, fp)
 /* emit code for the given tuple */
 tuple	*tn;
@@ -556,86 +590,76 @@ FILE	*fp;
 {
     node *np, *sp;
     int	dim;
+    char *name;
+    static int make_cf_target = 0;
 
-    if (yydebug)
+    if (yydebug || compile_only)
 	(void) fprintf(fp, "    /* line %03d: %s */\n",
 		   tn - tuples + 1,
 		   textlines[tn-tuples+1]);
 
+    /* don't make a label if we are emitting the jump to a COME FROM */
+    if (make_cf_target)
+	tn->label = 0;
     if (tn->label)
 	(void) fprintf(fp, "L%d:\n", tn->label);
 
-    if (tn->type == COME_FROM)
+    /* if this is a COME FROM statement, just make a label and jump to end */
+    if (tn->type == COME_FROM && !make_cf_target)
     {
-	(void) fprintf(fp, "C%d:\n", tn - tuples + 1);
-	return;
+	(void) fprintf(fp, "C%d:\n", tn->u.target);
+	goto comefrom;
     }
 
     /* emit conditional-execution prefixes */
-    if (tn->type == NEXT)
-    {
-	(void) fprintf(fp, "    if (skipto == %d) skipto = 0; else\n", tn-tuples+1);
-	(void) fprintf(fp, "    if (!skipto && ");
-    }
-    else
-	(void) fprintf(fp, "    if (!skipto && ", tn - tuples + 1);
-    if (tn->exechance && tn->exechance < 100)
+    (void) fprintf(fp, "    if (");
+    if (tn->exechance < 100)
 	(void) fprintf(fp, "roll(%d) && ", tn->exechance);
-    if (tn->type == GIVE_UP)
-	(void) fprintf(fp, "!abstained[(lineno = %d)-1])\n", tn - tuples + 1);
-    else
-	(void) fprintf(fp, "!abstained[(lineno = %d)-1] && %s)\n",
-		  tn-tuples + 1, enablers[tn->type-GETS]);
+    (void) fprintf(fp, "!abstained[(lineno = %d)-1])\n", tn - tuples + 1);
     (void) fprintf(fp, "    {\n");
-
-    if (tn->comefrom)
-	(void) fprintf(fp,
-	       "\tif (!abstained[%d-1] && comingfrom)\t/* COME FROM */\n\t    goto C%d;\n",
-	       tn->comefrom, tn->comefrom);
 
     /* now emit the code for the statement body */
     switch(tn->type)
     {
     case GETS:
 	np = tn->u.node;
-	(void) fprintf(fp,"\tif (!%s[%d])\n\t    ",
-		       nameof(np->lval->opcode, forgetbits),
-		       np->constant);
-	if (np->lval->opcode == ONESPOT || np->lval->opcode == TWOSPOT)
-	{
-	    prvar(np->lval, fp);
-	    (void) fprintf(fp, " = ");
-	    prexpr(tn->u.node->rval, fp);
+	if (np->lval->opcode != SUB) {
+	  sp = np->lval;
+	  (void) fprintf(fp,"\t(void) assign((char*)&");
 	}
-	else
-	{
-	    (void) fprintf(fp, "aput(");
-	    prexpr(tn->u.node->rval, fp);
-	    (void) fprintf(fp, ", ");
-	    prvar(np->lval, fp);
-	    (void) fprintf(fp, ")");
+	else {
+	  sp = np->lval->lval;
+	  (void) fprintf(fp,"\t(void) assign(");
 	}
-	(void) fprintf(fp, ";\n");
+	prvar(np->lval, fp);
+	(void) fprintf(fp,", %s", nameof(sp->opcode, vartypes));
+	(void) fprintf(fp,", %s[%d], ", nameof(sp->opcode, forgetbits),
+			   sp->constant);
+	prexpr(np->rval, fp);
+	(void) fprintf(fp,");\n");
 	break;
 
     case RESIZE:
-	(void) fprintf(fp, "\tresize(");
-	prvar(tn->u.node->lval, fp);
+	np = tn->u.node;
 	dim = 0;
 	for (sp = np->rval; sp; sp = sp->rval)
-	    dim++;
-	(void) fprintf(fp, " %d,", dim);
-	for (np = np->rval; np; np = np->rval)
-	{
-	    prexpr(np->lval, fp);
-	    fprintf(fp, ", ");
+	  dim++;
+	(void) fprintf(fp, "\tresize(");
+	prvar(np->lval, fp);
+	(void) fprintf(fp, ", %s[%d]", nameof(np->lval->opcode, forgetbits),
+		       np->lval->constant);
+	(void) fprintf(fp, ", %d", dim);
+	for (sp = np->rval; sp; sp = sp->rval) {
+	  (void) fprintf(fp, ", ");
+	  prexpr(sp->lval, fp);
         }
-	(void) fprintf(fp, "0");
-        (void) fprintf(fp, ");\n");
+	(void) fprintf(fp, ");\n");
 	break;
 
     case NEXT:
-	(void) fprintf(fp, "\tpushnext(%d); goto L%d;\n",tn - tuples + 1,tn->u.target);
+	(void) fprintf(fp,
+		       "\tpushnext(%d); goto L%d; N%d:;\n",
+		       tn - tuples + 1, tn->u.target, tn - tuples + 1);
 	break;
 
     case RESUME:
@@ -652,7 +676,7 @@ FILE	*fp;
 
     case STASH:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp, "\tstash(%s, %d, %s[%d]);\n",
+	    (void) fprintf(fp, "\tstash(%s, %d, %s+%d);\n",
 			  nameof(np->opcode, vartypes),
 			  np->constant,
 			  nameof(np->opcode, varstores), np->constant);
@@ -660,42 +684,58 @@ FILE	*fp;
 
     case RETRIEVE:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp, "\tretrieve(&%s[%d], %s, %d);\n",
-			  nameof(np->opcode, varstores), np->constant,
-			  nameof(np->opcode, vartypes),
-			  np->constant);
+	    (void) fprintf(fp, "\tretrieve(%s+%d, %s, %d, %s[%d]);\n",
+			   nameof(np->opcode, varstores), np->constant,
+			   nameof(np->opcode, vartypes),
+			   np->constant,
+			   nameof(np->opcode, forgetbits),
+			   np->constant);
 	break;
 
     case IGNORE:
 	for (np = tn->u.node; np; np = np->rval)
 	    (void) fprintf(fp,"\t%s[%d] = TRUE;\n",
-		       nameof(np->lval->opcode, forgetbits),
+		       nameof(np->opcode, forgetbits),
 		       np->constant);
 	break;
 
     case REMEMBER:
 	for (np = tn->u.node; np; np = np->rval)
 	    (void) fprintf(fp,"\t%s[%d] = FALSE;\n",
-		       nameof(np->lval->opcode, forgetbits),
+		       nameof(np->opcode, forgetbits),
 		       np->constant);
 	break;
 
     case ABSTAIN:
-	(void) fprintf(fp, "\tabstained[%d-1] = FALSE;\n", tn->u.target);
+	(void) fprintf(fp, "\tabstained[%d-1] = TRUE;\n", tn->u.target);
 	break;
 
     case REINSTATE:
-	(void) fprintf(fp, "\tabstained[%d-1] = TRUE;\n", tn->u.target);
+	(void) fprintf(fp, "\tabstained[%d-1] = FALSE;\n", tn->u.target);
 	break;
 
     case ENABLE:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp, "\t%s = TRUE;\n", enablers[np->constant-GETS]);
+	{
+	    (void) fprintf(fp,
+			   "\tint i;\n\n\tfor (i = 0; i < sizeof(linetype)/sizeof(int); i++)\n");
+	    (void) fprintf(fp,
+			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
+	    (void) fprintf(fp,
+			   "\t\tabstained[i] = FALSE;\n");
+	}
 	break;
 
     case DISABLE:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp, "\t%s = FALSE;\n", enablers[np->constant-GETS]);
+	{
+	    (void) fprintf(fp,
+			   "\tint i;\n\n\tfor (i = 0; i < sizeof(linetype)/sizeof(int); i++)\n");
+	    (void) fprintf(fp,
+			   "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
+	    (void) fprintf(fp,
+			   "\t\tabstained[i] = TRUE;\n");
+	}
 	break;
 
     case GIVE_UP:
@@ -703,238 +743,81 @@ FILE	*fp;
 	break;
 
     case WRITE_IN:
-	for (np = tn->u.node; np; np = np->rval)
-	{
-	    np = tn->u.node;
-	    (void) fprintf(fp,"\tif (!%s[%d])\n\t    ",
+	for (np = tn->u.node; np; np = np->rval) {
+	  if (np->lval->opcode == TAIL || np->lval->opcode == HYBRID) {
+	    (void) fprintf(fp,"\tbinin(");
+	    prvar(np->lval, fp);
+	    (void) fprintf(fp, ", %s[%d]",
 			   nameof(np->lval->opcode, forgetbits),
-			   np->constant);
-	    if (np->lval->opcode == ONESPOT || np->lval->opcode == TWOSPOT)
-	    {
-		prvar(np->lval, fp);
-		(void) fprintf(fp, " = pin()");
+			   np->lval->constant);
+	    (void) fprintf(fp,");\n");
+	  }
+	  else {
+	    if (np->lval->opcode != SUB) {
+	      sp = np->lval;
+	      (void) fprintf(fp,"\t(void) assign((char*)&");
 	    }
-	    else
-	    {
-		(void) fprintf(fp, "aput(pin(), ");
-		prvar(np->lval, fp);
-		(void) fprintf(fp, ")");
+	    else {
+	      sp = np->lval->lval;
+	      (void) fprintf(fp,"\t(void) assign(");
 	    }
-	    (void) fprintf(fp, ";\n");
+	    prvar(np->lval, fp);
+	    (void) fprintf(fp,", %s", nameof(sp->opcode, vartypes));
+	    (void) fprintf(fp,", %s[%d]", nameof(sp->opcode, forgetbits),
+			   sp->constant);
+	    (void) fprintf(fp,", pin());\n");
+	  }
 	}
 	break;
 
     case READ_OUT:
 	for (np = tn->u.node; np; np = np->rval)
 	{
+	  if (np->lval->opcode == TAIL || np->lval->opcode == HYBRID) {
+	    (void) fprintf(fp,"\tbinout(");
+	    prvar(np->lval, fp);
+	    (void) fprintf(fp,");\n");
+	  }
+	  else {
 	    (void) fprintf(fp, "\tpout(");
 	    prexpr(np->lval, fp);
 	    (void) fprintf(fp, ");\n");
+	  }
 	}
 	break;
 
+    case COME_FROM:
+	(void) fprintf(fp,"\tgoto C%d;\n", tn->u.target);
+	break;
+
     case SPLATTERED:
+	/*
+	fprintf(stderr,"compiling a splat... line = %d (%s)\n",
+		tn->lineno,textlines[tn->lineno]);
+		*/
+	(void) fprintf(fp,"\t(void) puts(\"%s\");\n",
+		       nice_text(textlines[tn->lineno]));
 	(void) fprintf(fp,
-		       "(void) puts(\"%s\");\n", textlines[tn->lineno]);
-	(void) fprintf(fp,
-		       "exit(%d);\n", tn->lineno);
+		       "\texit(%d);\n", tn->lineno);
 	break;
 
     default:
-	lose(tn - tuples + 1, E778);
+	lose(E778, tn - tuples + 1, (char *)NULL);
 	break;
     }
 
     (void) fprintf(fp, "    }\n");
-}
 
-/*************************************************************************
- *
- * Driver code
- *
- **************************************************************************/
+  comefrom:
 
-void abend()
-{
-    lose(yylineno, E778);
-}
+    /* if the statement that was just degenerated was a COME FROM target,
+       emit the code for the jump to the COME FROM. */
 
-main(argc, argv)
-int	argc;
-char	*argv[];
-{
-    extern char	*optarg;	/* set by getopt */
-    extern int	optind;		/* set by getopt */
-    char	buf[BUFSIZ], buf2[BUFSIZ];
-    tuple	*tp;
-    atom	*op;
-    int	c;
-
-    while ((c = getopt(argc, argv, "dOC")) != EOF)
-    {
-	switch (c)
-	{
-	case 'd':
-	    yydebug = 1;
-	    break;
-
-	case 'C':
-	    clockface = TRUE;
-	    break;
-
-	case 'O':
-	    dooptimize = TRUE;
-	    break;
-	}
+    if (tn->comefrom && !make_cf_target) {
+      make_cf_target = 1;
+      emit(tuples + tn->comefrom - 1, fp);
+      make_cf_target = 0;
     }
-
-    (void) signal(SIGSEGV, abend);
-    (void) signal(SIGBUS, abend);
-
-    for (; optind < argc; optind++)
-	if (freopen(argv[optind], "r", stdin) == (FILE *)NULL)
-	    lose(0, E777);
-	else
-	{
-	    FILE	*ifp, *ofp;
-	    int		maxabstain;
-
-	    /* zero out tuple and oblist storage */
-	    treset();
-
-	    /* compile tuples from current input source */
-	    yyparse();	
-
-	    /* 
-	     * Now propagate type information up the expression tree.
-	     * We need to do this because the unary-logical operations
-	     * are sensitive to the type widths of their operands, so
-	     * we have to generate different code depending on the
-	     * deducible type of the operand.
-	     */
-	    for (tp = tuples; tp < tuples + lineno; tp++)
-		if (tp->type == GETS || tp->type == RESIZE
-			|| tp->type == FORGET || tp->type == RESUME)
-		    typecast(tp->u.node);
-
-	    codecheck();	/* check for compile-time errors */
-
-	    /* perform optimizations */
-	    if (dooptimize)
-		for (tp = tuples; tp < tuples + lineno; tp++)
-		    if (tp->type == GETS || tp->type == RESIZE
-				|| tp->type == FORGET || tp->type == RESUME)
-			optimize(tp->u.node);
-
-	    /* strip off the file extension */
-	    argv[optind][strlen(argv[optind]) - 2] = '\0';
-
-	    /* set up the generated C output file name */
-	    (void) strcpy(buf, argv[optind]);
-	    (void) strcat(buf, ".c");
-	    if ((ofp = fopen(buf, "w")) == (FILE *)NULL)
-		lose(0, E888);
-
-	    /* now substitute in tokens in the skeleton */
-	    if ((ifp = fopen(SKELETON, "r")) == (FILE *)NULL)
-		lose(0, E999);
-	    buf[strlen(buf) - 2] = '\0';
-
-	    while ((c = fgetc(ifp)) != EOF)
-		if (c != '$')
-		    (void) fputc(c, ofp);
-	        else switch(fgetc(ifp))
-		{
-		case 'A':			/* source name stem */
-		    (void) fputs(buf, ofp);
-		    break;
-
-		case 'B':			/* # of source lines */
-		    (void) fprintf(ofp, "%d", lineno);
-		    break;
-
-		case 'C':			/* initial abstentions */
-		    maxabstain = 0;
-		    for (tp = tuples; tp < tuples + lineno; tp++)
-			if (tp->exechance == 0 && tp - tuples + 1 > maxabstain)
-			    maxabstain = tp - tuples + 1;
-		    if (maxabstain)
-		    {
-			(void) fprintf(ofp, " = {");
-			for (tp = tuples; tp < tuples + maxabstain; tp++)
-			    (void) fprintf(ofp, "%d, ", !tp->exechance);
-			(void) fprintf(ofp, "}");
-		    }
-		    break;
-
-		case 'D':			/* extern to intern map */
-		    if (nonespots)
-		    {
-			(void) fprintf(ofp,
-				       "static unsigned int onespots[%d];\n",
-				       nonespots);
-			(void) fprintf(ofp,
-				       "static bool oneforget[%d];\n",
-				       nonespots);
-		    }
-		    if (ntwospots)
-		    {
-			(void) fprintf(ofp,
-				       "static unsigned int twospots[%d];\n",
-				       ntwospots);
-			(void) fprintf(ofp,
-				       "static bool twoforget[%d];\n",
-				       ntwospots);
-		    }
-		    if (ntails)
-		    {
-			(void) fprintf(ofp,
-				       "static unsigned int *tails[%d];\n",
-				       ntails);
-			(void) fprintf(ofp,
-				       "static bool tailforget[%d];\n",
-				       ntails);
-		    }
-		    if (nhybrids)
-		    {
-			(void) fprintf(ofp,
-				       "static unsigned int *hybrids[%d];\n",
-				       nhybrids);
-			(void) fprintf(ofp,
-				       "static bool hyforget[%d];\n",
-				       nhybrids);
-		    }
-		    if (yydebug)
-			for (op = oblist; op < obdex; op++)
-			    (void) fprintf(ofp, "/* %s %d -> %d */\n",
-					   nameof(op->type, vartypes),
-					   op->extindex,
-					   op->intindex);
-		    break;
-
-		case 'E':
-		    if (clockface)
-			(void) fprintf(ofp, "clockface(TRUE);");
-		    break;
-
-		case 'F':			/* degenerated code */
-		    for (tp = tuples; tp < tuples + lineno; tp++)
-			emit(tp, ofp);
-		    break;
-		}
-
-	    (void) fclose(ifp);
-	    (void) fclose(ofp);
-
-	    /* OK, now sic the C compiler on the results */
-	    if (!yydebug)
-	    {
-		(void) sprintf(buf2, "cc %s.c -I. -L. -lick -o %s", buf, buf);
-		(void) system(buf2);
-		(void) strcat(buf, ".c");
-		(void) unlink(buf);
-	    }
-	}
 }
 
 /* feh.c ends here */

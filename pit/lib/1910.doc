@@ -1,0 +1,34 @@
+From ucbvax!bloom-beacon!eru!luth!sunic!lth.se!newsuser Thu May 17 19:51:02 PDT 1990
+
+Sorry, but I couldn't find the (1910)-routine so I wrote one, which
+will do it's job, IF the (1900)-routine is as the manual says ( you know
+it isn't ). At least I hope it works because the manual is not very clear
+about this routine.
+
+
+(1910) PLEASE STASH .3 + :3 + :1 + :2
+       DO :1 <- #32768
+       PLEASE .2 <- #1
+       PLEASE (1911) NEXT
+(1911) DO FORGET #1
+       DO STASH .1
+       DO (1900) NEXT
+       PLEASE :2 <- .1
+       DO RETRIEVE .1
+       DO (1500) NEXT
+       PLEASE DO :1 <- :3
+       DO (1010) NEXT
+       PLEASE .1 <- .3
+       DO (1912) NEXT
+       DO (1911) NEXT
+(1912) PLEASE (1913) NEXT
+       DO .2 <- :1~'#65280$#65280'
+       PLEASE RETRIEVE :2 + .3 + :1 + :3
+       DO RESUME #2
+(1914) PLEASE RESUME #1$"'.1~.1'~#1"
+(1913) PLEASE (1914) NEXT
+-- 
+----------
+Hans Olsson   Email: f88ho@efd.lth.se   
+              Snail: K[MN[RSV[GEN 8:118 
+                     222 45 Lund Sweden

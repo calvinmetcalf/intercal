@@ -1,0 +1,8 @@
+#
+# testcompile -- testcompile all named sources using ick:
+#
+for x in $*
+do
+	echo "Test-compiling $x";
+	../src/ick $x;
+done

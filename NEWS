@@ -1,0 +1,141 @@
+			NEW IN THIS RELEASE
+
+		Release 0.12 (by Eric S. Raymond)
+
+1. The code now compiles and runs under Linux, using bison and lex.  It does
+   *not* yet work with flex;  C.P. Osborne's patches for 0.11 turned out not
+   to be sufficient (at least for flex 2.4.6 under Linux using the -l option).
+   See the BUGS list.
+
+2. Note 3 under 0.11 was incorrect.  We're in conformance after all.
+
+3. The politesse check is a little smarter about programs too small to
+   conform to the 1/5-to-1/3 criterion.  All the pit programs have been
+   checked for conformance.  Also, the politesse error message now tells
+   you the offending program's line count.
+
+		Release 0.11 (by Eric S. Raymond)
+
+1. Incorporated changes by Jan-Pieter Cornet <cornet@OTech.fgg.EUR.nl> for
+   magical inclusion of the system library.  These address an outstanding bug
+
+   2. (SS) The `system library' should be precompiled and `linked' to user
+      written code, at least optionally.  Doing this with the current compiler
+      presents a few problems.
+
+   which has accordingly been removed from the BUGS file.  They also fix a
+   previously unknown bug; due to a minor oversight in the lexer, it was not
+   possible to ABSTAIN FROM WRITING IN or READING OUT.  Jan also contributed
+   a test program that demonstrates gerund abstention.
+
+2. Despite the obvious appeal of the idea, and much discussion on
+   alt.lang.intercal, I decided *not* to add Klingon; maintaining two parallel
+   grammars just so the compiler could support SVO and OSV languages would be
+   too painful.  There was also a minor mess near case-sensitivity in the
+   digits.  The workaround kluges I was offered instead failed to satisfy.
+
+3. We fess up to a violation of the INTERCAL-72 standard.  That implementation,
+   instead of accepting an entire multiple-digit number per line of input,
+   expected one digit per *card image* (input line).  It is unclear how 
+   INTERCAL-72 programs ever managed to input more than one number.
+
+4. Added patches by C.P.Osborne <boris@ibmpcug.co.uk> to make the lexer work
+   using flex, for Linux and BSD/386 support.  I didn't use his error-reporting
+   patch, though; instead, I changed the parser to catch errors at logical-line
+   level.  I also kept the N in `RESUBNIT'; this is a carefully preserved 
+   feature of INTERCAL-72.
+
+5. Volapuk digits are now recognized on input.  TO DO: Recognize Volapuk
+   keywords, including gerunds.
+
+		Release 0.10 (by Eric S. Raymond)
+
+1. It is now possible to undo a line-number abstention with a gerund
+   reinstatement, or undo a gerund abstention with a line-number 
+   reinstatement.  In previous versions, gerund abstention/reinstatements and
+   line-number abstention/reinstatements were independent of each other.
+
+2. After release 0.5, I wrote in the TO DO list as follows:
+  
+   2. (ESR) Input format internationalization -- allow WRITE IN input digits in
+     major languages such as Nahuatl, Tagalog, Sanskrit, and Basque.
+  
+   The twisted loons in the alt.folklore.computers crowd loved this idea,
+   and I actually got sent digit lists for Nahuatl, Tagalog, Sanskrit, and
+   Basque -- also, Kwakiutl, Georgian, Ojibwe. and Albanian.  I've left
+   out Albanian (didn't want to keep track of the dipthong diacritical)
+   and Ojibwe (no zero digit).  So: Nahuatl, Tagalog, Sanskrit, Basque,
+   Georgian, and Kwakiutl are now supported in addition to English.
+
+3. The THEORY document has been significantly revised.
+
+		Release 0.9 (by Eric S. Raymond)
+
+1. An embarrassing port bug in the INTERCAL skeleton has been fixed
+
+2. Jamie Zawinski's suggestion for an improved E333 error message has
+   been accepted.
+
+3. Added and improved documentation for pit programs.
+
+4. The install production in the Makefile now puts lose.h in place
+   as well as cesspool.h.
+
+5. You can now set the C compiler to be used as a back end by INTERCAL
+   by setting the environment variable CC.  The default is cc.
+
+		Release 0.8 (many hacks on 0.7 by Eric Raymond)
+
+1. A previously undocumented `feature' of the Princeton compiler,
+   revealed by Don Woods, is now emulated.  If fewer than 1/5 or more
+   than 1/3 of a program's statements contain the qualifier `PLEASE', the
+   program is rejected with an entertaining error message.  Programs in pit
+   have been hacked to pass the politesse test.
+
+2. The `sample' program now works correctly, thanks to Louis Howell.  Also,
+   he has contributed new programs to calculate pi and to search for prime
+   numbers.
+
+3. An intercal mode for GNU Emacs is included.  It helps programmers deal with
+   the new politesse check by randomly expanding the abbrev "do" to DO PLEASE
+   or PLEASE DO about 1/4 of the time.
+
+4. Improvements in code generation for NEXT/RESUME.
+
+5. Fixes to the optimizer; it handles the results of optimized MINGLEs
+   correctly now.  Also, added a rewrite rule that checks for the
+   equality-test idiom using XOR.
+
+6. The original error messages from the Princeton compiler have been restored.
+
+The documentation has been updated to reflect these changes.
+
+		Release 0.7 (by Louis Howell)
+
+In addition to bug fixes, new features in this version include arrays,
+character I/O, modified (hopefully improved!) semantics for the COME
+FROM statement, extensions to bases other than 2, new INTERCAL programs,
+and new documentation.
+
+		Release 0.6 (by Steve Swales)
+
+1. Restored Princeton documentation (courtesy of Michael Ernst).
+
+2. Added -@ usage option to ick.
+
+3. Added [+/-]help, [+/-]traditional, and [+/-]wimpmode options for
+generated programs; [+/-]traditional is a no-op at this point.
+
+4. Various bug fixes, esp. in lexical analysis.
+
+		Release 0.5 (ESR's original pre-release)
+
+1. As a convenience to all you junior birdmen out there, `NINER' is accepted as
+   a synonym for `NINE' in INTERCAL input.
+
+2. The COME FROM statement is now compiled. 
+
+			-------------
+
+For details on COME FROM and other extensions to C-INTERCAL, see
+doc/ick.txt.

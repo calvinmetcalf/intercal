@@ -1,18 +1,66 @@
 %{
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
+#include <memory.h>
 #include "ick.h"
 #include "y.tab.h"
+#include "lose.h"
+
+#ifdef	YYLINENO_BY_HAND
+int	yylineno = 1;
+#endif	/* YYLINENO_BY_HAND */
 
 #ifdef MAIN
 YYSTYPE	yylval;
 #endif /* MAIN */
 
 char *textlines[MAXLINES];
+int politesse = 0;
 
 static char linebuf[YYLMAX];
 static char *lineptr = linebuf;
 
+bool re_send_token = FALSE;
+
+int lexer()
+{
+    static int tok = BADCHAR;
+
+    if (re_send_token)
+	re_send_token = FALSE;
+    else 
+    {
+	tok = yylex();
+#ifdef YYDEBUG
+	if (yydebug)
+	    (void) (void) fprintf(stdout, "yylex: returning token %d\n", tok); 
+#endif /* YYDEBUG */
+    }
+
+#ifdef YYDEBUG
+    if (yydebug)
+	(void) (void) fprintf(stdout, "lexer: returning token %d\n", tok); 
+#endif /* YYDEBUG */
+    return(tok);
+}
+
+int myatoi(text)
+char *text;
+{
+#define MAXTEXT 100
+    static char buf[MAXTEXT];
+    register int i;
+
+    for(buf[i = 0] = '\0';*text && i < MAXTEXT;text++) {
+	if(isdigit(*text)) {
+	    buf[i++] = *text;
+	}
+    }
+    buf[i] = '\0';
+    return atoi(buf);
+}
+	
 /*
  * The spectacular ugliness of INTERCAL syntax requires that the lexical
  * analyzer have two levels. One, embedded in the getc() function, handles
@@ -26,13 +74,20 @@ static char *lineptr = linebuf;
 int getc(fp)
 FILE	*fp;
 {
-    bool bangflag = FALSE;
+    static bool bangflag = FALSE;
+    static bool backflag = FALSE;
 
     if (bangflag)
     {
 	bangflag = FALSE;
-	*lineptr++ = '!';
+	/*	*lineptr++ = '!'; */
 	return('.');
+    }
+    else if (backflag)	/* converting ctrl-H (backspace) to two chars "^H" */
+    {
+	backflag = FALSE;
+	/*	*lineptr++ = '\010'; */
+	return('H');
     }
     else
     {
@@ -43,27 +98,39 @@ FILE	*fp;
 	    *lineptr = '\0';
 	    return(EOF);
 	}
+#ifdef BACKSLASH_CONTINUATION
 	else if (c == '\\')
 	{
 	    do {
 		c = fgetc(fp);
+#ifdef	YYLINENO_BY_HAND
+		if( c == '\n' ) yylineno++;
+#endif	/* YYLINENO_BY_HAND */
 	    } while
 		(c != '\\' && isspace(c));
 	}
-
+#endif	/* BACKSLASH_CONTINUATION */
 	if (c == '!')
 	{
 	    *lineptr++ = '!';
 	    bangflag = TRUE;
 	    return(c = '\'');
 	}
+	else if (c == '\010')	/* convert ctrl-H (backspace) to
+				   two chars "^" and "H" so lex can take it */
+	{
+	    *lineptr++ = '\010';
+	    backflag = TRUE;
+	    return(c = '^');
+	}
 	else if (c == '\n')
 	{
-	    extern char *strdup();
-
 	    *lineptr = '\0';
 	    lineptr = linebuf;
-	    textlines[yylineno] = strdup(linebuf);
+	    textlines[yylineno] = strcpy((char *)malloc(1+strlen(linebuf)),linebuf);
+#ifdef YYLINENO_BY_HAND
+	    yylineno++;
+#endif /* YYLINENO_BY_HAND */
 	    return('\n');
 	}
 	else
@@ -78,36 +145,46 @@ FILE	*fp;
 %}
 
 W	[\ \t\n]*
-D	[0-9][0-9]*
+D	[0-9][\ \t\n0-9]*
 
 %%
 
-[0-9][0-9]*	{yylval.numval = atoi(yytext); return(NUMBER);}
+{D}		{yylval.numval = myatoi(yytext); return(NUMBER);}
 \.		{return(ONESPOT);}
 \:		{return(TWOSPOT);}
 \,		{return(TAIL);}
 \;		{return(HYBRID);}
 \#		{return(MESH);}
 
+"C^H/"	|
 \$		{return(MINGLE);}
 \~		{return(SELECT);}
 
 \&		{yylval.numval = AND; return(UNARY);}
 V		{yylval.numval = OR; return(UNARY);}
+"V^H-"		|
 \?		{yylval.numval = XOR; return(UNARY);}
+\^		{yylval.numval = FIN; return(UNARY);}
+@		{yylval.numval = WHIRL; return(UNARY);}
+[2-5]{W}@	{yylval.numval = WHIRL + myatoi(yytext) - 1; return(UNARY);}
 
 \'		{return(SPARK);}
 \"		{return(EARS);}
 
-\({D}\)		{yylval.numval = atoi(yytext + 1); return(LABEL);}
+\({W}{D}\)	{yylval.numval = myatoi(yytext); return(LABEL);}
 
 DO		{return(DO);}
-PLEASE		{return(DO);}
-PLEASE{W}DO	{return(DO);}
+PLEASE		{politesse++; return(DO);}
+DO{W}PLEASE	{politesse++; return(DO);}
+PLEASE{W}DO	{politesse++; return(DO);}
 NOT		{return(NOT);}
-DON\'T		{return(NOT);}
+N\'T		{return(NOT);}
 
-\%{D}		{yylval.numval = atoi(yytext + 1); return(OHOHSEVEN);}
+\%{W}{D}	{yylval.numval = myatoi(yytext);
+                 if (yylval.numval && yylval.numval < 100)
+		   return(OHOHSEVEN);
+		 else
+		   lose(E017, yylineno, (char *)NULL);}
 SUB		{return(SUB);}
 BY		{return(BY);}
 
@@ -132,15 +209,17 @@ ABSTAIN{W}FROM	{return(ABSTAIN);}
 ABSTAINING	{yylval.numval = ABSTAIN; return(GERUND);}
 REINSTATE	{return(REINSTATE);}
 REINSTATING	{yylval.numval = REINSTATE; return(GERUND);}
-\+		{return(INTERSECTION);}
-GIVE{W}UP	{return(GIVE_UP);}
 READ{W}OUT	{return(READ_OUT);}
+READING{W}OUT	{yylval.numval = READ_OUT; return(GERUND);}
 WRITE{W}IN	{return(WRITE_IN);}
+WRITING{W}IN	{yylval.numval = WRITE_IN; return(GERUND);}
 COME{W}FROM	{return(COME_FROM);}
 COMING{W}FROM	{yylval.numval = COME_FROM; return(GERUND);}
+GIVE{W}UP	{return(GIVE_UP);}
 
-[\ \t][\ \t]*	;
-\n		{return(NEWLINE);}
+\+		{return(INTERSECTION);}
+
+{W}     	;
 .		{yylval.numval = yytext[0]; return(BADCHAR);}
 
 
@@ -164,8 +243,7 @@ main()
 }
 #endif /* MAIN */
 
-static int yywrap()
+int yywrap()
 {
     return(EOF);
 }
-
