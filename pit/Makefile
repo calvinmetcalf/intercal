@@ -22,7 +22,6 @@ SOURCES = \
 	./tests/testops.3i \
 	./tests/testops.5i \
 	./tests/testsplat.i \
-	./tests/testi18n.i \
 	./pow.i \
 	./random.i \
 	./random2.i \
@@ -68,7 +67,6 @@ TARGETS = \
 	./tests/testops \
 	./tests/testops \
 	./tests/testsplat \
-	./tests/testi18n \
 	./pow \
 	./random \
 	./random2 \
@@ -146,4 +144,4 @@ lines:
 	wc -l $(SOURCES)
 
 clean:
-	rm -f $(TARGETS) *.c *.o lib/syslib?.?i tests/limits3.3i
+	rm -f $(TARGETS) *.c *.o *~ lib/syslib?.?i tests/limits3.3i

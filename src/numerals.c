@@ -133,15 +133,15 @@ static numeral numerals[] =
     { "FOL",		4 },
     { "LUL",		5 },
     { "M\\\"AL",	6 },
-    { "M\0xC4L",	6 },	/* Latin-1 support */
-    { "M\0xA3\0xA4L",	6 },	/* UTF-8 support */
+    { "M\xC4L",		6 },	/* Latin-1 support */
+    { "M\xA3\xA4L",	6 },	/* UTF-8 support */
     { "VEL",		7 },
     { "J\\\"OL",	8 },
-    { "J\0xD6L",	8 },	/* Latin-1 support */
-    { "J\0xA3\0x96L",	8 },	/* UTF-8 support */
+    { "J\xD6L",		8 },	/* Latin-1 support */
+    { "J\xA3\x96L",	8 },	/* UTF-8 support */
     { "Z\\\"UL",	9 },
-    { "Z\0xDCL",	9 },	/* Latin-1 support */
-    { "Z\0xA3\0x9CL",	9 },	/* UTF-8 support */
+    { "Z\xDCL",		9 },	/* Latin-1 support */
+    { "Z\xA3\x9CL",	9 },	/* UTF-8 support */
 /* Latin localization */
     { "NIL",		0 },
     { "NIHIL",		0 },
