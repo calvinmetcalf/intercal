@@ -1,7 +1,7 @@
 #
 # Utility productions for the INTERCAL distribution
 #
-VERSION=0.20
+VERSION=0.21
 
 dist: intercal-$(VERSION).tar.gz
 

@@ -1,5 +1,12 @@
 			NEW IN THIS RELEASE
 
+	Release 0.21 (by Eric S. Raymond)
+
+1. Jonathan Nieder sent a grammar fix for BLR's old bug #5 (a bad spark-ears
+interaction.)
+
+2. Latin-1 support and makefile fixes from Magnus Bodin.
+
 	Release 0.20 (by Eric S. Raymond) 16 September 1999
 
   (The following changes are due to John Cowan <cowan@ccil.org>)
@@ -294,6 +301,6 @@ generated programs; [+/-]traditional is a no-op at this point.
 
 			-------------
 
-The resurrection of INTERCAL from its grave took place on 12 May 90
+The resurrection of INTERCAL from its grave took place on 12 May 1990
 when ESR released 0.3 on an unsuspecting USENET.
 
