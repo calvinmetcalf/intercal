@@ -26,7 +26,7 @@ BUGS			-- current bug and to-do list
 NEWS			-- info on features and fixes new in this release
 intercal.el		-- elisp for editing INTERCAL code under GNU Emacs
 
-doc/README		-- historical notes on the docs
+doc/READ.ME		-- historical notes on the docs
 doc/intercal.mm		-- the manual in groffable form
 doc/THEORY		-- some notes on the internals of the INTERCAL compiler
 
@@ -45,6 +45,9 @@ abcess.h		-- interface to functions linked with programs
 cesspool.c		-- the INTERCAL runtime support code
 numerals.c		-- numerals table for INTERCAL input
 sizes.h			-- variables defining the numeric base
+unravel.c               -- multithreading functions
+yuk.[ch]                -- INTERCAL debugger and profiler
+coopt.sh                -- shell-script to help out the -F optimizer
 
 pit/*			-- sample INTERCAL code; see pit/CATALOG
 
@@ -55,13 +58,23 @@ program `foo.i' to executable code, just do
 
 	ick foo.i
 
-There's a -c option that leaves the generated `foo.c' in place for inspection
-(suppressing compilation to machine code), a -d option that enables verbose
-parse reporting from the yacc/bison parser, a -t option that requires strict
-INTERCAL-72 compliance (rejecting COME FROM and the extensions for bases other
-than two), a -b option that disables the INTERCAL-72 random-bug feature,
-and an -O option that enables the (hah!) optimizer.  Invoking ick -?
-prints a usage message.  Other than that, yer on yer own.
+There's a -c option that leaves the generated `foo.c' in place for
+inspection (suppressing compilation to machine code), a -d option that
+enables verbose parse reporting from the yacc/bison parser, a -t
+option that requires strict INTERCAL-72 compliance (rejecting COME
+FROM and the extensions for bases other than two), a -b option that
+disables the INTERCAL-72 random-bug feature, and an -O option that
+enables the (hah!) optimizer (which can be invoked at higher levels
+with -Of or -F).  Invoking ick -?  prints a usage message.  The -m
+option enables multithreading extensions. If you need to debug code,
+you can use -y to invoke the debugger immediately after compilation,
+-p to invoke the profiler immediately after compilation, or -g to
+generate the C code in such a way that it can be debugged with a C
+debugger. -h, -H, and -hH generate debugging output from the
+optimizer, which is useful if you need to understand an INTERCAL
+program, and -l turns on warnings (far too many warnings!). If ick
+itself needs debugging, the -U option will cause it to dump core on
+E778. Other than that, yer on yer own.
 
 Another switch affects C-INTERCAL's runtime behavior.  The `-C'
 option forces output in "clockface" mode, for superstitious users who
@@ -71,7 +84,10 @@ see IIII.
 Every INTERCAL runtime also accepts certain options at runtime (code by 
 Steve Swales).  These include [+/-]help, [+/-]traditional, and [+/-]wimpmode. 
 The help option (with either + or -) triggers a 'usage' message. The
-+traditional option is presently a no-op.
++traditional option is presently a no-op. Also available are [+/-] printflow,
+which gives information that may or may not be helpful for debugging a program,
+and [+/-] mystery, which is undocumented. Note that these options are not
+necessarily available if the program is compiled with -F.
 
 Steve writes: "The wimpmode option is the most interesting. I found myself
 always running my test programs with filters on both ends to work around the
@@ -113,6 +129,12 @@ strongly recommended that you add "-Wno-unused -Wimplicit" to the gcc
 command in the makefile. If you are in an ANSI environment and are
 using the current versions of gcc, flex, and bison, C-INTERCAL should
 build with no warnings.
+
+As the debugger is interactive, it needs to be able to find the GNU GPL.
+The Makefile attempts to copy the GPL to /dev/null to prove it exists. If
+this fails, you will have to point the Makefile to a copy of the GPL
+yourself. You can always copy the one included with this distribution
+somewhere safe and use that (what the Makefile will try to do by default).
 
 				LICENSING
 

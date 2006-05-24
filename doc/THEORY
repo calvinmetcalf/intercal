@@ -23,6 +23,13 @@ This avoids having to put the the size of the numerals array in an
 extern.  To add new numeral tokens, simply put them in the numerals
 initializer.
 
+AIS: Now computed COME FROM is in the language, the lexer is called forth to
+     do a bit of syntax analysis, by distinguishing it from an ordinary
+     COME FROM and passing different symbols to the parser. The lexer is also
+     responsible for helping the parser to match sparks and ears in complicated
+     array situations, by distinguishing possibly closing sparkears from
+     definitely opening sparkears.
+
 			Compilation
 
 The parser builds an array of tuples, one for each INTERCAL statement.  Most
@@ -49,6 +56,8 @@ at compile time (evaluating away all the irritating little kluges you
 have to use to generate 32-bit constants).  It also checks for known
 INTERCAL idioms for `test for equality', `test for nonzeroness', and
 the C logical operators &, |, ^, and ~.
+
+AIS: The optimizer has now been expanded. See below.
 
 			Code Generation
 
@@ -90,3 +99,101 @@ in this distribution, and fixed some bugs.  Brian Raiter did a
 much-needed delinting while porting it for ANSI C, flex and Linux. He
 also improved the lexical analyzer's line tracking.
 
+                        Code Generation 2 (by AIS)
+
+The recent additions to the language have made code generation
+potentially more complicated, depending on which switches are on. Each
+INTERCAL command is still translated into an if()-then, but with extra
+guards around it. COME FROM is still handled the same way, but only in
+singlethreaded programs with no computed COME FROMs. For anything more
+complicated than that, a general COMING FROM mechanism is invoked. C's
+most confusing control-flow identifiers, setjmp and longjmp, are
+used. When computed COME FROMs are involved, after every labeled
+statement, a set of gotos are done to check each in turn. A jmp_buf,
+cjb, is used to store the point in the program where the check
+started. Each COME FROM leading to that line and computed COME FROM
+anywhere in the program is checked, and modifies cjb to aim for its
+suckpoint if neccesary. In the case of a multithreaded program, one
+cjb will be stored in a linked ring of threads, and the other will be
+the one in the main program.
+Extra guards are also added for ONCE/AGAIN; the position of this guard
+depends on whether the command is a NEXT or something else. ONCE/AGAIN
+are quite legal even in singlethreaded programs. Computed ABSTAIN is
+dealt with by allowing the abstain[] array to hold values other than 0
+or 1.
+Multithreading is supported by a new library, libickmt.a, to hold the
+multithread versions of libick.a functions. See unravel.c for an
+explanation of the full gory details of the multithread implementation
+(it has many comments explaining the implementation at the top).
+
+                        Optimisation (by AIS)
+
+When I got my C-INTERCAL distribution, it only had a rudimentary
+optimiser. Constant folding had already been done, and the following
+optimisations. The following is mixed INTERCAL and C, sometimes in the
+same statement. It should be clear from context and whether I have
+used INTERCAL spark-ears or C brackets which language is which, although
+in some places I've mixed them. Note that apart from constant folding, the
+optimizer is only run in binary.
+
+Optimizations available with -O
+
+Optimisations that had already been done
+Constant folding
+'Vx$y'~"#0x55555555" into (x | y)
+'?x$y'~"#0x55555555" into (x ^ y)
+'&x$y'~"#0x55555555" into (x & y)
+(x ^ 0xFFFF) or (x ^ 0xFFFFFFFF) into ~x
+I added:
+Support for the first three examples above for some appropriate constants
+other than 0x55555555 (e.g. 0x1555)
+x~k into (x & k) where k is 2**n-1
+x~k into !!(x & k) where k is 2**n
+x~k into (x & k)>>1 where k is 2**n-2
+'x$0'~k into (x & <something appropriate>)<<1 for values of k that represent
+   left-shifts
+'x$1'~k into ((x & <something appropriate>)<<1) | 1 likewise
+32-bit left-shift idioms
+Double left-shift idioms
+syslib's left-shift by 8 idiom
+'x~x'~1 into ('x~x' & 1) into !!x
+'?x$1'~3 into (x & 1)+ 1
+'?x$2'~3 into 2 - (x & 1)
+(x & 1) & 1 into (x & 1) in the above two cases
+(!!x & 1) into !!x in the two cases above the above case
+Idioms that represent 32-bit logical operations (|, &, ^, ~) into their C
+equivalents
+No-op detection for some C-like idioms
+Simplification of some C-like idioms via the distributive law
+Some C-like operations done only on the even or odd bits of a value
+Some mingle/select combinations that can be replaced with & | and bitshifts
+A truly stupid idiom in syslib that does 32-bit rightshifts by separating
+odd bits and even bits
+Analysis of which bits in a number must always be 0, and which ones
+actually carry information (which can often remove a redundant & or
+other logical operator)
+Idiom recognition for > and !=
+Various other optimizations (many only on partially-optimized code)
+
+Optimizations available with -f (I wrote all these)
+
+Guard removal (if a line can't be abstained, the if(!abstained[x])
+line is removed when possible
+Ignorance checks (if a variable can't be ignored and it can't
+overflow, assignment is done with C's = rather than a function)
+Recognition of NEXT...NEXT...computed RESUME as an idiom for if()
+
+Optimizations available with -F (I wrote this one)
+
+This optimization should mean that INTERCAL suddenly becomes the best
+language for various benchmark programs. Basically, the file is
+analysed to try to determine whether it takes no input and always
+produces the same output. If that is the case, the output is simply a
+shell-script (with executable permissions set and a #! line) that
+outputs the correct output! Therefore, the time required for one run
+of the program is taken up during compilation, and whenever the
+program is executed, it just copies out the predetermined output. This
+means (for instance) that primes.i runs in only a fraction of a second
+when optimized with -F.
+Of course, this tends to slow down the compiler and often produces a
+large object file, which is why it has a command-line option of its own.

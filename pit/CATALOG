@@ -13,7 +13,7 @@ from original manual:
   lib/syslib-orig.i	Standard library (original buggy version)
 
 by Jon Blow <jon@sampo.com>
-  sink.i        Simple test program
+  tests/sink.i  Simple test program
   random.i      Random number program
   lib/plus.i    Increment .1
 
@@ -54,9 +54,9 @@ by Jacob Mandelson <jlm@cco.caltech.edu>
   rot13.i	Prints ROT-13 of its input
 
 by Jan-Pieter Cornet <johnpc@xs4all.nl>
-  hail_mary.3i	Print 1,000,000 Hail Marys
-  count.3i	Count from 1 to 10 in TriINTERCAL
-  iogerunds.i	Demonstrate gerund abstention
+  hail_mary.3i	        Print 1,000,000 Hail Marys
+  tests/count.3i        Count from 1 to 10 in TriINTERCAL
+  tests/iogerunds.i	Demonstrate gerund abstention
 
 by Clemens Meier <clmeier@lili.uni-bielefeld.de>
   rot13b.i      Another ROT-13 program
@@ -93,8 +93,8 @@ The subdirectory tests contains some programs written only to test the
 compiler.
 
 by David Moews
-  test1.i	Prints DO THIS TEST HAS BEEN SUCCESSFULLY COMPLETED
-  test2.i	Reads in two numbers and multiplies their product
+  tests/test1.i	Prints DO THIS TEST HAS BEEN SUCCESSFULLY COMPLETED
+  tests/test2.i	Reads in two numbers and multiplies their product
 
 David Moews wrote of the latter (test2.i):
 
@@ -103,6 +103,22 @@ It consists of a trivial calling program followed by a cleaned-up version
 of a portion of the INTERCAL subroutine library.  (Only a portion of 
 the INTERCAL subroutine library is present in the posted manual, and 
 that portion is full of typos.)
+
+by Alex Smith
+  tests/ais1.i	      A very simple test program
+  tests/ais2.i        A demonstration of computed ABSTAIN's power
+  tests/compucome.i   A program to test computed COME FROM
+  tests/onceagain.i   A single-threaded program testing ONCE and AGAIN
+  tests/arrtest.i     A program to test some changes I made to the grammar
+  tests/arrtest.doc   The history behind those changes
+  tests/permute.i     A permutation-printing program to test backtracking
+  tests/permute.doc   Information about the permutation-printer
+  sort.i              An insertion-sort program testing computed ABSTAIN
+
+by Malcom Ryan
+  tests/testonce.i    A single-threaded program testing ONCE and AGAIN
+  pass.i              A multithread program illustrating communications
+	              between threads
 
 The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
 limits.{i,3i}, testops.{3i,5i}, testsplat.i, were all written by Louis

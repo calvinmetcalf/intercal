@@ -29,19 +29,24 @@ make
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
-cp ick "$RPM_BUILD_ROOT"%{_bindir}
+cp ick coopt.sh "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}
 cp libick.a "$RPM_BUILD_ROOT"%{_libdir}
+cp libickmt.a "$RPM_BUILD_ROOT"%{_libdir}
+cp libyuk.a "$RPM_BUILD_ROOT"%{_libdir}
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
-cp lose.h abcess.h fiddle.h "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
+cp lose.h abcess.h fiddle.h yuk.h "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
 
 %files
 %doc README BUGS NEWS
 %{_bindir}/ick
 %{_libdir}/libick.a
+%{_libdir}/libickmt.a
+%{_libdir}/libyuk.a
 %{_includedir}/intercal-@PACKAGE_VERSION@/lose.h
 %{_includedir}/intercal-@PACKAGE_VERSION@/abcess.h
 %{_includedir}/intercal-@PACKAGE_VERSION@/fiddle.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/yuk.h
 
 %changelog
 * Wed Dec 31 2003 Eric S. Raymond <esr@snark.thyrsus.com> 0.24-1

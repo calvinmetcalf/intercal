@@ -24,12 +24,12 @@ LICENSE TERMS
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <memory.h>
 #include "ick.h"
 #include "y.tab.h"
 #include "lose.h"
 
-#define YY_NO_UNPUT
+/*#undef wchar_t*/
+/*#define wchar_t unsigned char*/
 
 #ifndef yywrap
 static int yywrap(void)
@@ -51,6 +51,10 @@ int textlinecount = 0;
 int politesse = 0;
 int stbeginline = 0;
 
+/* AIS: Sort out a grammar near-ambiguity */
+unsigned long sparkearsstack[SENESTMAX] = {0};
+int sparkearslev = 0;
+
 #ifdef FLEX_SCANNER
 static char linebuf[YY_BUF_SIZE];
 #else /* FLEX_SCANNER */
@@ -67,6 +71,15 @@ static int myatoi(char *text);
 #define SETLINENO					\
     {if (stbeginline == 0)	stbeginline = yylineno;	\
      else if (stbeginline < 0)	stbeginline = 0;}
+
+/* AIS: Keep track of the spark/ears situation */
+#define STACKSPARKEARS(a) \
+    if (sparkearslev+1>=SENESTMAX*32) lose(E281, yylineno, (char*) NULL); \
+    sparkearslev++; sparkearsstack[sparkearslev/32]<<=1; \
+    sparkearsstack[sparkearslev/32]+=a
+#define CLEARSPARKEARSTACK {int i=SENESTMAX; \
+                           while(i--) sparkearsstack[i] = 0;} \
+                           sparkearslev = 0
 
 /*
  * The spectacular ugliness of INTERCAL syntax requires that the lexical
@@ -99,7 +112,16 @@ int getc(FILE *fp)
     }
     else
     {
-	int c = fgetc(fp);
+      int c;
+      char c_char;
+      /*fprintf(stderr,"about to fgetc(\045p)",(void*)fp);*/
+
+      (void)fread(&c_char,1,1,fp);
+      c = c_char;
+      /*fputc(c,stderr);*/
+      if(feof(fp)) c=EOF;
+
+	/*fprintf(stderr,"getc input a character: %c\n",c);*/
 
 	if (feof(yyin))
 	{
@@ -230,20 +252,38 @@ V		{yylval.numval = OR; return(UNARY);}
 @		{yylval.numval = WHIRL; return(UNARY);}
 [2-5]{W}@	{yylval.numval = WHIRL + myatoi(yytext) - 1; return(UNARY);}
 
-\'		{return(SPARK);}
-\"		{return(EARS);}
+\'		{char temp = sparkearsstack[sparkearslev/32]&1; 
+                 STACKSPARKEARS(0); /* AIS: I added all mentions of
+				       STACKSPARKEARS, OPEN\(SPARK\|EARS\),
+				       CLOSE\(SPARK\|EARS\),
+				       and CLEARSPARKEARSTACK */
+                 return(temp?OPENSPARK:CLOSESPARK);}
+\"		{char temp = sparkearsstack[sparkearslev/32]&1;
+                 STACKSPARKEARS(1);
+                 return(temp?CLOSEEARS:OPENEARS);}
 
 \({W}{D}\)	{SETLINENO; yylval.numval = myatoi(yytext); return(LABEL);}
 
-DO		{SETLINENO; return(DO);}
-FAC		{SETLINENO; return(DO);}
-PLEASE		{SETLINENO; politesse++; return(DO);}
-PLACET		{SETLINENO; politesse++; return(DO);}
-PLEASE{W}DO	{SETLINENO; politesse++; return(DO);}
-PLACET{W}FACERE	{SETLINENO; politesse++; return(DO);}
+DO		{SETLINENO; CLEARSPARKEARSTACK; return(DO);}
+FAC		{SETLINENO; CLEARSPARKEARSTACK; return(DO);}
+PLEASE		{SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
+PLACET		{SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
+PLEASE{W}DO	{SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
+PLACET{W}FACERE	{SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
+MAYBE           {SETLINENO; CLEARSPARKEARSTACK; return(MAYBE);}
+MAYBE{W}DO      {SETLINENO; CLEARSPARKEARSTACK; return(MAYBE);}
+MAYBE{W}PLEASE  {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(MAYBE);}
+MAYBE{W}PLEASE{W}DO {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(MAYBE);
+                     /* AIS: I added all the MAYBE cases. It seems that MAYBE
+                             has no simple Latin synonym. */}
+
 NOT		{return(NOT);}
 N\'T		{return(NOT);}
 NON		{return(NOT);}
+ONCE            {return(ONCE);}
+QUONDAM         {return(ONCE);}
+AGAIN           {return(AGAIN);}
+ITERUM          {return(AGAIN);}
 
 \%{W}{D}	{yylval.numval = myatoi(yytext);
                  if (yylval.numval && yylval.numval < 100)
@@ -286,8 +326,10 @@ MEMINISSE	|
 REMEMBER	{return(REMEMBER);}
 MEMINISSENDUM	|
 REMEMBERING	{yylval.numval = REMEMBER; return(GERUND);}
-ABSTINERE{W}A	|
-ABSTAIN{W}FROM	{return(ABSTAIN);}
+ABSTINERE	|
+ABSTAIN         {return(ABSTAIN);}
+FROM            |
+A               {return(FROM);}
 ABSTINENDUM	|
 ABSTAINING	{yylval.numval = ABSTAIN; return(GERUND);}
 REINSTARE	|
@@ -302,13 +344,30 @@ SCRIBERE{W}IN	|
 WRITE{W}IN	{return(WRITE_IN);}
 SCRIBENDUM	|
 WRITING{W}IN	{yylval.numval = WRITE_IN; return(GERUND);}
-ADVENIRE{W}DE	|
-COME{W}FROM	{stbeginline = -stbeginline; return(COME_FROM);}
+ADVENIRE{W}DE{W}\({W}{D}\) |
+COME{W}FROM{W}\({W}{D}\) {/* By AIS */ yylval.numval = myatoi(yytext);
+			  return(COME_FROM);}
+ADVENIRE{W}DE   |
+COME{W}FROM     {/* By AIS */ return(COMPUCOME);}
 ADVENENDUM	|
 COMING{W}FROM	{yylval.numval = COME_FROM; return(GERUND);}
 CONCEDERE	|
 DESPERARE	|
 GIVE{W}UP	{return(GIVE_UP);}
+CONOR{W}ITERUM  |
+TRY{W}AGAIN     {return(TRY_AGAIN);}
+TRYING{W}AGAIN  {yylval.numval = TRY_AGAIN; return(GERUND);}
+GO{W}BACK       |
+REDIRE          {return(GO_BACK);}
+GOING{W}BACK    |
+REDENDUM        {yylval.numval = GO_BACK; return(GERUND);}
+GO{W}AHEAD      |
+GRASSOR         {return(GO_AHEAD);}
+GOING{W}AHEAD   {yylval.numval = GO_AHEAD; return(GERUND);
+		 /* AIS: I'm having a few deponent troubles with the Latin, so
+		    there are no Latin gerunds around here. Besides, the Latin
+		    'gerunds' look somewhat like gerundives to me, but that's
+		    purely based on memory so I may be wrong. */}
 
 \+		{return(INTERSECTION);}
 
@@ -340,10 +399,13 @@ int lexer(void)
     return(tok);
 }
 
-static int myatoi(char *text)
+static int myatoi(char *text) /* Alex edit! */
 {
 #define MAXTEXT 100
     static char buf[MAXTEXT];
+    static char thinbuf[MAXTEXT];
+    char* bp;
+    char* tp;
     register int i;
 
     for(buf[i = 0] = '\0';*text && i < MAXTEXT;text++) {
@@ -352,7 +414,10 @@ static int myatoi(char *text)
 	}
     }
     buf[i] = '\0';
-    return atoi(buf);
+    bp=buf; tp=thinbuf;
+    while(*tp++=*bp++); /* thinbuf code added by an Alex edit,
+			   in case we want to work with wchar_t */
+    return atoi(thinbuf);
 }
 
 void yyerror(char *errtype)

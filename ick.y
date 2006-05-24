@@ -5,9 +5,10 @@ NAME
 
 DESCRIPTION 
    This YACC grammar parses the INTERCAL language by designed by Don R. Woods
-and James M. Lyon.  There are two syntax extensions over the original
-INTERCAL-72 language; the COME FROM statement, and the prefixed forms of the
-WHIRL operator.
+and James M. Lyon.  There are five syntax extensions over the original
+INTERCAL-72 language; the COME FROM statement, the prefixed forms of the
+WHIRL operator, and (AIS) the ABSTAIN <expr> FROM, COME FROM <expr>,
+and ONCE/AGAIN forms.
 
 LICENSE TERMS
     Copyright (C) 1996 Eric S. Raymond 
@@ -48,6 +49,9 @@ static node *np;	/* variable for building node lists */
 
 extern int stbeginline;	/* line number of last seen preamble */
 static int thisline;	/* line number of beginning of current statement */
+
+extern int mark112;    /* AIS: Mark the tuple for W112 when it's created. */
+ 
 static tuple *splat(void);
 
 #define GETLINENO					\
@@ -58,7 +62,15 @@ static tuple *splat(void);
     {x = newtuple(); x->type = nt; x->lineno = thisline; x->u.node = nn;}
 #define TARGET(x, nt, nn)	\
     {x = newtuple(); x->type = nt; x->lineno = thisline; x->u.target = nn;}
-#define NEWFANGLED	if (traditional) lose(E111,yylineno,(char*)NULL); else
+#define ACTARGET(x, nt, nn, nn2)\
+    {x = newtuple(); x->type = nt; x->lineno = thisline;\
+      x->u.node = nn; x->u.target = nn2;}
+/* AIS : The macro above was added for ABSTAIN expr FROM. */ 
+#define NEWFANGLED mark112 = 1; /* AIS: Added the mention of mark112 */ \
+      if (traditional) lose(E111,yylineno,(char*)NULL); else
+
+#define DESTACKSE1 sparkearsstack[sparkearslev--/32] >>= 1
+#define DESTACKSPARKEARS DESTACKSE1; DESTACKSE1
 
 %}
 
@@ -75,12 +87,20 @@ static tuple *splat(void);
  * Don't change this statement token list gratuitously!
  * Some code in feh.c depends on GETS being the least
  * statement type and on the order of the ones following.
+ * AIS: Added FROM, MANYFROM, TRY_AGAIN, COMPUCOME.
+ * AIS: COME_FROM now merged with the label following it,
+ * to distinguish it from COMPUCOME, in the lexer. This changes
+ * the parser somewhat.
  */
-%token GETS RESIZE NEXT FORGET RESUME STASH RETRIEVE IGNORE REMEMBER ABSTAIN
-%token REINSTATE DISABLE ENABLE GIVE_UP READ_OUT WRITE_IN COME_FROM
+%token GETS RESIZE NEXT GO_AHEAD GO_BACK FORGET RESUME STASH RETRIEVE IGNORE
+%token REMEMBER ABSTAIN REINSTATE
+%token DISABLE ENABLE MANYFROM GIVE_UP READ_OUT WRITE_IN
+%token <numval> COME_FROM
+%token COMPUCOME TRY_AGAIN FROM
 
-%token DO PLEASE NOT MESH ONESPOT TWOSPOT TAIL HYBRID
-%token MINGLE SELECT SPARK EARS SUB BY BADCHAR
+/* AIS: ONCE and AGAIN added, for multithread support */
+%token MAYBE DO PLEASE NOT ONCE AGAIN MESH ONESPOT TWOSPOT TAIL HYBRID
+%token MINGLE SELECT /* AIS: SPARK EARS */ SUB BY BADCHAR
 
 %token <numval> NUMBER UNARY OHOHSEVEN GERUND LABEL
 %token <node> INTERSECTION
@@ -91,17 +111,22 @@ static tuple *splat(void);
  * will not conflict with the other tokens.  It is important that
  * WHIRL through WHIRL5 be a continuous sequence.
  */
-%token SPLATTERED C_AND C_OR C_XOR C_NOT AND OR XOR FIN MESH32
-%token WHIRL WHIRL2 WHIRL3 WHIRL4 WHIRL5
+/* AIS: Added new tokens for optimizer output */
+%token SPLATTERED
+%token C_AND C_OR C_XOR C_NOT C_NNAND C_ISNONZERO C_LSHIFT C_LSHIFT2
+%token C_LSHIFT8 C_LSHIFTIN1 C_RSHIFT C_AND1ADD1 C_2SUBAND1 C_1PLUS C_2MINUS
+%token C_XORGREATER C_RSHIFTBY C_NOTEQUAL
+%token AND OR XOR FIN MESH32 WHIRL WHIRL2 WHIRL3 WHIRL4 WHIRL5
 
 %type <node> expr varlist variable constant lvalue inlist outlist
 %type <node> subscr byexpr scalar array initem outitem sublist
 %type <node> unambig subscr1 sublist1 oparray osubscr osubscr1
-%type <tuple> perform
+%type <tuple> perform mtperform
 %type <numval> please preftype
 
+%nonassoc OPENEARS OPENSPARK CLOSEEARS CLOSESPARK
 %nonassoc HIGHPREC
-%nonassoc EARS SPARK
+/* AIS: I reversed this precedence, to sort out the near-ambiguity */
 
 %%	/* beginning of rules section */
 
@@ -115,22 +140,38 @@ program	:    /* EMPTY */
  * followed by an optional probability, followed by the statement body.
  * Negative exechance values indicate initial abstentions, and will be
  * made positive before code is emitted.
+ * AIS: An exechance above 100 indicates a MAYBE situation (e.g. 4545
+ * means MAYBE DO %45 ...). This means %0 should be illegal. I modified
+ * all these to allow for MAYBE.
  */
-command	:    please perform
+command	:    please mtperform
 		{$2->label = 0; $2->exechance = $1 * 100;}
-	|    please OHOHSEVEN perform
+	|    please OHOHSEVEN mtperform
 		{$3->label = 0; $3->exechance = $1 * $2;}
-	|    LABEL please perform
+	|    LABEL please mtperform
 		{checklabel($1); $3->label = $1; $3->exechance = $2 * 100;}
-	|    LABEL please OHOHSEVEN perform
+	|    LABEL please OHOHSEVEN mtperform
 		{checklabel($1); $4->label = $1; $4->exechance = $2 * $3;}
 	|    error
 		{lose(E017, yylineno, (char *)NULL);}
 	;
+/*
+ * AIS: added for the ONCE/AGAIN qualifiers. It copies a pointer to the tuple,
+ * so command will set the values in the original tuple via the copy.
+ */
 
-/* There are two forms of preamble returned by the lexer */
+mtperform :  perform
+                {$1->onceagainflag = onceagain_NORMAL; $$ = $1;}
+          |  perform ONCE
+                {NEWFANGLED {$1->onceagainflag = onceagain_ONCE; $$ = $1;}}
+          |  perform AGAIN
+                {NEWFANGLED {$1->onceagainflag = onceagain_AGAIN; $$ = $1;}}
+
+/* There are two (AIS: now four) forms of preamble returned by the lexer */
 please	:    DO			{GETLINENO; $$ = 1;}
 	|    DO NOT		{GETLINENO; $$ = -1;}
+        |    MAYBE              {NEWFANGLED {GETLINENO; $$ = 101;}}
+	|    MAYBE NOT          {NEWFANGLED {GETLINENO; $$ = -101;}}
 	;
 
 /* Here's how to parse statement bodies */
@@ -143,14 +184,21 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
 	|    RETRIEVE varlist	{ACTION($$, RETRIEVE,  rlist);}
 	|    IGNORE varlist	{ACTION($$, IGNORE,    rlist);}
 	|    REMEMBER varlist	{ACTION($$, REMEMBER,  rlist);}
-	|    ABSTAIN LABEL	{stbeginline=0; TARGET($$, ABSTAIN,   $2);}
-	|    ABSTAIN gerunds	{ACTION($$, DISABLE,   rlist);}
+	|    ABSTAIN FROM LABEL	{stbeginline=0; TARGET($$, ABSTAIN,   $3);}
+	|    ABSTAIN FROM gerunds	{ACTION($$, DISABLE,   rlist);}
+        |    ABSTAIN expr FROM LABEL {/* AIS */ NEWFANGLED {stbeginline=0; ACTARGET($$, FROM, $2, $4);}}
+        |    ABSTAIN expr FROM gerunds {/* AIS */ NEWFANGLED {$$ = newtuple(); $$->type = MANYFROM; $$->lineno = thisline; \
+	  {node* tempnode=newnode(); $$->u.node = tempnode; tempnode->lval=$2; tempnode->rval=rlist; tempnode->opcode=MANYFROM;}}}
 	|    REINSTATE LABEL	{stbeginline=0; TARGET($$, REINSTATE, $2);}
 	|    REINSTATE gerunds	{ACTION($$, ENABLE,    rlist);}
 	|    WRITE_IN inlist	{ACTION($$, WRITE_IN,  $2);}
 	|    READ_OUT outlist	{ACTION($$, READ_OUT,  $2);}
 	|    GIVE_UP		{ACTION($$, GIVE_UP,   0);}
-	|    COME_FROM LABEL	{NEWFANGLED {TARGET($$,COME_FROM,$2)}}
+        |    GO_AHEAD           {/* AIS */ NEWFANGLED {ACTION($$, GO_AHEAD,  0);}}
+        |    GO_BACK            {/* AIS */ NEWFANGLED {ACTION($$, GO_BACK,   0);}}
+        |    TRY_AGAIN          {/* AIS */ NEWFANGLED {ACTION($$,TRY_AGAIN,0);}}
+	|    COME_FROM	        {/* AIS: Modified this */ NEWFANGLED {TARGET($$,COME_FROM,$1);}}
+        |    COMPUCOME expr     {/* AIS */NEWFANGLED {ACTION($$,COMPUCOME,$2); compucomesused=1;}}
 	|    BADCHAR		{yyclearin; $$ = splat();}
 	|    error		{yyclearin; $$ = splat();}
 	;
@@ -317,22 +365,33 @@ unambig	:   variable	{$$ = $1;}
 		}
 
 	/* Now deal with the screwy unary-op interaction with grouping */
-	|    SPARK UNARY expr SPARK
+        /* AIS: Modified to allow for maintenance of the SPARK/EARS stack */
+	|    eitherspark UNARY expr CLOSESPARK
 		{
 		    $$ = newnode();
 		    $$->opcode = $2;
 		    $$->rval = $3;
+		    DESTACKSPARKEARS;
 		}
-	|    EARS UNARY expr EARS
+	|    eitherears UNARY expr CLOSEEARS
 		{
 		    $$ = newnode();
 		    $$->opcode = $2;
 		    $$->rval = $3;
+		    DESTACKSPARKEARS;
 		}
 
-	|    SPARK expr SPARK		{$$ = $2;}
-	|    EARS expr EARS		{$$ = $2;}
+	|    eitherspark expr CLOSESPARK	{$$ = $2; DESTACKSPARKEARS;}
+	|    eitherears expr CLOSEEARS		{$$ = $2; DESTACKSPARKEARS;}
 	;
+
+eitherspark : OPENSPARK ;
+            | CLOSESPARK ;
+            ;
+
+eitherears  : OPENEARS ;
+            | CLOSEEARS ;
+            ;
 
 %%
 
@@ -358,7 +417,8 @@ static tuple *splat(void)
 	    tok = ' ';		/* scanner must not see a NUL */
 	    break;
 	}
-	else if (tok == DO || tok == PLEASE || tok == LABEL) {
+	else if (tok == DO || tok == PLEASE || tok == LABEL
+		 /* AIS */ || tok == MAYBE) {
 	    re_send_token = TRUE;
 	    break;
 	}

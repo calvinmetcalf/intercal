@@ -23,10 +23,16 @@ LICENSE TERMS
 /*LINTLIBRARY*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include "lose.h"
+
+int coreonerr = 0; /* AIS */
+
+int checkforbugs; /* AIS */
 
 void lose(char *m, int n, char *s)
 {
+    (void) fflush(stdout); /* AIS: To stop stdout getting muddled with stderr*/
     (void) fprintf(stderr,
 		   "ICL%c%c%cI\t",
 		   m[0], m[1], m[2]);
@@ -35,9 +41,29 @@ void lose(char *m, int n, char *s)
     else
 	(void) fprintf(stderr, m + 4, n);
     (void) fprintf(stderr, "        CORRECT SOURCE AND RESUBNIT\n");
+    if(atoi(m)==778&&coreonerr) /* AIS */
+    {
+      /* AIS: Dump core. */
+      raise(SIGABRT);
+    }
     exit(atoi(m));
 }
 
+/* AIS: This function reports potential bugs. It's paraphrased from lose. */
+void lwarn(char *m, int n, char *s)
+{
+  if(!checkforbugs) return; /* Don't report a potential bug without -l */
+  (void) fflush(stdout);
+  (void) fprintf(stderr,
+		 "ICL%c%c%cW\t",
+		 m[0],m[1],m[2]);
+  if (s)
+    (void) fprintf(stderr, m + 4, s, n);
+  else
+    (void) fprintf(stderr, m + 4, n);
+  (void) fprintf(stderr, "        RECONSIDER SOURCE AND RESUBNIT\n\n");
+  /* Don't exit. This is not any error except one not causing immediate
+     termination of program execution. */
+}
+
 /* lose.c ends here */
-
-

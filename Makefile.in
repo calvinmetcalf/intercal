@@ -1,6 +1,7 @@
 #
 # Productions for the INTERCAL distribution
 #
+VERSION=@PACKAGE_VERSION@
 
 # Common prefix for machine-independent installed files.
 prefix = @prefix@
@@ -26,8 +27,17 @@ INSTALL = @INSTALL@
 # This can be overridden from the command line
 DESTDIR=
 
+# Location of GNU GPL. This will be automatically copied if not required during install.
+# If not using install, change this to any copy of the GNU GPL that exists on your system.
+# This is required because the yuk debugger reads commands interactively, and so must be
+# able to display a copy of the GPL on demand. This is only possible if yuk can find a copy.
+# If you want to delete or move the distribution files, then you will have to move COPYING
+# to another directory; otherwise, you can aim this at COPYING.
+# It's also possible to aim this at a copy of COPYING from another GPL program.
+copyloc = ${DESTDIR}${datadir}/COPYING
+
 CC = @CC@
-CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DYYDEBUG
+CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DYYDEBUG -DYUKCOPYLOC=\"$(copyloc)\"
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXFLAGS=
@@ -36,15 +46,24 @@ YACCFLAGS = -d # -t
 
 LOADLIBS = @LIBS@ @INTLLIBS@ @LEXLIB@
 
-CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c
+CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c unravel.c
 ISOURCES = cesspool.c arrgghh.c ick-wrap.c numerals.c
-HEADERS = ick.h lose.h sizes.h abcess.h fiddle.h feh.h
+YSOURCES = yuk.c
+HEADERS = ick.h lose.h sizes.h abcess.h fiddle.h feh.h yuk.h
 BUILD = Makefile.in Makefile configure.ac configure config.h.in intercal.spec.in intercal.spec install.sh
-MISC = intercal.el
+MISC = intercal.el coopt.sh
 DOCS = BUGS COPYING NEWS README
-SOURCES = $(CSOURCES) $(ISOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
+SOURCES = $(CSOURCES) $(ISOURCES) $(YSOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
 
-all: ick libick.a
+all: ick libick.a libickmt.a libyuk.a
+
+copycopy: COPYING
+	-mkdir $(DESTDIR)$(datadir)
+	-if cp $(copyloc) /dev/null ; then : ; else cp COPYING $(copyloc) ; fi
+
+checkcopy:
+	@echo If the following line fails, change \"copyloc\" in your makefile.
+	cp $(copyloc) /dev/null
 
 ick: ick.o lexer.o feh.o lose.o fiddle.o perpetrate.o
 	$(CC) perpetrate.o ick.o lexer.o feh.o lose.o fiddle.o $(LDFLAGS) -o ick
@@ -67,24 +86,39 @@ lexer.o: lexer.c y.tab.h ick.h lose.h
 feh.o: feh.c feh.h y.tab.h ick.h fiddle.h lose.h sizes.h
 perpetrate.o: perpetrate.c y.tab.h ick.h lose.h sizes.h
 cesspool.o: cesspool.c numerals.c abcess.h lose.h sizes.h
+unravel.o: unravel.c abcess.h lose.h sizes.h
 lose.o: lose.h
 fiddle.o: fiddle.h sizes.h
+yuk.o: checkcopy yuk.h lose.h sizes.h abcess.h
 
 libick.a: cesspool.o lose.o fiddle.o arrgghh.o
 	ar cr libick.a cesspool.o lose.o fiddle.o arrgghh.o
 	-ranlib libick.a
 
-install: all
+libickmt.a: cesspool.o unravel.o lose.o fiddle.o arrgghh.o
+	ar cr libickmt.a cesspool.o unravel.o lose.o fiddle.o arrgghh.o
+	-ranlib libickmt.a
+
+libyuk.a: yuk.o
+	ar cr libyuk.a yuk.o
+	-ranlib libyuk.a
+
+install: copycopy all
 	cp ick $(DESTDIR)$(bindir)
 	cp libick.a $(DESTDIR)$(libdir)
+	cp libickmt.a $(DESTDIR)$(libdir)
+	cp libyuk.a $(DESTDIR)$(libdir)
 	-mkdir -p $(DESTDIR)$(incdir)
-	cp lose.h abcess.h fiddle.h $(DESTDIR)$(incdir)
+	cp lose.h abcess.h fiddle.h yuk.h $(DESTDIR)$(incdir)
 	-mkdir $(DESTDIR)$(datadir)
 	(cp -r pit $(DESTDIR)$(datadir))
 	cp ick-wrap.c $(DESTDIR)$(datadir)
+	cp coopt.sh $(DESTDIR)$(bindir)
 
 uninstall:
 	rm -f $(DESTDIR)$(bindir)/ick $(DESTDIR)$(libdir)/libick.a
+	rm -f $(DESTDIR)$(bindir)/coopt.sh
+	rm -f $(DESTDIR)$(libdir)/libickmt.a $(DESTDIR)$(libdir)/libyuk.a
 	rm -fr $(DESTDIR)$(incdir) $(DESTDIR)$(datadir)
 
 TAGS: $(SOURCES)
@@ -100,5 +134,5 @@ intercal-@PACKAGE_VERSION@.tar.gz: $(SOURCES)
 
 clean:
 	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick
-	rm -f intercal-@PACKAGE_VERSION@.tar.gz intercal.spec
+	rm -f intercal-@PACKAGE_VERSION@.tar.gz intercal.spec core
 

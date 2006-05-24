@@ -8,6 +8,7 @@ ESR = Eric S. Raymond
 SS  = Steve Swales
 LHH = Louis Howell
 BLR = Brian Raiter
+AIS = Alex Smith
 
 1) (ESR) INTERCAL would be intrinsically a crock even if it worked right.
 
@@ -45,6 +46,18 @@ BLR = Brian Raiter
    instead, C-INTERCAL silently truncates them to 16 bits. Unfortunately,
    the modified behavior of select's return type depends on this, so
    there's not much we can do about it as things stand.
+
+4) (AIS) In multithread programs, a thread doing the equivalent of
+   (10) DO COME FROM (10) will cause the entire program to get stuck in
+   an infinite loop, because all COMING FROM a statement counts as part
+   of that statement, and all statements are atomic.
+
+5) (AIS) In a multithreaded backtracking program, you can't fork a thread
+   which has backtrack points in it. The problem is that backtracking past
+   the fork from one but not both of the new threads would lead to a
+   situation in which the fork hadn't happened in one possible route from
+   the fork, but had in the other. This is clearly absurd, even by the
+   standards of INTERCAL.
 
 			TO DO
 

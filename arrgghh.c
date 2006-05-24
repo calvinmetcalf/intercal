@@ -26,11 +26,16 @@ LICENSE TERMS
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <setjmp.h>
 #include "abcess.h"
 #include "lose.h"
 
 int traditional = 0;
 int wimp_mode = 0;
+int printflow = 0; /* AIS */
+int mystery = 0; /* AIS */
+
+unsigned long mysteryc = 0; /* AIS */
 
 void
 parseargs(int argc, char **argv)
@@ -40,12 +45,16 @@ parseargs(int argc, char **argv)
     static char *flags[] = {
 	"help",
 	"wimpmode",
-	"traditional"
+	"traditional",
+	"printflow", /* AIS */
+	"mystery", /* AIS */
       };
     static int *bools[] = {
 	&helpflag,
 	&wimp_mode,
-	&traditional
+	&traditional,
+	&printflow, /* AIS */
+	&mystery, /* AIS */
       };
     static int nflags = (int)(sizeof(flags)/sizeof(flags[0]));
 

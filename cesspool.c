@@ -25,6 +25,7 @@ LICENSE TERMS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <setjmp.h>
 
 #ifdef _POSIX_SOURCE
 #include <stdarg.h>
@@ -38,15 +39,17 @@ LICENSE TERMS
 
 #include "numerals.c"
 
+FILE* cesspoolin = stdin;
+FILE* cesspoolout = stdout;
+/* AIS: In a future version of ick or yuk, these might not be constants */
+
 /**********************************************************************
  *
  * The following functions manipulate the nexting stack
  *
  *********************************************************************/
 
-#define MAXNEXT	80
-
-int next[MAXNEXT];
+int* next; /* AIS: now allocated by ick-wrap.c */
 int nextindex = 0;
 
 void pushnext(int n)
@@ -95,7 +98,7 @@ unsigned int pin(void)
     int n;
     extern int wimp_mode;
 
-    if (fgets(buf, BUFSIZ, stdin) == (char *)NULL)
+    if (fgets(buf, BUFSIZ, cesspoolin) == (char *)NULL)
 	lose(E562, lineno, (char *)NULL);
     n = strlen(buf) - 1;
     if (n > 0 && buf[n-1] == '\r')
@@ -272,13 +275,13 @@ void pout(unsigned int val)
     extern int wimp_mode;
 
     if(wimp_mode) {
-	printf("%u\n",val);
+	(void) fprintf(cesspoolout,"%u\n",val);
     }
     else {
 	butcher(val, result);
-	(void) puts(result);
+	(void) fprintf(cesspoolout,"%s\n",result);
     }
-    fflush(stdout);
+    fflush(cesspoolout);
 }
 
 /**********************************************************************
@@ -299,7 +302,7 @@ void binin(unsigned int type, array *a, bool forget)
     lose(E241, lineno, (char *)NULL);
 
   for (i = 0 ; i < a->dims[0] ; i++) {
-    v = ((c=getchar()) == EOF) ? 256 : (c - lastin) % 256;
+    v = ((c=fgetc(cesspoolin)) == EOF) ? 256 : (c - lastin) % 256;
     lastin = c;
     if (!forget) {
       if (type == TAIL)
@@ -327,9 +330,9 @@ void binout(unsigned int type, array *a)
     c = (c & 0x0f) << 4 | (c & 0xf0) >> 4;
     c = (c & 0x33) << 2 | (c & 0xcc) >> 2;
     c = (c & 0x55) << 1 | (c & 0xaa) >> 1;
-    putchar(c);
+    fputc(c,cesspoolout);
     if (c == '\n')
-      fflush(stdout);
+      fflush(cesspoolout);
   }
 }
 
@@ -439,6 +442,8 @@ void resize(va_alist) va_dcl
   a = va_arg(ap, array*);
   forget = va_arg(ap, bool);
 
+  if (!a->rank) a->dims = 0; /* AIS: a->dims no longer initialised */
+
   r = va_arg(ap, unsigned int);
   if (!forget) {
     a->rank = r;
@@ -485,20 +490,7 @@ void resize(va_alist) va_dcl
  *
  *********************************************************************/
 
-typedef struct stashbox_t     /* this is a save-stack element */
-{
-    unsigned int type;	      /* variable type */
-    unsigned int index;       /* variable's index within the type */
-    union		      /* the data itself */
-    {
-	type16	onespot;
-	type32	twospot;
-	array	*a;
-    } save;
-    struct stashbox_t *next;  /* pointer to next-older stashbox */
-} stashbox;
-
-static stashbox *first;
+stashbox *first; /* AIS: made non-static so it can be seen by unravel.c */
 
 void stashinit(void)
 {
@@ -619,6 +611,21 @@ unsigned int roll(unsigned int n)
 #else
    return((unsigned int)(rand() % 100) < n);
 #endif /* UNIX */
+}
+
+/**********************************************************************
+ *
+ * AIS: This function is called when two COME FROMs reference the same
+ *      line at runtime. multicome0 is used in a non-multithread
+ *      program; it produces an error. For multicome1, see unravel.c.
+ *
+ *********************************************************************/
+
+int multicome0(int errlineno, jmp_buf pc)
+{
+  lose(E555, errlineno, (char *) NULL);
+  /* this line number is quite possibly going to be wildly inaccurate */
+  return 0;
 }
 
 /* cesspool.c ends here */
