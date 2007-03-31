@@ -43,7 +43,7 @@ typedef struct
 }
 numeral;
 
-static numeral numerals[] =
+numeral numerals[] =
 {
 /* English */
     { "OH",		0 },

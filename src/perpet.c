@@ -1,7 +1,7 @@
 /****************************************************************************
 
 NAME
-   perpetrate.c -- main routine for C-INTERCAL compiler.
+   perpet.c -- main routine for C-INTERCAL compiler.
 
 DESCRIPTION
    This is where all the dirty work begins and ends.
@@ -33,7 +33,7 @@ LICENSE TERMS
 #include <time.h>
 #include "ick.h"
 #include "feh.h"
-#include "y.tab.h"
+#include "parser.h"
 #include "sizes.h"
 #include "lose.h"
 
@@ -49,6 +49,8 @@ LICENSE TERMS
 #ifndef CC
 #define CC "gcc"
 #endif
+
+#define ARGSTRING "bcdfghlmptuvyCFHOPUX@"
 
 #ifdef USE_YYRESTART
 /* function supplied by lex */
@@ -69,22 +71,35 @@ int yukdebug;           /* AIS: Use the yuk debugger. */
 int yukprofile;         /* AIS: Use the yuk profiler. */
 extern int coreonerr;   /* AIS: Dump core on E778. (defined in lose.c) */
 int multithread;        /* AIS: Allow multithreading and backtracking. */
+int variableconstants;  /* AIS: Allow anything on the left of an assignment. */
 int cdebug;             /* AIS: Pass -g to our C compiler, and leave C code. */
 int optdebug;           /* AIS: Debug the optimizer. Value is 0, 1, 2, or 3. */
 int flowoptimize;       /* AIS: Do flow optimizations (in INTERCAL!). */
 int coopt;              /* AIS: The constant-output optimization. This should
 			   mean that INTERCAL will beat any other language at
 			   many benchmark programs (!) */
+int printfopens;        /* AIS: Print messages whenever attempting to open a
+			   file */
 extern int checkforbugs;/* AIS: Try to find possible bugs in the source code */
+int pickcompile;        /* AIS: Compile for PIC? */
+int clclex;             /* AIS: 1 means use CLC-INTERCAL meanings for @, ? */
+int outtostdout;        /* AIS: Output on stdout rather than the output file */
 
-int compucomecount=0;   /* AIS: Computed COME FROM count */
-int compucomesused=0;   /* AIS: Are computed COME FROMs used? */
+/* AIS: Autodetected compilation options */
+int compucomecount=0;   /* Computed COME FROM count */
+int compucomesused=0;   /* Are computed COME FROMs used? */
+int gerucomesused=0;    /* Is COME FROM gerund used? */
+int nextfromsused=0;    /* Is NEXT FROM used? */
+int opoverused=0;       /* Is operand overloading used? */
+node* firstslat=0;      /* The first slat expression in the program */
+node* prevslat=0;       /* The last slat expression used so far */
 
 static bool dooptimize;	/* do optimizations? (controlled by -O) */
 static bool clockface;	/* set up output to do IIII for IV */
 
-#define SKELETON	"ick-wrap.c"
-#define SYSLIB          "pit/lib/syslib"
+#define SKELETON  "ick-wrap.c"
+#define PSKELETON "pickwrap.c"
+#define SYSLIB    "syslib"
 
 /* numeric base defaults, exported to other files */
 
@@ -113,11 +128,14 @@ static char *compiler;
 atom *oblist = NULL, *obdex;
 int obcount = 0;
 int nonespots, ntwospots, ntails, nhybrids;
+int nmeshes; /* AIS */
 
 tuple *tuples = NULL;
 int tuplecount = 0;
 
 tuple *optuple = NULL; /* AIS: Tuple being optimized */
+
+extern assoc varstores[]; /* AIS: Need to know this for PIC compilation */
 
 static int myfgetc(FILE* in)
 {
@@ -127,13 +145,21 @@ static int myfgetc(FILE* in)
   return (int)c;
 }
 
+static FILE* debfopen(char* fname, char* mode)
+{
+  FILE* t;
+  if(printfopens) fprintf(stderr,"Trying to open '%s'...\n",fname);
+  t=fopen(fname,mode);
+  if(printfopens&&t) fprintf(stderr,"Success!\n");
+  if(printfopens&&!t) fprintf(stderr,"Failed!\n");
+  return t;
+}
 
 static void abend(int signim)
 {
     lose(E778, yylineno, (char *)NULL);
     (void) signim;
 }
-
 static void print_usage(char *prog, char *options)
 {
     fprintf(stderr,"Usage: %s [-%s] <file> [<file> ... ]\n",prog,options);
@@ -161,6 +187,14 @@ static void print_usage(char *prog, char *options)
     fprintf(stderr,"\t-p\t:run the yuk profiler on the code (prevents -fm)\n");
     fprintf(stderr,"\t-m\t:allow multithreading and backtracking "
 	    "(prevents -yp)\n");
+    fprintf(stderr,"\t-v\t:allow anything on the left of an assignment. This "
+	    "is required\n\t\tif you want operand overloading. "
+	    "(prevents -fFOP)\n");
+    fprintf(stderr,"\t-P\t:compile PIC-INTERCAL rather than INTERCAL\n");
+    fprintf(stderr,"\t-o\t:output to stdout rather than .c (implies -c)");
+    fprintf(stderr,"\t-X\t:interpret ? and @ with CLC-INTERCAL meanings\n");
+    fprintf(stderr,"\t-u\t:print a message whenever the compiler tries to "
+	    "open a file\n");
     fprintf(stderr,"\t-U\t:dump core on E778 rather than printing an error\n");
     fprintf(stderr,"\t-g\t:compile to both debuggable executable and C\n");
     fprintf(stderr,"\t-l\t:attempt to report likely bugs "
@@ -174,7 +208,8 @@ static void print_usage(char *prog, char *options)
    path they should be in, then the current directory, then argv[0]'s
    directory (if one was given). This function avoids possible buffer
    overflows, instead truncating filenames (and if that manages to find them,
-   I'll be incredibly surprised). */
+   I'll be incredibly surprised). It also tries argv[0]/../lib and
+   argv[0]/../include (where they are when running without installing). */
 static FILE* findandfopen(char* file, char* guessdir, char* mode, char* argv0)
 {
   char buf2[BUFSIZ], *fileiter;
@@ -185,18 +220,42 @@ static FILE* findandfopen(char* file, char* guessdir, char* mode, char* argv0)
   fileiter = file;
   while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
   buf2[i] = 0;
-  ret = fopen(buf2,mode); /* where it ought to be */
+  ret = debfopen(buf2,mode); /* where it ought to be */
   if(ret) return ret;
-  ret = fopen(file,mode); /* current dir */
+  ret = debfopen(file,mode); /* current dir */
   if(ret) return ret;
-  if(!strchr(argv0,'/')) return 0; /* argv[0] has no dir specified */
+  if(!strchr(argv0,'/')&&
+     !strchr(argv0,'\\')) return 0; /* argv[0] has no dir specified */
   i = j = 0;
-  while(*argv0&&i<BUFSIZ-2) {buf2[i++] = *argv0++; if(*argv0=='/') j = i;}
+  while(*argv0&&i<BUFSIZ-2)
+  {
+    buf2[i++] = *argv0++;
+    if(*argv0=='/') j = i;
+    if(*argv0=='\\') j = i;
+  }
   i = j + 1;
-  while(*file&&i<BUFSIZ-1) buf2[i++] = *file++;
+  fileiter=file;
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
   buf2[i] = 0;
-  ret = fopen(buf2,mode); /* argv[0]'s dir */
-  return ret; /* just return 0 if even this failed */
+  ret = debfopen(buf2,mode); /* argv[0]'s dir */
+  if(ret) return ret;
+  i = j + 1;
+  fileiter="../lib/"; /* correct for POSIX and DJGPP */
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  fileiter=file;
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]=0;
+  ret = debfopen(buf2,mode); /* argv[0]/../lib/ */
+  if(ret) return ret;
+  i = j + 1;
+  fileiter="../include/"; /* correct for POSIX and DJGPP */
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  fileiter=file;
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]=0;
+  ret = debfopen(buf2,mode); /* argv[0]/../include/ */
+  if(ret) return ret;
+  return 0; /* just return 0 if even this failed */
 }
 
 /* AIS: The same, looking for an executable */
@@ -211,45 +270,50 @@ static char* findandtestopen(char* file, char* guessdir, char* mode,
   fileiter = file;
   while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
   buf2[i] = 0;
-  ret = fopen(buf2,mode); /* where it ought to be */
+  ret = debfopen(buf2,mode); /* where it ought to be */
   if(ret) {fclose(ret); return buf2;}
-  ret = fopen(file,mode); /* current dir */
-  if(ret) {fclose(ret); return buf2;}
-  if(!strchr(argv0,'/')) return 0; /* argv[0] has no dir specified */
+  ret = debfopen(file,mode); /* current dir */
+  if(ret) {fclose(ret); return file;}
+  if(!strchr(argv0,'/')&&
+     !strchr(argv0,'\\')) return 0; /* argv[0] has no dir specified */
   i = j = 0;
-  while(*argv0&&i<BUFSIZ-2) {buf2[i++] = *argv0++; if(*argv0=='/') j = i;}
+  while(*argv0&&i<BUFSIZ-2)
+  {
+    buf2[i++] = *argv0++;
+    if(*argv0=='/') j = i;
+    if(*argv0=='\\') j = i;
+  }
   i = j + 1;
-  while(*file&&i<BUFSIZ-1) buf2[i++] = *file++;
+  fileiter=file;
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
   buf2[i] = 0;
-  ret = fopen(buf2,mode); /* argv[0]'s dir */
+  ret = debfopen(buf2,mode); /* argv[0]'s dir */
   if(ret) {fclose(ret); return buf2;}
-  return 0;
+  i = j + 1;
+  fileiter="../lib/"; /* correct for POSIX and DJGPP */
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  fileiter=file;
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]=0;
+  ret = debfopen(buf2,mode); /* argv[0]/../lib/ */
+  if(ret) {fclose(ret); return buf2;}
+    i = j + 1;
+  fileiter="../include/"; /* correct for POSIX and DJGPP */
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  fileiter=file;
+  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]=0;
+  ret = debfopen(buf2,mode); /* argv[0]/../include/ */
+  if(ret) {fclose(ret); return buf2;}
+  return 0; /* just return 0 if even this failed */
 }
 
 /* AIS: The same thing, but with freopen */
 static FILE* findandfreopen(char* file, char* guessdir, char* mode,
 			    char* argv0, FILE* over)
 {
-  char buf2[BUFSIZ], *fileiter;
-  int i = 0, j;
-  FILE* ret;
-  while(*guessdir&&i<BUFSIZ-2) buf2[i++] = *guessdir++;
-  buf2[i++] = '/';
-  fileiter = file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i] = 0;
-  ret = freopen(buf2,mode,over); /* where it ought to be */
-  if(ret) return ret;
-  ret = freopen(file,mode,over); /* current dir */
-  if(ret) return ret;
-  if(!strchr(argv0,'/')) return 0; /* argv[0] has no dir specified */
-  i = j = 0;
-  while(*argv0&&i<BUFSIZ-2) {buf2[i++] = *argv0++; if(*argv0=='/') j = i;}
-  i = j + 1;
-  while(*file&&i<BUFSIZ-1) buf2[i++] = *file++;
-  buf2[i] = 0;
-  ret = freopen(buf2,mode,over); /* argv[0]'s dir */
-  return ret; /* just return 0 if even this failed */
+  char* s=findandtestopen(file,guessdir,mode,argv0);
+  return freopen(s,mode,over);
 }
 
 int main(int argc, char *argv[])
@@ -262,7 +326,7 @@ int main(int argc, char *argv[])
     char	*includedir, *libdir; /* AIS: , *getenv(); */
     char        *bindir, *cooptsh;
     FILE	*ifp, *ofp;
-    int		maxabstain, nextcount, bugline;
+    int		maxabstain, /* nextcount, AIS */ bugline;
     bool        needsyslib, firstfile;
 
     if (!(includedir = getenv("ICKINCLUDEDIR")))
@@ -274,7 +338,7 @@ int main(int argc, char *argv[])
     if (!(compiler = getenv("CC")))
       compiler = CC;
 
-    while ((c = getopt(argc, argv, "bcdfghlmptyCFHOU@")) != EOF)
+    while ((c = getopt(argc, argv, ARGSTRING)) != EOF)
     {
 	switch (c)
 	{
@@ -287,6 +351,12 @@ int main(int argc, char *argv[])
 	    /* AIS */ coopt = FALSE;
 	    break;
 
+	case 'o': /* AIS */
+	  compile_only = TRUE;
+	  outtostdout = TRUE;
+	  coopt = FALSE;
+	  break;
+
 	case 'd':
 	    yydebug = compile_only = TRUE;
 	    /* AIS */ coopt = FALSE;
@@ -298,24 +368,29 @@ int main(int argc, char *argv[])
 
 	case 't':
 	    traditional = TRUE;
-	    if(multithread) lose(E111, 1, (char*) NULL);
+	    if(multithread) lose(E111, 1, (char*) NULL); /* AIS */
+	    if(pickcompile) lose(E111, 1, (char*) NULL); /* AIS */
 	    break;
 
 	case 'O':
 	    dooptimize = TRUE;
+	    variableconstants = FALSE; /* AIS */
 	    break;
 
 	case 'f': /* By AIS */
 	  flowoptimize = TRUE;
 	  yukdebug = yukprofile = FALSE;
+	  variableconstants = FALSE;
 	  break;
-
+	  
 	case 'F': /* By AIS */
 	  coopt = flowoptimize = dooptimize = TRUE;
-	  yukdebug = yukprofile = yydebug =
+	  variableconstants = FALSE;
+	  yukdebug = yukprofile = yydebug = outtostdout =
 	    compile_only = cdebug = FALSE;
+	  if(pickcompile) lose(E256, 1, (char*) NULL);
 	  break;
-
+	  
 	case 'h': /* By AIS */
 	  optdebug|=1;
 	  compile_only=dooptimize=TRUE;
@@ -327,7 +402,7 @@ int main(int argc, char *argv[])
 	  compile_only=dooptimize=TRUE;
 	  coopt=FALSE;
 	  break;
-
+	  
 	case 'y': /* By AIS */
 	  yukdebug=TRUE;
 	  multithread=flowoptimize=coopt=FALSE;
@@ -345,6 +420,14 @@ int main(int argc, char *argv[])
 	  if(traditional) lose(E111, 1, (char*) NULL);
 	  break;
 
+	case 'v': /* By AIS */
+	  variableconstants=TRUE;
+	  dooptimize=FALSE;
+	  flowoptimize=FALSE;
+	  coopt=FALSE;
+	  pickcompile=FALSE;
+	  break;
+	  
 	case 'l': /* By AIS */
 	  checkforbugs=TRUE;
 	  dooptimize=TRUE;
@@ -352,6 +435,21 @@ int main(int argc, char *argv[])
 
 	case 'U': /* By AIS */
 	  coreonerr=TRUE;
+	  break;
+
+	case 'u': /* By AIS */
+	  printfopens=TRUE;
+	  break;
+
+	case 'P': /* By AIS */
+	  pickcompile=TRUE;
+	  multithread=coopt=variableconstants=FALSE;
+	  compile_only=TRUE;
+	  dooptimize=flowoptimize=TRUE; /* needed for PICs */
+	  break;
+	  
+	case 'X': /* By AIS */
+	  clclex=TRUE;
 	  break;
 
 	case 'g': /* By AIS */
@@ -362,10 +460,18 @@ int main(int argc, char *argv[])
 	case '?':
 	default:
 	case '@':
-	    print_usage(argv[0],"bcdfghlmptyCFHOU@");
+	    print_usage(argv[0], ARGSTRING);
 	    exit(1);
 	    break;
 	}
+    }
+
+    /* AIS: This has only been able to compile 1 file at a time for ages,
+       as far as I can tell, without problems. */
+    if(optind+1<argc)
+    {
+      print_usage(argv[0], ARGSTRING);
+      exit(1);
     }
 
     (void) signal(SIGSEGV, abend);
@@ -382,7 +488,8 @@ int main(int argc, char *argv[])
     }
 
     /* AIS: New function for enhanced file-finding */
-    if ((ifp = findandfopen(SKELETON, libdir, "r", argv[0])) == 0)
+    if ((ifp = findandfopen(pickcompile?PSKELETON:SKELETON,
+			    libdir, "r", argv[0])) == 0)
       lose(E999, 1, (char *)NULL);
 	
     /* now substitute in tokens in the skeleton */
@@ -391,7 +498,8 @@ int main(int argc, char *argv[])
 
     for (firstfile = TRUE; optind < argc; optind++, firstfile = FALSE)
     {
-	if (freopen(argv[optind], "r", stdin) == (FILE *)NULL)
+      /* AIS: Read as binary to pick up Latin-1 and UTF-8 better */
+	if (freopen(argv[optind], "rb", stdin) == (FILE *)NULL)
 	    lose(E777, 1, (char *)NULL);
 	else
 	{
@@ -422,6 +530,8 @@ int main(int argc, char *argv[])
 		    lose(E998, 1, (char *)NULL);
 		else if (traditional && Base != 2)
 		    lose(E111, 1, (char *)NULL);
+		else if (pickcompile && Base != 2)
+		    lose(E256, 1, (char *)NULL); /* AIS */
 		Small_digits = smallsizes[Base];
 		Large_digits = 2 * Small_digits;
 		Max_small = maxsmalls[Base];
@@ -447,7 +557,17 @@ int main(int argc, char *argv[])
 	    }
 
 	    /* compile tuples from current input source */
-	    yyparse();	
+	    yyparse();
+
+	    if(variableconstants)
+	    {
+	      /* AIS: Up to 4 extra meshes may be needed by feh.c. */
+	      intern(MESH, 0xFFFFFFFFLU);
+	      intern(MESH, 0xFFFFLU);
+	      intern(MESH, 0xAAAAAAAALU);
+	      intern(MESH, 0x55555555LU);
+	    }
+	    
 
 	    /*
 	     * Miss Manners lives.
@@ -464,23 +584,28 @@ int main(int argc, char *argv[])
 	     * check if we need to magically include the system library
 	     */
 	    needsyslib = FALSE;
-	    for (tp = tuples; tp->type; tp++) {
-	      /*
-	       * If some label in the (1000)-(2000) range is defined,
-	       * then clearly the syslib is already there, so we
-	       * can stop searching and won't need the syslib.
-	       */
-	      if (tp->label >= 1000 && tp->label <= 1999) {
-		needsyslib = FALSE;
-		break;
+	    if(!pickcompile) /* AIS: We never need syslib when compiling
+				for PIC, because it's preoptimized. */
+	    {
+	      for (tp = tuples; tp->type; tp++)
+	      {
+		/*
+		 * If some label in the (1000)-(2000) range is defined,
+		 * then clearly the syslib is already there, so we
+		 * can stop searching and won't need the syslib.
+		 */
+		if (tp->label >= 1000 && tp->label <= 1999) {
+		  needsyslib = FALSE;
+		  break;
+		}
+		/*
+		 * If some label in the (1000)-(2000) range is being
+		 * called, we might need the system library.
+		 */
+		if (tp->type == NEXT && tp->u.target >= 1000 &&
+		    tp->u.target <= 1999)
+		  needsyslib = TRUE;
 	      }
-	      /*
-	       * If some label in the (1000)-(2000) range is being
-	       * called, we might need the system library.
-	       */
-	      if (tp->type == NEXT && tp->u.target >= 1000 &&
-		  tp->u.target <= 1999)
-		needsyslib = TRUE;
 	    }
 	    if ( needsyslib ) { /* AIS: modified to use findandfreopen */
 	      if (Base == 2)    /* see code for opening the skeleton */
@@ -489,7 +614,6 @@ int main(int argc, char *argv[])
 		(void) sprintf(buf2, "%s.%di", SYSLIB, Base);
 	      if (findandfreopen(buf2, libdir, "r", argv[0], stdin) == 0)
 		lose(E127, 1, (char*) NULL);
-	    	      
 #ifdef USE_YYRESTART
 	      yyrestart(stdin);
 #endif /* USE_YYRESTART */
@@ -547,7 +671,8 @@ int main(int argc, char *argv[])
 	    /* set up the generated C output file name */
 	    (void) strcpy(buf, argv[optind]);
 	    (void) strcat(buf, ".c");
-	    if ((ofp = fopen(buf, "w")) == (FILE *)NULL)
+	    if(outtostdout) ofp=stdout; /* AIS */
+	    else if((ofp = debfopen(buf, "w")) == (FILE *)NULL)
 		lose(E888, 1, (char *)NULL);
 	    
 	    fseek(ifp,0L,0);	/* rewind skeleton file */
@@ -563,9 +688,15 @@ int main(int argc, char *argv[])
 	    else strcpy(argv[0],".");
 	    
 	    (void) sprintf(buf2,
-			   "%s %s%s-I%s -I%s -L%s -L%s -o %s -lick%s%s",
-			   compiler, buf, yukdebug||yukprofile?" -lyuk ":" ",
-			   includedir, argv[0], libdir, argv[0],
+			   "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s"
+#ifdef __DJGPP__
+			   ".exe -lick%s%s","",
+#else
+			   " -lick%s%s",compiler,
+#endif
+			   buf, yukdebug||yukprofile?" -lyuk ":" ",
+			   includedir, argv[0], argv[0], libdir, argv[0], argv[0],
+			   coopt?'3':'2', /* AIS: If coopting, optimize as much as possible */
 			   argv[optind], multithread?"mt":"", cdebug?" -g":"");
 	    /* AIS: Possibly link in the debugger yuk and/or libickmt.a here. */
 	    /* AIS: Added -g support. */
@@ -585,15 +716,16 @@ int main(int argc, char *argv[])
 		    break;
 
 		case 'C':	/* initial abstentions */
-		  /* AIS: Modified to check for coopt */
+		  /* AIS: Modified to check for coopt, pickcompile */
 		    maxabstain = 0;
 		    for (tp = tuples; tp->type; tp++)
 			if (((tp->exechance <= 0 || tp->exechance >= 101)
-			     && tp - tuples + 1 > maxabstain) || coopt)
+			     && tp - tuples + 1 > maxabstain)
+			    || coopt || pickcompile)
 			    maxabstain = tp - tuples + 1;
 		    if (maxabstain)
 		    {
-			(void) fprintf(ofp, " = {");
+			if(!pickcompile) (void) fprintf(ofp, " = {");
 			for (tp = tuples; tp < tuples + maxabstain; tp++)
 			{
 			    if(tp->exechance != 100 && tp->exechance != -100)
@@ -605,9 +737,11 @@ int main(int argc, char *argv[])
 				 automagically inclulded. */
 			      if(needsyslib) needsyslib = 0; else coopt = 0;
 			    }
-			    if (tp->exechance > 0)
+			    if(!pickcompile)
+			    {
+			      if (tp->exechance > 0)
 				(void) fprintf(ofp, "0, ");
-			    else {
+			      else {
 				(void) fprintf(ofp, "1, ");
 				tp->exechance = -tp->exechance;
 				/* AIS: If the line was abstained, we need to
@@ -617,16 +751,25 @@ int main(int argc, char *argv[])
 				  tp->onceagainflag = onceagain_AGAIN;
 				else if(tp->onceagainflag == onceagain_AGAIN)
 				  tp->onceagainflag = onceagain_ONCE;
+			      }
+			      if(tp->exechance >= 101)
+			      {
+				/* AIS: This line has a MAYBE */
+				tp->maybe = 1;
+				tp->exechance /= 100;
+			      }
+			      else tp->maybe = 0;
 			    }
-			    if(tp->exechance >= 101)
+			    else /* AIS: hardcoded abstain bits for PICs */
 			    {
-			      /* AIS: This line has a MAYBE */
-			      tp->maybe = 1;
-			      tp->exechance /= 100;
+			      if(!tp->abstainable) continue;
+			      if(tp->exechance > 0)
+				(void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=0;\n",tp-tuples);
+			      else
+				(void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=1;\n",tp-tuples);				
 			    }
-			    else tp->maybe = 0;
 			}
-			(void) fprintf(ofp, "}");
+			if(!pickcompile) (void) fprintf(ofp, "}");
 		    }
 		    break;
 
@@ -635,14 +778,15 @@ int main(int argc, char *argv[])
 		    for (tp = tuples; tp->type; tp++)
 			if (tp->type == ENABLE || tp->type == DISABLE || tp->type == MANYFROM)
 			    maxabstain++;
-		    if (maxabstain)
+		    if (maxabstain || /* AIS */ gerucomesused)
 		    {
-			(void) fprintf(ofp, "#define UNKNOWN\t\t0\n");
+		      /* AIS: Changed to use enablersm1 */
+		      /*(void) fprintf(ofp, "#define UNKNOWN\t\t0\n");*/
 			i = 0;
-			for (; i < (int)(sizeof(enablers)/sizeof(char *)); i++)
+			for (;i < (int)(sizeof(enablersm1)/sizeof(char *));i++)
 			    (void) fprintf(ofp,
 					   "#define %s\t%d\n",
-					   enablers[i], i+1);
+					   enablersm1[i], i);
 
 			(void) fprintf(ofp, "int linetype[] = {\n");
 			for (tp = tuples; tp->type; tp++)
@@ -657,6 +801,8 @@ int main(int argc, char *argv[])
 		    break;
 
 		case 'E':	/* extern to intern map */
+		  if(!pickcompile)
+		  {
 		    (void) fprintf(ofp,"int Base = %d;\n",Base);
 		    (void) fprintf(ofp,"int Small_digits = %d;\n",
 				   Small_digits);
@@ -673,7 +819,14 @@ int main(int argc, char *argv[])
 		      if(!ntails) ntails = 1;
 		      if(!nhybrids) nhybrids = 1;
 		    }
-		    /* AIS: I de-staticed all these so they could be accessed by
+		    else if(opoverused)
+		    {
+		      /* AIS: The operand-overloading code requires onespot and
+			 twospot variables to exist. */
+		      if(!nonespots) nonespots = 1;
+		      if(!ntwospots) ntwospots = 1;
+		    }
+		    /* AIS:I de-staticed all these so they could be accessed by
 		       yuk and cesspool, and added all the mentions of yuk and
 		       multithread. Then I changed it so the variables would be
 		       allocated dynamically, to speed up multithreading. (It's
@@ -684,6 +837,18 @@ int main(int argc, char *argv[])
 		       matter, and I won't get the entire INTERCAL community
 		       angry with me for daring to implement an extension that
 		       slows down existing programs.) */
+		    if (variableconstants) /* AIS */
+		    {
+		      int temp=0;
+		      (void) fprintf(ofp, "type32 meshes[%d] = {",nmeshes);
+		      while(temp<nmeshes)
+		      {
+			(void) fprintf(ofp, "%luLU, ", varextern(temp,MESH));
+			temp++;
+		      }
+		      (void) fprintf(ofp, "};\n");
+		    }
+		    
 		    if (nonespots)
 		    {
 			(void) fprintf(ofp,
@@ -704,6 +869,18 @@ int main(int argc, char *argv[])
 			  (void) fprintf(ofp,
 					 "int onespotcount = %d;\n",
 					 nonespots);
+			}
+			if(opoverused) /* AIS */
+			{
+			  int temp=nonespots;
+			  (void) fprintf(ofp,
+					 "overop oo_onespots[%d];\n",
+					 nonespots);
+			  while(temp--)
+			    (void) fprintf(ofp,
+"type32 og1spot%d(type32 t)\n{\n  (void)t;\n  return onespots[%d];\n}\n"
+"void os1spot%d(type32 val, void(*f)())\n{\n  (void)f;\n  assign((void*)"
+"(onespots+%d), ONESPOT, oneforget[%d], val);\n}\n",temp,temp,temp,temp,temp);
 			}
 		    }
 		    if (ntwospots)
@@ -726,7 +903,19 @@ int main(int argc, char *argv[])
 			  (void) fprintf(ofp,
 					 "int twospotcount = %d;\n",
 					 ntwospots);
-			}			
+			}
+			if(opoverused) /* AIS */
+			{
+			  int temp=ntwospots;
+			  (void) fprintf(ofp,
+					 "overop oo_twospots[%d];\n",
+					 ntwospots);
+			  while(temp--)
+			    (void) fprintf(ofp,
+"type32 og2spot%d(type32 t)\n{\n  (void)t;\n  return twospots[%d];\n}\n"
+"void os2spot%d(type32 val, void(*f)())\n{\n  (void)f;\n  assign((void*)"
+"(twospots+%d), TWOSPOT, twoforget[%d], val);\n}\n",temp,temp,temp,temp,temp);
+			}
 		    }
 		    if (ntails)
 		    {
@@ -739,7 +928,7 @@ int main(int argc, char *argv[])
 			  (void) fprintf(ofp,
 					 "int tailcount = %d;\n",
 					 ntails);
-			}			
+			}
 		    }
 		    if (nhybrids)
 		    {
@@ -752,10 +941,11 @@ int main(int argc, char *argv[])
 			  (void) fprintf(ofp,
 					 "int hybridcount = %d;\n",
 					 nhybrids);
-			}			
+			}
 		    }
 		    if (yydebug || compile_only)
 			for (op = oblist; op < obdex; op++)
+			  if(op->type!=MESH) /* AIS: Added this check */
 			    (void) fprintf(ofp, " /* %s %d -> %d */\n",
 					   nameof(op->type, vartypes),
 					   op->extindex,
@@ -764,13 +954,83 @@ int main(int argc, char *argv[])
 		    { /* AIS: drop intern to extern map into the program */
 		      (void) fprintf(ofp, "\nyukvar yukvars[]={\n");
 		      for (op = oblist; op < obdex; op++)
-			(void) fprintf(ofp,"    {%s,%d,%d},\n",
-				       nameof(op->type, vartypes),
-				       op->extindex,
-				       op->intindex);
+			if(op->type!=MESH) /* AIS: Added this check */
+			  (void) fprintf(ofp,"    {%s,%d,%d},\n",
+					 nameof(op->type, vartypes),
+					 op->extindex,
+					 op->intindex);
 		      (void) fprintf(ofp,"    {YUKEND,0,0}};\n");
 		    }
-		    break;
+		  }
+		  else
+		  {
+		    /* Compiling for PIC */
+		    /* Arrays not supported on PICs */
+		    if(ntails || nhybrids)
+		      lose(E256, yylineno, (char*) NULL);
+		    /* and neither are variable constants */
+		    if(variableconstants)
+		      lose(E256, yylineno, (char*) NULL);
+ 		    for (op = oblist; op < obdex; op++)
+ 		    {
+ 		      (void) fprintf(ofp, " /* %s %d -> %d */\n",
+ 				     nameof(op->type, vartypes),
+ 				     op->extindex,
+ 				     op->intindex);
+ 		      (void) fprintf(ofp, "#define %s%d %s[%d]\n",
+ 				     nameof(op->type, vartypes),
+ 				     op->extindex,
+ 				     nameof(op->type, varstores),
+ 				     op->intindex);
+ 		      if(op->ignorable)
+ 			(void) fprintf(ofp, "ICK_INT1 ignore%s%d = 0;\n",
+ 				       nameof(op->type, varstores),
+  				       op->intindex);
+  		    }
+		    (void) fprintf(ofp, "#include \"pick1.h\"\n");
+		    if(nonespots)
+		    {
+		      (void) fprintf(ofp,
+				     "ICK_INT16 onespots[%d];\n"
+				     "ICK_INT16 onespotsstash[%d];\n",
+				     nonespots,
+				     nonespots);
+		      if(opoverused) /* AIS */
+		      {
+			int temp=nonespots;
+			(void) fprintf(ofp,
+				       "overop oo_onespots[%d];\n",
+				       nonespots);
+			while(temp--)
+			  (void) fprintf(ofp,
+"type32 og1spot%d(type32 t)\n{\n  (void)t;\n  return onespots[%d];\n}\n"
+"void os1spot%d(type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoreonespots%d)"
+" onespots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
+		      }
+		    }
+		    if(ntwospots)
+		    {
+		      (void) fprintf(ofp,
+				     "ICK_INT32 twospots[%d];\n"
+				     "ICK_INT32 twospotsstash[%d];\n",
+				     ntwospots,
+				     ntwospots);
+		      if(opoverused) /* AIS */
+		      {
+			int temp=ntwospots;
+			(void) fprintf(ofp,
+				       "overop oo_twospots[%d];\n",
+				       ntwospots);
+			while(temp--)
+			  (void) fprintf(ofp,
+"type32 og2spot%d(type32 t)\n{\n  (void)t;\n  return twospots[%d];\n}\n"
+"void os2spot%d(type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoretwospots%d)"
+" twospots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
+		      }		      
+		    }
+		    (void) fprintf(ofp, "#include \"pick2.h\"\n");
+		  }
+		  break;
 
 		case 'F':	/* set clockface option? */
 		    if (clockface)
@@ -800,6 +1060,9 @@ int main(int argc, char *argv[])
 		      (void) fprintf(ofp, "CCF%d: longjmp(cjb,1);\n",
 				     compucomecount);
 		    }
+#if 0
+		    /* AIS: This section is no longer used, because a switch
+		       is used inline instead of using gotos into the code. */
 		    nextcount = 0;
 		    for (tp = tuples; tp->type; tp++)
 			if (tp->type == NEXT)
@@ -815,6 +1078,7 @@ int main(int argc, char *argv[])
 					       (int)(tp-tuples+1), (int)(tp-tuples+1));
 			(void) fprintf(ofp, "    }");
 		    }
+#endif
 		    break;
 
 		case 'J':	/* # of source file lines */
@@ -858,18 +1122,27 @@ int main(int argc, char *argv[])
 
 		case 'L': /* AIS: increase Emacs compatibility */
 		  (void) fprintf(ofp,
-				 "/* -*- mode:c; compile-command:\"%s\" -*- */"
-				 ,buf2);
+				 "/* -*- mode:c; compile-command:\"%s%s%s\" -*- */",
+#ifdef __DJGPP__
+				 compiler," ",
+#else
+				 "","",
+#endif
+				 buf2);
 		  break;
 
-		case 'M': /* AIS: place a multithreading define in program */
+		case 'M': /* AIS: place new features defines in program */
 		  /* This is needed even in a non-multithread program, to let
 		     the header files know it's non-multithread */
-		  (void) fprintf(ofp, "#define MULTITHREAD %d", multithread);
+		  (void) fprintf(ofp, "#define MULTITHREAD %d\n", multithread);
+		  /* Likewise, to let the header files know whether it
+		     overloads operands (I don't think this is used at
+		     the moment, though) */
+		  (void) fprintf(ofp, "#define OPOVERUSED %d\n",opoverused);
 		  break;
 
 		case 'N':	/* allocate variables */
-		    /* AIS: I de-staticed all these so they could be accessed by
+		    /* AIS:I de-staticed all these so they could be accessed by
 		       yuk and cesspool, and added all the mentions of yuk and
 		       multithread. Then I changed it so the variables would be
 		       allocated dynamically, to speed up multithreading (it's
@@ -882,6 +1155,8 @@ int main(int argc, char *argv[])
 		       'deallocated' flag. */
 		    if (nonespots)
 		    {
+		      if(!pickcompile) /* AIS */
+		      {
 			(void) fprintf(ofp,
 				       "    onespots = calloc("
 				       "%d, sizeof *onespots);\n",
@@ -890,9 +1165,20 @@ int main(int argc, char *argv[])
 				       "    oneforget = calloc("
 				       "%d, sizeof *oneforget);\n",
 				       nonespots);
+		      }
+		      if(opoverused)
+		      {
+			int temp=nonespots;
+			while(temp--)
+			  (void) fprintf(ofp,
+"    oo_onespots[%d].get=og1spot%d;\n    oo_onespots[%d].set=os1spot%d;\n",
+					 temp,temp,temp,temp);
+		      }
 		    }
 		    if (ntwospots)
 		    {
+		      if(!pickcompile)
+		      {
 			(void) fprintf(ofp,
 				       "    twospots = calloc("
 				       "%d, sizeof *twospots);\n",
@@ -901,8 +1187,17 @@ int main(int argc, char *argv[])
 				       "    twoforget = calloc("
 				       "%d, sizeof *twoforget);\n",
 				       ntwospots);
+		      }
+		      if(opoverused)
+		      {
+			int temp=ntwospots;
+			while(temp--)
+			  (void) fprintf(ofp,
+"    oo_twospots[%d].get=og2spot%d;\n    oo_twospots[%d].set=os2spot%d;\n",
+					 temp,temp,temp,temp);
+		      }
 		    }
-		    if (ntails)
+		    if (ntails&&!pickcompile)
 		    {
 			(void) fprintf(ofp,
 				       "    tails = calloc("
@@ -913,7 +1208,7 @@ int main(int argc, char *argv[])
 				       "%d, sizeof *tailforget);\n",
 				       ntails);
 		    }
-		    if (nhybrids)
+		    if (nhybrids&&!pickcompile)
 		    {
 			(void) fprintf(ofp,
 				       "    hybrids = calloc("
@@ -924,11 +1219,27 @@ int main(int argc, char *argv[])
 				       "%d, sizeof *hyforget);\n",
 				       nhybrids);
 		    }		    
-		    break;		  
+		    break;
+		case 'O': /* AIS; for GERUCOME and operand overloading */
+		  if(gerucomesused || nextfromsused)
+		    fprintf(ofp,"unsigned truelineno = 0;\n");
+		  if(opoverused)
+		    fprintf(ofp,"%s trueval;\n",
+			    pickcompile?"ICK_INT32":"type32");
+		  break;
+		case 'P': /* AIS: for operand overloading */
+		  if(opoverused)
+		    emitslatproto(ofp);
+		  break;
+		case 'Q': /* AIS: for operand overloading */
+		  if(opoverused)
+		    emitslat(ofp);
+		  break;
 		}
 
-	    (void) fclose(ofp);
+	    if(!outtostdout) (void) fclose(ofp);
 
+#ifndef __DJGPP__	    
 	    /* OK, now sic the C compiler on the results */
 	    if (!compile_only&&!yukdebug&&!yukprofile)
 	    {
@@ -962,7 +1273,7 @@ int main(int argc, char *argv[])
 		 takes any input or is affected in any way by the state of
 		 the system, as the degenerated program may be wrong. At the
 		 moment, the only INTERCAL command that takes input is
-		 WRITE IN. */
+		 WRITE IN. Double-oh-sevens screw this up, too. */
 	      if(cooptsh)
 	      {
 		sprintf(buf2,"sh %s %s", cooptsh, argv[optind]);
@@ -970,11 +1281,42 @@ int main(int argc, char *argv[])
 					neccesary */
 	      }
 	    }
+#else /* we are using DJGPP */
+	    /* OK, now sic the C compiler on the results */
+	    if (!compile_only)
+	    {
+	      /* AIS: buf2 now assigned elsewhere so $L works */
+	      /* AIS: This changes somewhat for DJGPP, due to the
+		 command-line cap. It creates a temporary file
+		 with the arguments needed to give gcc. */
+	      FILE* rsp;
+	      rsp=debfopen("ickgcc.rsp","w");
+	      fprintf(rsp,"%s\n",buf2);
+	      fclose(rsp);
+	      if(yukdebug || yukprofile)
+	      {
+		/* Running the program from the batch file ickyuk.bat will
+		   handle the input redirection and deletion of the files
+		   afterwards. */
+		rsp=debfopen("ickyuk.bat","w");
+		fprintf(rsp,"%s.exe\ndel %s\ndel %s.exe\n",
+			argv[optind],buf,argv[optind]);
+		fclose(rsp);
+	      }
+	      else if(!cdebug)
+	      {
+		/* delete from the batch file after compilation */
+		rsp=debfopen("ickyuk.bat","w");
+		fprintf(rsp,"del %s\n",buf);
+		fclose(rsp);
+	      }
+	    }
+#endif	    
 	}
     }
     (void) fclose(ifp);
     return 0;
 }
 
-/* perpetrate.c ends here */
+/* perpet.c ends here */
 

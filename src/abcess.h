@@ -33,18 +33,28 @@ typedef struct array_t
   } data;
 } array;
 
+
+/* AIS: For operand overloading, a more complicated data type is needed. */
+typedef struct overop_t
+{
+  type32 (*get)(type32);
+  void (*set)(type32, void(*)());
+} overop;
+
 /* AIS: Moved from cesspool.c */
 typedef struct stashbox_t     /* this is a save-stack element */
 {
-    unsigned int type;	      /* variable type */
-    unsigned int index;       /* variable's index within the type */
-    union		      /* the data itself */
-    {
-	type16	onespot;
-	type32	twospot;
-	array	*a;
-    } save;
-    struct stashbox_t *next;  /* pointer to next-older stashbox */
+  unsigned int type;	      /* variable type */
+  unsigned int index;       /* variable's index within the type */
+  union		      /* the data itself */
+  {
+    type16	onespot;
+    type32	twospot;
+    array	*a;
+  } save;
+  struct stashbox_t *next;  /* pointer to next-older stashbox */
+  overop overloadinfo; /* AIS: overloading info is stashed too, in a
+			    non-overloaded program (ignored otherwise) */
 } stashbox;
 
 /* AIS: files to take input and output from */
@@ -85,8 +95,10 @@ extern void resize();
 #endif
 
 extern void stashinit(void);
-extern void stash(unsigned int type, unsigned int index, void *from);
-extern void retrieve(void *to, int type, unsigned int index, bool forget);
+/* AIS: Added mentions of oo. This is set to 0 in a non-overloaded program. */
+extern void stash(unsigned int type, unsigned int index, void *from, overop* oo);
+extern void retrieve(void *to, int type, unsigned int index, bool forget,
+		     overop* oo);
 extern unsigned int roll(unsigned int n);
 
 /* defined in arrgghh.c */
@@ -143,7 +155,7 @@ extern int hybridcount;
 extern int oldabstain;
 extern int gonebackto;
 extern int ccfc;
-extern int skipto;
+extern unsigned skipto;
 extern jmp_buf btjb;
 extern jmp_buf cjb;
 

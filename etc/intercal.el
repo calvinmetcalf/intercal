@@ -321,8 +321,8 @@ a good idea in long files, which take a long time to update."
 ;; be abstained from all program.
 (defvar intercal-font-lock-keywords
   '(("^\\(([0-9]+)\\|\\)[ \t]*\\(PLEASE DO\\|DO\\|PLEASE\\)[ \t]*\\(NOT\\|N'T\\).*$" . font-lock-comment-face)
-    ("\\<\\(ABSTAIN\\|GIVE UP\\|READ OUT\\|RESUME\\|WRITE IN\\|COME\\|FROM\\|IGNORE\\|REINSTATE\\|RETRIEVE\\|PLEASE\\|DO\\|MAYBE\\|ONCE\\|AGAIN\\|FORGET\\|NEXT\\|REMEMBER\\|STASH\\|DON'T\\|NOT\\|TRY AGAIN\\|GO AHEAD\\|GO BACK\\)\\>" . font-lock-keyword-face)
-    ("\\<\\(ABSTAINING\\|GIVING UP\\|READING OUT\\|RESUMING\\|WRITING IN\\|COMING\\|IGNORING\\|REINSTATING\\|RETRIEVING\\|FORGETTING\\|NEXTING\\|REMEMBERING\\|STASHING\\|TRYING AGAIN\\|CALCULATING\\|GOING AHEAD\\|GOING BACK\\)\\>" . font-lock-builtin-face)
+    ("\\<\\(ABSTAIN\\|GIVE UP\\|READ OUT\\|RESUME\\|WRITE IN\\|PIN\\|COME\\|FROM\\|IGNORE\\|REINSTATE\\|RETRIEVE\\|PLEASE\\|DO\\|MAYBE\\|ONCE\\|AGAIN\\|FORGET\\|NEXT\\|REMEMBER\\|STASH\\|DON'T\\|NOT\\|TRY AGAIN\\|GO AHEAD\\|GO BACK\\)\\>" . font-lock-keyword-face)
+    ("\\<\\(ABSTAINING\\|GIVING UP\\|READING OUT\\|RESUMING\\|WRITING IN\\|PINNING\\|COMING\\|IGNORING\\|REINSTATING\\|RETRIEVING\\|FORGETTING\\|NEXTING\\|REMEMBERING\\|STASHING\\|TRYING AGAIN\\|CALCULATING\\|GOING AHEAD\\|GOING BACK\\)\\>" . font-lock-builtin-face)
     ("[.,:;][0-9]+" . font-lock-variable-name-face)
     ("#[0-9]+\\(\\$#[0-9]+\\|\\)" . font-lock-constant-face))
   "Default expressions to highlight in Intercal mode.")

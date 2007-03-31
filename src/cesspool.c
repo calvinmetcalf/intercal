@@ -27,6 +27,11 @@ LICENSE TERMS
 #include <string.h>
 #include <setjmp.h>
 
+/* AIS: Make this work with DJGPP's stdarg.h */
+#ifdef __DJGPP__
+#define _POSIX_SOURCE
+#endif
+
 #ifdef _POSIX_SOURCE
 #include <stdarg.h>
 #else
@@ -34,14 +39,19 @@ LICENSE TERMS
 #endif
 
 #include "sizes.h"
+/* AIS: To avoid a separate overloaded/nonoverloaded library, we import
+   the overloading defines here and ignore them if we don't need them. */
+#define MULTITHREAD 0
+#define OVEROPUSED 1
 #include "abcess.h"
 #include "lose.h"
 
 #include "numerals.c"
 
-FILE* cesspoolin = stdin;
-FILE* cesspoolout = stdout;
-/* AIS: In a future version of ick or yuk, these might not be constants */
+/* AIS: These will be set to stdin/stdout at the first opportunity,
+   which is not necessarily here. */
+FILE* cesspoolin=0;
+FILE* cesspoolout=0;
 
 /**********************************************************************
  *
@@ -98,6 +108,8 @@ unsigned int pin(void)
     int n;
     extern int wimp_mode;
 
+    if(!cesspoolin) cesspoolin=stdin; /* AIS */
+       
     if (fgets(buf, BUFSIZ, cesspoolin) == (char *)NULL)
 	lose(E562, lineno, (char *)NULL);
     n = strlen(buf) - 1;
@@ -274,6 +286,8 @@ void pout(unsigned int val)
     char	result[2*MAXROMANS+1];
     extern int wimp_mode;
 
+    if(!cesspoolout) cesspoolout=stdout; /* AIS */
+    
     if(wimp_mode) {
 	(void) fprintf(cesspoolout,"%u\n",val);
     }
@@ -300,6 +314,8 @@ void binin(unsigned int type, array *a, bool forget)
 
   if (a->rank != 1)
     lose(E241, lineno, (char *)NULL);
+  
+  if(!cesspoolin) cesspoolin=stdin; /* AIS */
 
   for (i = 0 ; i < a->dims[0] ; i++) {
     v = ((c=fgetc(cesspoolin)) == EOF) ? 256 : (c - lastin) % 256;
@@ -321,6 +337,8 @@ void binout(unsigned int type, array *a)
   if (a->rank != 1)
     lose(E241, lineno, (char *)NULL);
 
+  if(!cesspoolout) cesspoolout=stdout; /* AIS */
+  
   for (i = 0 ; i < a->dims[0] ; i++) {
     if (type == TAIL)
       c = lastout - a->data.tail[i];
@@ -345,7 +363,7 @@ void binout(unsigned int type, array *a)
 unsigned int assign(char *dest, unsigned int type, bool forget,
 		    unsigned int value)
 {
-  unsigned int retval;
+  unsigned int retval = 0;
   if (type == ONESPOT || type == TAIL) {
     if (value > (unsigned int)Max_small)
       lose(E275, lineno, (char *)NULL);
@@ -512,7 +530,7 @@ static stashbox *fetch(unsigned int type, unsigned int index)
   return (sp);
 }
 
-void stash(unsigned int type, unsigned int index, void *from)
+void stash(unsigned int type, unsigned int index, void *from, overop* oo)
 /* stash away the variable's value */
 {
   /* create a new stashbox and push it onto the stack */
@@ -524,8 +542,11 @@ void stash(unsigned int type, unsigned int index, void *from)
   /* store the variable in it */
   sp->type = type;
   sp->index = index;
+  if(oo) sp->overloadinfo=oo[index]; /* AIS */
   if (type == ONESPOT)
+  {
     memcpy((char *)&sp->save.onespot, from, sizeof(type16));
+  }
   else if (type == TWOSPOT)
     memcpy((char *)&sp->save.twospot, from, sizeof(type32));
   else if (type == TAIL || type == HYBRID) {
@@ -561,7 +582,7 @@ void stash(unsigned int type, unsigned int index, void *from)
   return;
 }
 
-void retrieve(void *to, int type, unsigned int index, bool forget)
+void retrieve(void *to, int type, unsigned int index, bool forget, overop* oo)
 /* restore the value of a variable from the save stack */
 {
   stashbox *sp;
@@ -569,6 +590,7 @@ void retrieve(void *to, int type, unsigned int index, bool forget)
   if ((sp = fetch(type, index)) == (stashbox *)NULL)
     lose(E436, lineno, (char *)NULL);
   else if (!forget) {
+    if(oo) oo[index]=sp->overloadinfo; /* AIS */
     if (type == ONESPOT)
       memcpy(to, (char *)&sp->save.onespot, sizeof(type16));
     else if (type == TWOSPOT)
@@ -623,6 +645,7 @@ unsigned int roll(unsigned int n)
 
 int multicome0(int errlineno, jmp_buf pc)
 {
+  (void) pc; /* it's ignored by this function */
   lose(E555, errlineno, (char *) NULL);
   /* this line number is quite possibly going to be wildly inaccurate */
   return 0;

@@ -92,6 +92,10 @@
 /* Out of stash space */
 #define E222 "222 BUMMER, DUDE!\n\
 	ON THE WAY TO %d\n"
+/* (AIS) Can't reverse an expression in an assignment. This is the
+   same error number as in CLC-INTERCAL, but the message is different. */
+#define E277 "277 YOU CAN ONLY DISTORT THE LAWS OF MATHEMATICS SO FAR\n\
+        ON THE WAY TO %d\n"
 /* (AIS) The spark/ears nesting is too deep. */
 #define E281 "281 THAT MUCH QUOTATION AMOUNTS TO PLAGIARISM\n\
 	ON THE WAY TO %d\n"
@@ -134,6 +138,19 @@
         ON THE WAY TO %d\n"
 /* (AIS) Memory allocation failure during multithreading */
 #define E991 "991 YOU HAVE TOO MUCH ROPE TO HANG YOURSELF\n\
+        ON THE WAY TO %d\n"
+/* (AIS) Unimplemented feature used. This should never come up, hopefully. */
+#define E995 "995 DO YOU REALLY EXPECT ME TO HAVE IMPLEMENTED THAT?\n\
+	ON THE WAY TO %d\n"
+/*
+ *  AIS: These errors are specific to PIC-INTERCAL
+ */
+/* (AIS) Attempted to use an unsupported language feature. */
+#define E256 "256 THAT'S TOO HARD FOR MY TINY BRAIN\n\
+	ON THE WAY TO %d\n"
+
+/* (AIS) Attempted to use a PIC feature in a non-PIC program. */
+#define E652 "652 HOW DARE YOU INSULT ME!\n\
         ON THE WAY TO %d\n"
 
 /*
@@ -195,6 +212,10 @@
 #define W276 "276 YOU CAN'T EXPECT ME TO CHECK BACK THAT FAR\n\
 	ON THE WAY TO %d\n"
 
+/* (AIS) A line will inevitably cause an expression-reversal failure. */
+#define W278 "278 FROM A CONTRADICTION, ANYTHING FOLLOWS\n\
+        ON THE WAY TO A HUGE DISASTER\n"
+	
 /* (AIS) The two following warnings are both compile-time traps for
    near-certain runtime errors. As such, they have similar numbers
    and similar messages. In fact, they're a shameless ripoff of the

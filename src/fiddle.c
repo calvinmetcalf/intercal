@@ -251,4 +251,128 @@ unsigned int fin32(unsigned int n)
   }
 }
 
+/* AIS: Reversed operations, for operand overloading */
+
+static unsigned int rotleft16(unsigned int n)
+{
+  return !!(n&0x8000)|((n&0x7FFF)<<1);
+}
+static unsigned int rotleft32(unsigned int n)
+{
+  return !!(n&0x80000000)|((n&0x7FFFFFFF)<<1);
+}
+
+/* For the time being, just work out the answer in binary, and test using
+   the base-whatever operation. This means that there'll nearly always be
+   a failure in reversing in bases other than 2. */
+unsigned int rev_or16(unsigned int n)
+{
+  if(or16(rotleft16(and16(n)))==n) return rotleft16(and16(n));
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_or32(unsigned int n)
+{
+  if(or32(rotleft32(and32(n)))==n) return rotleft32(and32(n));
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_and16(unsigned int n)
+{
+  if(and16(rotleft16(or16(n)))==n) return rotleft16(or16(n));
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_and32(unsigned int n)
+{
+  if(and32(rotleft32(or32(n)))==n) return rotleft32(or32(n));
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_xor16(unsigned int n)
+{
+  unsigned int a=0, l=1, t=0;
+  while(l<=0x4000)
+  {
+    if(n&l)
+      t^=1;
+    if(t)
+      a+=l*2;
+    l*=2;
+  }
+  if(xor16(a)==n) return a;
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+
+unsigned int rev_xor32(unsigned int n)
+{
+  unsigned int a=0, l=1, t=0;
+  while(l<=0x4000000)
+  {
+    if(n&l)
+      t^=1;
+    if(t)
+      a+=l*2;
+    l*=2;
+  }
+  if(xor32(a)==n) return a;
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_fin16(unsigned int n)
+{
+  unsigned int a=0, l=1, t=0;
+  while(l<=0x4000)
+  {
+    if(n&l)
+      t^=1;
+    if(t)
+      a+=l*2;
+    l*=2;
+  }
+  if(fin16(a)==n) return a;
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+
+unsigned int rev_fin32(unsigned int n)
+{
+  unsigned int a=0, l=1, t=0;
+  while(l<=0x4000000)
+  {
+    if(n&l)
+      t^=1;
+    if(t)
+      a+=l*2;
+    l*=2;
+  }
+  if(fin32(a)==n) return a;
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_whirl16(unsigned int p, unsigned int n)
+{
+  /* Only reverse if all digits are the same. */
+  if(whirl16(p,n)==n) return n;
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
+unsigned int rev_whirl32(unsigned int p, unsigned int n)
+{
+  /* Only reverse if all digits are the same. */
+  if(whirl32(p,n)==n) return n;
+  lose(E277, lineno, (char*) NULL);
+  return 0;
+}
+
 /* fiddle.c */

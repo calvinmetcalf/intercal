@@ -52,12 +52,11 @@ AIS = Alex Smith
    an infinite loop, because all COMING FROM a statement counts as part
    of that statement, and all statements are atomic.
 
-5) (AIS) In a multithreaded backtracking program, you can't fork a thread
-   which has backtrack points in it. The problem is that backtracking past
-   the fork from one but not both of the new threads would lead to a
-   situation in which the fork hadn't happened in one possible route from
-   the fork, but had in the other. This is clearly absurd, even by the
-   standards of INTERCAL.
+5) (AIS) Reverse assignments (those with the expression on the left)
+   are very unlikely to work in bases other than 2.
+
+6) (AIS) Most of the features new in 0.26, and many in 0.25, haven't
+   been documented. (This is partly because I can't get groff to work.)
 
 			TO DO
 

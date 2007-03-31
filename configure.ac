@@ -2,9 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT(intercal, 0.25, esr@thyrsus.com)
-AC_CONFIG_SRCDIR([lose.h])
-#AC_CONFIG_HEADER([config.h])
+AC_INIT(intercal, 0.26, esr@thyrsus.com)
+AC_CONFIG_SRCDIR([src/lose.h])
 
 # Checks for programs.
 AC_PROG_YACC
@@ -32,4 +31,4 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([memset strrchr strtol strtoul])
 
 AC_MSG_NOTICE(Version is $PACKAGE_VERSION)
-AC_OUTPUT(Makefile intercal.spec)
+AC_OUTPUT(Makefile ickspec)

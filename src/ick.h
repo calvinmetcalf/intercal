@@ -1,10 +1,22 @@
 /* ick.h -- compilation types for intercal parser */
 
+/* AIS: Changes for DJGPP */
+#ifdef __DJGPP__
+#define _POSIX_SOURCE
+#endif
+
+#ifdef ICKNOSEARCH
+#define ICKINCLUDEDIR "."
+#define ICKLIBDIR "."
+#define ICKBINDIR "."
+#define YYDEBUG 1
+#endif
+
 /* Comment this out if your version of lex automatically supplies yylineno. */
-/*#define YYLINENO_BY_HAND*/
+#define YYLINENO_BY_HAND
 
 /* Comment this out if your version of lex doesn't use yyrestart(). */
-/*#define USE_YYRESTART*/
+#define USE_YYRESTART
 
 #define YY_NO_UNPUT
 
@@ -25,7 +37,7 @@ typedef int	bool;
  * Maximum supported statement types; should be equal to (FROM - GETS + 1)
  * AIS: Changed this when I added new statements.
  */
-#define MAXTYPES	23
+#define MAXTYPES	28
 
 /* AIS: Maximum supported spark/ears nesting, divided by 32. The value given
    allows for 256 nested spark/ears groupings, which should be enough. */
@@ -40,6 +52,7 @@ typedef struct node_t
     unsigned long       optdata;        /* AIS: Temp used by the optimizer */
     int			width;		/* is this 32-bit data? */
     struct node_t	*lval, *rval;	/* attached expression nodes */
+    struct node_t       *nextslat;      /* AIS: The next node with a slat */
 } node;
 
 typedef struct tuple_t
@@ -80,10 +93,11 @@ typedef struct tuple_t
 /* this maps the `external' name of a variable to an internal array index */
 typedef struct
 {
-    int	type;
-    int extindex;
-    int intindex;
-    int ignorable; /* AIS: Can this variable be IGNOREd? */
+  int type;
+  unsigned int extindex;
+  unsigned int intindex;
+  int ignorable; /* AIS: Can this variable be IGNOREd? */
+  int memloc; /* AIS: Where does a PIC store this in memory? */
 }
 atom;
 
@@ -96,13 +110,15 @@ assoc;
 
 extern atom *oblist, *obdex;
 extern int obcount, nonespots, ntwospots, ntails, nhybrids;
+extern int nmeshes; /* AIS */
 
 extern tuple *tuples;
 extern int tuplecount;
 
 extern tuple *optuple; /* AIS: The tuple currently being optimized */
 
-extern char *enablers[MAXTYPES];
+extern char **enablers;
+extern char *enablersm1[MAXTYPES+1];
 extern assoc vartypes[];
 
 /* the lexical analyzer keeps copies of the source logical lines */
@@ -128,7 +144,13 @@ extern int yukdebug;       /* debug the code with yuk */
 extern int yukprofile;     /* profile the code with yuk */
 extern int compucomecount; /* number of computed COME FROMs */
 extern int compucomesused; /* are computed COME FROMs used? */
+extern int nextfromsused;  /* is NEXT FROM used? */
+extern int gerucomesused;  /* is COME FROM gerund used? */
+extern int opoverused;     /* is operand overloading used? */
+extern node* firstslat;    /* the first node with a slat */
+extern node* prevslat;     /* the last node so far with a slat */
 extern int multithread;    /* is the program multithreaded? */
+extern int variableconstants; /* is any assignment allowed? */
 extern int coreonerr;      /* dump core on E778? */
 extern int optdebug;       /* debug the optimizer */
 extern int flowoptimize;   /* optimize program flow */

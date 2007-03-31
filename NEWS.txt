@@ -1,8 +1,102 @@
 			NEW IN THIS RELEASE
 
-	Release ? (by ?) ?
+  Release 0.26 (by Alex Smith)
+  
+1.  Fixed a few bugs in the previous release (some bugfixed by Joris Huizer).
 
-(All these changes were by AIS)
+2.  Ported to DJGPP. The compiler now works on both POSIX and DJGPP systems.
+
+3.  Reorganized the directory structure.
+
+4.  Added support for cross-compiling to the PIC microcontroller.
+
+5.  Added a simple test program for PIC cross-compilation.
+
+6.  Improved further searching for skeletons and executables.
+
+7.  Delinted some of the code, and turned up the default gcc warning level.
+
+8.  Reformatted some of the documentation.
+
+9.  Renamed and split files; all files used in the build now have 8.3
+    filenames, to prevent any problems using DJGPP on 8.3 systems. The
+    optimizer was split from the code degeneration into dekludge.c (optimizer)
+    and feh2.c (degeneration), because feh.c was getting too large.
+
+10. The text documentation (README, COPYING, NEWS, and BUGS) was renamed to
+    end .txt (again for DJGPP compatibility); formatting changes were made to
+    README in addition to the addition of extra readme information.
+
+11. Included precompiled-to-C versions of the parser and the lexer so that
+    DJGPP (or I suppose, POSIX if you hacked the makefile) implementations
+    without bison or flex could still compile the rest of C-INTERCAL and give
+    a running program.
+
+12. Fixed a bug involving optimization of Tri-INTERCAL programs.
+
+13. Added to the lexer, so that it supports CLC-INTERCAL syntax for operators
+    that were already present in C-INTERCAL, as long as they don't conflict
+    with C-INTERCAL syntax. (Using the -X switch will support CLC-INTERCAL
+    syntax for operators that were already present in C-INTERCAL even if they
+    conflict with C-INTERCAL syntax.) For the symbols present in the
+    CLC-INTERCAL character set but not in ASCII, ISO-8859-1 is supported as an
+    encoding as well as UTF-8 (to increase the chance that CLC-INTERCAL
+    programs will run without modification); it was meant to be supported to
+    some extent before, but seemed not to be working.
+
+14. Added the COMMENT gerund, with the same semantics as in CLC-INTERCAL.
+
+15. Added COME FROM gerund. This suffers from the same restrictions as
+    computed COME FROM, in that it can't be used in PIC programs and causes
+    the program to end up substantially less efficient.
+
+16. Added support for prefix as well as infix unary operators. The rule is
+    that any number of prefix unary operators, but only one infix unary
+    operator, is allowed on each group, variable, and/or mesh. (Previously,
+    only infix operators were supported, and then only one per mesh.)
+
+17. Added positional precedences to the parser. INTERCAL still doesn't have
+    operator precedences (that would be completely contrary to the spirit of
+    INTERCAL) but it now has rules for deciding on the meaning of previously
+    ambiguous expressions. Chains of select and mingle operations right-
+    associate, and when a unary operator could legitimately be in either a
+    prefix or infix position, the infix position is assumed (although remember
+    that only one infix operator is allowed for each group, variable, and/or
+    mesh).
+
+18. Added ¬ as a synonym for NOT.
+
+19. Added operand overloading, for onespot and twospot variables. This uses
+    the slat operator in almost, but not quite, the same way as
+    CLC-INTERCAL. Note that the width of unary operations will mostly depend
+    on the type a variable appears to have in an expression, rather than on
+    its actual bitwidth (if a onespot is overloaded to a twospot or vice
+    versa). Note that meshes won't change as the result of operand overloading
+    unless the -v option is used (an error will be generated instead).
+
+20. Added an option for generalised assignments. With the -v option,
+    expressions (rather than just variables) can appear on the left of an
+    assignment. Any meshes on the left of an assignment (even if in apparently
+    inoccuous positions) may change value as a result. (Note that such
+    assignments aren't always possible.) If the left-hand-side of an
+    expression is anything other than simply a variable or a constant, the
+    compiler will try to change the values of meshes and non-ignored variables
+    in the expression to make it fit. (In bases other than 2, it will nearly
+    always fail.) Unlike CLC-INTERCAL, assigning to a mesh only changes that
+    mesh, not line labels or other uses of the number.
+
+21. Restricted the compiler to just one input file at a time (it used to break
+    if this wasn't done anyway).
+
+22. Fixed a nonportability involving stdin and stdout in cesspool.c.
+
+23. Added support for the NEXT FROM command, with the same semantics as COME
+    FROM (including computed NEXT FROM and NEXT FROM gerund), except that it
+    saves the line that was NEXTed FROM on the choicepoint stack.
+
+24. Fixed a bug where the yuk debugger accessed unallocated memory.
+
+  Release 0.25 (by Alex Smith)
 
 1. Added support for computed ABSTAIN and TRY AGAIN.
 
@@ -48,9 +142,9 @@ possible for multithreading, backtracking, computed ABSTAIN, and computed COME
 FROM to all be used simultaneously in the same program, to help maximize
 obfuscation.
 
-11. Added an option (-l) for generating warnings. To prevent this actually being
-useful, it is designed to generate far too many warnings, which all have to be
-trawled through to find the important ones, and has no way to turn the
+11. Added an option (-l) for generating warnings. To prevent this actually
+being useful, it is designed to generate far too many warnings, which all have
+to be trawled through to find the important ones, and has no way to turn the
 unimportant ones off.
 
 12. Added the +printflow and +mystery options for executing INTERCAL programs.

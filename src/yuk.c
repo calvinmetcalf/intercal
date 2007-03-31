@@ -30,6 +30,7 @@ LICENSE TERMS
 #include <signal.h>
 #include <unistd.h>
 #include <setjmp.h>
+#include <string.h>
 
 #define YUKDEBUG 1
 
@@ -40,6 +41,13 @@ LICENSE TERMS
 
 #if YPTIMERTYPE == 4
 #include <sys/times.h>
+#endif
+
+/* To help out shells that only understand backslashes in filenames. */
+#ifdef YUKCOPYLOCUS
+#define STRINGIZE2(s) s
+#define STRINGIZE(s) STRINGIZE2(s)
+#define YUKCOPYLOC STRINGIZE(YUKCOPYLOCUS)
 #endif
 
 extern signed char onewatch[];
@@ -105,7 +113,7 @@ yptimer yuktimes()
 
 void yukterm(void)
 {
-  int i,lastline,thisline,inrow;
+  int i,lastline,thisline,inrow=0;
   yptimer avgtime,avgtime2;
   if(yukopts==2) puts("Program ended without error.");
   if(!(yukopts&1)) return;
@@ -748,7 +756,7 @@ void yukline(int aboff,int emitlineno)
 	  }
 	  break;
 	case '*':
-	  system("more < " YUKCOPYLOC); /* display the GNU GPL copying conditions */
+	  system("more < " YUKCOPYLOC); /* display the GNU GPL copyright */
 	  break;
 	default:
 	  puts("Not sure what you mean. Try typing ?<RET>.");

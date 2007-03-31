@@ -14,7 +14,10 @@ $M
 #include "lose.h"
 $K
 
-#define OK(d) !abstained[d]
+#define ICKABSTAINED(d) abstained[d]
+#define ICKSTASH(a,b,c,d) stash(a, b, c+b, d)
+#define ICKRETRIEVE(a,b,c,d,e) retrieve(a+b, c, b, d[b], e)
+#define ICKIGNORE(a,b,c) a[b]
 
 extern int printflow;
 
@@ -22,13 +25,14 @@ int lineno;
 
 jmp_buf cjb;
 int ccfc;
-int skipto;
+unsigned skipto=0;
+$O
 
 int oldabstain;
 int abstained[$B]$C;
 $D
 $E
-
+$P
 int main(int argc, char *argv[])
 {
     parseargs(argc,argv);
@@ -44,9 +48,9 @@ $N
 #endif
     /* set seed for random error generation */
 #ifdef USG
-    srand48(time((long *)0) + getpid());
+    srand48(time(0) + getpid());
 #else
-    srand(time((long *)0));
+    srand(time(0));
 #endif /* UNIX */
 
 #if MULTITHREAD == 1
@@ -60,17 +64,21 @@ $N
       
       /* degenerated code */
  ick_restart: 
-    ;
+ top:
+    switch(skipto)
+    {
+    case 0:
+      $G
+	}
     
-$G
-
 #ifdef YUK
     if(yukloop) goto ick_restart; 
 #endif
     lose(E633, $J, (char *)0);
 
-$H
+    $H
+    
     return 0;
 }
-
+$Q
 /* Generated code for $A.i ends here */

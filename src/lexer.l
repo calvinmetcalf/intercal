@@ -1,3 +1,6 @@
+%e 2000
+%p 4000
+%n 1000
 %{
 /*
  * NAME
@@ -25,7 +28,7 @@ LICENSE TERMS
 #include <ctype.h>
 #include <string.h>
 #include "ick.h"
-#include "y.tab.h"
+#include "parser.h"
 #include "lose.h"
 
 /*#undef wchar_t*/
@@ -54,6 +57,16 @@ int stbeginline = 0;
 /* AIS: Sort out a grammar near-ambiguity */
 unsigned long sparkearsstack[SENESTMAX] = {0};
 int sparkearslev = 0;
+
+/* AIS: Some symbols are ambiguous between C-INTERCAL and CLC-INTERCAL:
+   Symbol    C-INTERCAL CLC-INTERCAL
+   NOSPOT    _          @
+   WHIRL     @          ?
+   XOR       ?          yen, or bookworm (bookworm's also C-INTERCAL legal)
+   By default, the C-INTERCAL meanings are used; the extern variable clclex
+   causes CLC-INTERCAL interpretations to be put on the ambiguous symbols.
+   Otherwise, mixing syntaxes freely is allowed. */
+extern int clclex;
 
 #ifdef FLEX_SCANNER
 static char linebuf[YY_BUF_SIZE];
@@ -116,9 +129,10 @@ int getc(FILE *fp)
       char c_char;
       /*fprintf(stderr,"about to fgetc(\045p)",(void*)fp);*/
 
+      c_char=0; /* AIS */
       (void)fread(&c_char,1,1,fp);
       c = c_char;
-      /*fputc(c,stderr);*/
+      /*if(!c) c=' '; AIS */
       if(feof(fp)) c=EOF;
 
 	/*fprintf(stderr,"getc input a character: %c\n",c);*/
@@ -211,12 +225,17 @@ D	[0-9][\ \t\n0-9]*
 %%
 
 {D}		{yylval.numval = myatoi(yytext); return(NUMBER);}
+\_              {return(NOSPOT);}
 \.		{return(ONESPOT);}
 \:		{return(TWOSPOT);}
 \,		{return(TAIL);}
 \;		{return(HYBRID);}
 \#		{return(MESH);}
 
+\xBD            |
+"c^H/"          |
+"c^H|"          {return(MINGLE); /* AIS: CLC-INTERCAL mingle symbols. 
+				    The \xBD is ISO-8859-1 for cent. */}
 \$		|
 \xA2		|
 \xA3		|
@@ -243,13 +262,26 @@ D	[0-9][\ \t\n0-9]*
 
 \~		{return(SELECT);}
 
+\/		{return(SLAT); /* AIS: Operand overloading */}
+\\		{return(BACKSLAT); /* ditto */}
+
 \&		{yylval.numval = AND; return(UNARY);}
 V		{yylval.numval = OR; return(UNARY);}
+\xA5            |
+\xBE            |
 "V^H-"		|
-\xE2\x88\x80	|
-\?		{yylval.numval = XOR; return(UNARY);}
-\^		{yylval.numval = FIN; return(UNARY);}
-@		{yylval.numval = WHIRL; return(UNARY);}
+\xE2\x88\x80    {yylval.numval = XOR; return(UNARY); 
+                 /* AIS: CLC-INTERCAL uses \xBE, ISO-8859-1 for yen;
+                    for some reason, \xA5 is what was detected by the compiler
+		    during my tests, so that's here too */}
+\?              {if(clclex) yylval.numval = WHIRL;
+                 else yylval.numval = XOR; return(UNARY);
+                 /* AIS: ? is a unary operator in both C-INTERCAL and
+		    CLC-INTERCAL, but with different meanings. */}
+\|              |
+\^		{yylval.numval = FIN; return(UNARY); /* AIS: | is CLC */}
+@		{if(clclex) return(NOSPOT); /* AIS: a C/CLC ambiguity */
+                 else {yylval.numval = WHIRL; return(UNARY);}}
 [2-5]{W}@	{yylval.numval = WHIRL + myatoi(yytext) - 1; return(UNARY);}
 
 \'		{char temp = sparkearsstack[sparkearslev/32]&1; 
@@ -280,6 +312,10 @@ MAYBE{W}PLEASE{W}DO {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(MAYBE);
 NOT		{return(NOT);}
 N\'T		{return(NOT);}
 NON		{return(NOT);}
+\xAA            {return(NOT); /* AIS: CLC-INTERCAL again, this time it's
+				 ISO-8859-1 for the logical NOT symbol... */}
+\xAC            {return(NOT); /* ... but my computer translates it to \xAC */}
+
 ONCE            {return(ONCE);}
 QUONDAM         {return(ONCE);}
 AGAIN           {return(AGAIN);}
@@ -298,10 +334,6 @@ BY		{return(BY);}
 CALCULANDUM	|
 CALCULATING	{yylval.numval = GETS; return(GERUND);}
 
-DEINDE		|
-NEXT		{stbeginline = 0; return(NEXT);}
-PROXIMANDUM	|
-NEXTING		{yylval.numval = NEXT; return(GERUND);}
 ALIENERE	|
 FORGET		{return(FORGET);}
 ALIENENDUM	|
@@ -328,8 +360,6 @@ MEMINISSENDUM	|
 REMEMBERING	{yylval.numval = REMEMBER; return(GERUND);}
 ABSTINERE	|
 ABSTAIN         {return(ABSTAIN);}
-FROM            |
-A               {return(FROM);}
 ABSTINENDUM	|
 ABSTAINING	{yylval.numval = ABSTAIN; return(GERUND);}
 REINSTARE	|
@@ -344,13 +374,34 @@ SCRIBERE{W}IN	|
 WRITE{W}IN	{return(WRITE_IN);}
 SCRIBENDUM	|
 WRITING{W}IN	{yylval.numval = WRITE_IN; return(GERUND);}
+COMMEMERO       |
+COMMENT         {yylval.numval = UNKNOWN; return(GERUND);
+                 /* AIS: An idea stolen from CLC-INTERCAL.
+		    The Latin means literally 'remind' or 'mention'. */}
+PIN             {/* By AIS. I can't find a Latin translation for this. */
+                 return(PIN);}
+PINNING         {/* By AIS */ yylval.numval = PIN; return(GERUND);}
+DEINDERE{W}A{W}\({W}{D}\) |
+NEXT{W}FROM{W}\({W}{D}\) {/* AIS */ yylval.numval = myatoi(yytext);
+			  return(NEXTFROMLABEL);}
+DEINDERE{W}A    |
+NEXT{W}FROM     {/* AIS: 'next' is not a verb, so the Latin is invented */
+                 return(NEXTFROMEXPR);}
+DEINDENDUM	|
+NEXTING{W}FROM	{/* AIS */ yylval.numval = NEXTFROMLABEL; return(GERUND);}
 ADVENIRE{W}DE{W}\({W}{D}\) |
-COME{W}FROM{W}\({W}{D}\) {/* By AIS */ yylval.numval = myatoi(yytext);
+COME{W}FROM{W}\({W}{D}\) {/* AIS */ yylval.numval = myatoi(yytext);
 			  return(COME_FROM);}
 ADVENIRE{W}DE   |
-COME{W}FROM     {/* By AIS */ return(COMPUCOME);}
+COME{W}FROM     {/* AIS */ return(COMPUCOME);}
 ADVENENDUM	|
 COMING{W}FROM	{yylval.numval = COME_FROM; return(GERUND);}
+DEINDE		|
+NEXT		{stbeginline = 0; return(NEXT);}
+PROXIMANDUM	|
+NEXTING		{yylval.numval = NEXT; return(GERUND);}
+FROM            |
+A               {return(FROM);}
 CONCEDERE	|
 DESPERARE	|
 GIVE{W}UP	{return(GIVE_UP);}
@@ -372,7 +423,9 @@ GOING{W}AHEAD   {yylval.numval = GO_AHEAD; return(GERUND);
 \+		{return(INTERSECTION);}
 
 {W}     	;
-.		{yylval.numval = yytext[0]; return(BADCHAR);}
+.		{yylval.numval = yytext[0]; /* AIS: The line below for debug */
+ if(yydebug) fprintf(stdout, "yylex: bad char %#x\n",(unsigned char)yytext[0]);
+                 return(BADCHAR);}
 
 
 %%
@@ -399,7 +452,7 @@ int lexer(void)
     return(tok);
 }
 
-static int myatoi(char *text) /* Alex edit! */
+static int myatoi(char *text) /* AIS */
 {
 #define MAXTEXT 100
     static char buf[MAXTEXT];
@@ -415,8 +468,10 @@ static int myatoi(char *text) /* Alex edit! */
     }
     buf[i] = '\0';
     bp=buf; tp=thinbuf;
-    while(*tp++=*bp++); /* thinbuf code added by an Alex edit,
-			   in case we want to work with wchar_t */
+    while(((*tp++=*bp++))); /* thinbuf code added by an AIS
+			       in case we want to work with wchar_t;
+			       the extra brackets tell GCC that this is
+			       intended and not a mistaken assignment */
     return atoi(thinbuf);
 }
 

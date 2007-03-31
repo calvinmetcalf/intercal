@@ -1,0 +1,14 @@
+version.4i is a simple program that tests what version of INTERCAL you are
+running.
+
+Under INTERCAL-72, the .4i suffix is ignored, and the COME FROM lines are
+splatted. So execution flows to the first splat line, where an error is
+reported that prints out the required message.
+
+Under C-INTERCAL (or CLC-INTERCAL faking it), the ? is interpreted as XOR,
+leaving a hugely large value in .1. So the second COME FROM doesn't match,
+and the second splat line generates the error.
+
+Under CLC-INTERCAL (or C-INTERCAL using the -X option), the ? is interpreted
+as BUT, leaving #5 in .1. So the second COME FROM finds the required line
+label, and the third splat line generates the error.

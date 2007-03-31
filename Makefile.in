@@ -34,10 +34,10 @@ DESTDIR=
 # If you want to delete or move the distribution files, then you will have to move COPYING
 # to another directory; otherwise, you can aim this at COPYING.
 # It's also possible to aim this at a copy of COPYING from another GPL program.
-copyloc = ${DESTDIR}${datadir}/COPYING
+copyloc = ${DESTDIR}${datadir}/COPYING.txt
 
 CC = @CC@
-CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DYYDEBUG -DYUKCOPYLOC=\"$(copyloc)\"
+CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DYYDEBUG -DYUKCOPYLOC=\"$(copyloc)\" -O2 -W -Wall -I./src -I./temp
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXFLAGS=
@@ -46,74 +46,103 @@ YACCFLAGS = -d # -t
 
 LOADLIBS = @LIBS@ @INTLLIBS@ @LEXLIB@
 
-CSOURCES = ick.y lexer.l feh.c lose.c fiddle.c perpetrate.c unravel.c
-ISOURCES = cesspool.c arrgghh.c ick-wrap.c numerals.c
-YSOURCES = yuk.c
-HEADERS = ick.h lose.h sizes.h abcess.h fiddle.h feh.h yuk.h
+CSOURCES = src/parser.y src/lexer.l src/feh2.c src/dekludge.c src/lose.c src/fiddle.c src/perpet.c src/unravel.c
+ISOURCES = src/cesspool.c src/arrgghh.c src/ick-wrap.c src/numerals.c
+YSOURCES = src/yuk.c
+HEADERS = src/ick.h src/lose.h src/sizes.h src/abcess.h src/fiddle.h src/feh.h src/yuk.h
 BUILD = Makefile.in Makefile configure.ac configure config.h.in intercal.spec.in intercal.spec install.sh
-MISC = intercal.el coopt.sh
-DOCS = BUGS COPYING NEWS README
+MISC = etc/intercal.el src/coopt.sh
+DOCS = BUGS.txt COPYING.txt NEWS.txt README.txt
 SOURCES = $(CSOURCES) $(ISOURCES) $(YSOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
 
-all: ick libick.a libickmt.a libyuk.a
+all: bin/ick lib/libick.a lib/libickmt.a lib/libyuk.a ial
 
-copycopy: COPYING
+ial: src/fiddle.h src/abcess.h src/lose.h src/yuk.h src/ick-wrap.c src/pickwrap.c src/coopt.sh pit/lib/syslib.i
+	-cp src/fiddle.h include/fiddle.h
+	-cp src/abcess.h include/abcess.h
+	-cp src/lose.h include/lose.h
+	-cp src/yuk.h include/yuk.h
+	-cp pit/lib/syslib.i pit/lib/syslib.?i include
+	-cp src/ick-wrap.c lib/ick-wrap.c
+	-cp src/pickwrap.c lib/pickwrap.c
+	-cp src/coopt.sh lib/coopt.sh
+
+copycopy: COPYING.txt
 	-mkdir $(DESTDIR)$(datadir)
-	-if cp $(copyloc) /dev/null ; then : ; else cp COPYING $(copyloc) ; fi
+	-if cp $(copyloc) /dev/null ; then : ; else cp COPYING.txt $(copyloc) ; fi
 
 checkcopy:
 	@echo If the following line fails, change \"copyloc\" in your makefile.
 	cp $(copyloc) /dev/null
 
-ick: ick.o lexer.o feh.o lose.o fiddle.o perpetrate.o
-	$(CC) perpetrate.o ick.o lexer.o feh.o lose.o fiddle.o $(LDFLAGS) -o ick
+bin/ick: temp/parser.o temp/lexer.o temp/feh2.o temp/dekludge.o temp/lose.o temp/fiddle.o temp/perpet.o
+	$(CC) temp/perpet.o temp/ick.o temp/lexer.o temp/feh2.o temp/dekludge.o temp/lose.o temp/fiddle.o $(LDFLAGS) -o bin/ick
 
-y.tab.h ick.c: ick.y ick.h sizes.h feh.h lose.h
-	$(YACC) -d $(YACCFLAGS) ick.y
-	mv y.tab.c ick.c
+temp/parser.h temp/parser.c: src/parser.y src/ick.h src/sizes.h src/feh.h src/lose.h
+	$(YACC) -d $(YACCFLAGS) src/parser.y
+	-rm temp/parser.c
+	mv y.tab.c temp/parser.c
+	-rm temp/parser.h
+	mv y.tab.h temp/parser.h
 
-lexer.c: lexer.l ick.h lose.h
-	$(LEX) $(LEXFLAGS) lexer.l
-	mv lex.yy.c lexer.c 
+temp/lexer.c: src/lexer.l src/ick.h src/lose.h
+	$(LEX) $(LEXFLAGS) src/lexer.l
+	-rm temp/lexer.c
+	mv lex.yy.c temp/lexer.c 
 
 # Uncomment the following if using a stock lex
 # LEXLIBS = -ll
-lextest: y.tab.h lexer.c ick.h lose.o
-	$(CC) -DMAIN lexer.c lose.o $(LEXLIBS) -o lextest
+bin/lextest: temp/parser.h src/lexer.c src/ick.h temp/lose.o
+	$(CC) -DMAIN src/lexer.c src/lose.o $(LEXLIBS) -o bin/lextest
 
-ick.o: ick.c ick.h feh.h lose.h sizes.h
-lexer.o: lexer.c y.tab.h ick.h lose.h
-feh.o: feh.c feh.h y.tab.h ick.h fiddle.h lose.h sizes.h
-perpetrate.o: perpetrate.c y.tab.h ick.h lose.h sizes.h
-cesspool.o: cesspool.c numerals.c abcess.h lose.h sizes.h
-unravel.o: unravel.c abcess.h lose.h sizes.h
-lose.o: lose.h
-fiddle.o: fiddle.h sizes.h
-yuk.o: checkcopy yuk.h lose.h sizes.h abcess.h
+temp/parser.o: temp/parser.c src/ick.h src/feh.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/ick.o temp/parser.c
+temp/lexer.o: temp/lexer.c temp/parser.h src/ick.h src/lose.h
+	$(CC) $(CFLAGS) -c -o temp/lexer.o temp/lexer.c
+temp/feh2.o: src/feh2.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/feh2.o src/feh2.c
+temp/dekludge.o: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/dekludge.o src/dekludge.c
+temp/perpet.o: src/perpet.c temp/parser.h src/ick.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/perpet.o src/perpet.c
+temp/cesspool.o: src/cesspool.c src/abcess.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/cesspool.o src/cesspool.c
+temp/numerals.o: src/numerals.c src/abcess.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/numerals.o src/numerals.c
+temp/unravel.o: src/unravel.c src/abcess.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/unravel.o src/unravel.c
+temp/lose.o: src/lose.c src/lose.h
+	$(CC) $(CFLAGS) -c -o temp/lose.o src/lose.c
+temp/fiddle.o: src/fiddle.c src/fiddle.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/fiddle.o src/fiddle.c
+temp/arrgghh.o: src/arrgghh.c
+	$(CC) $(CFLAGS) -c -o temp/arrgghh.o src/arrgghh.c
+temp/yuk.o: checkcopy src/yuk.h src/lose.h src/sizes.h src/abcess.h
+	$(CC) $(CFLAGS) -c -o temp/yuk.o src/yuk.c
 
-libick.a: cesspool.o lose.o fiddle.o arrgghh.o
-	ar cr libick.a cesspool.o lose.o fiddle.o arrgghh.o
-	-ranlib libick.a
+lib/libick.a: temp/cesspool.o temp/numerals.o temp/lose.o temp/fiddle.o temp/arrgghh.o
+	ar cr lib/libick.a temp/cesspool.o temp/numerals.o temp/lose.o temp/fiddle.o temp/arrgghh.o
+	-ranlib lib/libick.a
 
-libickmt.a: cesspool.o unravel.o lose.o fiddle.o arrgghh.o
-	ar cr libickmt.a cesspool.o unravel.o lose.o fiddle.o arrgghh.o
+lib/libickmt.a: temp/cesspool.o temp/numerals.o temp/unravel.o temp/lose.o temp/fiddle.o temp/arrgghh.o
+	ar cr lib/libickmt.a temp/cesspool.o temp/numerals.o temp/unravel.o temp/lose.o temp/fiddle.o temp/arrgghh.o
 	-ranlib libickmt.a
 
-libyuk.a: yuk.o
-	ar cr libyuk.a yuk.o
-	-ranlib libyuk.a
+lib/libyuk.a: temp/yuk.o
+	ar cr lib/libyuk.a temp/yuk.o
+	-ranlib lib/libyuk.a
 
 install: copycopy all
-	cp ick $(DESTDIR)$(bindir)
-	cp libick.a $(DESTDIR)$(libdir)
-	cp libickmt.a $(DESTDIR)$(libdir)
-	cp libyuk.a $(DESTDIR)$(libdir)
+	cp bin/ick $(DESTDIR)$(bindir)
+	cp lib/libick.a $(DESTDIR)$(libdir)
+	cp lib/libickmt.a $(DESTDIR)$(libdir)
+	cp lib/libyuk.a $(DESTDIR)$(libdir)
 	-mkdir -p $(DESTDIR)$(incdir)
-	cp lose.h abcess.h fiddle.h yuk.h $(DESTDIR)$(incdir)
+	cp src/lose.h src/abcess.h src/fiddle.h src/yuk.h $(DESTDIR)$(incdir)
 	-mkdir $(DESTDIR)$(datadir)
 	(cp -r pit $(DESTDIR)$(datadir))
-	cp ick-wrap.c $(DESTDIR)$(datadir)
-	cp coopt.sh $(DESTDIR)$(bindir)
+	cp src/ick-wrap.c $(DESTDIR)$(datadir)
+	cp etc/coopt.sh $(DESTDIR)$(bindir)
 
 uninstall:
 	rm -f $(DESTDIR)$(bindir)/ick $(DESTDIR)$(libdir)/libick.a
@@ -124,15 +153,16 @@ uninstall:
 TAGS: $(SOURCES)
 	etags $(SOURCES)
 
-dist: intercal-@PACKAGE_VERSION@.tar.gz
+dist: ick-@PACKAGE_VERSION@.tgz
 
-intercal-@PACKAGE_VERSION@.tar.gz: $(SOURCES)
-	@find $(SOURCES) -type f -print | grep -v RCS | sed s:^:intercal-@PACKAGE_VERSION@/: >MANIFEST
-	@(cd ..; ln -s intercal intercal-@PACKAGE_VERSION@)
-	(cd ..; tar -czvf intercal/intercal-@PACKAGE_VERSION@.tar.gz `cat intercal/MANIFEST`)
-	@(cd ..; rm intercal-@PACKAGE_VERSION@)
+ick-@PACKAGE_VERSION@.tgz: $(SOURCES)
+	@find $(SOURCES) -type f -print | grep -v RCS | sed s:^:ick-@PACKAGE_VERSION@/: >MANIFEST.txt
+	@(cd ..; ln -s intercal ick-@PACKAGE_VERSION@)
+	(cd ..; tar -czvf intercal/ick-@PACKAGE_VERSION@.tgz `cat intercal/MANIFEST.txt`)
+	@(cd ..; rm ick-@PACKAGE_VERSION@)
 
 clean:
-	rm -f yacc.* y.tab.* y.output *~ *.[oa] lexer.c ick.c lextest ick
-	rm -f intercal-@PACKAGE_VERSION@.tar.gz intercal.spec core
+	rm -f temp/* bin/* lib/* include/*
 
+distr:
+	rm -f temp/*.o bin/* lib/* include/*

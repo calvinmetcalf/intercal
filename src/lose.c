@@ -59,8 +59,10 @@ void lwarn(char *m, int n, char *s)
 		 m[0],m[1],m[2]);
   if (s)
     (void) fprintf(stderr, m + 4, s, n);
-  else
+  else if(m[0]!='2'||m[1]!='7'||m[2]!='8')
     (void) fprintf(stderr, m + 4, n);
+  else
+    (void) fprintf(stderr, m + 4);
   (void) fprintf(stderr, "        RECONSIDER SOURCE AND RESUBNIT\n\n");
   /* Don't exit. This is not any error except one not causing immediate
      termination of program execution. */
