@@ -8,14 +8,10 @@ README.txt
 bin
 cleanick.bat
 cleanick.sh
-config.log
-config.status
-configure.ac
-configure.sh
+config.ac
+config.sh
 districk.bat
 districk.sh
-djfix.bat
-djfix.sh
 doc
 etc
 ickspec
@@ -39,6 +35,8 @@ chip.spec
 intercal.mm
 
 ./etc:
+ctrlmfix.bat
+ctrlmfix.sh
 intercal.el
 
 ./include:
@@ -164,7 +162,6 @@ feh2.c
 fiddle.c
 fiddle.h
 ick-wrap.c
-ick.bat
 ick.h
 lexer.l
 lose.c

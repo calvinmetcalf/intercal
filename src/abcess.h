@@ -155,7 +155,7 @@ extern int hybridcount;
 extern int oldabstain;
 extern int gonebackto;
 extern int ccfc;
-extern unsigned skipto;
+extern int skipto;
 extern jmp_buf btjb;
 extern jmp_buf cjb;
 

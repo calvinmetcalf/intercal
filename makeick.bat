@@ -9,6 +9,8 @@ rem will be used. My DJGPP distribution seems to require that you
 rem copy DJDIR\bin\m4.exe to the temp subdir of the INTERCAL
 rem distribution or bison won't work; YMMV.
 
+if not exist makeick.bat goto :direrror
+
 copy /y src\*.* temp
 cd temp
 bison -d -oparser.c parser.y
@@ -44,8 +46,8 @@ ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o unravel.o
 ranlib libickmt.a
 ar cr libyuk.a yuk.o
 ranlib libyuk.a
-gcc %CFLAGS% -oickmain.exe parser.o lexer.o perpet.o feh2.o dekludge.o lose.o fiddle.o
-copy /y ickmain.exe ..\bin
+gcc %CFLAGS% -oick.exe parser.o lexer.o perpet.o feh2.o dekludge.o lose.o fiddle.o
+copy /y ick.exe ..\bin
 copy /y *.a ..\lib
 cd ..
 copy /y src\ick-wrap.c lib
@@ -56,11 +58,13 @@ copy /y src\fiddle.h include
 copy /y src\abcess.h include
 copy /y src\lose.h include
 copy /y src\yuk.h include
-copy /y src\ick.bat bin
 echo Compilation complete unless there were errors.
 goto :end
 :error
 echo You need to tell this batch file where the GNU GPL is on your system.
 echo Please edit this batch file and set COPYLOC to a correct location.
 echo (You can point it to the copy of COPYING.txt provided.)
+goto :end
+:direrror
+echo Please run this batch file from its own directory.
 :end

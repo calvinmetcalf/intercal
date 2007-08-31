@@ -55,8 +55,8 @@ ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o unravel.o
 ranlib libickmt.a
 ar cr libyuk.a yuk.o
 ranlib libyuk.a
-gcc ${CFLAGS} -oickmain.exe parser.o lexer.o perpet.o feh2.o dekludge.o lose.o fiddle.o
-cp ickmain.exe ../bin
+gcc ${CFLAGS} -oick.exe parser.o lexer.o perpet.o feh2.o dekludge.o lose.o fiddle.o
+cp ick.exe ../bin
 cp *.a ../lib
 cd ..
 cp src/ick-wrap.c lib
@@ -67,5 +67,4 @@ cp src/fiddle.h include
 cp src/abcess.h include
 cp src/lose.h include
 cp src/yuk.h include
-cp src/ick.bat bin
 echo Compilation complete unless there were errors.

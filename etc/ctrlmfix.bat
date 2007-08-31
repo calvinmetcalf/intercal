@@ -1,8 +1,10 @@
 @echo off
 rem This is a script to remove trailing ^Ms that might otherwise get into files
 rem when running under DJGPP, to prevent the files being unusable on Unix.
+rem Likewise, it adds trailing ^Ms to .bat files so they run under DOS shells.
 
-dtou *.txt
+
+dtou *.*
 dtou etc\intercal.el
 dtou src\*.c
 dtou src\*.h
@@ -15,3 +17,4 @@ dtou pit\tests\*.doc
 dtou pit\tests\*.i
 dtou pit\lib\*.doc
 dtou pit\lib\*.i
+utod *.bat

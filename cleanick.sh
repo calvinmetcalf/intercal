@@ -13,7 +13,7 @@ rm -f temp/*.y
 rm -f temp/*.l
 rm -f temp/*.bat
 rm -f temp/*.sh
-rm -f temp/ickmain.exe
+rm -f temp/*.exe
 rm -f temp/*~
 rm -f src/*~
 rm -f *~

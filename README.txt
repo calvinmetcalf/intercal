@@ -62,16 +62,16 @@ Makefile.in		-- makefile input for the INTERCAL compiler (POSIX)
 makeick.bat		-- script to compile under DJGPP
 districk.bat		-- script to remove files not distributed (DJGPP)
 cleanick.bat		-- script to remove all non-source files (DJGPP)
-djfix.bat               -- script to remove ^Ms that may have got in by mistake
+ctrlmfix.bat            -- script to remove ^Ms that may have got in by mistake
 makeick.sh		--\
 districk.sh		--|the same as above, but in sh format 
-cleanick.sh		--|
-djfix.sh                --/
+cleanick.sh		--|(use .bat under command.com/cmd, and .sh under bash)
+ctrlmfix.sh             --/
 
-configure.sh		-- GNU Autoconf script that generates a makefile
+config.sh		-- GNU Autoconf script that generates a makefile
 			   from Makefile.in
-ickspec.in		-- Input to configure.sh
-configure.ac		-- Source from which configure.sh was generated
+ickspec.in		-- Input to config.sh
+config.ac		-- Source from which config.sh was generated
 install.sh		-- Helper file for 'make install'
 
 bin/*			-- Directory that holds binaries after the build
@@ -135,10 +135,22 @@ There is an INTERCAL Resource Page at http://www.catb.org/intercal
 The latest version of INTERCAL is also kept available at the Retrocomputing
 Museun, http://www.catb.org/retro.
 
+(Note that the above paragraph appears to be out of date. Looking through the
+alt.lang.intercal archives is usually the best way to find out what the latest
+version of C-INTERCAL (and you'll find out how to get its rival too, for that
+matter) is nowadays; they tend to pop up in various unusual places, so giving
+a URL might be misleading. Note also that contact details, and even who to
+contact, often end up out of date; the newsgroup is also a good way to find out
+who to contact.)
+
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal.
 
 			   NOTES ON THE POSIX BUILD
+
+The configure script in this distribution is called 'config.sh', to be kind to
+people trying to build under DOS, and also just because we like being
+different.
 
 At the top of ick.h are two defines that you may need to remove if you are
 using lex instead of flex.
@@ -152,6 +164,11 @@ while others automatically restart after seeing an EOF. (This is the case with
 flex.) If your build fails at link time because yyrestart is not defined,
 comment out the define of USE_YYRESTART.
 
+I have also come across lexes whose default limits for various things aren't
+high enough to handle INTERCAL's various lexing conundrums. In this case, pay
+attention to the error messages they give you, and alter the source file
+src/lexer.l accordingly.
+
 If you are using gcc in an non-ANSI environment, such as SunOS, it is strongly
 recommended that you add "-Wno-unused -Wimplicit" to the gcc command in the
 makefile. If you are in an ANSI environment and are using the current versions
@@ -161,13 +178,20 @@ As the debugger is interactive, it needs to be able to find the GNU GPL.  The
 Makefile attempts to copy the GPL to /dev/null to prove it exists. If this
 fails, you will have to point the Makefile to a copy of the GPL yourself. You
 can always copy the one included with this distribution somewhere safe and use
-that (what the Makefile will try to do by default).
+that (what the Makefile will try to do by default, but I suspect it always
+fails).
+
+If you get an error about 'gettimeofday()', or if you have a more accurate
+timing function available, there's a whole section about profiling in yuk.h
+that you can change to affect the accuracy of the timings. (Option 0 is pure
+ANSI C, which can be used as a fallback to allow the debugging library to
+compile if you have nothing better.)
 
 			   NOTES ON THE DJGPP BUILD
 
 This distribution needs prebuilding; you can use the makeick.bat or makeick.sh
 file provided to compile the program if you can't compile using the usual
-POSIX methods via configure and make. Once the implementation has been built,
+POSIX methods via config.sh and make. Once the implementation has been built,
 you can install it by adding the \bin subdirectory to your PATH environment
 variable (at either end). The temporary output from bison and flex is included
 in the distribution (for those people who don't have bison and flex, makeick
@@ -176,16 +200,28 @@ districk.bat file will remove all generated files that weren't in the
 distribution, and the cleanick.bat file will remove all files that aren't
 needed for a build (including the temporary bison/flex output). Note that
 makeick.bat and makeick.sh produce DJGPP-specific output; and if you're
-running DJGPP under bash under Windows XP, you'll need to either set your
-default command interpreter for batch files to cmd rather than command.com, or
-explicitly invoke the compiler as cmd /c ick rather than just ick.
+running DJGPP under bash under Windows XP, you may need to either set your
+default command interpreter for batch files to cmd rather than command.com (by
+setting your SHELL environment variable, or use some better workaround that I
+don't know about. (command.com seems to have problems with the PATH environment
+variable under Windows XP when running under bash.) Also try to make sure that
+you use the .sh versions of the makeick.* scripts when running under bash or a
+similar ported shell, and the .bat versions when running under a DOS shell.
 
 Some distributions of DJGPP have a bug where they complain that they can't find
-'m4.exe'. You can solve this problem by copying m4.exe into the \temp
-subdirectory before running makeick.bat.
+'m4.exe' (or maybe my PATH is still wrong...). You can solve this problem by
+copying m4.exe into the \temp subdirectory before running makeick.bat.
+
+(P.S. It was my PATH that was wrong. Still, if you made the same mistake as me,
+you may want to try the same fix.)
 
 Some features (for instance, -F) are unavailable at the moment under DJGPP
-(they are documented, but have no effect).
+(they are documented, but have no effect). Note also that the profiler is
+pretty much useless under DOS; this is a problem inherent in DOS, in that it
+doesn't provide timings to any decent resolution (it was worse than 50ms last I
+checked, and the DJGPP documentation agrees with me on this; INTERCAL may be
+traditionally considered to be slow, but it isn't that slow, especially with
+the optimiser enabled).
 
 Note that for copyright reasons, the compilation needs to know a location of
 the GNU GPL on your system. There is one provided as COPYING.txt. You will
@@ -193,6 +229,11 @@ need to edit makeick.sh or makeick.bat to change the location given, if the
 default (/DJGPP/COPYING) is incorrect.
 
 You can get a copy of DJGPP at <http://www.delorie.com/djgpp>.
+
+If you release your own version of C-INTERCAL and have edited it on DJGPP,
+please run etc/ctrlmfix.bat (or sh) from the main installation directory before
+releasing it; this will remove any trailing control-M characters that may have
+got into the files by mistake.
 
 			NOTES ON COMPILING PIC-INTERCAL
 

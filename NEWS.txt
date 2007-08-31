@@ -1,7 +1,39 @@
 			NEW IN THIS RELEASE
 
+  Release 1.26 (by Alex Smith) [a bugfix of 0.26]
+
+1.  Fixed an optimizer bug (thanks to Joris Huizer for pointing it out),
+    relating to active-bits deduction in some expressions involving select.
+
+2.  Fixed a bug in the flow optimizer that caused it to occasionally confuse
+    ABSTAIN with REINSTATE when gerunds were used.
+
+3.  Simplified the compilation of INTERCAL files to .exe under DJGPP, to avoid
+    some temporary files (hopefully solving some problems users may be having
+    with finding which directory the temporary files are in under DJGPP);
+    when under DJGPP a temporary file other than .c or .exe is needed, the
+    compiler now looks for a directory reserved for temporary files to place it
+    in rather than just using the current directory.
+
+4.  The original INTERCAL manual specifies that GIVE UP cannot be REINSTATED
+    or ABSTAINED FROM; this is now implemented, by taking only the original
+    DO/DO NOT status into account when executing a GIVE UP statement.
+
+5.  Dealt with problems with what happens with the 'original' stdin (this
+    information was previously lost, making it hard for the debugger to accept
+    input because it had no obvious place to accept it from), and removed the
+    previous hacky workarounds for this problem (which were my fault).
+
+6.  Made several improvements to the documentation, especially with respect to
+    installing and running under DJGPP.
+
+7.  Modified the version number scheme, so that minor revisions and bugfixes
+    now increment the major version number rather than the minor version number
+    (it was getting a little bored stuck at 0). The next major release will be
+    version 0.27.
+
   Release 0.26 (by Alex Smith)
-  
+
 1.  Fixed a few bugs in the previous release (some bugfixed by Joris Huizer).
 
 2.  Ported to DJGPP. The compiler now works on both POSIX and DJGPP systems.
@@ -64,7 +96,7 @@
     that only one infix operator is allowed for each group, variable, and/or
     mesh).
 
-18. Added ¬ as a synonym for NOT.
+18. Added the not character as a synonym for NOT.
 
 19. Added operand overloading, for onespot and twospot variables. This uses
     the slat operator in almost, but not quite, the same way as

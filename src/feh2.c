@@ -1980,9 +1980,13 @@ void emit(tuple *tn, FILE *fp)
       break;
 
     case GIVE_UP: /* AIS: Edited to allow for yuk */
-      if(yukprofile||yukdebug) fprintf(fp, "\tYUKTERM;\n");
-      if(multithread) fprintf(fp, "\tkillthread();\n");
-      (void) fprintf(fp, "\treturn(0);\n");
+      if(!tn->initabstain) /* AIS: DON'T GIVE UP is a no-op, so ignore it */
+      {
+	(void) fprintf(fp, "\t;};{\n"); /* AIS: can't be abstained from */
+	if(yukprofile||yukdebug) fprintf(fp, "\tYUKTERM;\n");
+	if(multithread) fprintf(fp, "\tkillthread();\n");
+	(void) fprintf(fp, "\treturn(0);\n");
+      }
       break;
 
     case TRY_AGAIN: /* By AIS */

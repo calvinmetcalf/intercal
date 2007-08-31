@@ -64,7 +64,7 @@ int yukcommands = 0; /* these 3 lines because externs must be defined
    unadorned: defining an extern
    extern: defined elsewhere (unless initialised) */
 
-static char buf[20];
+static char buf[21];
 
 static sig_atomic_t singlestep = 1; /* if 0, run until a breakpoint */
 static sig_atomic_t writelines = 1; /* whether to display executed lines onscreen */
@@ -285,7 +285,7 @@ void yukline(int aboff,int emitlineno)
       {
 	printf("yuk007 "); /* this is our prompt, a sort of reverse
 			      INTERCAL version of % */
-	fgets(buf,20,stdin); /* input a command */
+	fgets(buf,20,stdin);
 	if(!strchr(buf,'\n'))
 	{
 	  lose(E810,emitlineno,(char*)NULL);

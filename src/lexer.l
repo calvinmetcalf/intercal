@@ -131,6 +131,10 @@ int getc(FILE *fp)
 
       c_char=0; /* AIS */
       (void)fread(&c_char,1,1,fp);
+      /* AIS: ignore the first \r in a row to deal with DOS newlines. The
+	 second in a row is definitely an error, though, and will be caught
+	 later on. */
+      if(c_char=='\r') (void)fread(&c_char,1,1,fp);
       c = c_char;
       /*if(!c) c=' '; AIS */
       if(feof(fp)) c=EOF;

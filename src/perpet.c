@@ -204,6 +204,14 @@ static void print_usage(char *prog, char *options)
     fprintf(stderr,"\t\teach file produces a separate output program.\n");
 }
 
+/* AIS: Determine whether an environment variable exists (this is used to
+   find a temp directory) */
+int isenv(char* e)
+{
+  char* x=getenv(e);
+  return x&&*x;
+}
+
 /* AIS: This function looks for the skeleton and syslib, searching first the
    path they should be in, then the current directory, then argv[0]'s
    directory (if one was given). This function avoids possible buffer
@@ -328,6 +336,7 @@ int main(int argc, char *argv[])
     FILE	*ifp, *ofp;
     int		maxabstain, /* nextcount, AIS */ bugline;
     bool        needsyslib, firstfile;
+    int         oldstdin; /* AIS: for keeping track of where stdin was */
 
     if (!(includedir = getenv("ICKINCLUDEDIR")))
       includedir = ICKINCLUDEDIR;
@@ -495,6 +504,9 @@ int main(int argc, char *argv[])
     /* now substitute in tokens in the skeleton */
 
     buf[strlen(buf) - 2] = '\0';
+
+    /* AIS: Save the old stdin */
+    oldstdin=dup(0);
 
     for (firstfile = TRUE; optind < argc; optind++, firstfile = FALSE)
     {
@@ -740,10 +752,17 @@ int main(int argc, char *argv[])
 			    if(!pickcompile)
 			    {
 			      if (tp->exechance > 0)
+			      {
 				(void) fprintf(ofp, "0, ");
+				tp->initabstain=0; /* AIS: -f might not be
+						      given, so we can't rely
+						      on dekludge.c doing
+						      this */
+			      }
 			      else {
 				(void) fprintf(ofp, "1, ");
 				tp->exechance = -tp->exechance;
+				tp->initabstain=1; /* AIS: As above */
 				/* AIS: If the line was abstained, we need to
 				   swap ONCEs and AGAINs on it round, to suit
 				   the code degenerator. */
@@ -1252,16 +1271,7 @@ int main(int argc, char *argv[])
 	      /* Note that the output must be deleted for copyright
 		 reasons (so as not to GPL a non-GPL file automatically) */
 	      (void) system(buf2);
-	      (void) freopen("/dev/tty", "r", stdin);
-	      /* stdin has got seriously muddled, what with
-	         it being redirected so much. Let's set it
-	         to the keyboard (the only reasonable place
-	         for input to a debugger anyway). If the user
-	         wants to use the profiler with data from a file,
-	         this won't work, so this code probably needs
-	         changing. But the original value of stdin seems
-	         to have been lost, and we need to redirect from
-	         somewhere. */
+	      dup2(oldstdin,0); /* restore stdin */
 	      (void) system(argv[optind]);
 	      (void) unlink(buf);
 	      (void) unlink(argv[optind]);
@@ -1290,31 +1300,40 @@ int main(int argc, char *argv[])
 		 command-line cap. It creates a temporary file
 		 with the arguments needed to give gcc. */
 	      FILE* rsp;
+	      char* tempfn="ickgcc.rsp"; /*use current dir as temp if needed*/
+	      /* Three tries are used to find a temp directory.
+		 ICKTEMP is the preferred environment variable to check;
+	         if, as expected, this isn't set, try TMPDIR (which DJGPP
+	         sets to its own temp directory, at least when running under
+                 bash), TEMP and TMP (in that order). DJGPP offers /dev/env
+	         as a method of accessing environment variables in filenames.*/
+	      if(isenv("TMP")) tempfn="/dev/env/TMP/ickgcc.rsp";
+	      if(isenv("TEMP")) tempfn="/dev/env/TEMP/ickgcc.rsp";
+	      if(isenv("TMPDIR")) tempfn="/dev/env/TMPDIR/ickgcc.rsp";
+	      if(isenv("ICKTEMP")) tempfn="/dev/env/ICKTEMP/ickgcc.rsp";
 	      rsp=debfopen("ickgcc.rsp","w");
 	      fprintf(rsp,"%s\n",buf2);
 	      fclose(rsp);
+	      system("gcc @ickgcc.rsp");
+	      remove("ickgcc.rsp");
 	      if(yukdebug || yukprofile)
 	      {
-		/* Running the program from the batch file ickyuk.bat will
-		   handle the input redirection and deletion of the files
-		   afterwards. */
-		rsp=debfopen("ickyuk.bat","w");
-		fprintf(rsp,"%s.exe\ndel %s\ndel %s.exe\n",
-			argv[optind],buf,argv[optind]);
-		fclose(rsp);
+		dup2(oldstdin,0); /* restore stdin */
+		sprintf(buf2,"%s.exe",argv[optind]);
+		system(buf2);
+		remove(buf);
+		remove(buf2);
 	      }
 	      else if(!cdebug)
 	      {
-		/* delete from the batch file after compilation */
-		rsp=debfopen("ickyuk.bat","w");
-		fprintf(rsp,"del %s\n",buf);
-		fclose(rsp);
+		remove(buf);
 	      }
 	    }
 #endif	    
 	}
     }
     (void) fclose(ifp);
+    (void) close(oldstdin); /* AIS */
     return 0;
 }
 

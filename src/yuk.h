@@ -30,10 +30,16 @@ extern int yukloop;
    4 to use times() */
 /* Note: On many systems, 0's resolution is too low to produce any output
 	 1 and 2 produce the same output; use 2 if your system can handle
-	 long long because the overflow is dealt with more simply
+	 long long because the overflow is dealt with more simply.
          3 is a system-specific function. If there are more system-specific
          functions around that return more accurate times than the others
-         used here, it would improve the profiler on those systems. */
+         used here, it would improve the profiler on those systems.
+         According to the DJGPP documentation, it's impossible to get times
+         with decent accuracy under DOS. DJGPP implements timer types 0, 1,
+         and 2, so it will 'work' with the default value of 2, but the results
+         you get will be basically meaningless as the base information can't
+         be accurately obtained (the resolution is slightly worse than 50ms, 
+         which is far too slow for profiling). */
 
 #if YPTIMERTYPE == 0
 #define YPTIMERTFORMAT "lu"

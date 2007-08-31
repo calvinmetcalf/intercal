@@ -100,7 +100,7 @@ int abstainmatch(int npconstant, int tptype)
   if(npconstant == ABSTAIN)
     if(tptype == FROM || tptype == MANYFROM || tptype == DISABLE) return 1;
   if(npconstant == REINSTATE)
-    if(tptype == DISABLE) return 1;
+    if(tptype == ENABLE) return 1;
   return 0;
 }
 
@@ -407,6 +407,7 @@ static void checkforintercaloperators(node *np)
 /* By AIS (with a few code fragments copied from elsewhere in this file) */
 static void checknodeactbits(node *np)
 {
+  int temp;
   if (np == (node *)NULL)
     return;
   else if (np->lval != (node *)NULL)
@@ -427,8 +428,12 @@ static void checknodeactbits(node *np)
     break;
 
   case SELECT:
-    np->optdata = np->lval->optdata & np->rval->optdata;
-    np->optdata = iselect(np->optdata, np->optdata);
+    /* The result could be the selected optdata, or have a 1 anywhere to the
+       right of a 1 in the resulting selection if there are 0s in rval where
+       there could have been 1s */
+    np->optdata = iselect(np->lval->optdata, np->rval->optdata);
+    temp=16;
+    while(temp--) np->optdata|=(np->optdata>>1); /* fill in gaps in optdata */
     break;
 
   case AND:
