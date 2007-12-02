@@ -375,4 +375,41 @@ unsigned int rev_whirl32(unsigned int p, unsigned int n)
   return 0;
 }
 
+/* AIS: Some helper functions for the optimizer, only working in base 2 */
+
+unsigned int xselx(unsigned int x)
+{
+  register int r=0;
+  if(Base != 2) lose(E778, lineno, (char*) NULL);
+  while(x) {if(x&1) r=(r<<1)|1; x>>=1;}
+  return r;
+}
+
+unsigned int setbitcount(unsigned int x)
+{
+  register int r=0;
+  while(x) {if(x&1) r++; x>>=1;}
+  return r;
+}
+
+unsigned int smudgeright(unsigned int x)
+{
+  x=x|(x>>1);
+  x=x|(x>>2);
+  x=x|(x>>4);
+  x=x|(x>>8);
+  x=x|(x>>18);
+  return x;
+}
+
+unsigned int smudgeleft(unsigned int x)
+{
+  x=x|(x<<1);
+  x=x|(x<<2);
+  x=x|(x<<4);
+  x=x|(x<<8);
+  x=x|(x<<18);
+  return x;
+}
+
 /* fiddle.c */

@@ -1,7 +1,7 @@
 /*****************************************************************************
 
 NAME
-    ick.y -- grammar for the INTERCAL language
+    parser.y -- grammar for the INTERCAL language
 
 DESCRIPTION 
    This YACC grammar parses the INTERCAL language by designed by Don R. Woods
@@ -28,6 +28,7 @@ LICENSE TERMS
 *****************************************************************************/
 
 %{
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "sizes.h"
@@ -49,6 +50,7 @@ extern int stbeginline;	/* line number of last seen preamble */
 static int thisline;	/* line number of beginning of current statement */
 
 extern int mark112;    /* AIS: Mark the tuple for W112 when it's created. */
+static int lineuid=65537; /* AIS: a line number not used anywhere else */
  
 static tuple *splat(void);
 
@@ -65,7 +67,7 @@ static tuple *splat(void);
       x->u.node = nn; x->u.target = nn2;}
 /* AIS : The macro above was added for ABSTAIN expr FROM. */ 
 #define NEWFANGLED mark112 = 1; /* AIS: Added the mention of mark112 */ \
-      if (traditional) lose(E111,yylineno,(char*)NULL); else
+      if (traditional) lose(E111,iyylineno,(char*)NULL); else
 
 #define DESTACKSE1 sparkearsstack[sparkearslev--/32] >>= 1
 #define DESTACKSPARKEARS DESTACKSE1; DESTACKSE1
@@ -85,11 +87,15 @@ static tuple *splat(void);
  * Don't change this statement token list gratuitously!
  * Some code in feh2.c depends on GETS being the least
  * statement type and on the order of the ones following.
+ * When adding a new statement, also update MAXTYPES in ick.h
+ * and the token list in feh2.c.
  * AIS: Note that although GETS is the lowest statement type (with index 0
  *	in feh2.c), UNKNOWN (i.e. a line that causes error 000) is an even
  *	lower statement type, with index -1. perpet.c uses indexes 1 higher.
- * AIS: Added FROM, MANYFROM, TRY_AGAIN, COMPUCOME, GERUCOME, and
- *	three NEXT FROM cases.
+ * AIS: Added FROM, MANYFROM, TRY_AGAIN, COMPUCOME, GERUCOME, WHILE, and
+ *	three NEXT FROM cases. Also added PREPROC; this is for when the parser
+ *      acts like a preprocessor, translating an INTERCAL statement into a
+ *      sequence of INTERCAL statements with the same net effect.
  * AIS: COME_FROM now merged with the label following it,
  *      to distinguish it from COMPUCOME, in the lexer. This changes
  *      the parser somewhat.
@@ -99,7 +105,8 @@ static tuple *splat(void);
 %token REMEMBER ABSTAIN REINSTATE
 %token DISABLE ENABLE MANYFROM GIVE_UP READ_OUT WRITE_IN /* AIS: */PIN
 %token <numval> COME_FROM NEXTFROMLABEL
-%token NEXTFROMEXPR NEXTFROMGERUND COMPUCOME GERUCOME TRY_AGAIN FROM
+%token NEXTFROMEXPR NEXTFROMGERUND COMPUCOME GERUCOME
+%token PREPROC WHILE TRY_AGAIN FROM
 
 /* AIS: ONCE and AGAIN added, for multithread support; also, NOSPOT added,
    so that I can reserve _ for future use (it's nowhere in the grammar yet) */
@@ -119,9 +126,9 @@ static tuple *splat(void);
  */
 /* AIS: Added new tokens for optimizer output */
 %token SPLATTERED MESH32
-%token C_AND C_OR C_XOR C_NOT C_NNAND C_ISNONZERO C_LSHIFT C_LSHIFT2
-%token C_LSHIFT8 C_LSHIFTIN1 C_RSHIFT C_AND1ADD1 C_2SUBAND1 C_1PLUS C_2MINUS
-%token C_XORGREATER C_RSHIFTBY C_NOTEQUAL C_A
+%token C_AND C_OR C_XOR C_NOT C_LOGICALNOT C_LSHIFTBY  C_RSHIFTBY
+%token C_NOTEQUAL C_A C_PLUS C_MINUS C_TIMES C_DIVIDEBY C_MODULUS
+%token C_GREATER C_LESS C_ISEQUAL C_LOGICALAND C_LOGICALOR
 /* The reverse unary operators have to be in the same order as the forward
    unary operators. */
 %token AND OR XOR FIN WHIRL WHIRL2 WHIRL3 WHIRL4 WHIRL5
@@ -132,7 +139,7 @@ static tuple *splat(void);
 %type <node> subscr byexpr scalar scalar2s array initem outitem sublist
 %type <node> unambig limunambig subscr1 sublist1 oparray osubscr osubscr1
 %type <node> notanlvalue nlunambig lunambig
-%type <tuple> perform mtperform
+%type <tuple> preproc perform mtperform
 %type <numval> please preftype
 
 %nonassoc OPENEARS OPENSPARK CLOSEEARS CLOSESPARK
@@ -168,19 +175,71 @@ command	:    please mtperform
 	|    LABEL please OHOHSEVEN mtperform
 		{checklabel($1); $4->label = $1; $4->exechance = $2 * $3;}
 	|    error
-		{lose(E017, yylineno, (char *)NULL);}
+		{lose(E017, iyylineno, (char *)NULL);}
 	;
 /*
  * AIS: added for the ONCE/AGAIN qualifiers. It copies a pointer to the tuple,
  * so command will set the values in the original tuple via the copy.
  */
 
-mtperform :  perform
+mtperform :  preproc
 		{$1->onceagainflag = onceagain_NORMAL; $$ = $1;}
-	  |  perform ONCE
+	  |  preproc ONCE
 		{NEWFANGLED {$1->onceagainflag = onceagain_ONCE; $$ = $1;}}
-	  |  perform AGAIN
+	  |  preproc AGAIN
 		{NEWFANGLED {$1->onceagainflag = onceagain_AGAIN; $$ = $1;}}
+
+/* AIS: Either we do a simple 'perform', or preprocessing is needed.
+        I wrote all of this. The way the preprocessor works is to add a whole
+        load of new tuples. The tuples are written in the correct order,
+        except for where one of the commands referenced in the preproc is
+        needed; then one command from near the start is written, and swapped
+        into place using tupleswap. ppinit must also be called giving the
+        number of tuples at the end, to sort out each of the tuples. Note
+        that preprocs can't be nested (so no DO a WHILE b WHILE c), and that
+        lineuid can be used to create unreplicable numbers. preproc must also
+        be set by hand on all commands that you want to be immune to ABSTAIN,
+	etc., from outside the preproc, and $$ is set to the command that
+	gets the line number and can be NEXTED to and from. */
+
+preproc : perform {$$ = $1;} /* the simple case */
+        | perform WHILE perform
+{
+  if(!multithread) lose(E405, iyylineno, (char*)NULL);
+  NEWFANGLED{
+  /*    (x)  DO a WHILE b
+    is equivalent to
+    #11 (l0) DO REINSTATE (l3) <weave on>
+    #10 (l1) DO COME FROM (l2) AGAIN
+     #9      DO b
+     #8      DO COME FROM (l0)
+     #7      DO NOTHING
+     #6      DO NOTHING
+     #5 (l2) DO NOTHING
+     #4      DO GIVE UP
+     #3      DO COME FROM (l0)
+     #2 (x)  DO a
+     #1 (l3) DON'T ABSTAIN FROM (l1) AGAIN <weave off> */
+  tuple* temptuple;
+  TARGET(temptuple, COME_FROM, lineuid+2);
+  temptuple->label=lineuid+1; temptuple->preproc=1; /* #10 */
+  TARGET(temptuple, COME_FROM, lineuid+0); temptuple->preproc=1; /* #8 */
+  ACTION(temptuple, PREPROC, 0); temptuple->preproc=1; /* #7 */
+  ACTION(temptuple, PREPROC, 0); temptuple->preproc=1; /* #6 */
+  ACTION(temptuple, PREPROC, 0);
+  temptuple->label=lineuid+2; temptuple->preproc=1; /* #5 */
+  ACTION(temptuple, GIVE_UP, 0); temptuple->preproc=1; /* #4 */
+  TARGET(temptuple, COME_FROM, lineuid+0); temptuple->preproc=1; /* #3 */
+  TARGET(temptuple, REINSTATE, lineuid+3); temptuple->setweave=1;
+  temptuple->label=lineuid+0; temptuple->preproc=1; /* #11 */
+  TARGET(temptuple, ABSTAIN, lineuid+1); temptuple->label=lineuid+3; /* #1 */
+  temptuple->preproc=1; temptuple->setweave=-1; temptuple->exechance=-100; 
+  politesse += 3; /* Keep the politeness checker happy */
+  ppinit(11); tupleswap(10,9); tupleswap(11,2); lineuid+=4; /* #2, #9 */
+  tuples[lineno-10].onceagainflag=onceagain_AGAIN;
+  tuples[lineno-1].onceagainflag=onceagain_AGAIN;
+  $$=&(tuples[lineno-2]);
+}}
 
 /* There are two (AIS: now four) forms of preamble returned by the lexer */
 please	:    DO			{GETLINENO; $$ = 1;}
@@ -231,7 +290,6 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
                                  nextfromsused=1;}
 	|    NEXTFROMEXPR expr	{NEWFANGLED {ACTION($$,NEXTFROMEXPR,$2);
 				 compucomesused=1; nextfromsused=1;}}
-
 	|    BADCHAR		{yyclearin; $$ = splat();}
 	|    error		{yyclearin; $$ = splat();}
 	;
@@ -311,7 +369,7 @@ constant:   MESH NUMBER
 		{
 		    /* enforce the 16-bit constant constraint */
 		    if ((unsigned int)$2 > Max_small)
-			lose(E017, yylineno, (char *)NULL);
+			lose(E017, iyylineno, (char *)NULL);
 		    $$ = newnode();
 		    $$->opcode = MESH;
 		    if(variableconstants) /* AIS */
@@ -429,7 +487,7 @@ lunambig:   constant	{$$ = $1;}
 		    if($1 == MESH) {
 			    /* enforce the 16-bit constant constraint */
 			    if ((unsigned int)$3 > Max_small)
-				lose(E017, yylineno, (char *)NULL);
+				lose(E017, iyylineno, (char *)NULL);
 			    $$->rval->constant = intern(MESH, $3);
 		    }
 		    else {
@@ -502,7 +560,7 @@ static tuple *splat(void)
      * which we can do with a tricky flag on the lexer (re_send_token).
      */
 
-    /*	fprintf(stderr,"attempting to splat at line %d....\n",yylineno); */
+    /*	fprintf(stderr,"attempting to splat at line %d....\n",iyylineno); */
     for(i = 0,re_send_token = FALSE;;i++) {
 	tok = lexer();
 	if (!tok)
@@ -519,7 +577,7 @@ static tuple *splat(void)
     }
     /*
 	fprintf(stderr,"found %d on line %d after %d other tokens.\n",
-		tok,yylineno,i);
+		tok,iyylineno,i);
      */
 
     /* generate a placeholder tuple for the text line */
@@ -528,4 +586,4 @@ static tuple *splat(void)
     return(sp);
 }
 
-/* ick.y ends here */
+/* parser.y ends here */

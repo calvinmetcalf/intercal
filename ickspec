@@ -1,8 +1,8 @@
 Name: intercal
-Version: 1.26
+Version: @PACKAGE_VERSION@
 Release: 1
 URL: http://www.catb.org/~esr/intercal/
-Source: ick-1.26.tgz
+Source: intercal-@PACKAGE_VERSION@.tar.gz
 License: GPL
 Group: Development/Languages
 Summary: the language that kills the weak and drives mad the strong
@@ -34,8 +34,8 @@ mkdir -p "$RPM_BUILD_ROOT"%{_libdir}
 cp libick.a "$RPM_BUILD_ROOT"%{_libdir}
 cp libickmt.a "$RPM_BUILD_ROOT"%{_libdir}
 cp libyuk.a "$RPM_BUILD_ROOT"%{_libdir}
-mkdir -p "$RPM_BUILD_ROOT"%{_includedir}/intercal-1.26
-cp lose.h abcess.h fiddle.h yuk.h "$RPM_BUILD_ROOT"%{_includedir}/intercal-1.26
+mkdir -p "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
+cp lose.h abcess.h fiddle.h yuk.h "$RPM_BUILD_ROOT"%{_includedir}/intercal-@PACKAGE_VERSION@
 
 %files
 %doc README BUGS NEWS
@@ -43,10 +43,10 @@ cp lose.h abcess.h fiddle.h yuk.h "$RPM_BUILD_ROOT"%{_includedir}/intercal-1.26
 %{_libdir}/libick.a
 %{_libdir}/libickmt.a
 %{_libdir}/libyuk.a
-%{_includedir}/intercal-1.26/lose.h
-%{_includedir}/intercal-1.26/abcess.h
-%{_includedir}/intercal-1.26/fiddle.h
-%{_includedir}/intercal-1.26/yuk.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/lose.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/abcess.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/fiddle.h
+%{_includedir}/intercal-@PACKAGE_VERSION@/yuk.h
 
 %changelog
 * Wed Dec 31 2003 Eric S. Raymond <esr@snark.thyrsus.com> 0.24-1

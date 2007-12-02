@@ -27,6 +27,7 @@ LICENSE TERMS
 
 ****************************************************************************/
 /*LINTLIBRARY */
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +45,7 @@ int mark112 = 0; /* AIS: Mark the next generated tuple for W112 */
 
 /* AIS: From perpet.c */
 extern int pickcompile;
+extern int clclex;
 
 /*************************************************************************
  *
@@ -85,14 +87,14 @@ unsigned int intern(int type, unsigned int index)
 
     /* AIS: Allow use of a modifiable constant 0. */
     if ((index < 1 || index > 65535) && type!=MESH)
-	lose(E200, yylineno, (char *)NULL);
+	lose(E200, iyylineno, (char *)NULL);
 
     if (!oblist)
     {
 	/* initialize oblist and obdex */
 	oblist = malloc(ALLOC_CHUNK * sizeof(atom));
 	if (!oblist)
-	    lose(E778, yylineno, (char *)NULL);
+	    lose(E778, iyylineno, (char *)NULL);
 	obdex = oblist;
 	obcount = ALLOC_CHUNK;
     }
@@ -108,7 +110,7 @@ unsigned int intern(int type, unsigned int index)
 	obcount += ALLOC_CHUNK;
 	x = realloc(oblist, obcount * sizeof(atom));
 	if (!x)
-	    lose(E333, yylineno, (char *)NULL);
+	    lose(E333, iyylineno, (char *)NULL);
 	obdex = x + (obdex - oblist);
 	oblist = x;
     }
@@ -136,10 +138,14 @@ unsigned int intern(int type, unsigned int index)
  *
  **************************************************************************/
 
+/* AIS: I haven't modified this function, but I have repurposed it without
+   changing the code; this function must not now have side effects (apart from
+   an error exit), because some labels are initialised in the preprocessor
+   without causing this. */
 void checklabel(int label)
 {
     if (label < 1 || label > 65535)
-	lose(E197, yylineno, (char *)NULL);
+	lose(E197, iyylineno, (char *)NULL);
 }
 
 /*************************************************************************
@@ -185,22 +191,43 @@ void treset(void)
 tuple *newtuple(void)
 /* allocate and zero out a new expression tuple */
 {
-    if (lineno >= tuplecount)
+  if (lineno >= tuplecount - 1) /* Patch by Joris Huizer: must leave 1 empty */
+  {
+    tuplecount += ALLOC_CHUNK;
+    if (tuples)
+      tuples = realloc(tuples, tuplecount * sizeof(tuple));
+    else
+      tuples = malloc(tuplecount * sizeof(tuple));
+    if (!tuples)
     {
-	tuplecount += ALLOC_CHUNK;
-	if (tuples)
-	    tuples = realloc(tuples, tuplecount * sizeof(tuple));
-	else
-	    tuples = malloc(tuplecount * sizeof(tuple));
-	if (!tuples)
-	{
-	    lose(E666, yylineno, (char *)NULL);
-	    return NULL;
-	}
-	memset(tuples + lineno, 0, (tuplecount - lineno) * sizeof(tuple));
+      lose(E666, iyylineno, (char *)NULL);
+      return NULL;
     }
-    if(mark112) tuples[lineno].warn112 = 1; mark112 = 0; /* AIS */
-    return(tuples + lineno++);
+    memset(tuples + lineno, 0, (tuplecount - lineno) * sizeof(tuple));
+  }
+  if(mark112) tuples[lineno].warn112 = 1; mark112 = 0; /* AIS */
+  return(tuples + lineno++);
+}
+
+void tupleswap(int distback1, int distback2)
+{
+  tuple temp;
+  memcpy(&temp, &tuples[lineno-distback1], sizeof(tuple));
+  memcpy(&tuples[lineno-distback1], &tuples[lineno-distback2], sizeof(tuple));
+  memcpy(&tuples[lineno-distback2], &temp, sizeof(tuple));
+}
+
+void ppinit(int tuplecount)
+{
+  while(tuplecount)
+  {
+    /* 0 is an impossible exechance; make sure it's set for tuple elements. */
+    if(!tuples[lineno-tuplecount].exechance)
+      tuples[lineno-tuplecount].exechance=100;
+    /* The onceagainflag also needs to be set. */
+    tuples[lineno-tuplecount].onceagainflag=onceagain_NORMAL;
+    tuplecount--;
+  }
 }
 
 /*************************************************************************
@@ -328,7 +355,7 @@ void codecheck(void)
 	    else if (tp->type == COME_FROM || tp->type == NEXTFROMLABEL)
 	    {
 	        if (up->ncomefrom && !multithread) /* AIS: multithread check */
-		    lose(E555, yylineno, (char *)NULL);
+		    lose(E555, iyylineno, (char *)NULL);
 		else
                     up->ncomefrom++; /* AIS: to handle multiple COME FROMs */
 	    }
@@ -403,6 +430,8 @@ char *enablersm1[MAXTYPES+1] =
     "NEXTFROMGERUND", /* AIS */
     "COMPUCOME", /* AIS: Added COMPUCOME */
     "GERUCOME", /* AIS: This is COME FROM gerunds */
+    "PREPROC", /* AIS: Nonexistent statement */
+    "WHILE", /* AIS: statement WHILE statement */
     "TRY_AGAIN", /* AIS: Added TRY AGAIN */
     "FROM", /* AIS: ABSTAIN expr FROM LABEL */
 };
@@ -647,70 +676,6 @@ void explexpr(node* np, FILE* fp)
     (void) fprintf(fp, "a");
     break;
 
-  case C_NNAND:
-    (void) fprintf(fp, "(!!(");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, " & ");
-    explexpr(np->rval, fp);
-    (void) fprintf(fp, "))");
-    break;
-
-  case C_AND1ADD1:
-    (void) fprintf(fp, "((");
-    explexpr(np->rval,fp);
-    (void) fprintf(fp, " & 0x1) + 0x1)");
-    break;
-
-  case C_1PLUS:
-    (void) fprintf(fp, "(");
-    explexpr(np->rval,fp);
-    (void) fprintf(fp, " + 0x1)");
-    break;
-
-  case C_2MINUS:
-    (void) fprintf(fp, "(0x2 - ");
-    explexpr(np->rval,fp);
-    (void) fprintf(fp, ")");
-    break;
-
-  case C_2SUBAND1:
-    (void) fprintf(fp, "(0x2 - (");
-    explexpr(np->rval,fp);
-    (void) fprintf(fp, " & 0x1))");
-    break;
-
-  case C_LSHIFT:
-    (void) fprintf(fp, "((");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, " & ");
-    explexpr(np->rval, fp);
-    (void) fprintf(fp, ") << 0x1)");
-    break;
-
-  case C_LSHIFTIN1:
-    (void) fprintf(fp, "(((");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, " & ");
-    explexpr(np->rval, fp);
-    (void) fprintf(fp, ") << 0x1) | 0x1)");
-    break;
-
-  case C_LSHIFT2:
-    (void) fprintf(fp, "((");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, " & ");
-    explexpr(np->rval, fp);
-    (void) fprintf(fp, ") << 0x2)");
-    break;
-
-  case C_LSHIFT8:
-    (void) fprintf(fp, "((");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, " & ");
-    explexpr(np->rval, fp);
-    (void) fprintf(fp, ") << 0x8)");
-    break;
-
   case C_RSHIFTBY:
     (void) fprintf(fp, "(");
     explexpr(np->lval, fp);
@@ -719,26 +684,96 @@ void explexpr(node* np, FILE* fp)
     (void) fprintf(fp, ")");
     break;
 
-  case C_RSHIFT:
-    (void) fprintf(fp, "((");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, " & ");
+  case C_LOGICALNOT:
+    (void) fprintf(fp, "(! ");
     explexpr(np->rval, fp);
-    (void) fprintf(fp, ") >> 0x1)");
+    (void) fprintf(fp, ")");
     break;
 
-  case C_XORGREATER:
+  case C_LSHIFTBY:
     (void) fprintf(fp, "(");
     explexpr(np->lval, fp);
-    (void) fprintf(fp, " > (");
+    (void) fprintf(fp, " << ");
     explexpr(np->rval, fp);
-    (void) fprintf(fp, " ^ ");
-    explexpr(np->lval, fp);
-    (void) fprintf(fp, "))");
+    (void) fprintf(fp, ")");
     break;
-      
-  case C_ISNONZERO:
-    (void) fprintf(fp, "(!!");
+
+  case C_PLUS:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " + ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_MINUS:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " - ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_TIMES:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " * ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_DIVIDEBY:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " / ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_MODULUS:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " %% ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_GREATER:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " > ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_LESS:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " < ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_ISEQUAL:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " == ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_LOGICALAND:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " && ");
+    explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case C_LOGICALOR:
+    (void) fprintf(fp, "(");
+    explexpr(np->lval, fp);
+    (void) fprintf(fp, " || ");
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
@@ -1017,7 +1052,7 @@ void revprexpr(node *np, FILE *fp, node *target)
       ooprvar(np, fp, 0);
       (void) fprintf(fp,".set(");
       prexpr(target, fp, 0);
-      (void) fprintf(fp,",(void(*)())os%dspot%lu);\n",
+      (void) fprintf(fp,",os%dspot%lu);\n",
 		     (np->opcode==TWOSPOT)+1, np->constant);
     }
     else if(!pickcompile)
@@ -1062,19 +1097,19 @@ void revprexpr(node *np, FILE *fp, node *target)
   case C_NOT:
   case C_NOTEQUAL:
   case C_A:
-  case C_NNAND:
-  case C_AND1ADD1:
-  case C_1PLUS:
-  case C_2MINUS:
-  case C_2SUBAND1:
-  case C_LSHIFT:
-  case C_LSHIFTIN1:
-  case C_LSHIFT2:
-  case C_LSHIFT8:
   case C_RSHIFTBY:
-  case C_RSHIFT:
-  case C_XORGREATER:
-  case C_ISNONZERO:
+  case C_LOGICALNOT:
+  case C_LSHIFTBY:
+  case C_PLUS:
+  case C_MINUS:
+  case C_TIMES:
+  case C_DIVIDEBY:
+  case C_MODULUS:
+  case C_GREATER:
+  case C_LESS:
+  case C_ISEQUAL:
+  case C_LOGICALAND:
+  case C_LOGICALOR:
   case GETS: /* should never come up */
   default:
     lose(E778, emitlineno, (char*) NULL);
@@ -1284,103 +1319,109 @@ void prexpr(node *np, FILE *fp, int freenode)
     case C_A:
       (void) fprintf(fp, "a");
       break;
-	
-    case C_NNAND:
-	(void) fprintf(fp, "(!!(");
-	prexpr(np->lval, fp, freenode);
-	(void) fprintf(fp, " & ");
-	prexpr(np->rval, fp, freenode);
-	(void) fprintf(fp, "))");
-	break;
-
-    case C_AND1ADD1:
-      (void) fprintf(fp, "((");
-      prexpr(np->rval,fp, freenode);
-      (void) fprintf(fp, " & 0x1) + 0x1)");
-      break;
-
-    case C_1PLUS:
-      (void) fprintf(fp, "(");
-      prexpr(np->rval,fp, freenode);
-      (void) fprintf(fp, " + 0x1)");
-      break;
-
-    case C_2MINUS:
-      (void) fprintf(fp, "(0x2 - ");
-      prexpr(np->rval,fp, freenode);
-      (void) fprintf(fp, ")");
-      break;
-
-    case C_2SUBAND1:
-      (void) fprintf(fp, "(0x2 - (");
-      prexpr(np->rval,fp, freenode);
-      (void) fprintf(fp, " & 0x1))");
-      break;
-
-    case C_LSHIFT:
-      (void) fprintf(fp, "((");
-      prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, " & ");
-      prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, ") << 0x1)");
-      break;
-
-    case C_LSHIFTIN1:
-      (void) fprintf(fp, "(((");
-      prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, " & ");
-      prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, ") << 0x1) | 0x1)");
-      break;
-
-    case C_LSHIFT2:
-      (void) fprintf(fp, "((");
-      prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, " & ");
-      prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, ") << 0x2)");
-      break;
-
-    case C_LSHIFT8:
-      (void) fprintf(fp, "((");
-      prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, " & ");
-      prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, ") << 0x8)");
-      break;
 
     case C_RSHIFTBY:
-      (void) fprintf(fp, "((");
+      (void) fprintf(fp, "(");
       prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, ") >> ");
+      (void) fprintf(fp, " >> ");
       prexpr(np->rval, fp, freenode);
       (void) fprintf(fp, ")");
       break;
 
-    case C_RSHIFT:
-      (void) fprintf(fp, "((");
-      prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, " & ");
+    case C_LOGICALNOT:
+      (void) fprintf(fp, "(!");
       prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, ") >> 0x1)");
+      (void) fprintf(fp, ")");
       break;
       
-    case C_XORGREATER:
+    case C_LSHIFTBY:
       (void) fprintf(fp, "(");
-      prexpr(np->lval, fp, 0); /* Patched by Joris Huizer */
-      (void) fprintf(fp, " > (");
-      prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, " ^ ");
       prexpr(np->lval, fp, freenode);
-      (void) fprintf(fp, "))");
+      (void) fprintf(fp, " << ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
       break;
 
-    case C_ISNONZERO:
-      (void) fprintf(fp, "(!!(");
+    case C_PLUS:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " + ");
       prexpr(np->rval, fp, freenode);
-      (void) fprintf(fp, "))");
+      (void) fprintf(fp, ")");
       break;
-      
+
+    case C_MINUS:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " - ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_TIMES:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " * ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_DIVIDEBY:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " / ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_MODULUS:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " %% ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_GREATER:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " > ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_LESS:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " < ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_ISEQUAL:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " == ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_LOGICALAND:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " && ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
+    case C_LOGICALOR:
+      (void) fprintf(fp, "(");
+      prexpr(np->lval, fp, freenode);
+      (void) fprintf(fp, " || ");
+      prexpr(np->rval, fp, freenode);
+      (void) fprintf(fp, ")");
+      break;
+
     case GETS: /* AIS: this is used only if freenode == 0 */
       if(freenode) lose(E778, emitlineno, (char*) NULL);
       prexpr(np->lval, fp, freenode);
@@ -1481,7 +1522,7 @@ void emittextlines(FILE *fp)
 {
   int i=0; /* The first textline is line 1 */
   (void) fprintf(fp, "\"\",\n");
-  while(++i<yylineno)
+  while(++i<iyylineno)
   {
     (void) fprintf(fp, "\"%s\",\n",nice_text(textlines + i, 0));
   }
@@ -1531,11 +1572,15 @@ void emit(tuple *tn, FILE *fp)
     else if (tn < tuples + lineno - 1)
 	emitlineno = tn[1].lineno;
     else
-	emitlineno = yylineno;
+	emitlineno = iyylineno;
     if(!pickcompile) /* AIS: PICs can't report errors, so don't bother with lineno */
       (void) fprintf(fp, "    lineno = %d;\n", emitlineno);
 
-    /* print warnings on -l */
+    /* AIS: set weaving status if necessary */
+    if(tn->setweave)
+      (void) fprintf(fp, "    weaving = %d;\n", tn->setweave>0);
+
+    /* AIS: print warnings on -l */
     if(checkforbugs)
     {
       if(tn->warn112) lwarn(W112, emitlineno, (char*) NULL);
@@ -1548,7 +1593,7 @@ void emit(tuple *tn, FILE *fp)
       if(tn->warn622) lwarn(W622, emitlineno, (char*) NULL);
     }
     
-    /* emit debugging information */
+    /* AIS: emit debugging information */
     if (yukdebug||yukprofile)
     {
 	(void) fprintf(fp, "    YUK(%d,%d);\n",
@@ -1618,6 +1663,11 @@ void emit(tuple *tn, FILE *fp)
 "linetype[truelineno] == %s || linetype[truelineno] == %s || ",
 			   enablers[np->constant-GETS],
 			   enablers[np->constant-GETS+2]);
+	  } else if (np->constant == GETS) {
+	    (void) fprintf(fp,
+"linetype[truelineno] == %s || linetype[truelineno] == %s || ",
+			   enablers[GETS-GETS],
+			   enablers[RESIZE-GETS]);
 	  } else if (np->constant == COME_FROM) {
 	    (void) fprintf(fp,
 "linetype[truelineno] == %s || linetype[truelineno] == %s || "
@@ -1715,9 +1765,9 @@ void emit(tuple *tn, FILE *fp)
 	  ooprvar(tn->u.node->lval, fp, 1);
 	  (void) fprintf(fp,".set(");
 	  prexpr(tn->u.node->rval, fp, 1);
-	  (void) fprintf(fp,",(void(*)())os%dspot%lu);\n",
-			 (tn->u.node->rval->opcode==TWOSPOT)+1,
-			 tn->u.node->rval->constant);
+	  (void) fprintf(fp,",os%dspot%lu);\n",
+			 (tn->u.node->lval->opcode==TWOSPOT)+1,
+			 tn->u.node->lval->constant);
 	}
 	else if(!pickcompile)
 	{
@@ -1863,11 +1913,18 @@ void emit(tuple *tn, FILE *fp)
 	/* All abstention code has been edited by AIS to allow for the new
 	   abstention rules */
     case ABSTAIN:
-      if(!pickcompile)
-	(void) fprintf(fp, "\tif(!ICKABSTAINED(%d)) ICKABSTAINED(%d) = 1;\n", tn->u.target - 1, tn->u.target-1);
+      /* AIS: In CLC-INTERCAL, you can't abstain a GIVE UP line, so I copied
+         a modified version of Joris's REINSTATE patch here as well */
+      if (!clclex || (tuples + tn->u.target - 1)->type != GIVE_UP)
+      {
+	if(!pickcompile)
+	  (void) fprintf(fp, "\tif(!ICKABSTAINED(%d)) ICKABSTAINED(%d) = 1;\n", tn->u.target - 1, tn->u.target-1);
+	else
+	  (void) fprintf(fp, "ICKABSTAINED(%d) = 1;\n", tn->u.target-1);
+      }
       else
-	(void) fprintf(fp, "ICKABSTAINED(%d) = 1;\n", tn->u.target-1);
-	break;
+	(void) fprintf(fp, "\t/* not abstaining from a GIVE UP line */\n");;
+      break;
 
     case FROM:
       if(pickcompile) lose(E256, emitlineno, (char*) NULL);
@@ -1878,11 +1935,17 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case REINSTATE:
-      if(!pickcompile)
-	(void) fprintf(fp, "\tif(ICKABSTAINED(%d)) ICKABSTAINED(%d)--;\n", tn->u.target - 1, tn->u.target-1);
-      else
-	(void) fprintf(fp, "\tICKABSTAINED(%d)=0;\n", tn->u.target - 1);
-	break;
+        /* (Joris Huizer) ensure it is not an GIVE UP statement */
+        if ((tuples + tn->u.target - 1)->type != GIVE_UP)
+        {
+          if(!pickcompile)
+            (void) fprintf(fp, "\tif(ICKABSTAINED(%d)) ICKABSTAINED(%d)--;\n", tn->u.target - 1, tn->u.target-1);
+          else
+            (void) fprintf(fp, "\tICKABSTAINED(%d)=0;\n", tn->u.target - 1);
+        }
+        else
+          (void) fprintf(fp, "\t/* not reinstating a GIVE UP line */\n");
+        break;
 
     case ENABLE:
       if(pickcompile) lose(E256, emitlineno, (char*) NULL); /* AIS */
@@ -1898,6 +1961,9 @@ void emit(tuple *tn, FILE *fp)
 	    } else if (np->constant == REINSTATE) {
 	      (void) fprintf(fp,
 			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
+	    } else if (np->constant == GETS) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[GETS-GETS], enablers[RESIZE-GETS]);
 	    } else if (np->constant == COME_FROM) {
 	      (void) fprintf(fp,
 			     "\t    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[COME_FROM-GETS], enablers[COMPUCOME-GETS], enablers[GERUCOME-GETS]);
@@ -1927,6 +1993,9 @@ void emit(tuple *tn, FILE *fp)
 	    } else if (np->constant == REINSTATE) {
 	      (void) fprintf(fp,
 			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
+	    } else if (np->constant == GETS) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[GETS-GETS], enablers[RESIZE-GETS]);
 	    } else if (np->constant == COME_FROM) {
 	      (void) fprintf(fp,
 			     "\t    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[COME_FROM-GETS], enablers[COMPUCOME-GETS], enablers[GERUCOME-GETS]);
@@ -1960,6 +2029,15 @@ void emit(tuple *tn, FILE *fp)
 	    } else if (np->constant == REINSTATE) {
 	      (void) fprintf(fp,
 			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
+	    } else if (np->constant == GETS) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[GETS-GETS], enablers[RESIZE-GETS]);
+	    } else if (np->constant == COME_FROM) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[COME_FROM-GETS], enablers[COMPUCOME-GETS], enablers[GERUCOME-GETS]);
+	    } else if (np->constant == NEXTFROMLABEL) {
+	      (void) fprintf(fp,
+			     "\t    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[NEXTFROMLABEL-GETS], enablers[NEXTFROMGERUND-GETS], enablers[NEXTFROMEXPR-GETS]);
 	    } else {
 	      (void) fprintf(fp,
 			     "\t    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
@@ -1976,17 +2054,34 @@ void emit(tuple *tn, FILE *fp)
 		       braces; it's designed to work with COMPUCOME's
 		       crazy guarding arrangements */
       if(pickcompile) lose(E256, emitlineno, (char*) NULL); /* AIS */
-      fprintf(fp,"\t;} else goto CCF%d;\n",compucomecount);
+      fprintf(fp,"\t%s;} else goto CCF%d;\n",multithread?"NEXTTHREAD":"",
+	      compucomecount);
       break;
 
     case GIVE_UP: /* AIS: Edited to allow for yuk */
-      if(!tn->initabstain) /* AIS: DON'T GIVE UP is a no-op, so ignore it */
+      if(yukprofile||yukdebug) fprintf(fp, "\tYUKTERM;\n");
+      if(multithread) fprintf(fp, "\tkillthread();\n");
+      else
       {
-	(void) fprintf(fp, "\t;};{\n"); /* AIS: can't be abstained from */
-	if(yukprofile||yukdebug) fprintf(fp, "\tYUKTERM;\n");
-	if(multithread) fprintf(fp, "\tkillthread();\n");
-	(void) fprintf(fp, "\treturn(0);\n");
+	if(nonespots||opoverused)
+	  fprintf(fp,"\tif(onespots) free(onespots);\n");
+	if(ntwospots||opoverused)
+	  fprintf(fp,"\tif(twospots) free(twospots);\n");
+	if(ntails) fprintf(fp,"\tif(tails) free(tails);\n");
+	if(nhybrids) fprintf(fp,"\tif(hybrids) free(hybrids);\n");
+	if(nonespots||opoverused)
+	  fprintf(fp,"\tif(oneforget) free(oneforget);\n");
+	if(ntwospots||opoverused)
+	  fprintf(fp,"\tif(twoforget) free(twoforget);\n");
+	if(ntails) fprintf(fp,"\tif(tailforget) free(tailforget);\n");
+	if(nhybrids) fprintf(fp,"\tif(hyforget) free(hyforget);\n");
+	if(opoverused)
+	{
+	  fprintf(fp,"\tif(oo_onespots) free(oo_onespots);\n");
+	  fprintf(fp,"\tif(oo_twospots) free(oo_twospots);\n");
+	}
       }
+      (void) fprintf(fp, "\treturn(0);\n");
       break;
 
     case TRY_AGAIN: /* By AIS */
@@ -1994,6 +2089,26 @@ void emit(tuple *tn, FILE *fp)
       if(yukprofile||yukdebug) fprintf(fp, "    if(yukloop) goto ick_restart;\n");
       if(yukprofile||yukdebug) fprintf(fp, "    YUKTERM;\n");
       if(multithread) fprintf(fp, "\tkillthread();\n");
+      else
+      {
+	if(nonespots||opoverused)
+	  fprintf(fp,"\tif(onespots) free(onespots);\n");
+	if(ntwospots||opoverused)
+	  fprintf(fp,"\tif(twospots) free(twospots);\n");
+	if(ntails) fprintf(fp,"\tif(tails) free(tails);\n");
+	if(nhybrids) fprintf(fp,"\tif(hybrids) free(hybrids);\n");
+	if(nonespots||opoverused)
+	  fprintf(fp,"\tif(oneforget) free(oneforget);\n");
+	if(ntwospots||opoverused)
+	  fprintf(fp,"\tif(twoforget) free(twoforget);\n");
+	if(ntails) fprintf(fp,"\tif(tailforget) free(tailforget);\n");
+	if(nhybrids) fprintf(fp,"\tif(hyforget) free(hyforget);\n");
+	if(opoverused)
+	{
+	  fprintf(fp,"\tif(oo_onespots) free(oo_onespots);\n");
+	  fprintf(fp,"\tif(oo_twospots) free(oo_twospots);\n");
+	}
+      }
       (void) fprintf(fp, "    {\n\treturn(0);\n");
       /* because if TRY AGAIN is the last line, falling off the end isn't an error */
       pasttryagain=1; /* flag an error if we try any more commands */
@@ -2090,22 +2205,38 @@ void emit(tuple *tn, FILE *fp)
       break;
 	
     case SPLATTERED:
-	dim = emitlineno - tn->lineno;
-	if (tn->sharedline)
-	    ++dim;
-	(void) fprintf(fp, "\tlose(E000, %d, \"%s\");\n",
-		       emitlineno, nice_text(textlines + tn->lineno, dim));
-	break;
+      /* AIS: The code previously here could access unallocated memory due to
+	 a bug if the comment was a COME FROM target. The problem is that
+	 emitlineno (the line to show an error on) is usually the line after
+	 this one, but not always, and in this case the line after this one is
+	 always what we want, so I copied the relevant part of the emitlineno
+	 logic here to fix the bug. */
+      if (tn < tuples + lineno - 1)
+	dim = tn[1].lineno - tn->lineno;
+      else
+	dim = iyylineno - tn->lineno;
+      if (tn->sharedline)
+	++dim;
+      (void) fprintf(fp, "\tlose(E000, %d, \"%s\");\n",
+		     emitlineno, nice_text(textlines + tn->lineno, dim));
+      break;
+
+    case PREPROC: /* AIS: 'DO NOTHING', but not enterable into a program. This
+		     is generated by the preprocessor. */
+      fprintf(fp,"\t; /* do nothing */\n");
 
     case COME_FROM:
     case NEXTFROMLABEL: /* AIS */
-	(void) fprintf(fp, "if(0) {C%ld: %s;}\n", (long)(tn-tuples+1),
-		       tn->type==NEXTFROMLABEL ? "pushnext(truelineno+1)":"");
+	(void) fprintf(fp, "if(0) {C%ld: %s;%s}\n", (long)(tn-tuples+1),
+		       tn->type==NEXTFROMLABEL ? "pushnext(truelineno+1)":"",
+		       multithread?" NEXTTHREAD;":"");
 	/* AIS: Changed so all COME_FROMs have unique labels even if two
 	   of them aim at the same line, and added the NEXT FROM case (which
-	   invloves hiding COME FROM labels in an unreachable if()). */
+	   involves hiding COME FROM labels in an unreachable if()). */
 	break;
 
+    case WHILE: /* AIS: fall through to the error, because this shouldn't
+		   come up yet. */
     default:
 	lose(E778, emitlineno, (char *)NULL);
 	break;
@@ -2209,8 +2340,12 @@ void emit(tuple *tn, FILE *fp)
        If (at runtime) ccfc is nonzero, we know cjb has already been set;
        otherwise, set it now. In the case of a multithread non-COMPUCOME
        program, the goto will just jump to a longjmp, switching to the
-       one and only one COME FROM that hasn't been given its own thread. */
-    if ((tn->label && compucomesused) || generatecfjump || gerucomesused)
+       one and only one COME FROM that hasn't been given its own thread.
+       However, skip all the compucomes and gerucomes if preproc is set,
+       because COMING FROM a preproc
+       should only ever be done by label. */
+    if (((tn->label && compucomesused) || generatecfjump || gerucomesused) &&
+        (!tn->preproc || generatecfjump))
     {
       if(compucomesused)
       {
@@ -2220,8 +2355,9 @@ void emit(tuple *tn, FILE *fp)
       {
 	(void) fprintf(fp, "    truelineno = %d;\n", (int)(tn-tuples));
       }
-      if(generatecfjump) (void) fprintf(fp, "    if(ccfc) goto CCF0;\n");
-      if(compucomesused || gerucomesused)
+      if(generatecfjump) (void) fprintf(fp, "    if(ccfc) goto CCF%s;\n",
+					tn->preproc?"L":"0");
+      if((compucomesused || gerucomesused) && !tn->preproc)
       { /* check all the COMPUCOMES */
 	(void) fprintf(fp, "    %sif(setjmp(cjb) == 0) goto CCF0;\n",
 		       generatecfjump?"else ":"");
@@ -2263,9 +2399,9 @@ void emitslat(FILE* fp)
   {
     fprintf(fp,
 	    "void os%lx(%s a, void(*f)())\n{\n  static int l=0;\n"
-	    "  if(l)\n  {\n    if(!f)lose(E778, lineno, (char *)NULL);\n"
-	    "    ((void(*)(%s,void(*)()))f)(a,0);\n    return;\n  }\n  l=1;\n",
-	    (unsigned long)np,t,t);
+	    "  if(l)\n  {\n    if(!f) lose(E778, lineno, (char *)NULL);\n"
+	    "    f(a,0);\n    return;\n  }\n  l=1;\n",
+	    (unsigned long)np,t);
     temp=cons(C_A, 0, 0);
     revprexpr(np->rval, fp, temp); /* revprexpr can't free */
     fprintf(fp,"  l=0;\n}\n");

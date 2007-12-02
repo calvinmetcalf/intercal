@@ -1,6 +1,6 @@
-			 Release Notes for C-INTERCAL
+                         Release Notes for C-INTERCAL
 
-				  DISCREDITS
+                                  DISCREDITS
 
 This package is an implementation of the language INTERCAL designed by Don
 Woods and James Lyon, who have since spent more than twenty years trying to
@@ -9,9 +9,9 @@ live it down.
 This implementation was created by Eric S. Raymond <esr@snark.thyrsus.com>
 during a fit of lunacy from which he has since mostly recovered.  It has been
 considerably hacked upon and improved by Steve Swales, Michael Ernst, Louis
-Howell, Brian Raiter, and others.  For detailed credits see NEWS.
+Howell, Brian Raiter, Alex Smith, and others.  For detailed credits see NEWS.
 
-				     FILES
+                                     FILES
 
 The compiler itself is in the src directory.  Setting a symbol in the makefile
 will allow you to install it and its libraries and support files in a directory
@@ -20,72 +20,93 @@ contains various examples of INTERCAL source code, writhing in agony.
 
 The files included are:
 
-README.txt		-- this file
-BUGS.txt		-- current bug and to-do list
-NEWS.txt		-- info on features and fixes new in this release
-COPYING.txt		-- copyright and licence information
-MANIFEST.txt		-- a list of all files in the distribution
+README.txt              -- this file
+BUGS.txt                -- current bug and to-do list
+NEWS.txt                -- info on features and fixes new in this release
+COPYING.txt             -- copyright and licence information
+MANIFEST.txt            -- a list of all files in the distribution
 
-etc/intercal.el		-- elisp for editing INTERCAL code under GNU Emacs
+etc/intercal.el         -- elisp for editing INTERCAL code under GNU Emacs
 
-doc/READ.ME		-- historical notes on the docs
-doc/intercal.mm		-- the manual in groffable form
-doc/THEORY		-- some notes on the internals of the INTERCAL compiler
+doc/READ.ME             -- historical notes on the docs
+doc/ick.txi             -- the Revamped Manual sources, a newer manual
+doc/gpl-2-0.txi         -- the GNU GPL version 2.0 in Texinfo form
+doc/fdl-1-2.txi         -- the GNU FDL version 1.2 in Texinfo form
+doc/html/*.htm          -- the Revamped Manual as an HTML website
+doc/ick.htm             -- the Revamped Manual as one HTML file
+doc/ick.txt             -- the Revamped Manual in plain text form
+doc/ick.inf             -- the Revamped Manual in Info
+doc/fix83.pl            -- script to fixup the HTML output for 8.3 systems
+doc/intercal.mm         -- the old manual in groffable form
+doc/Makefile            -- makefile to build old and new manuals
+doc/THEORY.txt          -- some notes on the internals of the INTERCAL compiler
+doc/chipspec.txt        -- plans for an INTERCAL-based microprocessor
 
-src/lexer.l		-- the lexical analyzer specification (in LEX)
-src/parser.y		-- the grammar specification (in YACC)
-src/ick.h		-- compilation types and defines
-src/perpet.c		-- main routine for compiler
-src/feh2.c		-- INTERCAL-to-C code generator
-src/feh2.h		-- interface to INTERCAL-to-C code generator
-src/dekludge.c		-- INTERCAL parse tree optimizer
-src/fiddle.c		-- the INTERCAL operators
-src/lose.[ch]		-- INTERCAL compile- and run-time error handling
-src/ick-wrap.c		-- the driver for generated C-from-INTERCAL code
-src/pickwrap.c		-- the driver for generated PIC C-from-INTERCAL code
-src/arrgghh.c		-- option argument parsing for generated programs
-src/abcess.h		-- interface to functions linked with programs
-src/cesspool.c		-- the INTERCAL runtime support code
-src/numerals.c		-- numerals table for INTERCAL input
-src/sizes.h		-- variables defining the numeric base
-src/unravel.c           -- multithreading functions
-src/yuk.[ch]            -- INTERCAL debugger and profiler (POSIX only)
-src/pick1.h		-- template for compiler-dependent PIC C headers
-src/pick2.h		-- runtime support for compiled PIC-INTERCAL
+src/abcess.h            -- interface to functions linked with programs
+src/arrgghh.c           -- option argument parsing for generated programs
+src/cesspool.c          -- the INTERCAL runtime support code
+src/configdj.h          -- config.h substitute for DJGPP without config.sh
 src/coopt.sh            -- script to help out the -F optimizer (POSIX only)
-src/ick.bat		-- wrapper around the compiler (DJGPP only)
+src/dekludge.c          -- INTERCAL optimizer wrapper and utility functions
+src/feh.h               -- interface to INTERCAL-to-C code generator
+src/feh2.c              -- INTERCAL-to-C code generator
+src/fiddle.[ch]         -- the INTERCAL operators
+src/ick-wrap.c          -- the driver for generated C-from-INTERCAL code
+src/ick.h               -- compilation types and defines
+src/idiotism.oil        -- list of INTERCAL idioms to optimize
+src/lexer.l             -- the lexical analyzer specification (in LEX)
+src/lose.[ch]           -- INTERCAL compile- and run-time error handling
+src/numerals.c          -- numerals table for INTERCAL input
+src/oil.y               -- compiler to translate idiotism.oil into C
+src/parser.y            -- the grammar specification (in YACC)
+src/perpet.c            -- main routine for compiler
+src/pick1.h             -- template for compiler-dependent PIC C headers
+src/pick2.h             -- runtime support for compiled PIC-INTERCAL
+src/pickwrap.c          -- the driver for generated PIC C-from-INTERCAL code
+src/sizes.h             -- variables defining the numeric base
+src/uncommon.[ch]       -- code common to the compiler and debugger
+src/unravel.c           -- multithreading functions
+src/yuk.[ch]            -- INTERCAL debugger and profiler
 
-temp/parser.[ch]	-- Prebuilt parser (for DJGPP systems without bison)
-temp/lexer.c		-- Prebuilt lexer (for DJGPP systems without flex)
+temp/parser.[ch]        -- Prebuilt parser (for DJGPP systems without bison)
+temp/lexer.c            -- Prebuilt lexer (for DJGPP systems without flex)
+temp/oil.c              -- Prebuilt OIL compiler (again, for bisonless systems)
 
-Makefile.in		-- makefile input for the INTERCAL compiler (POSIX)
-makeick.bat		-- script to compile under DJGPP
-districk.bat		-- script to remove files not distributed (DJGPP)
-cleanick.bat		-- script to remove all non-source files (DJGPP)
-ctrlmfix.bat            -- script to remove ^Ms that may have got in by mistake
-makeick.sh		--\
-districk.sh		--|the same as above, but in sh format 
-cleanick.sh		--|(use .bat under command.com/cmd, and .sh under bash)
-ctrlmfix.sh             --/
+makeick.bat             -- script to compile under DJGPP
+districk.bat            -- script to remove files not distributed (DJGPP)
+cleanick.bat            -- script to remove all non-source files (DJGPP)
+etc/ctrlmfix.bat        -- script to remove ^Ms that may have got in by mistake
+makeick.sh              --\
+districk.sh             --|the same as above, but in sh format 
+cleanick.sh             --|(use .bat under command.com/cmd, and .sh under bash)
+etc/ctrlmfix.sh         --/
 
-config.sh		-- GNU Autoconf script that generates a makefile
-			   from Makefile.in
-ickspec.in		-- Input to config.sh
-config.ac		-- Source from which config.sh was generated
-install.sh		-- Helper file for 'make install'
+config.sh               -- GNU Autoconf script that generates a makefile
+                           from Makefile.in
+ickspec.in              -- Input to config.sh
+config.in               -- Source from which config.sh was generated
+configh.in              -- Source from which temp/config.h is generated
+Makefile.in             -- makefile input for the INTERCAL compiler
 
-bin/*			-- Directory that holds binaries after the build
-include/*		-- Directory that holds header files after the build
-lib/*			-- Directory that holds library files after the build
+bin/*                   -- Directory that holds binaries after the build
+include/*               -- Directory that holds header files after the build
+lib/*                   -- Directory that holds library files after the build
 
-pit/*			-- sample INTERCAL code; see pit/CATALOG
+pit/*                   -- sample INTERCAL code; see pit/CATALOG
 
-			      HOW TO GET STARTED
+                              HOW TO GET STARTED
+
+First, note that there is a much fuller manual than this README file
+available. For full information about C-INTERCAL, including extensive
+installation and usage instructions, see that one; point a web browser at
+doc/html/index.htm, or run `info -f doc/ick.inf', or failing that read the
+plain text version at doc/ick.txt. After C-INTERCAL is installed, the manual is
+also available with just `info ick'.
 
 You want a man page?  Man pages are for wimps.  To compile an INTERCAL program
 `foo.i' to executable code, just do
 
-	ick foo.i
+        ick foo.i
 
 There's a -c option that leaves the generated `foo.c' in place for inspection
 (suppressing compilation to machine code), a -d option that enables verbose
@@ -104,7 +125,8 @@ will cause it to dump core on E778. Other than that, yer on yer own.
 -t has been mentioned above as a compatibility option; -X is also permitted,
 and causes the program to treat the ambiguous characters ? and @ as having the
 meanings that they have in CLC-INTERCAL rather than their traditional
-C-INTERCAL meanings.
+C-INTERCAL meanings, and also uses the CLC-INTERCAL meaning for some commands
+(such as an ABSTAIN aiming at a GIVE UP command's line label).
 
 Another switch affects C-INTERCAL's runtime behavior.  The `-C' option forces
 output in "clockface" mode, for superstitious users who believe writing "IV"
@@ -128,7 +150,7 @@ extent the INTERCAL philosophy, the fact that a 'unbutcher' command has been
 posted clearly indicates the need for it. Anyway... if you don't like it, don't
 use it... the default is -wimpmode (i.e. NOT wimp mode)."
 
-			      SPREADING THE BLAME
+                              SPREADING THE BLAME
 
 There is an INTERCAL Resource Page at http://www.catb.org/intercal
 
@@ -146,67 +168,70 @@ who to contact.)
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal.
 
-			   NOTES ON THE POSIX BUILD
+                           NOTES ON THE POSIX BUILD
 
 The configure script in this distribution is called 'config.sh', to be kind to
 people trying to build under DOS, and also just because we like being
-different.
+different. (You can build and install C-INTERCAL using the familiar routine of
+config.sh, then make, then make install.)
 
-At the top of ick.h are two defines that you may need to remove if you are
-using lex instead of flex.
-
-Many lexes export a yylineno variable, an undocumented feature that is not in
-flex (by default). If your build fails because of redecleration of yylineno,
-comment out the define of YYLINENO_BY_HAND.
-
-Some lexes also supply a yyrestart function to begin parsing a second file,
-while others automatically restart after seeing an EOF. (This is the case with
-flex.) If your build fails at link time because yyrestart is not defined,
-comment out the define of USE_YYRESTART.
-
-I have also come across lexes whose default limits for various things aren't
-high enough to handle INTERCAL's various lexing conundrums. In this case, pay
+I have come across lexes whose default limits for various things aren't high
+enough to handle INTERCAL's various lexing conundrums. In this case, pay
 attention to the error messages they give you, and alter the source file
-src/lexer.l accordingly.
+src/lexer.l accordingly. (Note that previously you might also have had to
+change some defines at the top of ick.h to allow for features of your version
+of lex; this is no longer required, as one of the defines is now detected by
+config.sh and the source files were refactored to make the other moot.)
 
 If you are using gcc in an non-ANSI environment, such as SunOS, it is strongly
 recommended that you add "-Wno-unused -Wimplicit" to the gcc command in the
 makefile. If you are in an ANSI environment and are using the current versions
-of gcc, flex, and bison, C-INTERCAL should build with no warnings.
-
-As the debugger is interactive, it needs to be able to find the GNU GPL.  The
-Makefile attempts to copy the GPL to /dev/null to prove it exists. If this
-fails, you will have to point the Makefile to a copy of the GPL yourself. You
-can always copy the one included with this distribution somewhere safe and use
-that (what the Makefile will try to do by default, but I suspect it always
-fails).
+of gcc, flex, and bison, C-INTERCAL should build with no warnings (except some
+from rm saying it can't find files, which is not a problem; if installing for
+a second or subsequent time, you may also get a harmless warning from mkdir
+explaining that the directory it's trying to make already exists, and you can
+ignore that too).
 
 If you get an error about 'gettimeofday()', or if you have a more accurate
 timing function available, there's a whole section about profiling in yuk.h
 that you can change to affect the accuracy of the timings. (Option 0 is pure
 ANSI C, which can be used as a fallback to allow the debugging library to
-compile if you have nothing better.)
+compile if you have nothing better.) Note that the configure script now tries
+to detect what timing functions you have available; it's pretty good at
+finding ANSI and POSIX functions, but at the moment I only have one
+nonstandard one there (gethrtime, which was on one proprietary UNIX system I
+tested on); feel free to add code to call other proprietary functions in much
+the same way if they're more accurate than gettimeofday() or POSIX
+alternatives on some system.
 
-			   NOTES ON THE DJGPP BUILD
+                           NOTES ON THE DJGPP BUILD
 
 This distribution needs prebuilding; you can use the makeick.bat or makeick.sh
 file provided to compile the program if you can't compile using the usual
-POSIX methods via config.sh and make. Once the implementation has been built,
-you can install it by adding the \bin subdirectory to your PATH environment
-variable (at either end). The temporary output from bison and flex is included
-in the distribution (for those people who don't have bison and flex, makeick
-will give error messages, but succeed anyway using the prebuilt versions). The
-districk.bat file will remove all generated files that weren't in the
-distribution, and the cleanick.bat file will remove all files that aren't
-needed for a build (including the temporary bison/flex output). Note that
-makeick.bat and makeick.sh produce DJGPP-specific output; and if you're
+POSIX methods via config.sh and make. (Unlike previous releases of C-INTERCAL,
+the configure/make process can work under DJGPP; invoke config.sh as 'sh
+config.sh' (without the sparks), and run make as normal. However, this
+requires that you've installed quite a few utilities in addition to just gcc,
+including at least bash, sed, tr and make, but possibly other things I
+missed.)  Once the implementation has been built, you can install it by adding
+the \bin subdirectory to your PATH environment variable (at either end), or by
+using 'make install' (again without the sparks) if you got config.sh and make
+to work (which will copy the INTERCAL compiler into your main DJGPP
+installation direcrtories). The temporary output from bison and flex is
+included in the distribution (for those people who don't have bison and flex,
+makeick will give error messages, but succeed anyway using the prebuilt
+versions). The districk.bat file will remove all generated files that weren't
+in the distribution, and the cleanick.bat file will remove all files that
+aren't needed for a build (including the temporary bison/flex output). Note
+that makeick.bat and makeick.sh produce DJGPP-specific output; and if you're
 running DJGPP under bash under Windows XP, you may need to either set your
 default command interpreter for batch files to cmd rather than command.com (by
 setting your SHELL environment variable, or use some better workaround that I
-don't know about. (command.com seems to have problems with the PATH environment
-variable under Windows XP when running under bash.) Also try to make sure that
-you use the .sh versions of the makeick.* scripts when running under bash or a
-similar ported shell, and the .bat versions when running under a DOS shell.
+don't know about. (command.com seems to have problems with the PATH
+environment variable under Windows XP when running under bash.) Also try to
+make sure that you use the .sh versions of the makeick.* scripts when running
+under bash or a similar ported shell, and the .bat versions when running under
+a DOS shell.
 
 Some distributions of DJGPP have a bug where they complain that they can't find
 'm4.exe' (or maybe my PATH is still wrong...). You can solve this problem by
@@ -215,18 +240,16 @@ copying m4.exe into the \temp subdirectory before running makeick.bat.
 (P.S. It was my PATH that was wrong. Still, if you made the same mistake as me,
 you may want to try the same fix.)
 
-Some features (for instance, -F) are unavailable at the moment under DJGPP
-(they are documented, but have no effect). Note also that the profiler is
-pretty much useless under DOS; this is a problem inherent in DOS, in that it
-doesn't provide timings to any decent resolution (it was worse than 50ms last I
-checked, and the DJGPP documentation agrees with me on this; INTERCAL may be
-traditionally considered to be slow, but it isn't that slow, especially with
-the optimiser enabled).
-
-Note that for copyright reasons, the compilation needs to know a location of
-the GNU GPL on your system. There is one provided as COPYING.txt. You will
-need to edit makeick.sh or makeick.bat to change the location given, if the
-default (/DJGPP/COPYING) is incorrect.
+Some features (for instance, -F) are sometimes unavailable under DJGPP (they
+are documented, but have no effect); note that if you do compile a program
+under DJGPP using -F, the resulting program may not run if invoked using a
+command interpreter other than bash (because -F sometimes produces a shell
+script with a .exe extension, rather than a DOS-format executable file). Note
+also that the profiler is pretty much useless under DOS; this is a problem
+inherent in DOS, in that it doesn't provide timings to any decent resolution
+(it was worse than 50ms last I checked, and the DJGPP documentation agrees
+with me on this; INTERCAL may be traditionally considered to be slow, but it
+isn't that slow, especially with the optimiser enabled).
 
 You can get a copy of DJGPP at <http://www.delorie.com/djgpp>.
 
@@ -235,7 +258,7 @@ please run etc/ctrlmfix.bat (or sh) from the main installation directory before
 releasing it; this will remove any trailing control-M characters that may have
 got into the files by mistake.
 
-			NOTES ON COMPILING PIC-INTERCAL
+                        NOTES ON COMPILING PIC-INTERCAL
 
 PIC C compilers tend to differ substantially in the way they handle various
 language constructs. As a result, this compiler will only compile to C (not to
@@ -245,14 +268,14 @@ your compiler can find them, and pick1.h will need to be modified to contain
 compiler-specific data (like the names of data types and the syntax for
 specifying the device type, fuses, and various commands).
 
-				   LICENSING
+                                   LICENSING
 
 C-INTERCAL is now distributed under the General Public License, except for the
 C skeleton file which is explicitly *not* GPLed in order to avoid the (possibly
 mythical) "license virus" effect.  See the file COPYING.txt for details on the
 General Public License.
 
-				  APOCALYPSE
+                                  APOCALYPSE
 
 INTERCAL is fully Y2K-compliant.  Indeed, it is Y2K-obsequious, and loves
 nothing better than to be punished by relays of leather-clad and spike-heeled

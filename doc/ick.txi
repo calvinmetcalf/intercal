@@ -1,0 +1,3465 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename ick.info
+@set VERSION 0.27
+@set VERSIONDASH 0-27
+@settitle C-INTERCAL @value{VERSION} Revamped Instruction Manual
+@paragraphindent 0
+@documentlanguage en
+@documentencoding ISO-8859-1
+
+@c Command line option index.
+@defcodeindex op
+@c Error index
+@defindex er
+@c Commands and language features are in the predefined fnindex.
+@c Things generally are in the predefined cpindex.
+
+@c Combining indices.
+@syncodeindex fn cp
+@syncodeindex op cp
+@synindex er cp
+
+@c Adding to the main documentation tree.
+@dircategory INTERCAL compilers
+@direntry
+* C-INTERCAL: (ick).                 The C-INTERCAL language and compiler.
+* ick: (ick) Invoking ick.           Invoking the C-INTERCAL compiler.
+@end direntry
+
+@c Some macros to ease writing and updating. (The VERSION is set above because
+@c it's needed to set the title.)
+@macro cic{}
+@abbr{C-INTERCAL}
+@end macro
+@macro clcic{}
+@abbr{CLC-INTERCAL}
+@end macro
+@macro icst{}
+@abbr{INTERCAL-72}
+@end macro
+@macro ical{}
+@acronym{INTERCAL}
+@end macro
+
+@c Part headings for unsplit output
+@macro partheading{arg}
+@html
+<!--
+@end html
+@unnumbered \arg\
+@html
+--><h1>\arg\</h1>
+@end html
+@c
+@end macro
+
+@c 'Portability' boxes
+@macro portability{st,c,clc}
+@multitable @columnfractions .25 .25 .25
+@headitem @icst{} @tab @cic{} @tab @clcic{}
+@item \st\ @tab \c\ @tab \clc\
+@end multitable
+@c
+@end macro
+
+@c Generating items and anchors together is also helpful.
+@macro ianchor{arg}
+@item \arg\
+@anchor{\arg\}
+@c
+@end macro
+@macro ianchorc{arg}
+@item \arg\
+@anchor{\arg\+}
+@c
+@end macro
+@macro ieanchor{arg}
+@item \arg\
+@anchor{\arg\}
+@erindex \arg\
+@c
+@end macro
+@macro ianchorpm{arg}
+@item +\arg\
+@itemx -\arg\
+@anchor{+\arg\}
+@anchor{-\arg\}
+@c
+@end macro
+
+@c Some fixes for HTML.
+@ifhtml
+@c Examples are styled in CSS; don't do it with hardcoded whitespace!
+@exampleindent 0
+@end ifhtml
+@c %**end of header
+
+@copying
+This manual is for @cic{} version @value{VERSION}.  It does not replace
+the old groff manual, nor is it designed to be read in conjunction with
+it; instead, it serves a different purpose, of providing information
+useful to users of @cic{} (unlike the other manual, it is not derived
+from the original @icst{} manual).
+
+Copyright @copyright{} 2007 Alex Smith.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``GNU General Public License'', with no
+Front-Cover Texts, and with no Back-Cover Texts.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License.''
+
+As a special exception, you may create a Modified Version of this
+document (with the definition of ``Modified Version'' given in the GNU
+Free Documentation License) in which the Invariant Section ``GNU General
+Public License'' has been deleted entirely, as long as all of that
+license is complied with apart from the requirement to preserve that
+Invariant Section.  (This means that that section must be either
+entirely preserved or entirely deleted in any copies or Modified
+Versions of this document.)
+@end quotation
+@end copying
+
+@titlepage
+@ifset notsplit
+@title C-INTERCAL Revamped Instruction Manual
+@subtitle (this version distributed with version @value{VERSION} of C-INTERCAL)
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+@end ifset
+@end titlepage
+
+@ifset notsplit
+@contents
+@end ifset
+
+@ifnottex
+@node Top
+@top C-INTERCAL @value{VERSION}
+
+@insertcopying
+
+@menu
+
+The @cic{} compiler
+* Installation::                    How to install @cic{} @value{VERSION}
+* Invoking ick::                    Options to give to the compiler ick
+* Errors and Warnings::             Error messages, and what to do about them
+* The yuk debugger::                How to use the runtime debugger
+
+Basic @ical{} features
+* Syntax::                          Holding statements together
+* Expressions::                     Operators, operands, and grouping
+* Statements::                      What an @ical{} statement can do
+
+@ical{} dialects and extensions
+* TriINTERCAL::                     @ical{} in non-binary bases
+* Multithreading and Backtracking:: Running @ical{} programs in parallel
+* Operand Overloading::             Where one expression stands for another
+* PIC-INTERCAL::                    @ical{} on embedded systems
+* Differences to Other Compilers::  @cic{} vs. @clcic{}
+
+Appendices and indices
+* Optimizer Idiom Language::        The syntax to specify optimizer idioms
+* Copying::                         License information for the code and manual
+* Main Index::                      An index of all the pages in this manual
+
+@end menu
+@end ifnottex
+@ifset notsplit
+@partheading PART I: THE @cic{} COMPILER
+@end ifset
+@node Installation
+@chapter Installation
+@cindex installation
+@cindex @command{ick}, installing
+
+The @cic{} distribution is distributed in source code form; this means
+that before using it, you first have to compile it.  Don't worry: if you
+have the right software, it's not at all difficult.  Most Linux-based
+and UNIX-based computers are likely to have the software needed already;
+the software needed to compile source-distributed packages is also
+readily available for free for other operating systems.  The following
+instructions will help you install the distribution in a method
+appropriate for your system.
+
+@menu
+* Obtaining::            How to get a @cic{} distribution to install
+* Unpacking::            What to do with the distribution file
+* Simple Installation::  Normally you can just do things the easy way
+* DOS/Windows Install::  For users of DOS or of Microsoft Windows
+* Not Installing::       You can use the software without installing it
+* Uninstalling::         If you don't want to use the software
+* Reporting Bugs::       If it doesn't work or you know how to fix it
+* Distributing::         How to make your own @cic{} distribution
+@end menu
+
+@node Obtaining
+@section Obtaining
+@cindex obtaining C-INTERCAL
+@cindex C-INTERCAL, obtaining a copy
+
+@cic{} distributions have been stored in many different places over
+time; it can sometimes be hard to make sure that you are finding the
+most recent version.  In order to make sure that you have the most
+recent version, the easiest way is to look at the
+@uref{news:alt.lang.intercal,,alt.lang.intercal newsgroup}; all releases
+of the @cic{} compiler ought to be announced there.  (If you are
+interested in what other @ical{} compilers are available, it may also be
+worth looking there.)  If you don't have access to a newsreader, your
+newsreader doesn't cover that newsgroup, or the distance between
+releases has been too large for your news server to keep the message,
+it's likely that you can find the announcement in an archive on the
+World Wide Web; at the time of writing (2007), the archives of the
+newsgroup are stored by @uref{http://groups.google.com,Google Groups},
+and a search for @samp{alt.lang.intercal} there should tell you where to
+find a copy.
+
+If you're looking for the latest version, note that the number after the
+dot represents the major version number; you want to maximise this in
+favour of the number before the dot, which is the bugfix level within a
+major version.  (Major versions are released as version 0.whatever; if a
+new version comes out that fixes bugs but adds no new features, nowadays
+its number will be of the form 1.whatever, with the same major number.
+This has not always been the case, though.)
+
+@node Unpacking
+@section Unpacking
+@cindex C-INTERCAL, unzipping
+@cindex C-INTERCAL, unpacking
+@cindex unzipping C-INTERCAL
+@cindex unpacking C-INTERCAL
+@cindex ick-@value{VERSIONDASH}.tgz
+
+The distribution is likely to be a single file with extension
+@samp{.tgz}; this refers to a gzipped tar file.  Most computer systems
+can extract files in this format (nowadays even many computers running
+Windows have the appropriate software).
+
+It doesn't matter where you extract the distribution file to: it's best
+if you don't put it anywhere special.  If you aren't an administrator,
+you should extract the file to somewhere in your home directory (Linux
+or UNIX-like systems) or to your My Documents directory (recent versions
+of Windows; if you're using an older version, then you @emph{are} an
+administrator, or at least have the same privileges, and can extract it
+anywhere).  Some commands that you might use to extract it:
+
+@table @asis
+
+@item Generic UNIX/Linux
+
+@example
+gunzip ick-@value{VERSIONDASH}.tgz
+tar xvf ick-@value{VERSIONDASH}.tar
+@end example
+
+On most UNIX-based and Linux-based systems, @command{tar} will be
+available to unpack the installation files once they've been
+uncompressed with @command{gunzip}.  @command{gunzip} is also likely to
+be available; if it isn't, you will need to download a copy from the
+Internet.
+
+@item Using GNU tar
+
+@example
+tar xzvf ick-@value{VERSIONDASH}.tgz
+@end example
+
+If you are using the GNU version of @command{tar} (which is very likely
+on Linux), you can combine the two steps into one as shown here.
+
+@item Using DJGPP
+
+@example
+djtar -x ick-@value{VERSIONDASH}.tgz
+@end example
+
+On a DOS or Windows system, you will have to install DJGPP anyway to be
+able to compile the distribution (@pxref{DOS/Windows Install}), and once
+you've done that you will be able to use DJGPP's decompressing and
+unpacking utility to extract the files needed to install the
+distribution.  (You will need to type this at the command line; on
+Windows 95 and later, try choosing Run...@: from the start menu then
+typing @command{cmd} (or @command{command} if that fails) in the dialog
+box that opens to get a command prompt, which you can exit by typing
+@command{exit}.  After typing any command at a command line, press
+@key{RET} to tell the shell to execute that command.)
+
+@item On Windows
+
+If you're running a Windows system, you could always try double-clicking
+on the ick-@value{VERSIONDASH}.tgz file.  It's quite possible that
+you'll have a program installed that's capable of decompressing and
+unpacking it.  Unfortunately, I can't guess what program that might be,
+so I can't give you any instructions for using it.
+
+@end table
+
+Whatever method you use, you should end up with a directory created
+called @file{ick-@value{VERSION}}; this is your main installation
+directory where all the processing done by the installation will be
+carried out.  You will need to have that directory as the current
+directory during install (at the command prompt in all the operating
+systems I know, you can set the current directory by typing @command{cd
+ick-@value{VERSION}}).
+
+@node Simple Installation
+@section Simple Installation
+@cindex installation, simple
+@cindex simple installation
+@findex config.sh
+@findex make
+@findex make install
+@cindex compiling, @command{ick} itself
+@cindex installation, via autoconf and make
+@cindex configuring
+
+There are scripts included in the distribution to automate the process
+of installing, in various ways.  The simplest method of installing is to
+use the following routine:
+
+@enumerate
+
+@item
+Configure @cic{}, by typing @command{sh config.sh}
+
+@item
+Compile the source code, with the command @command{make}
+
+@item
+Install the executables and libraries, using @command{make install}
+
+@end enumerate
+
+On all systems, it's worth just trying this to see if it works.  This
+requires a lot of software on your computer to work, but all of it is
+standard on Linux and UNIX systems.  The first command is a shell-script
+which will analyse your system and set settings accordingly; it will
+explain what it's doing and what settings it detected, and create
+several files in the installation directory to record its results.
+(This is a configure script produced by the DJGPP version of GNU
+autoconf; its autoconf source code is available in the file
+@file{config.in}.)  The second command actually compiles the source code
+to produce binaries; this takes the longest of any of the steps.  You
+will see all the commands that it's running as it runs them.  (The most
+time-consuming one is the compilation of @file{idiotism.c}, by the way;
+be prepared for this to take longer than the other compilations.)  The
+third command will copy the files it's compiled to appropriate shared
+locations on your system so that anyone on the system can just use
+@command{ick}.
+
+There may be various factors that prevent this simple installation
+method working.  On a system not based on UNIX or Linux, you may find
+that you don't have some of the software required to run this (for
+instance, you may be missing the shell @command{sh}, and don't have the
+shell @command{bash} which can emulate it, and so can't run @command{sh
+config.sh} that depends on one of those shells being available) and so
+this method won't work for you.  In such cases, one solution may be to
+install all the software required; the GNU project has a version of all
+the commands required, for instance, and there may be ports available
+for your operating system.  However, the only software absolutely
+required is a C compiler (@cic{} was designed to work with @command{gcc}
+and has only been tested in combination with that compiler, but in
+theory it should be possible to adapt it to work with other compilers)
+and the associated software needed to compile C files to object files
+and executables, combine object files into libraries, etc.
+
+Another possiblity that might stop this process working is if your
+version of the relevant software is incompatible with the GNU versions
+that were used for testing.  For instance, I have come across
+proprietary versions of @command{lex} that need directives in the source
+file to say in advance how much memory the lexer-generator needs to
+allocate.  In such cases, pay attention to the error messages you're
+getting; normally they will suggest trivial modifications to the source
+files that will cause the compilation to work again.
+
+If you're trying to do something unusual, you probably want to set some
+of the settings yourself rather than letting the compilation process
+guess everything.  In this case, use @command{sh config.sh --help} to
+view the options that you can set on @command{config.sh}; there's a wide
+range of settings that you can set available there, and one of them may
+be what you want.  For the special case of a non-administrator user who
+wants to test the @cic{} compiler without having admin rights, or
+equivalently any user who wants to test the compiler without installing
+it, see @ref{Not Installing}.
+
+@node DOS/Windows Install
+@section DOS/Windows Install
+@cindex installation, on DOS or Windows
+@cindex DOS
+@cindex Windows
+@cindex DJGPP
+@findex makeick.sh
+@findex makeick.bat
+
+On DOS and Windows, it's possible to install @cic{} by using the C
+compiler and utilities provided by DJGPP.  (Possibly other environments
+also work, but DJGPP is the only C compilation system on which recent
+versions of @cic{} have been tested.)  If you don't have a copy of DJGPP,
+or you're not sure whether you have the most recent version, visit
+@uref{http://www.delorie.com/djgpp}.  I think it's possible to compile
+@cic{} to binaries from only the files in the distribution and the C
+compilation parts of DJGPP, but this relies on some prebuilt files
+enclosed in the distribution, and I haven't actually tested this, so I
+might be wrong.  At the other extreme, if you download and install not
+only the DJGPP C compiler but also all the DJGPP ports of the GNU
+utilities required to run @command{config.sh} and @command{make}, you
+can use the simple installation method; see @ref{Simple Installation}.
+(This is actually somewhat recommended; doing this will not only allow
+you to change source code, recompile, and be guaranteed to have your
+changes to the source code affect the executables, and allow you to
+install @cic{} without having to fiddle around with the @samp{PATH}
+environment variable, but also you may then be able to install other
+programs distributed in source form without further hassle.)
+
+Assuming that you decide not to download all the utilites required to
+carry out a simple install, follow the following instructions to compile
+and install the @cic{} compiler:
+
+@enumerate
+
+@item
+If you haven't already installed DJGPP, do that now, following the
+instructions given there.
+
+@item
+Open a command prompt if you aren't at one already, unpack the
+distribution if you haven't already, and change directory to the main
+installation directory (@pxref{Unpacking}).
+
+@item
+Run one of two commands included in the distribution especially for
+installing @cic{} under DJGPP.  Which one you run depends on the shell
+you're using: if you're running under one of the DOS/Windows shells
+(@command{cmd.exe} or @command{command.com}), type
+@command{makeick.bat}, and if you're running under a port of a UNIX or
+Linux shell (such as @command{bash}), type @command{makeick.sh}.
+
+@item
+The distribution should now have been compiled, but it still needs to be
+installed.  To do this, you will need to edit your @samp{PATH}
+environment variable.  Under DOS and earlier versions of Windows, you
+can do this by editing @file{C:\autoexec.bat}; look for the last command
+that sets the @samp{PATH} environment variable (i.@:e.@: that starts
+with @samp{set PATH=}), and add another semicolon and the @file{bin}
+subdirectory of your main installation directory to it (for instance, if
+your installation directory is
+@file{C:\stuff\intercal\ick-@value{VERSION}}, you want to add
+@samp{;C:\stuff\intercal\ick-@value{VERSION}\bin} to the end of that
+line).  Under later versions of Windows, this won't work (I'm not sure
+exactly where the cutoff is, but I know the other method doesn't work on
+Windows XP); instead, go via the Start menu to Settings, Control Panel,
+System, Advanced, Environment Variables, and edit either your own or the
+system-wide PATH setting (depending on whether you want to install for
+yourself or for everyone) to end with the @file{bin} subdirectory of the
+main installation directory, the same way as for older versions of
+Windows.
+
+@end enumerate
+
+To test that the @samp{PATH} setting is set correctly, try changing to
+an unrelated directory (for instance, by typing @command{cd \} at a
+command prompt), and typing @command{ick -@@}; if you get a usage
+message for @command{ick}, then you've set the @samp{PATH} setting
+correctly.  Note that if things go wrong during compilation, other than
+errors about inability to find @command{flex} or @command{bison} (the
+compilation process can succeed despite either of these errors), it's
+likely that you've messed up your DJGPP installation (maybe by setting
+the @samp{PATH} or @samp{DJDIR} environment variables incorrectly for
+it).
+
+@node Not Installing
+@section Not Installing
+@cindex @command{ick}, using without installation
+@cindex @command{ick}, not installating
+@cindex trying out @command{ick}
+@cindex not installing
+@cindex non-root installation
+@cindex installation, non-root
+@cindex live CD/USB stick
+@cindex making a live CD/USB stick
+
+You don't have to install @cic{} to be able to use it; you can instead
+stop any of the other install techniques just after compiling the source
+code, before the installation step.  (This may be useful if you just
+want to try out @cic{}, or if you aren't a root/admin user and therefore
+don't have the permissions to install things.)  When @cic{} hasn't been
+installed, @command{ick} won't be able to find the files it looks for in
+the places that they ought to have been installed, so it will look in a
+variety of places they might be instead (the installation directory, if
+it can figure out where it is; the same directory as the binary; the
+current directory).  In order for this to work, just don't move any of
+the files that were compiled anywhere else.
+
+Of course, if you haven't installed the compiler, just typing
+@command{ick} is unlikely to work, because your computer won't know what
+you mean.  Instead, you should give a pathname (absolute or relative) to
+where @command{ick} is, so that your computer can find it.  With any
+luck, your computer will communicate the pathname you used to
+@command{ick} itself, and if that happens @command{ick} will use it to
+figure out where the main installation directory is, and find the files
+it needs that way.  If you suspect that errors you are getting are due
+to inability to find files (such as E127 (@pxref{E127}) or E999
+(@pxref{E999})), try giving the @option{-u} (@pxref{-u}) option to
+@command{ick} to see where it's looking.
+
+You can make a `live' CD or USB-stick version of @cic{} using similar
+methods; configure (if possible) and compile it, but instead of
+installing it, copy the entire @file{@value{VERSION}} directory to the
+CD or USB stick.  @ical{} can then be run from there by explicitly giving
+a pathname to @file{bin/ick} or @file{bin/ick.exe}
+
+@node Uninstalling
+@section Uninstalling
+@cindex uninstalling
+@cindex @command{ick}, uninstalling
+
+It may happen that you decide to uninstall @cic{} after installing it;
+this may be useful if you want to test the installation system, or
+change the location you install programs, or for some reason you don't
+want it on your computer.  It's worth uninstalling just before you
+install a new version of @cic{} because this will save some disk space;
+you cannot install two versions of @cic{} at once (but see @ref{Not
+Installing} for information on how you can use @cic{} without installing
+it).
+
+If you installed @cic{} using @command{make install}, you can uninstall
+it by using @command{make uninstall} from the installation directory,
+assuming that it still exists.  If you can't use that method for some
+reason, you can uninstall it by deleting the files @file{ick.exe} where
+your computer installs binaries, @file{libick.a}, @file{libickmt.a},
+@file{libyuk.a}, @file{COPYING.txt}, and @file{coopt.sh} where your
+computer installs libraries, and the subdirectories
+@file{ick-@value{VERSION}} in the places where your computer installs
+data files and include files, and their contents.
+
+If you installed @cic{} by changing your @samp{PATH} environment
+variable, you can uninstall by changing it back.
+
+You can go further than uninstalling.  Running @command{make distr},
+@command{districk.sh}, or @command{districk.bat} will delete any files
+created by compilation; @command{make distclean} will delete those
+files, and also any files created by configuring.  The distribution
+contains prebuilt versions of the parser, lexical analyser and OIL
+compiler; doing @command{make clean} (or @command{cleanick.sh} or
+@command{cleanick.bat}) will do the same thing as @command{make distr}
+and also delete those prebuilt versions.
+
+@node Reporting Bugs
+@section Reporting Bugs
+@cindex bugs, reporting
+@cindex reporting bugs
+@cindex patches, submitting
+@cindex submitting patches
+
+If you can't get @cic{} to install at all, or something goes wrong when
+you're using it, reporting a bug is probably a good idea.  (This is
+still important even if you figure out how to fix it, and the
+information isn't in the manual, because the fix can be added to the
+source code if possible, or at least to the manual, to benefit future
+users.)  For general help, you may want to post to the
+@uref{news:alt.lang.intercal,,alt.lang.intercal} news group; to report
+a bug or submit a patch, email the person who released the most recent
+@cic{} version (which you can determine by looking at that newsgroup).
+
+If you do find a bug (either the compiler not behaving in the way you'd
+expect, or if you find a way to cause E778 (@pxref{E778}) without
+modifying the source code), it helps a lot if you can submit a bug
+report explaining what causes it.  If you're not sure, say that; it
+helps if you give examples of input, command line options, etc.@: that
+cause the bug.  There are several debug options (@pxref{Debug Options})
+that you can use to help pin down a bug if you're interested in trying
+to solve the problem yourself; looking at the output C code can also
+help pin down a bug if the compiler gets that far.
+
+Information that should be given in a bug report is what you expect to
+happen, what actually happens, what input and command line options you
+gave to the compiler, what operating system you're using, any ideas you
+might have as to what the problem is, and any appropriate debug traces
+(for instance, @option{-H} (@pxref{-H+,,-H}) output if you think the bug
+is in the optimizer).  Core dumps aren't portable between systems, so
+don't send those; however, if you're getting an internal error and can
+dump core with @option{-U} (@pxref{-U+,,-U}), it helps if you can load a
+debugger (such as @command{gdb}) on the core dump, use the debugger to
+produce a backtrace, and send that backtrace.
+
+If you figure out how to solve the bug yourself, and want to submit the
+patches to help other users (this also carries the advantage that your
+patches will then be maintained along with the rest of the distribution,
+and that you won't have to reapply them every time you upgrade to a
+newer version of @cic{}), you must first agree to license your code
+under the same license as the code that surrounds it (normally, that's
+the GNU General Public License, but if you submit a patch to a file with
+a different license, like this manual (yes, documentation patches are
+useful too), you must agree to that license).  You will be credited for
+the patch in the source code unless you specifically ask not to be or
+you don't give your name (in both these cases, you must license the code
+to the public domain so that it can be incorporated without the
+attribution requirement).  Preferably, patches should be submitted in
+the format created by the command @command{diff -u}; this command is
+likely to be available on UNIX and Linux systems and versions are also
+available for DOS and Windows (including a DJGPP port of the GNU
+version).  If you can't manage that, just submit your new code with
+enough lines of old code around it to show where it's meant to go, and a
+description of approximately where in the file it was.  Patches should
+be submitted by email to the person who most recently released a version
+of @cic{}.
+
+If you have a suggestion for a new feature, it makes sense to first
+discuss it on the @uref{news:alt.lang.intercal,,alt.lang.intercal} news
+group; other @ical{} compiler maintainers may also want to implement
+that feature.  If you have developed code to implement that feature in
+@cic{}, you can submit it the same way that you would submit a patch for
+a bug.
+
+@node Distributing
+@section Distributing
+@cindex C-INTERCAL, distributing
+@cindex distributing C-INTERCAL
+@cindex releasing C-INTERCAL
+
+Due to the licensing conditions of @cic{}, you are allowed to release
+your own version or distribution if you want to.  In such cases, it's
+recommended that you follow the following guidelines:
+
+@enumerate
+
+@item
+Make sure the new version is based on the most recent existing version.
+Looking at the @uref{news:alt.lang.intercal,,alt.lang.intercal}
+newsgroup will normally let you know what version is most recent.
+
+@item
+Increment the version number; if you add any new features, increment the
+major version number (after the decimal point) and drop the minor
+version number (before the decimal point) to 0, and otherwise increment
+the minor version number.  You have to update the version number in the
+following files: @file{config.in}, @file{config.sh}, and
+@file{ick.info}.  You also have to rename the installation directory to
+reflect the new version number.
+
+@item
+Add an entry to the @file{NEWS.txt} file explaining what's new in the
+version that you're releasing, following the same format as the other
+entries.
+
+@item
+Update the @file{README.txt} with a description of any new files you may
+have added.
+
+@item
+Remove any autosave or backup files that may be littering the
+installation directory or its subdirectories.
+
+@item
+Run @command{make distclean}, or @command{districk.sh} or
+@command{districk.bat} if you didn't manage to configure; this will
+remove all files that shouldn't be in the distribution.
+
+@item
+Update the @file{MANIFEST.txt} file that lists all files in the
+distribution; on a Linux or UNIX system, you can do this by typing
+@command{ls -R1 > MANIFEST.txt} in the main installation directory.
+
+@item
+If creating the distribution under DJGPP, run @command{etc/ctrlmfix.bat}
+or @command{etc/ctrlmfix.sh}, even if you managed to configure; this
+will sort out portability problems with newlines.
+
+@item
+Create a gzipped tar file containing the installation directory.  Its
+filename should be @samp{ick-}, followed by the version number with the
+dot replaced by a dash, followed by @samp{.tgz}; this form of filename
+is friendly to DOS.
+
+@item
+Place the new version somewhere on the Internet, and announce the
+location and the fact that a new version has been released on
+@uref{news:alt.lang.intercal,,alt.lang.intercal}.
+
+@end enumerate
+
+@node Invoking ick
+@chapter Invoking ick
+@cindex command line options
+@cindex options, to @command{ick}
+@cindex @command{ick}, command line options
+@cindex @command{ick}, invoking
+@cindex @command{ick}, options
+@cindex compiling, @ical{} source code
+
+All operations on @ical{} source code available in @cic{} are currently
+carried out by the compiler @command{ick}.
+
+The syntax is
+
+@example
+ick -options @var{inputfile}
+@end example
+
+@noindent
+(Options can be given preceded by separate hyphens, or all in a row
+after one hyphen, or a mixture; they're all single characters.)  By
+default, this compiles one @ical{} program given as the input file
+directly to an executable without doing anything fancy; usually you will
+want to give options, which are described below.
+
+@menu
+* Language-affecting Options::       Options that specify language dialect
+* Debug Options::                    Debug your code or ick itself
+* Output Options::                   Specifying output format and location
+* Optimizer Options::                Yes, you can optimize @ical{}!
+* Other Options::                    Options not covered in other sections
+* Options to Generated Programs::    Generated executables allow options too
+* Environment Variables::            What environment variables affect ick
+@end menu
+
+@node Language-affecting Options
+@section Language-affecting Options
+@cindex options, language-affecting
+@cindex language-affecting options
+@cindex options, dialect
+@cindex dialect options
+
+The following command-line options to @command{ick} affect what dialect
+of the @ical{} language is compiled by the compiler; you may need to set
+one or more of these options if your input is not the default @cic{} but
+instead some other language like @icst{} or @clcic{}, or just because
+you like certainty or like being different with respect to your output.
+Note that there is no command-line option corresponding to
+@abbr{TriINTERCAL} (or the base 4-7 versions); instead, the numeric base
+to use is determined by looking at the filename extension (@samp{.i} for
+base 2, the default, or @samp{.3i} to @samp{.7i} for the base 3-7
+versions.)
+
+@table @option
+@ianchor -b
+@opindex -b
+@cindex random bug
+@cindex E774, disabling
+If this option is @emph{not} given, there is a small chance that a
+random bug appears in the compiler, which causes the programs it creates
+to manifest a bug that causes error E774 (@pxref{E774}).  Giving the
+option means that this bug will not happen.  (You may wonder why this
+bug was preserved; it is in fact a bug that was carefully preserved
+since the days of @icst{}, in this case, but the option to turn it off
+is available as a workaround.  (There are no plans to fix this or any of
+the other carefully preserved bugs any time soon, because that would
+kind of defeat the point of having preserved them.)   Interestingly, the
+@icst{} compiler documentation mentions a similar command-line option
+that is a workaround for the same bug.
+
+@ianchor -m
+@opindex -m
+@cindex multithreading, enabling
+@cindex backtracking, enabling
+This option needs to be given to allow any multithreading or
+backtracking commands or identifiers to be used.  (Unlike with other
+language features, this is not autodetected because it's legal to have a
+program with multiple COME FROM (@pxref{COME FROM}) commands aiming at
+the same line even when it isn't multithreaded, in which case the
+commands cause error E555 (@pxref{E555}) when that line is encountered
+(with the usual caveats about both commands having to be active at the
+time).)  Attempts to use non-COME FROM multithreading or backtracking
+commands without this option produce error E405 (@pxref{E405}).
+
+@ianchor -t
+@opindex -t
+@cindex INTERCAL-72 compatibility mode
+@cindex compatibility, INTERCAL-72
+This option tells the compiler to treat the source code as @icst{}; as a
+result, any language constructs that are used but weren't available in
+1972 will trigger error E111 (@pxref{E111}).
+
+@ianchor -v
+@opindex -v
+@cindex constants, assigning to
+@cindex assigning to constants
+It is possible to write @ical{} code sufficiently tortuous that it ends
+up assigning to a constant.  Generally speaking, this isn't what you
+wanted to do, so the compiler will kindly cause an error (E277;
+@pxref{E277}) that stops the insanity at that point, but at the cost of
+a significant amount of performance you can give this option to tell the
+compiler to simply change the constant and keep on going anyway.  (Note
+that unlike @clcic{}, this only changes uses of the constant preceded by
+@code{#} in your program, not things like line numbers; you want
+@uref{http://esolangs.org/wiki/Forte,Forte} for that.)
+
+@ianchorc -C
+@opindex -C
+@cindex clockface mode
+When this option is given, the generated programs will write the number
+4 as @samp{IIII} rather than @samp{IV}, in case you're writing a clock
+program.
+
+@ianchorc -P
+@opindex -P
+@cindex PIC-INTERCAL, command line option
+@cindex E256, avoiding
+@cindex E652, avoiding
+This tells the compiler to treat the input as @abbr{PIC-INTERCAL}
+(@pxref{PIC-INTERCAL}) rather than ordinary @cic{} input, and generate
+PIC output code accordingly.  There are a lot of options that are
+incompatible with this, as well as many language features, due to the
+limited memory available on a PIC.  If you get error E256
+(@pxref{E256}), you have this option given when it shouldn't be;
+likewise, if you get error E652 (@pxref{E652}), you should be using this
+option but aren't.  (A few simple programs are
+@cic{}/@abbr{PIC-INTERCAL} polyglots, but such programs are incapable of
+doing input or output, meaning that they aren't particularly useful.)
+
+@ianchorc -X
+@opindex -X
+@cindex CLC-INTERCAL compatibility mode
+@cindex compatibility, CLC-INTERCAL
+The @cic{} and @clcic{} compilers use different notation for various
+things, sometimes to the extent where the same notation is legal in both
+cases but has a different meaning.  As this is the @cic{} compiler, it
+rather guessably uses its own notation by default; however, the @clcic{}
+notation can be used as the default instead using this option.  (In most
+situations where there isn't an ambiguity about what something means,
+you can use the `wrong' syntax freely.)  This option also causes some
+constructs with subtly different meanings in these two @ical{}
+implementations to take on the @clcic{} meaning.  (OK, one construct at
+present, the abstention of a GIVE UP (@pxref{GIVE UP}) command by line
+number, which is possible as long as this switch isn't given; reading
+through the @icst{} manual, there are a lot of things that imply that
+this probably wasn't intended to be possible, but as far as I can tell
+that manual doesn't actually @emph{say} anywhere that this particular
+case is disallowed, even though it rules out all other similar cases.
+However, I intend to add to this list at some point.)
+
+@end table
+
+@node Debug Options
+@section Debug Options
+@cindex options, debug
+@cindex debug options
+
+Sometimes things will go wrong with your program, or with the way
+@command{ick} was installed.  There may even be unknown bugs in
+@command{ick} itself (if you find one of these, please report it).  The
+following options are used to debug the whole system on various levels.
+
+@table @option
+
+@ianchor -d
+@opindex -d
+@cindex debugging, parser
+@cindex parser, debugging
+@cindex debugging, lexical analyser
+@cindex lexical analyser, debugging
+
+If you think that something has gone wrong with the parser, or you want
+to see how your program is being parsed, you can give this option on the
+command line.  All the debug output produced by the parser and lexical
+analyser will be output on standard error.
+
+@ianchor -g
+@opindex -g
+@cindex debugging, C code
+@cindex C code, debugging
+@cindex C code, leaving in place
+
+This option allows debugging of the final executable at the C code
+level.  Any C code generated will be left in place, and the @option{-g}
+option will be given to the C compiler that's used to compile the code,
+so all the information needed for a C debugger to be used on the
+executable will be present there.
+
+@item -h
+@itemx -H
+@itemx -hH
+@anchor{-h}
+@anchor{-H+}
+@anchor{-hH}
+@opindex -h
+@opindex -H
+@opindex -hH
+@cindex optimizer, debugging
+@cindex debugging, optimizer
+@cindex OIL, debugging
+@cindex debugging, OIL
+
+These options allow debugging of the optimiser, or produce output
+helpful for understanding how your program has been summarised.
+@option{-h} produces a summary of what optimiser rules were used, the
+initial expression and what it was optimised to; @option{-H} produces a
+more expanded view that shows each intermediate step of optimisation,
+and @option{-hH} shows the same output as @option{-H}, but written
+completely using C syntax (the other options output in a strange mix of
+@ical{} and C).
+
+@ianchor -l
+@opindex -l
+@cindex warnings, enabling
+
+This option turns on generation of warnings (@pxref{Warnings}).  To make
+sure that they aren't actually useful, or are only marginally useful,
+the warning generator is far too sensitive, and there is no way to
+decide which warnings are given and which ones aren't; you either get
+all of them or none.
+
+@ianchor -p
+@opindex -p
+@cindex profiling
+@cindex yuk, profiling
+
+This option causes the program to run immediately after being compiled,
+and profiles the resulting program to identify performance bottlenecks,
+etc.  The usefulness of this depends on the resolution of the timers on
+the computer and operating system; DOS, in particular, is really bad
+with timer resolution.  The output will be saved in a file called
+@file{yuk.out} when the program finishes running.  It's legal to turn on
+both the profiler and the interactive debugger at the same time, but if
+you do this the profiler will also identify bottlenecks in the person
+typing in commands to step through the program! The profiler will, in
+fact, identify all the timings that particular commands in the program
+take; so @code{WRITE IN} instructions will often show up as taking a
+long time due to their need to wait for input.
+
+@ianchor -u
+@opindex -u
+@cindex skeleton file, directory problems
+@cindex system library, directory problems
+@cindex syslib, directory problems
+@cindex directory problems
+@cindex E999, debugging
+@cindex E127, debugging
+
+When you are getting problems with finding files -- for instance, the
+compiler can't find the skeleton file (@pxref{E999}) or the system
+library (@pxref{E127}) -- this option will let you know, on standard
+error, where the compiler is looking for files.  This may hopefully help
+you pin down where the file-finding problems are coming from, and also
+offers the option of simply placing copies of the files where the
+compiler is looking as a last resort.
+
+@ianchor -y
+@opindex -y
+@cindex yuk, command line option
+
+This is the main debugging option: it loads yuk, an interactive @ical{}
+debugger with ability to step through the program, set breakpoints, view
+and modify variables, etc.  @xref{yuk}.
+
+@ianchorc -U
+@opindex -U
+@cindex internal errors, debugging
+@cindex debugging, internal errors
+@cindex internal errors, dumping core
+@cindex dumping core on error
+@cindex E778, debugging
+
+The internal error E778 (@pxref{E778}) should never happen.  However,
+there are all sorts of potential problems that may come up, and if part
+of the code detects something impossible, or more usually when the
+operating system detects things have got too insane and segfaults,
+normally this error will just be generated and that's that.  (I most
+often get this when I've been writing a new section of code and have
+made a mistake; hopefully, all or at least most of these errors are
+fixed before release, though.)  If you want more information as to what's
+going on, you can give the @option{-U} option, which will cause the
+compiler to raise an abort signal when an internal error happens.  This
+can generally be caught by a debugger that's being run on @command{ick}
+itself at the time; on many systems, it will also cause a core dump.
+
+@end table
+
+@node Output Options
+@section Output Options
+@cindex output options
+@cindex options, output
+
+These options allow you to control how far to compile (all the way to an
+executable, or only to C, etc.@:), and where the output will be created.
+Note that the output options may change depending on the other options
+selected; for instance, many of the debug options will prevent the code
+being compiled all the way to an executable.
+
+@table @option
+
+@ianchor -c
+@opindex -c
+@cindex code generation, stopping at C code
+@cindex C, stopping after C is generated
+@cindex output, C only
+
+By default, the original @ical{} code will be compiled all the way to an
+executable, and the intermediate C and object files produced will be
+deleted.  Giving this option causes the compiler to stop when it has
+finished producing the C file, leaving the C file there as the final
+output of the compiler.  (Its filename is the same as the source file,
+but with @samp{.c} as its extension/suffix rather than the source file's
+extension.)  Without this option, an executable will be produced with the
+extension changed to whatever's appropriate for the system you are on
+(or omitted entirely if that's appropriate for the system).
+
+This option also places verbose comments in the output C file.
+
+@ianchor -o
+@opindex -o
+@cindex output, to standard output
+@cindex standard output
+
+This option causes the compiler to progress no further than producing
+the C output file, but instead of writing it to a file writes it
+directly to standard output.  This might occasionally be useful when
+using @command{ick} as part of a pipe; it can also be useful to see how
+far the compiler gets with compiling code before an error happens, when
+you're trying to track down an error.
+
+@end table
+
+@node Optimizer Options
+@section Optimizer Options
+@cindex optimizer options
+@cindex options, optimizer
+@cindex optimization
+
+There are various command line options that can be used to tell
+@command{ick} whether and in what ways to optimize code.
+
+@table @option
+
+@ianchor -f
+@opindex -f
+@cindex flow optimization
+@cindex optimization, flow
+@cindex optimization, control flow
+
+This option requests the compiler to attempt to analyse the flow of the
+program and optimize accordingly; for instance, it will detect which
+commands can't possibly be @code{ABSTAINED} from and refrain from
+generating code to check the abstention status of those commands.
+
+@ianchorc -F
+@opindex -F
+@cindex optimization, extreme
+@cindex extreme optimization
+
+This option tells the compiler to optimize the output for speed.  This
+is done to crazy extremes; the compiler may take several hours/days
+analysing the program in some cases and still not come up with an
+improvement.  It turns on all the other optimizer options.  Note that
+not all systems accept this option, because it sometimes outputs a shell
+script disguised as an executable rather than an actual executable.
+
+@ianchorc -O
+@opindex -O
+@cindex optimization, idioms
+@cindex idiom optimization
+@cindex optimization, OIL
+@cindex OIL, optimizing code
+
+This option tells the compiler to apply optimizer idioms to the
+expressions in the code given, when appropriate.  The list of idioms is
+stored in the file @file{src/idiotism.oil}; note that it is compiled
+into the compiler, though, so you will have to rebuild and reinstall the
+compiler if you change it.  For more information about changing the list
+of idioms, see @ref{Optimizer Idiom Language}.
+
+@end table
+
+@node Other Options
+@section Other Options
+@cindex other options
+@cindex options, other
+
+Some options just can't be classified.
+
+@table @option
+
+@ianchor -@@
+@opindex -@@
+@cindex options, help
+@cindex help with options
+@cindex usage instructions, printing
+
+If this option is given, the compiler doesn't run at all, but instead
+prints a set of instructions for using it, explaining which options are
+available on the system you're on and which options conflict with which
+other options.
+
+@end table
+
+@node Options to Generated Programs
+@section Options to Generated Programs
+@cindex generated programs, options
+@cindex options, to generated programs
+
+Once the compiler runs and produces an output executable, that
+executable itself will accept a range of options that control the way it
+runs.  None of these options have to be used; a default value will be
+assumed if they aren't.
+
+@table @option
+
+@ianchorpm help
+@opindex +help
+@opindex -help
+
+Whether @samp{+} or @samp{-} is given at the start of this option, it
+will cause the program to print out what options are available and what
+state they are in.  It will then cause the program to exit via an
+internal error.
+
+@ianchorpm wimpmode
+@opindex +wimpmode
+@opindex -wimpmode
+@cindex wimpmode
+@cindex Roman numerals, disabling
+@cindex Arabic numberals, enabling
+@cindex input, in Arabic numerals
+@cindex output, in Arabic numerals
+
+If the @samp{+} version of this is given (rather than the default
+@samp{-}), then the program will print a message explaining that you are
+a wimp (the mode itself is known as wimpmode), and for the rest of
+execution will input in Arabic numerals (@samp{123} rather than
+@samp{ONE TWO THREE}) and likewise will output in Arabic numerals rather
+than Roman numerals (such as @samp{CXXIII}).  True @ical{} programmers
+should rarely have to use this mode.
+
+@ianchorpm traditional
+@opindex +traditional
+@opindex -traditional
+
+This option does not actually appear to do anything.
+
+@ianchorpm printflow
+@opindex +printflow
+@opindex -printflow
+@cindex flow, printing
+@cindex debugging, flow
+@cindex debugging, multithreaded programs
+@cindex multithreading, debugging
+@cindex backtracking, debugging
+
+The usual debugging methods don't work with multithreaded or
+backtracking programs.  This option exists to give at least a slim
+chance of working out what is going on with them.  It causes the program
+to print the line number of the command it thinks it may be executing
+next (i.e.@: the line number that would be printed if that line had an
+error) immediately after executing each command, and also an internal
+identifier for the thread that that command was in.  It also prints a
+trace of what parts of the multithreader are being activated; so for
+instance, it will tell you when a thread is being forked into multiple
+threads or when a choicepoint has been deleted.
+
+@ianchorpm mystery
+@opindex +mystery
+@opindex -mystery
+
+This option is occasionally capable of doing something, but is
+deliberately undocumented.  Normally changing it will have no effect,
+but changing it is not recommended.
+
+@end table
+
+@node Environment Variables
+@section Environment Variables
+@cindex environment variables
+
+Various environment variables can be set to affect the operation of
+@command{ick}.
+
+@multitable @columnfractions .3 .7
+@headitem Variable @tab Meaning
+@item ICKINCLUDEDIR@*ICKLIBDIR@*ICKBINDIR
+@tab
+These three environment variables suggest locations in which
+@command{ick} should look to find various files that it needs: the
+skeleton file, system library, C header files and libraries that it
+needs, constant-output optimiser, and the GNU General Public License
+(which the debugger needs to be able to display on demand for legal
+reasons).
+@item CC
+@tab
+The name of a C compiler to use (defaults to gcc, which is the only
+compiler with which @cic{} has been tested recently).  This option has
+no effect on DJGPP, where gcc is always used.
+@item ICKTEMP@*TMPDIR@*TEMP@*TMP
+@tab
+On DJGPP, @command{ick} creates temporary files to pass options to gcc
+as a method of getting around the limit on the length of a command line
+that can sometimes affect DOS programs.  These four environment
+variables are tried (in this order) to determine a location for the
+temporary file; if none of them are set, the current directory is used.
+@end multitable
+
+@node Errors and Warnings
+@chapter Errors and Warnings
+@cindex ick, errors and warnings
+@cindex errors and warnings
+
+Things may go wrong, either during the compilation or the execution of
+your program.  Note that some things that would be compile-time errors
+in many other languages -- such as syntax errors -- are in fact run-time
+errors in @ical{}.
+
+Errors and warnings appear as an error code starting with @samp{ICL},
+followed by a three digit number, followed by @samp{I} for an error or
+@samp{W} for a warning.  However, they will be notated here as
+@samp{E000}, etc.@:, to save space and because consistency was never a
+strong point of @ical{}.  This is followed by a text description of the
+error, and a hint as to the location of the error.  This is not the line
+on which the error occurred, but rather the line on which the next
+command to be executed is.  To add to the fun, the calculation of the
+next command to be executed is done at compile-time rather than runtime,
+so it may be completely wrong due to things like abstention on
+@code{COME FROM}s or computed @code{COME FROM}s.  The moral of this
+story is that, if you really want to know where the error is, use a
+debugger.  Note also that if the error happens at compile-time, there is
+no guarantee that the line number given makes any sense at all.  Some
+errors don't give next line numbers, mostly those for which it doesn't
+make logical sense, such as E633 (@pxref{E633}).  After this is a
+suggestion to correct (or reconsider) the source code and to resubnit
+it.  (This typo has been carefully preserved for over a decade.)
+
+@menu
+* Errors::                     Error messages that might be produced
+* Warnings::                   Warnings produced by the @option{-l} option
+@end menu
+
+@node Errors
+@section Errors
+@cindex errors
+@cindex ick, errors
+
+This is a list of the error messages that might be produced during the
+compilation or execution of an @ical{} program.
+
+@table @asis
+
+@ieanchor E000
+@cindex syntax error
+
+This is an unusual error; it's what's printed when a syntax error is
+encounted at runtime, in a situation in which it would be executed.  (An
+@code{ABSTAIN}ed syntax error, for instance, would not be executed; this
+is one of the mechanisms available for writing comments.)  The text of
+the error message is simply the statement that couldn't be decoded.
+
+@ieanchor E017
+@cindex syntax error, serious
+@quotation
+DO YOU EXPECT ME TO FIGURE THIS OUT?
+@end quotation
+
+It sometimes happens that a syntax error manages to get the parser so
+confused that it can't figure out what to do next; that causes this
+error, which happens at compile time.
+
+@ieanchor E079
+@cindex politesse
+@cindex @code{PLEASE}, proportion required
+@quotation
+PROGRAMMER IS INSUFFICIENTLY POLITE
+@end quotation
+
+The balance between various statement identifiers is important.  If less
+than approximately one fifth of the statement identifiers used are the
+polite versions containing @code{PLEASE}, that causes this error at
+compile time.
+
+@ieanchor E099
+@quotation
+PROGRAMMER IS OVERLY POLITE
+@end quotation
+
+Of course, the same problem can happen in the other direction; this
+error is caused at compile time if over about one third of the statement
+identifiers are the polite form.
+
+@ieanchor E111
+@quotation
+COMMUNIST PLOT DETECTED, COMPILER IS SUICIDING
+@end quotation
+
+This error happens when you give the @option{-t} option (@pxref{-t}) but
+you use a language construct that wasn't available in @icst{}.  If this
+happens, then either there's a mistake in the program that prevents it
+being @icst{} or you shouldn't be compiling it as @icst{} in the first
+place.
+
+@ieanchor E123
+@cindex black lagoon
+@cindex @code{NEXT}, stack overflow
+@cindex stack overflow
+@quotation
+PROGRAM HAS DISAPPEARED INTO THE BLACK LAGOON
+@end quotation
+
+There is a hard limit of 80 @command{NEXT}s at a time; this is to
+discourage excessive use of @command{NEXTING} for things like recursion.
+(Recursive programs are entirely legal; you simply have to figure out
+how to do it with computed @command{COME FROM} instead.  (For the
+record, it is possible.  (Using lots of nested brackets when talking
+about recursion is great (yay!@:).)))  Another problem with writing the
+source code that can cause this error is a failure to properly
+@command{FORGET} the entry on the @command{NEXT} stack created when
+trying to simulate a goto.
+
+@ieanchor E127
+@cindex system library, errors
+@cindex syslib, errors
+@quotation
+SAYING 'ABRACADABRA' WITHOUT A MAGIC WAND WON'T DO YOU ANY GOOD
+@end quotation
+Your program asked to include the system library (by specifying a line
+number from 1000 to 1999 inclusive without including a line with that
+number), but due to installation problems the copmiler couldn't find the
+system library to include.  You could try using the @option{-u}
+(@pxref{-u}) option to see where the compiler's looking; that may give
+you an idea of where you need to copy the system library so that the
+compilation will work.  This error happens at compile time and doesn't
+give a next command line number.
+
+@ieanchor E129
+@cindex @code{NEXT}, nonexistent target
+@quotation
+PROGRAM HAS GOTTEN LOST
+@end quotation
+
+This error happens at compile time when the compiler can't figure out
+where a @command{NEXT} command is actually aiming (normally due to a
+typo in either the line label given or the line label on the line aimed
+for).  The logic behind this error means that the next line to be
+executed is unknown (after all, that's the whole point of the error) and
+is therefore not given.
+
+@ieanchor E139
+@cindex @code{ABSTAIN}, nonexistent target
+@cindex @code{REINTSTATE}, nonexistent target
+@quotation
+I WASN'T PLANNING TO GO THERE ANYWAY
+@end quotation
+
+This error happens at compile time when an @code{ABSTAIN} or
+@code{REINSTATE} references a non-existent target line.  This generally
+happens for much the same reasons as E129 (@pxref{E129}).
+
+@ieanchor E182
+@cindex line label, duplicate
+@cindex duplicate line label
+@quotation
+YOU MUST LIKE THIS LABEL A LOT!
+@end quotation
+
+At present, it's impossible to have more than one line with the same
+line number.  That would make @code{NEXT} act too much like @code{COME
+FROM} in reverse to be interesting.  This error happens at compile time.
+
+@ieanchor E197
+@cindex line label, illegal value
+@cindex illegal line label value
+@cindex invalid line label value
+@quotation
+SO@!  65535 LABELS AREN'T ENOUGH FOR YOU?
+@end quotation
+
+Legal values for line labels are 1 to 65535 (with values from 1000 to
+1999 reserved if you want to use the system library).  This error comes
+up if you use nonpositive or twospot values for a line label.
+
+@ieanchor E200
+@cindex variable, illegal number
+@cindex illegal variable number
+@cindex invalid variable number
+@quotation
+NOTHING VENTURED, NOTHING GAINED
+@end quotation
+
+You used a variable that isn't actually in your program.  Failing that
+(which would be quite impressive and is probably impossible, at least in
+the present version of @cic{}), you specified an illegal number for a
+variable (legal numbers are positive and onespot).  This error happens
+at compile time, at least for illegal variable numbers.
+
+@ieanchor E222
+@cindex out of memory, during @code{STASH}
+@quotation
+BUMMER, DUDE!
+@end quotation
+
+In @ical{}, you're allowed to @code{STASH} as much as you like; this
+makes the language Turing-complete and allows for unlimited recursion
+when combined with computed @code{COME FROM} in the right way.
+Unfortunately, real computers aren't so idealised; if you manage to
+write a program so memory-intensive that the computer runs out of memory
+to store stashes, it causes this error at runtime.  To fix this error,
+you either have to simplify the program or upgrade your computer's
+memory, and even then that will only help to some extent.
+
+@ieanchor E240
+@cindex array, invalid dimension
+@cindex invalid array dimension
+@cindex illegal array dimension
+@quotation
+ERROR HANDLER PRINTED SNIDE REMARK
+@end quotation
+
+Arrays have to be large enough to hold at least one element; you tried
+to dimension an array which isn't large enough to hold any data.  This
+error happens at run time.
+
+@ieanchor E241
+@cindex array, wrong dimension
+@cindex wrong array dimension
+@cindex array, out of bounds
+@cindex out of bounds
+@quotation
+VARIABLES MAY NOT BE STORED IN WEST HYPERSPACE
+@end quotation
+
+This error happens at run time when the subscripts given to an array are
+inconsistent with the way the array was dimensioned, either because
+there were the wrong number of subscripts or because a subscript was too
+large to fit in the array.
+
+@ieanchor E256
+@cindex PIC-INTERCAL, unsupported command
+@quotation
+THAT'S TOO HARD FOR MY TINY BRAIN
+@end quotation
+
+Some commands simply aren't available in @abbr{PIC-INTERCAL}.  I mean,
+@acronym{PIC}s generally have less than a kilobyte of memory; you're not
+going to be able to use some of the more confusing language features
+with that sort of resource limitation.  The solution is to replace the
+affected command, or to not give the @option{-P} option
+(@pxref{-P+,,-P}) if you didn't mean to compile as @abbr{PIC-INTERCAL}
+in the first place.
+
+@ieanchor E275
+@cindex overflow, over onespot
+@cindex overflow, over 16 bits
+@cindex onespot overflow
+@cindex 16 bit overflow
+@quotation
+DON'T BYTE OFF MORE THAN YOU CAN CHEW
+@end quotation
+
+This error happens when there is an attempt to store a twospot value in
+a onespot variable.  The actual size of the value is what matters when
+counting its spots; so you can store the output of a mingle in a onespot
+variable if it happens to be less than or equal to 65535, for instance.
+(This is not necessarily the case in versions of @ical{} other than
+@cic{}, though, so you have to be careful with portability when doing
+this.)
+
+@ieanchor E277
+@cindex reverse assignment, impossible
+@cindex reverse assignment, error
+@cindex operand overloading, impossible
+@cindex impossible reverse assignment
+@quotation
+YOU CAN ONLY DISTORT THE LAWS OF MATHEMATICS SO FAR
+@end quotation
+
+Reverse assignments are not always mathematically possible.  Also,
+sometimes they require changing the value of a constant; this is only
+legal if you specifically specified that it was legal by using the
+@option{-v} option.  In the case of an impossible reverse assignment
+(including a situation in which operand overloading causes a reverse
+assignment to happen), this error happens at runtime.
+
+@ieanchor E281
+@cindex spark, nesting limit
+@cindex ears, nesting limit
+@cindex rabbit-ears, nesting limit
+@cindex nesting limit
+@findex SENESTMAX
+@quotation
+THAT MUCH QUOTATION AMOUNTS TO PLAGIARISM
+@end quotation
+
+There is a limit of 256 on the number of nested spark/ears groups
+allowed.  If you somehow manage to exceed that limit, that will cause
+this error.  Try breaking the expression up into smaller expressions.
+(The limit is trivial to increase by changing @code{SENESTMAX} in
+@file{ick.h}; if you ever actually come across a program that hits the
+limit but wasn't designed to, just email the maintainer to request a
+higher limit.)
+
+@ieanchor E333
+@cindex variables, limit
+@quotation
+YOU CAN'T HAVE EVERYTHING, WHERE WOULD YOU PUT IT?
+@end quotation
+
+Your program references so many variables that the compiler couldn't
+cope.  This error is unlikely to ever happen; if it does, try reducing
+the number of variables you use by combining some into arrays.  This is
+a compile-time error.
+
+@ieanchor E404
+@cindex @code{GO BACK}, no choicepoint
+@cindex @code{GO AHEAD}, no choicepoint
+@quotation
+I'M ALL OUT OF CHOICES!
+@end quotation
+
+Your program asked that a choicepoint be backtracked to or removed, but
+there aren't any choicepoints at the moment.  This runtime error usually
+indicates a logic mistake in your program.  In backtracking programs
+translated from other backtracking languages, this indicates that the
+program has failed.
+
+@ieanchor E405
+@cindex multithreading, not enabled
+@cindex backtracking, not enabled
+@cindex @code{WHILE}, not enabled
+@cindex @code{MAYBE}, not enabled
+@cindex @code{GO AHEAD}, not enabled
+@cindex @code{GO BACK}, not enabled
+@quotation
+PROGRAM REJECTED FOR MENTAL HEALTH REASONS
+@end quotation
+
+Your program used a construct that only makes sense when multithreading
+or backtracking (@code{WHILE}, @code{MAYBE}, @code{GO BACK}, or @code{GO
+AHEAD}), but you didn't specify the @option{-m} option (@pxref{-m}).  If
+you meant to write a multithreaded or backtracking program, just give
+that option; if you didn't, be careful what words you use in comments!
+This error happens at compile-time.
+
+@ieanchor E436
+@cindex @code{RETRIEVE}, without stashing
+@cindex stash failure
+@quotation
+THROW STICK BEFORE RETRIEVING!
+@end quotation
+
+In order to @code{RETRIEVE} a variable, it has to be @code{STASH}ed
+first; if it isn't, then this error happens at runtime.
+
+@ieanchor E444
+@cindex @code{COME FROM}, no target
+@cindex @code{NEXT FROM}, no target
+@quotation
+IT CAME FROM BEYOND SPACE
+@end quotation
+
+A @code{COME FROM} aiming at a line label --- as opposed to a computed
+@code{COME FROM}, which is allowed to be pointing at a nonexistent line
+--- must point to a valid line label.  The same applies to @code{NEXT
+FROM}.  This error happens at compile time if a nonexistent line label is
+found in one of these contexts.
+
+@ieanchor E533
+@cindex overflow, over twospot
+@cindex overflow, over 32 bits
+@cindex twospot overflow
+@cindex 32 bit overflow
+@quotation
+YOU WANT MAYBE WE SHOULD IMPLEMENT 64-BIT VARIABLES?
+@end quotation
+
+This error is like E275 (@pxref{E275}), but applies when an attempt is
+made at runtime to store a threespot value (or even a fourspot or
+morespot value) in a twospot variable, or a threespot or greater value
+is produced as an intermediate during a calculation (for instance by a
+mingle operation).  No values above twospot are allowed at any point
+during an @ical{} program; if you want to process higher numbers, you
+have to figure out a different way of storing them.
+
+@ieanchor E555
+@cindex @code{COME FROM}, ambiguity
+@quotation
+FLOW DIAGRAM IS EXCESSIVELY CONNECTED
+@end quotation
+
+Aiming two @code{COME FROM}s at the same line only makes sense in a
+multithreaded program.  In a non-multithread program, doing that will
+cause this error at compile time (if neither @code{COME FROM} is
+computed) or at run time (if the command that has just finished running
+is simultaneously the target of two or more @code{COME FROM}s).  This
+either indicates an error in your program or that you've forgotten to
+use the @option{-m} option (@pxref{-m}) if you are actually trying to
+split the program into two threads.
+
+@ieanchor E562
+@cindex input, EOF
+@cindex EOF
+@cindex end of file
+@quotation
+I DO NOT COMPUTE
+@end quotation
+
+The program asked for input, but for some reason it wasn't available.
+(This is a runtime error, obviously.)   The error may happen because the
+input is being piped in from a command or file which has reached
+end-of-file, or because the user typed @kbd{@key{CTRL}-@key{D}}
+(UNIX/Linux) or @kbd{@key{CTRL}-@key{Z}} (DOS/Windows) while the program
+was trying to @code{WRITE IN} some data.
+
+@ieanchor E579
+@cindex input, invalid
+@quotation
+WHAT BASE AND/OR LANGUAGE INCLUDES @var{string}?
+@end quotation
+
+When reading spelt-out-digit input, the input didn't seem to be a valid
+digit in English, Sanskrit, Basque, Tagalog, Classical Nahuatl,
+Georgian, Kwakiutl, Volap@"uk, or Latin.  This seems to have languages
+covered pretty well; what on earth were you using, or did you just make
+a spelling mistake?
+
+@ieanchor E621
+@cindex @code{RESUME}, by 0
+@quotation
+ERROR TYPE 621 ENCOUNTERED
+@end quotation
+
+The compiler encountered error E621 (@pxref{E621}).  This happens at
+runtime when the program requests that no entries are removed from the
+@code{NEXT} stack (which is possible), but that the last entry removed
+should be jumped to (which given the circumstances isn't, because no
+entries were removed.)
+
+@ieanchor E632
+@quotation
+THE NEXT STACK RUPTURES.  ALL DIE.  OH, THE EMBARRASSMENT!
+@end quotation
+
+When an attempt is made to @code{RESUME} past the end of the @code{NEXT}
+stack, the program ends; however, this cause the program to end in a
+manner other than via @code{GIVE UP} or @code{DON'T TRY AGAIN}, so an
+error message must be printed, and this is that error message.
+
+@ieanchor E633
+@quotation
+PROGRAM FELL OFF THE EDGE
+@end quotation
+
+You can't just let execution run off the end of the program.  At least,
+that is, if it doesn't end with @code{TRY AGAIN}.  An attempt to do that
+causes this error at runtime.  Note that if your program references the
+system library, then it counts as being appended to your program and so
+the program will run into the first line of the system library rather
+than cause this error.  As it happens, the first line of the system
+library is a syntax error, so doing this will cause E000 (@pxref{E000})
+with the error text @samp{PLEASE KNOCK BEFORE ENTERING}.  There isn't a
+next statement to be executed with E633, so the next statement won't be
+given in the error message.
+
+@ieanchor E652
+@cindex @code{PIN}, in a non-PIC program
+@quotation
+HOW DARE YOU INSULT ME!
+@end quotation
+
+The @code{PIN} command doesn't make much sense for anything bigger than
+a @acronym{PIC}; using it in a non-@acronym{PIC} program causes this
+error at compile-time.  Try using the normal input and output mechanisms
+instead.  This error may also be a clue that you are trying to compile a
+@abbr{PIC-INTERCAL} program without giving the @option{-P} option
+(@pxref{-P+,,-P}).
+
+@ieanchor E666
+@cindex out of memory, during compile
+@quotation
+COMPILER HAS INDIGESTION
+@end quotation
+
+There isn't a limit on the length of an input program other than your
+computer's memory; if your computer does run out of memory during
+compilation, it causes this error.
+
+@ieanchor E774
+@cindex random bug, error message
+@quotation
+RANDOM COMPILER BUG
+@end quotation
+
+No compiler is perfect; sometimes errors just happen at random.  In this
+case, the random error is E774.  If you don't like the idea that your
+program may be shot down by a random compiler bug, or you are doing
+something important, you can use the @option{-b} option (@pxref{-b}) to
+prevent this bug happening.  (You may wonder why this bug is in there at
+all if it's so easily prevented.  The answer is that such a bug was
+present in the original @icst{} compiler, which also had an option to
+turn the bug off.  It's also a reward for people who actually read the
+manual.)
+
+@ieanchor E777
+@cindex directory problems, source file
+@cindex no source file
+@quotation
+A SOURCE IS A SOURCE, OF COURSE, OF COURSE
+@end quotation
+
+You specified a file to compile on the command line, but the compiler
+couldn't find or couldn't open it.  This is almost certainly because you
+made a typo specifying the file.
+
+@ieanchor E778
+@cindex internal errors
+@quotation
+UNEXPLANED COMPILER BUG
+@end quotation
+
+This should never come up, either at compile time or at run time.  It
+could come up at either when an internal check by the compiler or the
+runtime libraries realises that something has gone badly wrong; mistakes
+happen, and in such cases the mistake will have been detected.  (If this
+happens at compile time you can use the @option{-U} option
+(@pxref{-U+,,-U}) to cause the compiler to send an abort signal -- which
+normally causes a core dump -- when the error happens, to help debug
+what's causing it.)  More often, this error comes up when the operating
+system has noticed something impossible, like an attempt to free
+allocated memory twice or to write to a null pointer, and tells the
+compiler an error has occured, in which case the same response of
+putting up this error happens.  The point is that in all cases this
+error indicates a bug in the compiler (even if it happens at run time);
+in such cases, it would be very helpful if you figure out what caused it
+and send a bug report (@pxref{Reporting Bugs}).
+
+@ieanchor E810
+@cindex yuk, input overflow
+@quotation
+ARE ONE-CHARACTER COMMANDS TOO SHORT FOR YOU?
+@end quotation
+
+This is a debug-time error caused when you give too much input to the
+debugger when all it wanted was to know what you wanted to do next.
+
+@ieanchor E811
+@cindex yuk, breakpoint overflow
+@cindex yuk, too many breakpoints
+@cindex breakpoints, too many
+@quotation
+PROGRAM IS TOO BADLY BROKEN TO RUN
+@end quotation
+
+There's a limit to how many breakpoints you can have in a program;
+you've broken the limit and therefore broken the debugger.  This is a
+debug-time error.
+
+@ieanchor E888
+@quotation
+I HAVE NO FILE AND I MUST SCREAM
+@end quotation
+
+The output file couldn't be written, maybe because the disk is full or
+because there's already a read-only file with the same name.  This is a
+compile-time error.
+
+@ieanchor E991
+@cindex out of memory, multithreading
+@cindex out of memory, backtracking
+@cindex multithreading, out of memory
+@cindex backtracking, out of memory
+@quotation
+YOU HAVE TOO MUCH ROPE TO HANG YOURSELF
+@end quotation
+
+There is no limit on the number of threads or choicepoints that you can
+have in a multithreaded or backtracking program (in a program that isn't
+multithreaded or backtracking, these are obviously limited to 1 and 0
+respectively).  However, your computer may not be able to cope; if it
+runs out of memory in the multithreader, it will cause this error at
+runtime.
+
+@ieanchor E993
+@cindex @code{TRY AGAIN}, not last
+@quotation
+I GAVE UP LONG AGO
+@end quotation
+
+@code{TRY AGAIN} has to be the last command in a program, if it's there
+at all; you can't even follow it by comments, not even if you know in
+advance that they won't be @code{REINSTATE}d.  This error happens at
+compile time if a command is found after a @code{TRY AGAIN}.
+
+@ieanchor E995
+@quotation
+DO YOU REALLY EXPECT ME TO HAVE IMPLEMENTED THAT?
+@end quotation
+
+Some parts of the code haven't been written yet.  There ought to be no
+way to cause those to actually run; however, if you do somehow find a
+way to cause them to run, they will cause this error at compile time.
+
+@ieanchor E997
+@cindex whirlpool, in base 2
+@cindex sharkfin, in base 2
+@cindex TriINTERCAL, operators in base 2
+@quotation
+ILLEGAL POSSESSION OF A CONTROLLED UNARY OPERATOR
+@end quotation
+
+Some operators (such as whirlpool (@code{@@}) and sharkfin (@code{^}))
+only make sense in @abbr{TriINTERCAL} programs, and some have a minimum
+base in which they make sense.  This error happens at compile-time if
+you try to use an operator that conflicts with the base you're in (such
+as using @abbr{TriINTERCAL} operators in an @ical{} program in the
+default base 2).
+
+@ieanchor E999
+@cindex skeleton file, errors
+@quotation
+NO SKELETON IN MY CLOSET, WOE IS ME!
+@end quotation
+
+The skeleton file @file{ick-wrap.c} or @file{pickwrap.c} is needed to be
+able to compile @ical{} to C.  If the compiler can't find it, it will
+give this error message.  This indicates a problem with the way the
+compiler has been installed; try using the @option{-u} option
+(@pxref{-u}) to find out where it's looking (you may be able to place a
+copy of the skeleton file in one of those places.)
+
+@end table
+
+@node Warnings
+@section Warnings
+@cindex warnings
+@cindex ick, warnings
+
+This is a list of the warnings stored in the warning database.  Warnings
+only come up when the @option{-l} (@pxref{-l}) is given; even then, some
+of the warnings are not currently implemented and therefore will never
+come up.
+
+@table @asis
+
+@ieanchor W016
+@quotation
+DON'T TYPE THAT SO HASTILY
+@end quotation
+
+The positional precedence rules for unary operators are somewhat
+complicated, and it's easy to make a mistake.  This warning is meant to
+detect such mistakes, but is not currently implemented.
+
+@ieanchor W018
+@quotation
+THAT WAS MEANT TO BE A JOKE
+@end quotation
+
+If an @ical{} expression has been translated from another language such
+as C, the optimiser is generally capable of translating it back into
+something similar to the original, at least in base 2.  When after
+optimisation there are still @ical{} operators left in an expression,
+then this warning is produced.  (Therefore, it's likely to come up quite
+a lot if optimisation isn't used@!)  The system library produces some of
+these warnings (you can tell if a warning has come up in the system
+library because you'll get a line number after the end of your program).
+
+@ieanchor W112
+@cindex warnings, non-INTERCAL-72
+@cindex non-INTERCAL-72 warning
+@quotation
+THAT RELIES ON THE NEW WORLD ORDER
+@end quotation
+
+This warning comes up whenever the compiler recognises that you've added
+some code that didn't exist in @icst{}.  This allows you to check
+whether your code is valid @icst{} (although @option{-t} (@pxref{-t}) is
+more useful for that); it also warns you that code might not be portable
+(because @icst{} is implemented by most @ical{} compilers, but more
+recent language features may not be).
+
+@ieanchor W128
+@quotation
+SYSLIB IS OPTIMIZED FOR OBUSCATION
+@end quotation
+
+There is an idiom used in the system library that does a right-shift by
+selecting alternate bits from a twospot number and then mingling them
+the other way round.  A rightshift can much more easily be done with a
+single rightshift, so this is a silly way to do it, and this warning
+warns that this idiom was used.  However, the present optimizer is
+incapable of recognising whether this problem exists or not, so the
+warning is not currently implemented.
+
+@ieanchor W276
+@cindex onespot, overflow warning
+@cindex overflow, warning
+@quotation
+YOU CAN'T EXPECT ME TO CHECK BACK THAT FAR
+@end quotation
+
+It's an error to assign a twospot value (a value over 65535) to a
+onespot variable, or to use it as an argument to a mingle.  If the
+optimizer can't guarantee at compile time that there won't be an
+overflow, it issues this warning.  (Note that this doesn't necessarily
+mean there's a problem --- for instance, the system library generates
+some of these warnings --- only that the optimiser couldn't work out for
+sure that there wasn't a problem.)
+
+@ieanchor W239
+@quotation
+WARNING HANDLER PRINTED SNIDE REMARK
+@end quotation
+
+Your code looks like it's trying to assign 0 to an array, giving it no
+dimension; this is an error.  This warning is produced at compile time
+if it looks like a line in your code will cause this error, but it isn't
+necessarily an error because that line of code might never be executed.
+
+@ieanchor W278
+@quotation
+FROM A CONTRADICTION, ANYTHING FOLLOWS
+@end quotation
+
+It's sometimes impossible to reverse an assignment (a reverse assignment
+can happen if the @option{-v} option (@pxref{-v}) is used and an
+expression is placed on the left of an assignment), or in operand
+overloading; if the compiler detects that a reversal failure is
+inevitable, it will cause this warning.  Note that this doesn't always
+cause an error, because the relevant code might never be executed.
+
+@ieanchor W534
+@cindex unary operators, portability
+@cindex portability, unary operators
+@quotation
+KEEP LOOKING AT THE TOP BIT
+@end quotation
+
+@cic{} uses a slightly different typing mechanism to some other @ical{}
+compilers; types are calculated at compile time rather than run time.
+This only makes a difference in some cases involving unary operators.
+It's impossible to detect at compile time for certain whether such a
+case has come up or not, but if the compiler or optimizer thinks that
+such a case might have come up, it will issue this warning.
+
+@ieanchor W622
+@quotation
+WARNING TYPE 622 ENCOUNTERED
+@end quotation
+
+Your code looks like it's trying to resume by 0; this is an error.  This
+warning is produced at compile time if it looks like a line in your code
+will cause this error, but it isn't necessarily an error because that
+line of code might never be executed.
+
+@end table
+
+@node The yuk debugger
+@chapter The yuk debugger
+@cindex yuk
+@cindex debugging, yuk
+@cindex debugging, runtime
+@cindex runtime debugger
+@anchor{yuk}
+
+The @cic{} distribution contains a runtime debugger called `yuk'.
+Unlike most other debuggers, it is stored as object code rather than as
+an executable, and it is compiled into the code rather than operating on
+it.  To debug code, add @option{-y} (@pxref{-y}) to the command line of
+@command{ick} when invoking it; that tells it to compile the debugger
+into the code and then execute the resulting combination.  (The
+resulting hybrid debugger/input executable is deleted afterwards; this
+is to prevent it being run by mistake, and to prevent spreading the
+debugger's licence onto the code it was compiled with.)
+
+yuk can also be used as a profiler using the @option{-p} option
+(@pxref{-p}); this produces a file @file{yuk.out} containing information
+on how much time was spent running each command in your program, and
+does not prompt for debugger commands.
+
+Note that some command line arguments are incompatible with the
+debugger, such as @option{-m} and @option{-f}.  In particular, this
+means that multithreaded programs and programs that use backtracking
+cannot be debugged using this method; the @option{+printflow} option
+(@pxref{+printflow}) to a compiled program may or may not be useful for
+debugging multithreaded programs.
+
+When the debugger starts, it will print a copyright message and a
+message on how to access online help; then you can enter commands to
+run/debug the program.  The debugger will show a command prompt,
+@samp{yuk007 }, to let you know you can input a command.
+
+@cindex yuk, commands
+Here are the commands available.  Commands are single characters
+followed by newlines, or followed by a line number (in decimal) and a
+newline or a variable name (a @code{.}, @code{,}, @code{:} or @code{;}
+followed by a number in decimal; note that some commands only allow
+onespot and twospot variables as arguments).
+
+@multitable @columnfractions .15 .85
+@headitem Command @tab Description
+@item a@var{LINE}
+@tab
+All non-abstained commands on line @var{LINE} become abstained from
+once.
+@item b@var{LINE}
+@tab
+A breakpoint is set on line @var{LINE}.  The breakpoint causes execution
+with @samp{c} to stop when it is reached.
+@item c
+@tab
+The program is run until it ends (which also ends the debugger) or a
+breakpoint is reached.
+@item d@var{LINE}
+@tab
+Any breakpoint that may be on line @var{LINE} is removed.
+@item e@var{LINE}
+@tab
+An explanation of the main expression in each command on line @var{LINE}
+is printed to the screen.  The explanation is in the same format as the
+format produced by @option{-h} (@pxref{-h}) and shows what the optimiser
+optimised the expression to (or the original expression if the optimiser
+wasn't used).
+@item f@var{LINE}
+@tab
+Removes the effect of the @samp{m} command on line @var{LINE}.
+@item g@var{LINE}
+@tab
+Causes the current command to be the first command on @var{LINE} (if not
+on that line already) or the next command on @var{LINE}, as if that line
+was @code{NEXT}ed to and then that @code{NEXT} stack item was forgotten.
+@item h
+@tab
+Lists 10 lines either side of the current line; if there aren't 10 lines
+to one or the other side of the current line, instead more lines will be
+shown on the other side to compensate, if available.
+@item i@var{VAR}
+@tab
+Causes variable @var{VAR} to become @code{IGNORE}d, making it read-only.
+@item j@var{VAR}
+@tab
+Causes variable @var{VAR} to become @code{REMEMBER}ed, making it no
+longer read-only.
+@item k
+@tab
+Continues executing commands until the @command{NEXT} stack is the same
+size or smaller than it was before.  In other words, if the current
+command is not a @command{NEXT} and doesn't have a @command{NEXT FROM}
+aiming at it, one command is executed; but if a @command{NEXT} does
+happen, execution will continue until that @command{NEXT} returns or is
+forgotten.  A breakpoint or the end of the program also end this.
+@item l@var{LINE}
+@tab
+Lists 10 lines of source code either side of line @var{LINE}, the same
+way as with @samp{h}, but using a line stated in the command rather than
+the current line.
+@item m@var{LINE}
+@tab
+Produces a message onscreen every time a command on line @var{LINE} is
+executed, but without interrupting the program.
+@item n
+@tab
+Show the @command{NEXT} stack on the screen.
+@item o
+@tab
+Continue executing commands until the @command{NEXT} stack is smaller
+than it was before.  If you are using @command{NEXT}s like procedures,
+then this effectively means that the procedure will run until it
+returns.  A breakpoint or the end of the program also end this.
+@item p
+@tab
+Displays the value of all onespot and twospot variables.
+@item q
+@tab
+Aborts the current program and exits the debugger.
+@item r@var{LINE}
+@tab
+Reinstates once all abstained commands on line @var{LINE}.
+@item s
+@tab
+Executes one command.
+@item t
+@tab
+Continues execution until the end of the program or a breakpoint: each
+command that executes is displayed while this command is running.
+@item u@var{LINE}
+@tab
+Continues execution of the program until just before a command on line
+@var{LINE} is run (or a breakpoint or the end of the program).
+@item v@var{VAR}
+@tab
+Adds a `view' on variable @var{VAR} (which must be onespot or twospot),
+causing its value to be displayed on the screen whenever a command is
+printed on screen (for instance, because the command has just been
+stepped past, or due to the @samp{m} or @samp{t} commands).
+@item w
+@tab
+Displays the current line and current command onscreen.
+@item x@var{VAR}
+@tab
+Removes any view and any action that may be associated with it on
+variable @var{VAR} (which must be onespot or twospot).
+@item y@var{VAR}
+@tab
+Adds a view on variable @var{VAR}; also causes a break, as if a
+breakpoint was reached, whenever the value of that variable changes.
+@item z@var{VAR}
+@tab
+Adds a view on variable @var{VAR}; also causes a break, as if a
+breakpoint was reached, whenever that variable's value becomes 0.
+@item @var{VAR}
+@tab
+A onespot or twospot variable written by itself prints out the value of
+that variable.
+@item <@var{VAR}
+@tab
+@command{WRITEs IN} a new value for variable @var{VAR}.  Note that input
+must be in the normal @samp{ONE TWO THREE} format; input in any other
+format will cause error E579 (@pxref{E579}) and as that is a fatal
+error, the debugger and program it's debugging will end.
+@item *
+@tab
+Displays the license conditions under which @command{ick} is
+distributed.
+@item ?
+@tab
+Displays a summary of what each command does.  (@samp{@@} does the same
+thing.)
+@end multitable
+
+While the code is executing (for instance, during a @samp{c}, @samp{k},
+@samp{o}, @samp{t} or @samp{u} command), it's possible to interrupt it
+with @kbd{@key{CTRL}-@key{C}} (on UNIX/Linux) or
+@kbd{@key{CTRL}-@key{BREAK}} (on Windows/DOS); this will cause the
+current command to finish running and the debugger prompt to come back
+up.
+
+@ifset notsplit
+@partheading PART II: THE @ical{} LANGUAGE
+@end ifset
+@node Syntax
+@chapter Syntax
+@cindex syntax, INTERCAL
+@cindex INTERCAL, syntax
+
+@ical{} programs consist of a list of statements.  Execution of a
+program starts with its first statement; generally speaking each
+statement runs after the previous statement, although many situations
+can change this.
+
+Whitespace is generally insignificant in @ical{} programs; it cannot be
+added in the middle of a keyword (unless the keyword contains whitespace
+itself) or inside a decimal number, but it can be added more or less
+anywhere else, and it can be removed from anywhere in the program as
+well.
+
+An @ical{} statement consists of an optional line label, a statement
+identifier, an optional execution chance, the statement itself
+(@pxref{Statements}), and optionally @code{ONCE} or @code{AGAIN}.
+
+@menu
+* Line Labels::               Allowing lines to be referred to
+* Statement Identifiers::     Marking the start of a statement
+* Execution Chance::          Statements that might not execute
+* ONCE and AGAIN::            Self-abstaining and self-reinstating statements
+@end menu
+
+@node Line Labels
+@section Line Labels
+@cindex line label
+@cindex line number
+
+@portability{yes, all versions, all versions}
+
+The first part of an @ical{} statement is a line label that specifies
+what its line number is.  This is optional; it's allowed to have a
+statement without a line number, although that prevents other commands
+referring to it by number.  Line numbers must be constants, and unique
+within the program.  However, they do not have to be in order; unlike
+some other languages with line numbers, a line with a higher number can
+come earlier in the program than a line with a lower number, and the
+numbers don't affect the order in which commands are executed.
+
+A line label is a integer expressed in decimal within a wax/wane pair
+(@code{(} and @code{)}).  For instance, this is a valid line label:
+
+@example
+(1000)
+@end example
+
+Note that line numbers from 1000 to 1999 are used by the system library,
+so using them within your own programs may produce unexpected errors if
+the system library is included.  Apart from this, line numbers from 1 to
+65535 are allowed.
+
+It has become reasonably customary for people writing @ical{} libraries
+to pick a range of 1000 line numbers (for instance, 3000 to 3999) and
+stick to that range for all line numbers used in the program (apart from
+when calling the system library), so if you want to write an @ical{}
+library, it may be a good idea to look at the existing libraries (in the
+@file{pit/lib} directory in the @cic{} distribution) and choose a range
+of numbers that nobody else has used.  If you aren't writing a library,
+it may be a good idea to avoid such number ranges (that is, use only
+line numbers below 1000 or very high numbers that are unlikely to be
+used by libraries in the future), so that you can easily add libraries
+to your program without renumbering in the future.
+
+@node Statement Identifiers
+@section Statement Identifiers
+@cindex statement identifier
+@findex DO
+@findex PLEASE
+@findex NOT
+@findex N'T
+
+@portability{yes, all versions, all versions}
+
+After the line label (if a statement has one) comes the statement
+identifier, which marks where the statement starts.  Either the label or
+the statement identifier, whichever one comes first, marks where the
+preceding statement finishes.
+
+@anchor{DO}@anchor{PLEASE}
+The main statement identifier is @code{DO}.  It also has two synonyms,
+@code{PLEASE} and @code{PLEASE DO}; these synonyms are the 'polite'
+forms of statement identifiers.  Although the three identifiers have the
+same meaning, using either polite or non-polite identifiers too much can
+cause an error; the correct proportion is approximately 3 non-polite
+identifiers for every polite identifier used.  None of these identifiers
+actually does anything else apart from marking where the statement
+starts; they leave the statements in the default `reinstated' state.
+
+@anchor{NOT}@anchor{N'T}
+Adding @code{NOT} or @code{N'T} to the end of any of these identifiers,
+to create a statement identifier such as @code{DO NOT} or @code{PLEASE
+DON'T}, also creates a valid statement identifier.  These differ in
+meanings from the previous set of identifiers, though; they cause the
+statement they precede to not be executed by default; that is, the
+command will be skipped during execution (this is known as the
+`abstained' state).  This applies even if the command in question is in
+fact a syntax error, thus causing this to be a useful method of writing
+comments.  One common idiom is to write code like this:
+
+@example
+PLEASE NOTE: This is a comment.
+@end example
+
+The statement identifier (@code{PLEASE NOT}) is the only part of this
+statement that is valid @ical{}; however, because the statement
+identifier is in the negated form that contains @code{NOT}, the syntax
+error won't be executed, and therefore this is a valid statement.  (In
+@ical{}, syntax errors happen at runtime, so a program containing a
+statement like @code{DOUBT THIS WILL WORK} will still compile, and will
+not end due to the syntax error unless that statement is actually
+executed.  @xref{E000}.)
+
+The @code{ABSTAIN} and @code{REINSTATE} statements can override the
+@code{NOT} or otherwise on a statement identifier; @xref{ABSTAIN}.
+
+In backtracking programs, @code{MAYBE} is also a valid statement
+identifier; @xref{MAYBE}.  It comes before the other keywords in the
+statement identifier, and an implicit @code{DO} is added if there wasn't
+one already in the statement identifier (so @code{MAYBE}, @code{MAYBE
+DO}, @code{MAYBE DON'T}, @code{MAYBE PLEASE}, and so on are all valid
+statement identifiers).
+
+@node Execution Chance
+@section Execution Chance
+@cindex execution chance
+@cindex double-oh-seven
+@findex %
+
+@portability{yes, all versions, all versions}
+
+It's possible to specify that a command should be run only a certain
+proportion of the time, at random.  This is a rarely used feature of
+@ical{}, although it is the only way to introduce randomness into a
+program.  (The @cic{} compiler approximates this with pseudorandomness.)
+An execution chance specification comes immediately after the statement
+identifier, but before the rest of the statement, and consists of a
+double-oh-seven (@code{%}) followed by an integer from 1 to 99
+inclusive, written in decimal; this gives the percentage chance of the
+statement running.  The execution chance only acts to prevent a
+statement running when it otherwise would have run; it cannot cause a
+statement that would otherwise not have run to run.  For instance, the
+statement @code{DO %40 WRITE OUT #1} has a 40% chance of writing out
+@samp{I}, but the statement @code{DON'T %40 WRITE OUT #1} has no chance
+of writing out @code{I} or anything else, because the @code{N'T}
+prevents it running and the double-oh-seven cannot override that.
+
+@node ONCE and AGAIN
+@section ONCE and AGAIN
+@cindex ABSTAIN, self-abstaining
+@cindex REINSTATE, self-reinstating
+@cindex self-abstaining
+@cindex self-reinstating
+@findex ONCE
+@findex AGAIN
+@anchor{ONCE}@anchor{AGAIN}
+
+@portability{no, version 0.25+, no}
+
+The last part of a statement is an optional @code{ONCE} or @code{AGAIN}.
+@code{ONCE} specifies that the statement is self-abstaining or
+self-reinstating (this will be explained below); @code{AGAIN} specifies
+that the statement should behave like it has already self-reinstated or
+self-abstained.  Whether the behaviour is self-abstention or
+self-reinstatement depends on whether the statement was initially
+abstained or not; a @code{ONCE} on an initially reinstated statement or
+@code{AGAIN} on an initially abstained statement indicates a
+self-abstention, and a @code{ONCE} on an initially abstained statement
+or @code{AGAIN} on an initially reinstated statement indicates a
+self-reinstatement.
+
+The first time a self-abstaining statement is encountered, it is
+executed as normal, but the statement is then abstained from and
+therefore will not run in future.  Likewise, the first time
+self-reinstating statement is encountered, it is not executed (as is
+normal for an abstained statement), but then becomes reinstated and will
+run in future.  In each of these cases, the @code{ONCE} effectively
+changes to an @code{AGAIN}; the @code{ONCE} only happens once, as might
+be expected.
+
+@code{REINSTATING} a currently abstained self-abstaining statement or
+@code{ABSTAINING} (that is, with the @code{ABSTAIN} or @code{REINSTATE}
+commands) a currently reinstated self-reinstating statement causes the
+@code{AGAIN} on the statement to change back into a @code{ONCE}, so the
+statement will again self-abstain or self-reinstate.  Likewise,
+@code{REINSTATING} a currently abstained self-reinstating statement or
+@code{ABSTAINING} a currently reinstated self-abstaining statement
+causes its @code{ONCE} to turn into an @code{AGAIN}.
+
+Historical note: @code{ONCE} was devised by Malcom Ryan as a method of
+allowing synchronisation between threads in a multithreaded program
+(@code{ONCE} is atomic with the statement it modifies, that is, there is
+no chance that threads will change between the statement and the
+@code{ONCE}).  @code{AGAIN} was added to Malcom Ryan's Threaded Intercal
+standard on the suggestion of Kyle Dean, as a method of adding extra
+flexibility (and to allow the @code{ONCE}s to happen multiple times,
+which is needed to implement some multithreaded algorithms).
+
+@node Expressions
+@chapter Expressions
+@cindex expressions
+
+Many @ical{} statements take expressions as arguments.  Expressions are
+made up out of operands and operators between them.  Note that there is
+no operator precedence in @ical{}; different compilers resolve
+ambiguities different ways, and some versions of some compilers
+(including the original @icst{} compiler) will cause error messages on
+compiling or executing an ambiguous expression, so it's safest to fully
+group each expression.
+
+@menu
+* Constants and Variables::      The basic operands that make up expressions
+* Grouping Rules::               How to specify grouping in expressions
+* Operators::                    Joining operands into more complex expressions
+@end menu
+
+@node Constants and Variables
+@section Constants and Variables
+@cindex constant
+@cindex variable
+@cindex mesh
+@cindex onespot
+@cindex twospot
+@cindex tail
+@cindex hybrid
+@findex #
+@findex .
+@findex :
+@findex ,
+@findex ;
+
+@portability{yes, all versions, all versions}
+
+The basic operands in @ical{} are constants and variables.  These
+together make up what in other languages are known as `lvalues', that
+is, operands to which values can be assigned.  (Constants can also be
+lvalues in @ical{}, but by default @cic{} turns this off because it
+carries an efficiency penalty and can be confusing; this can be turned
+on with the @option{-v} option (@pxref{-v}).)
+
+Constants can have any integer value from 0 to 65535 inclusive; higher
+values (up to 4294967295) can be generated in programs, but cannot be
+specified literally as constants.  (The usual way to work around this
+limitation is to interleave two constants together; @xref{Mingle}.) A
+constant is written as a mesh (@code{#}) followed by a number in
+decimal.  At the start of the program, all constants have the same value
+as the number that identifies them; for instance, @code{#100} has 100 as
+its value, and it's strongly advised not to change the value of a
+constant during the execution of a program.
+
+There are four types of variable: 16-bit and 32-bit unsigned integers,
+and arrays of 16-bit and 32-bit unsigned integers.  These are
+represented with a spot, twospot, tail, and hybrid (@code{.}, @code{:},
+@code{,}, and @code{;}) respectively.  For this reason, integers within
+the range 0 to 65535 inclusive are known as `onespot numbers', and
+integers within the range 0 to 4294967295 inclusive are known as
+`twospot numbers'; variables with those ranges are known as onespot and
+twospot variables.
+
+Variables are represented with a character representing their data type,
+followed by an integer from 1 to 65535 inclusive, written in decimal.
+Non-array variables don't need to be declared before they are used; they
+automatically exist in any program that uses them.  For instance,
+@code{.1} and @code{.001} are the same variable, onespot number 1.
+Array variables need to be dimensioned before they are used, by
+assigning dimensions to them; @xref{Calculate}.
+
+@node Grouping Rules
+@section Grouping Rules
+@cindex grouping rules
+@cindex positional precedence
+@cindex spark
+@cindex rabbit-ears
+@cindex ears
+@findex '
+@findex "
+
+Because there are no operator precedences in @ical{}, there are various
+solutions to specifying what precedences actually are.
+
+@table @asis
+
+@item The portable solution
+
+All known versions of @ical{} accept the @icst{} grouping rules.  These
+state that it's possible to specify that an operator takes precedence by
+grouping it inside sparks (@code{'}) or rabbit-ears (@code{"}), the same
+way as wax/wane pairs (parentheses) are used in other programming
+languages.  @icst{} and earlier @cic{} versions demanded that
+expressions were grouped fully like this, and this practice is still
+recommended because it leads to portable programs and is easier to
+understand.  Whether sparks or rabbit-ears (often called just `ears' for
+short) are used normally doesn't matter, and programmers can use one or
+the other for clarity or for aesthetic appeal.  (One common technique is
+to use just sparks at the outermost level of grouping, just ears at the
+next level, just sparks at the next level, and so on; but expressions
+like @code{''#1~#2'~"#3~#4"'~#5} are completely unambiguous, at least to
+the compiler.)
+
+There are, however, some complicated situations involving arrays
+subscripting where it is necessary to use sparks and ears at alternate
+levels, if you want to write a portable program.  This limitation is in
+@cic{} to simplify the parsing process; @icst{} has the same limitation,
+probably for the same reason.  Compare these two statements:
+
+@example
+DO .1 <- ,3SUB",2SUB.1".2
+DO .1 <- ,3SUB",2SUB.1".2~.3"".4
+@end example
+
+The problem is that in the first statement, the ears close a group, and
+in the second statement, the ears open a group, and it's impossible to
+tell the difference without unlimited lookahead in the expression.
+Therefore, in similar situations (to be precise, in situations where a
+group is opened inside an array subscript), it's necessary to use the
+other grouping character to the one that opened the current group if you
+want a portable program.
+
+One final comment about sparks and rabbit-ears; if the next character in
+the program is a spot, as often happens because onespot variables are
+common choices for operands, a spark and the following spot can be
+combined into a wow (@code{!}).  Unfortunately, none of the character
+sets that @cic{} accepts as input (UTF-8, Latin-1, and ASCII-7) contain
+the rabbit character, although the Hollerith input format that @clcic{}
+can use does.
+
+@item Positional precedences: @clcic{} rules
+
+The precedence rules used by @clcic{} for grouping when full grouping
+isn't used are simple to explain: the largest part of the input that
+looks like an expression is taken to be that expression.  The main
+practical upshot of this is that binary operators right-associate; that
+is, @code{.1~.2~.3} is equivalent to @code{.1~'.2~.3'}.  @cic{} versions
+0.26 and later also right-associate binary operators so as to produce
+the same results as @clcic{} rules in this situation, but as nobody has
+yet tried to work out what the other implications of @clcic{} rules are
+they are not emulated in @cic{}, except possibly by chance
+
+@ianchor Prefix and infix unary operators
+@cindex unary operator, prefix
+@cindex unary operator, infix
+
+In @icst{} and versions of @cic{} before 0.26, unary operators were
+always in the `infix' position.  (If you're confused about how you can
+have an infix unary operator: they go one character inside a group that
+they apply to, or one character after the start of a constant or
+variable representation; so for instance, to portably apply the unary
+operator @code{&} to the variable @code{:1}, write @code{:&1}, and to
+portably apply it to the expression @code{'.1~.2'}, write
+@code{'&.1~.2'}.)  @clcic{}, and versions of @cic{} from 0.26 onwards,
+allow the `prefix' position of a unary operator, which is just before
+whatever it applies to (as in @code{&:1}).  This leads to ambiguities as
+to whether an operator is prefix or infix.  The portable solution is, of
+course, to use only infix operators and fully group everything, but when
+writing for recent versions of @cic{}, it's possible to rely on its
+grouping rule, which is: unary operators are interpreted as infix where
+possible, but at most one infix operator is allowed to apply to each
+variable, constant, or group, and infix operators can't apply to
+anything else.  So for instance, the @cic{} @code{'&&&.1~.2'} is
+equivalent to the portable @code{'&"&.&1"~.2'} (or the more readable
+version of this, @code{"&'"&.&1"~.2'"}, which is also portable).  If
+these rules are counter-intuitive to you, remember that this is @ical{}
+we're talking about; note also that this rule is unique to @cic{}, at
+least at the time of writing, and in particular @clcic{} is likely to
+interpret this expression differently.
+
+@end table
+
+@node Operators
+@section Operators
+@cindex operator
+
+Operators are used to operate on operands, to produce more complicated
+expressions that actually calculate something rather than just fetch
+information from memory.  There are two types of operators, unary and
+binary operators, which operate on one and two arguments respectively.
+Binary operators are always written between their two operands; to
+portably write a unary operator, it should be in the `infix' position,
+one character after the start of its operand; see @ref{Prefix and infix
+unary operators} for the full details of how to write unary operators
+portably, and how else you can use them if you aren't aiming for
+portability.  This section only describes @icst{} operators; many
+@ical{} extensions add their own operators.
+
+@menu
+* Mingle::                   Interleaving bits in two operands
+* Select::                   Selecting from one operand according to another
+* Unary Binary Logic::       Binary logic on adjacent bits of an operand
+@end menu
+
+@node Mingle
+@subsection Mingle
+@cindex mingle
+@cindex interleave
+@findex $
+
+@portability {yes, all versions, all versions}
+
+Mingle, or interleave, is one of the two binary operators in @icst{}.
+However, different @ical{} compilers represent it in different ways, so
+it is impossible to write a mingle in a program completely portably.
+
+The original @icst{} compiler (the Princeton compiler) used the 'change'
+(cent) character for a mingle, represented as @code{c}, backspace,
+@code{/}.  (By the way, this is still the most portable way to write a
+mingle; both @cic{} and @clcic{} accept it, at least if a lowercase
+@code{c} is used; @clcic{} also accepts a capital @code{C} before the
+backspace and @code{/}, and allows @code{|} rather than @code{/}.)  The
+Atari compiler, another @icst{} compiler, used a 'big money' character
+(@code{$}) as the mingle character.  @cic{} originally also used the
+@code{$} character for mingle, and this character is the one most
+commonly seen in existing @cic{} programs, and most often used when
+giving examples of @ical{} on Usenet, because it exists in the ASCII-7
+character set, and because it doesnt contain control characters.  From
+version 0.18 of @cic{} onwards, various other units of currency (change,
+quid, and zlotnik if Latin-1 is used as the input, and euro if Latin-9
+is used as the input) are accepted; from version 0.20 onwards, in
+addition to the Latin-1 characters, all the currency symbols in Unicode
+are accepted if UTF-8 is used as the input format.  @cic{} has always
+used the change character (either the Latin-1 version or the version
+that contains a backspace) for mingle.  In this manual, mingle will be
+represented as @code{$}, but it's important to bear in mind that this
+character is not the most portable choice.
+
+The mingle operator should be applied to two operands or expressions.
+To be portable, the operands must both be onespot expressions, that is
+expressions which have a 16-bit result; @cic{} relaxes this rule
+slightly and only requires that the result be in the onespot range.
+(This is because the data type of a select operator's value is meant to
+be determined at runtime; @cic{} determines all data types at compile
+time, so has to guess a 32-bit result for a select with a 32-bit type as
+its right operand even when the result might actually turn out to be of
+a 16-bit type, and so this behaviour prevents an error when a select
+operation returns a value with a 16-bit data type and is used as an
+argument to amingle.)  The result is a 32-bit value (that is, it is of a
+32-bit data type, even if its value fits into the onespot range), which
+consists of bits alternated from the two arguments; to be precise, its
+most significant bit is the most significant bit of its first argument,
+its second most significant bit is the most significant bit of its
+second argument, its third most significant bit is the second most
+significant bit of its first argument, and so on until its least
+significant bit, which is the least significant bit of its second
+argument.
+
+One of the most common uses of interleaving is to create a constant with
+a value greater than 65535; for instance, 65536 is @code{#256$#0}.  It
+is also commonly used in expressions that need to produce 32-bit
+results; except in some simple cases, this is usually coded by
+calculating separately the odd-numbered and even-numbered bits of the
+result, and mingling them together at the end.  It is also used in
+expressions that need to left-shift values or perform similar
+value-increasing operations, as none of the other operators can easily
+do this; and mingle results are commonly used as the argument to unary
+binary logic operators, because this causes them to behave more like the
+binary logic operators found in some other languages.
+
+@node Select
+@subsection Select
+
+@portablity{yes, all versions, all versions}
+
+The select operator is one of the two binary operators in @icst{};
+unlike mingle, every known implementation of @ical{} ever has used the
+sqiggle character (@code{~}) as the representation of the select
+operator, meaning that writing it portably is easy.
+
+The select operator takes two arguments, which can be of either datatype
+(that is, 16- or 32-bit).  It returns a value made by selecting certain
+bits of its first operand indicated by the second operand, and
+right-justifying them.  What it does is ignores all the bits of the
+first operand where the second operand has a 0 as the corresponding bit,
+that is, deletes them from a copy of the operand's value; the bits that
+are left are squashed together towards the least-significant end of the
+number, and the result is filled with 0s to make it up to 16 or 32
+bits.  (In @icst{} the minimum multiple of 16 bits possible that the
+result fits into is chosen, although if :1 has the value 131061 (in hex,
+1FFFF) the expression @code{#21~:1} produces a 32-bit result because 17
+bits were selected, even though many of the leading bits were zeros; in
+@cic{} the data type of the result is the same as of the right operand
+of the select, so that it can be determined at run time, and so using a
+unary binary logic operator on the result of select when the right
+operand has a 32-bit type is nonportable and not recommended.)  As an
+example, @code{#21~:1} produces 21 as its result if :1 has the value
+131061, 10 as its result if :1 has the value 30 (1E in hex; the
+least significant bit of 21 is removed because it corresponds to a 0 in
+:1), and 7 as its result if :1 has the value 21 (because three bits in
+21 are set, and those three bits from 21 are therefore selected by 21).
+
+Select is used for right-shifts, to select every second bit from a
+number (either to produce what will eventually become an argument to
+mingle, or to interpret the result of a unary binary logic operator, or
+occasionally both), to test if a number is zero or not (by selecting it
+from itself and selecting 1 from the result), in some cases as a limited
+version of bitwise-and (that only works if the right operand is 1 less
+than a power of 2), and for many other purposes.
+
+@node Unary Binary Logic
+@subsection Unary Binary Logic
+@cindex unary binary logic
+@cindex and
+@cindex or
+@cindex xor
+@cindex exor
+@cindex exclusive or
+@findex ?
+@findex &
+@findex V
+@cindex what
+@cindex ampersand
+@cindex book
+
+@portability{yes, all versions, all versions}
+
+There are three unary operators in @icst{}, each of which carries out a
+binary logic operation on adjacent bits of the number. The operators are
+and, or, and exclusive or; and and or are represented by an ampersand
+(@code{&}) and book (@code{V}) respectively, and exclusive or has the
+same notational problems as mingle.  It was represented by a bookworm,
+written @code{V}, backspace, @code{-}, in the Princeton @icst{}
+implementation, and this is still the most portable way to write it
+(@cic{} and @clcic{} accept it).  The Atari implementation of @icst{}
+wrote it with a what (@code{?}), and this is the representation
+originally used by @cic{} (and still accepted), the one most commonly
+used on Usenet, and the one used in this manual (although again, it's
+worth pointing out that this isn't portable).  @clcic{} approximates a
+bookworm with the yen character, which being a currency character is one
+of the possible representations for mingle in @cic{}; therefore, @cic{}
+will only execute a @clcic{} program which contains yen-represented
+exclusive ors if the @clcic{} compatibility option @code{-X} is used
+(@pxref{-X+,,-X}).  (In the same way, @clcic{} has a @cic{}
+compatibility option to allow the use of @code{?} for exclusive-or.)
+
+The operators take each pair of consecutive bits in their arguments
+(that is, the least significant with the second least significant, the
+second least significant with the third least significant, the third
+least significant with the fourth least significant, and so on, with the
+pair consisting of the most significant and least significant being used
+to calculate the most significant bit of the result), and perform an
+appropriate logic operation on them; and sets a bit of the result if and
+only if both bits in the pair were set, or sets each bit corresponding to
+each pair where either bit was set, and exclusive or sets if and only if
+the bits in the pair had different values (that is, one was set, but not
+both).  So for instance, @code{#&26} is 16 (26 is 1A in hexadecimal or
+11010 in binary); @code{#V26} is 31 (11111 in binary), and @code{#?26}
+is 23 (10111 in binary).
+
+The most commonly seen use for these operators is to carry out bitwise
+ands, ors, and exclusive ors between two different 16-bit expressions,
+by mingling them together, applying a unary binary logic operator, and
+selecting every second bit of the result; such code often results due to
+people thinking in terms of some other language when writing @ical{},
+but is still often useful.  (Historically, the first idiom added to the
+optimizer, apart from constant folding, was the mingle/unary/select
+sequence.)  There are more imaginative uses; one impressive example is
+the exclusive or in the test for greater-than from the original @icst{}
+system library:
+
+@example
+DO :5 <- "'?":1~'#65535$#0'"$":2~'#65535$#0'"'
+     ~'#0$#65535'"$"'?":1~'#0$#65535'"$":2~'#0$
+     #65535'"'~'#0$#65535'"
+DO .5 <- '?"'&"':2~:5'~'"'?"'?":5~:5"~"#65535~
+     #65535"'~'#65535$#0'"$#32768'~'#0$#65535'"
+     $"'?":5~:5"~"#65535$#65535"'~'#0$#65535'"'
+     "$"':5~:5'~#1"'~#1"$#2'~#3
+@end example
+
+The first statement works out the value of :1 bitwise exclusive or :2;
+the second statement then works out whether the most significant set bit
+in :5 (that is, the most significant bit that differs between :1 and :2)
+corresponds to a set bit in :2 or not.  In case that's a bit too
+confusing to read, here's the corresponding optimizer idiom (in OIL):
+
+@example
+((_1~:2)~((?(:2~:2))^#2147483648))->(_1>(:2^_1))
+@end example
+
+(Here, the ^ refers to a bitwise exclusive or, an operation found in OIL
+but not in @ical{}, which is why the @ical{} version is so much longer.)
+The @ical{} version also has some extra code to check for equality and
+to produce 1 or 2 as the output rather than 0 or 1.
+
+@node Statements
+@chapter Statements
+
+@ifset notsplit
+@partheading PART III: @ical{} DIALECTS AND EXTENSIONS
+@end ifset
+@node TriINTERCAL
+@chapter TriINTERCAL
+
+@c first available in 0.7
+
+@node Multithreading and Backtracking
+@chapter Multithreading and Backtracking
+
+@node Operand Overloading
+@chapter Operand Overloading
+
+@node PIC-INTERCAL
+@chapter PIC-INTERCAL
+
+@node Differences to Other Compilers
+@chapter Differences to Other Compilers
+
+@ifset notsplit
+@partheading PART IV: APPENDICES AND INDICES
+@end ifset
+@node Optimizer Idiom Language
+@appendix Optimizer Idiom Language
+@cindex Optimizer Idiom Language
+@cindex OIL
+
+One file in the @cic{} distribution (@file{src/idiotism.oil}) is written
+in Optimizer Idiom Language, a programming language designed especially
+for expressing optimizer idioms for @ical{} in an easily editable form
+(well, at least it's easier than the unmaintainable set of idioms
+hard-coded in C that were used in previous versions of the @ical{}
+compiler).
+
+@menu
+* Basics: OIL Basics.               The basics of how an OIL program works.
+* Syntax: OIL Syntax.               How to write comments, idioms, and groups.
+* Expressions: OIL Expressions.     Expressions are the basis of idioms.
+* Patterns: OIL Patterns.           Filling in the left hand side of an idiom.
+* Replacements: OIL Replacements.   Syntax for the right hand side.
+* Loops: OIL Loops.                 Simplifying and shortening programs.
+* Tips: OIL Tips.                   Some tips about using OIL.
+* Example: OIL Example.             An example of how OIL can work.
+@end menu
+
+@node OIL Basics
+@appendixsec OIL Basics
+@cindex OIL, basics
+@cindex @file{src/idiotism.oil}
+@cindex @file{idiotism.oil}
+@cindex OIL, execution
+
+The structure of an @acronym{OIL} file consists of a sequence of idioms.
+An optimizer idiom looks for a certain pattern in an expression (which
+could be an @ical{} expression, or an expression that has already been
+partly optimized and therefore contains some non-@ical{} operators), and
+replaces it with a replacement that's `simpler' in some sense (in the
+case of @cic{}, `simpler' is interpreted to mean `compiles into a faster
+or smaller executable when run through a C compiler').  When an
+@acronym{OIL} program acts on an input @ical{} file, it keeps on
+matching idioms to simplify expressions, until none of the idioms act
+any more (and if a situation occurs where idioms can keep matching
+indefinitely, the compiler goes into an infinite loop; so don't allow
+that to happen); at present, the idioms are tried from left to right,
+from the leaves of an expression to its root, and from the start of the
+OIL file to the end; but don't rely on that, because it's subject to
+change (and gets confusing when you think about what happens when the
+program actually does a replacement).  Anyway, the point is that if an
+idiom can match an expression, and another idiom doesn't change it
+first, then the idiom will be matched against that part of the
+expression eventually, and the program won't end until there are no
+idioms that match the optimized expression.
+
+At present, the only place that @acronym{OIL} is used in the @cic{}
+compiler is when the @option{-O} option (@pxref{-O+,,-O}) is used in
+base 2.  (Syntax is planned to extend @acronym{OIL} to higher bases, and
+some of this is documented and even implemented, but there's no way to
+use it.)  The idioms are read from the file @file{src/idiotism.oil}
+during the compilation of the @cic{} from sources; you can change the
+idioms, but you will then have to recompile the distribution (and if you
+are using the @command{config.sh} method, also reinstall, but that will
+be pretty fast.)
+
+@node OIL Syntax
+@appendixsec OIL Syntax
+@cindex OIL, syntax
+@cindex syntax, of OIL
+
+An @acronym{OIL} file is encoded as an @acronym{ASCII} text file using
+no codepoints outside the range 0-127; using 10 for newline (as on a
+UNIX or Linux system) is always acceptable, but using 13 then 10 (as is
+common on Windows or DOS) for newline is acceptable only if your C
+compiler recognizes that as a newline.  I have no idea what happens if
+you use just 13 on an Apple computer on which that is the common newline
+convention.
+
+@cindex OIL, comments
+@cindex comments, OIL
+Comments can be given anywhere in the file by writing lines starting
+with semicolons (known as hybrids to @ical{} programmers).  It's also
+possible to write a semicolon after part of a line to comment out the
+rest of the line.  Inside braced C expressions, comments can be given
+anywhere whitespace would be allowed by placing them between @code{/*}
+and @code{*/} (in such cases, the comments will be copied verbatim to
+the C temporary files used when building the @cic{} compiler, where your
+C compiler will ignore them).  Whitespace is ignored nearly everywhere;
+the only places it isn't ignored are in the middle of a decimal
+constant, inside square brackets, immediately after one of the
+characters @samp{.:#_@}}, and anywhere that C doesn't allow it in quoted
+C code.  (This means that you can even place it inside operators like &&
+if you like, as long as they're part of OIL code and not C code,
+although doing this is not recommended.)  If you use whitespace in a
+situation where it isn't ignored, that's almost certainly an error.
+
+@cindex OIL, idiom groups
+Idioms are grouped into groups of idioms by placing an identifier in
+square brackets before the group; this follows the rules for C
+identifiers, except that there's a maximum length of 30 characters.
+This identifier is the `name' of the group, which has no effect except
+on optimizer debug output; for that matter, the only effect a group has
+is that all idioms in the group look the same in optimizer debug output,
+because they have the same name.  It's recommended that idioms only have
+the same name if they are the same idiom, possibly written in several
+ways.  For example, a shift by 0 has no effect and may as well be
+removed from the output; the way to express this in OIL is:
+
+@example
+[nullshift]
+(_1 >> #0)->(_1)
+(_1 << #0)->(_1)
+@end example
+
+Here, nullshift is the name of the group of idioms, and two idioms are
+given; one which removes a null rightshift, and one which removes a null
+leftshift.
+
+@cindex OIL, idioms
+@cindex idiom
+As the example above shows, the syntax of an idiom itself is
+
+@example
+(pattern)->(replacement)
+@end example
+
+The parentheses here are actually part of the pattern and/or
+replacement, and as such sparks (apostrophes) or rabbit-ears (double
+quotes) can be used instead; they're shown in the syntax because the
+outer layer of parenthesising is always required.  Both the pattern and
+replacement are @acronym{OIL} expressions, although they both have their
+own special syntax elements as well.
+
+@node OIL Expressions
+@appendixsec OIL Expressions
+@cindex expressions, OIL
+@cindex OIL, expressions
+
+An @acronym{OIL} expression is built around subexpressions connected by
+infix binary operators and/or preceded by prefix unary operators, the
+same way as in C or @ical{} (although unary operators must be entirely
+before their argument; the one character later position is not allowed.)
+As in @ical{}, there is no operator precedence; expressions must be very
+fully bracketed to show unambiguously what the precedences must be, and
+then more so; for instance, bracketing marks must be placed around the
+argument of a unary operator in most circumstances.  Bracketing of
+expressions can be done with parentheses, sparks (apostrophes) or
+rabbit-ears (double-quotes).
+
+The following unary and binary operators are allowed in OIL expressions:
+
+@cindex OIL, operators
+@cindex operators, OIL
+@multitable {@code{@@2..@@5}} {@ical{} unary generalised whirlpool}
+@item @code{$} @tab INTERCAL mingle
+@item @code{~} @tab INTERCAL select
+@item @code{&} @tab INTERCAL unary AND
+@item @code{V} @tab INTERCAL unary OR
+@item @code{?} @tab INTERCAL unary XOR
+@item @code{^} @tab INTERCAL unary sharkfin
+@item @code{@@} @tab INTERCAL unary whirlpool
+@item @code{@@2..@@5} @tab INTERCAL unary generalised whirlpool
+@item @code{&} @tab C binary bitwise AND
+@item @code{|} @tab C binary bitwise OR
+@item @code{^} @tab C binary bitwise XOR
+@item @code{+} @tab C addition
+@item @code{-} @tab C subtraction
+@item @code{*} @tab C multiplication
+@item @code{/} @tab C integer division
+@item @code{%} @tab C modulus
+@item @code{>} @tab C greater than
+@item @code{<} @tab C less than
+@item @code{~} @tab C unary bitwise complement
+@item @code{!=} @tab C not equals operator
+@item @code{==} @tab C equals operator
+@item @code{&&} @tab C logical AND
+@item @code{||} @tab C logical OR
+@item @code{>>} @tab C bitwise rightshift
+@item @code{<<} @tab C bitwise leftshift
+@item @code{!} @tab C unary logical NOT
+@end multitable
+
+(Note that in some cases two operators are expressed the same way, but
+that this doesn't matter because one is unary and the other is binary so
+that there can't be any ambiguity, only confusion.)
+
+It hasn't yet been explained what operands these operators have to
+operate on; the syntax for those depends on whether it's a pattern or
+replacement that the expression is representing.
+
+@node OIL Patterns
+@appendixsec OIL Patterns
+@cindex patterns
+@cindex OIL, patterns
+
+Patterns are simply @acronym{OIL} expressions; the expressions match
+either original @ical{} input or expressions produced by earlier idioms.
+Each operator must match the same operator in the (possibly
+partially-optimised) input; the operands themselves are pattern
+templates specifying what operands in the input they can match.
+
+One special simple form of match is possible: @code{#@var{NUMBER}},
+where @var{NUMBER} is in decimal, matches a constant with that value.
+(Unlike in @ical{}, this constant is not limited to being a onespot
+value; it is, however, limited to being at most twospot, as are all
+operands and intermediate values in @acronym{OIL}.)
+
+Otherwise, an operand consists of the following parts, written in order:
+
+@cindex operands, OIL, in patterns
+@cindex patterns, operands
+@enumerate
+
+@item
+A character to specify the data type of what's being matched.  Usually,
+this will be @code{_} to specify that any data type can be matched.  In
+a few cases, you may want to use @code{.} or @code{:} to specify that
+you only want to match a onespot or twospot value respectively (that is,
+16- or 32-bit).  You can also use @code{#}; this specifies a value that
+can be any width, but must be known to be a constant with a known value
+at optimize time (either because it was hardcoded as a constant
+originally or because a constant was produced there by the optimizer,
+for instance via a constant folding optimization).
+
+@item
+Optionally, an expression in braces (@code{@{} and @code{@}}).  This
+expression is written in C, not @acronym{OIL} (as are all expressions in
+braces), and puts an extra condition on whether the pattern matches.
+The exact meaning of this will be explained later.
+
+@item
+A reference number, which must be one decimal digit long.  A reference
+number of 0 causes the operand to be discarded immediately after
+matching; normally, you will want to specify a positive reference
+number.  Two operands with the same reference number must be exactly the
+same for the pattern to match (for instance, both references to the same
+variable, or identical subexpressions).  The reference number also
+allows the operand to be referenced by C expressions on other operands
+and by replacements.  Reference numbers must be unique within the idiom
+(unless two or reference numbers are deliberately the same so that the
+operands they reference have to be identical to produce a match), and
+they are scoped only as far as the containing idiom; they don't carry
+from one idiom to another.
+
+@end enumerate
+
+Note that syntax like @code{#2} is ambiguous given what comes so far;
+the first interpretation is the one that is taken in practice, and if
+the second interpretation is wanted the operand should be expressed as
+@code{#@{1@}2}, using a no-op braced expression to tell them apart.
+This particular no-op is recommended because it's detected and optimized
+by the @code{OIL} compiler.
+
+Braced expressions, which must be written purely in C, add extra
+conditions; they must return nonzero to allow a possible match or zero
+to prevent one.  They can reference the following variables and
+functions:
+
+@cindex functions, OIL in C
+@cindex OIL, functions in C
+@cindex C, within OIL
+@anchor{C functions in OIL}
+@table @code
+
+@item c
+@itemx c@var{NUMBER}
+@findex c
+@findex c1--c9
+
+This accesses a calculation made automatically by the compiled
+@acronym{OIL} program to identify which bits of the operand can possibly
+be set, and which ones cannot be.  @code{c} by itself refers to the
+operand to which the braced expression is attached; if a number is
+given, it refers to another node (the number is interpreted as a
+reference numer).  The actual value of @code{c} is a 32-bit unsigned
+integer, each bit of which is true, or 1, if there is any chance that
+the corresponding bit of the operand might be 1, and false, or 0, if
+it's known for certain that the corresponding bit of the operand is 0.
+
+For instance:
+
+@example
+_@{!(c&4294901760LU)@}1
+@end example
+
+The constant given here is FFFF0000 when expressed in hexadecimal; the
+point is that the expression matches any operand that is known to have a
+value no greater than 65535.  Unless the operand is the argument to a
+unary AND, this check generally makes more point than explicitly
+specifying @code{.} rather than @code{_}, because it will identify both
+16- and 32-bit values as long as they're small enough to fit into a
+onespot variable.  This code could, for instance, be used to check that
+an argument to a mingle must be small enough before optimising it (this
+is important because an optimisation shouldn't optimise an error -- in
+this case, an overflowing mingle -- into a non-error).
+
+@item x
+@itemx x@var{NUMBER}
+@findex x
+@findex x1--x9
+
+@code{x} is like @code{c}, and refers to operands in the same way,
+except that it can only refer to an operand marked with @code{#}.  It
+holds the value of that constant (a 32-bit unsigned integer), which will
+be known to the optimizer at optimize time.  One common use of this is
+to detect whether a constant happens to be a power of 2, although there
+are many other possibilities that may be useful.
+
+@item r
+@findex r
+
+When inside a loop, @code{r} is the value of the loop counter.  (It's
+almost certainly a mistake if you have a loop but don't reference the
+loop counter at least once, and usually at least twice, within the
+loop.)  @xref{OIL Loops}.
+
+@item and16
+@itemx and32
+@itemx or16
+@itemx or32
+@itemx xor16
+@itemx xor32
+@itemx iselect
+@itemx mingle
+@findex and16
+@findex and32
+@findex or16
+@findex or32
+@findex xor16
+@findex xor32
+@findex iselect
+@findex mingle
+
+These are all functions with one argument (apart from iselect and
+mingle, which each take two arguments); they exist so that @ical{}
+operators can be used by C expressions.  They all take unsigned longs as
+input and output, even if they are onespot operators.  Note that it's
+entirely possible for these to cause a compile-time error if used on
+invalid arguments (such as mingling with an operand over 65535), or to
+silently truncate an invalid argument down to the right number of bits;
+both of these should be avoided if possible, so the optimiser should
+check first to make sure that it doesn't use any of these functions on
+invalid arguments.
+
+@item xselx
+@findex xselx
+
+This function returns its argument selected with itself; so
+@code{xselx(c)} is shorthand for @code{iselect(c,c)}.  When the argument
+is very complicated, this can save a lot of space in the original
+@acronym{OIL} program.
+
+@item setbitcount
+@findex setbitcount
+
+This function simply returns the number of bits with value 1 in its
+argument.  This is sometimes useful with respect to various
+select-related optimisations, and can be a useful alternative to having
+to take logarithms in various situations.
+
+@item smudgeright
+@itemx smudgeleft
+@findex smudgeright
+@findex smudgeleft
+
+The @code{smudgeright} function returns its argument but with all the
+bits less significant than the most significant bit with value 1 set to
+1; likewise, @code{smudgeleft} returns its argument with all the bits
+more significant than the least significant bit with value 1 set to 1.
+
+@end table
+
+Note that all @acronym{OIL} character is done internally using unsigned
+32-bit numbers, and C expressions you write should do the same.  The
+practical upshot of this is that you should write @code{LU} after any
+constant you write in C code; if you don't do this, you are reasonably
+likely to get compiler warnings, and the resulting program may not work
+reliably, although the @acronym{OIL} compiler itself will not complain.
+
+Here's a more complicated example of an optimizer operand:
+
+@example
+#@{!(x&2863311530LU)&&iselect(x,1431655765LU)==
+  xselx(iselect(x,1431655765LU))@}3
+@end example
+
+It helps to understand this if you know that 2863311530 in hexadecimal
+is AAAAAAAA and 1431655765 is hexadecimal is 55555555.  (It's worth
+putting a comment with some frequently-used decimal constants in an
+@acronym{OIL} input file to help explain what these numbers mean and
+make the code more maintainable.)  The operand matches any constant
+integer which has no bits in common with AAAAAAAA, and for which if any
+bit in common with 55555555 is set, all less significant bits in common
+with that number are also set.
+
+@node OIL Replacements
+@appendixsec OIL Replacements
+@cindex OIL, replacements
+@cindex replacements
+
+Replacements have much the same syntax as patterns.  The expressions are
+parsed in much the same way; however, one peculiarity of replacements is
+that bitwidths must be specified.  @ical{} has a typecaster that figures
+out whether each expression is 16 bits or 32 bits wide, but it runs
+before the optimizer, and as the optimizer can produce expressions whose
+bitwidths don't obey @ical{}'s rules, this information needs to be
+inserted somehow in a replacement.  In @cic{}, it usually doesn't matter
+what the bitwidth is, and in cases where it doesn't matter the normal
+operators (@code{$}, @code{~}, and so on) can be used.  (Note that the
+bit width of the entire replacement is always set to the same bit width
+as the bit width of the expression matched by the pattern; so you don't
+have to worry about the effect on unary logical operators that might be
+operating on the expression being optimized.  This is an exception to
+the normal bitwidth rules for a replacement.)  In cases where it does
+matter (due to @cic{}'s lenient interpretation of bitwidth on mingle
+inputs, the only place it matters is in the input to @ical{} unary
+logical operators), both the bidwidth of the operator and the argument
+on which it operates must be explicitly given, and given as the same
+value; to set the bitwidth of an operator's result, simply write the
+bitwidth (16 or 32 for onespot and twospot respectively) immediately
+after the operator; for instance, @code{!=32} will generate a not-equals
+operation with a 32-bit bitwidth.  If an operator's width is set to 16,
+and during the course of execution of the optimized program, a value
+that doesn't fit into 16 bits is encountered, that's undefined behaviour
+and anything might happen (most likely, though, the program will just
+act as though its width had been set to 32 bits instead); this error
+condition is not detected.
+
+@cindex operands, OIL, in replacements
+@cindex replacements, operands
+Replacement operands are simpler than pattern operands, because there
+are only a few forms they can take.
+
+@table @code
+@item _@var{NUMBER}
+@itemx .@var{NUMBER}
+@itemx :@var{NUMBER}
+
+This tells the optimiser to copy the operand or expression with
+reference number @var{NUMBER} to this point in the replacement used for
+the expression matched by the pattern.  The three forms are identical;
+the last two are provided for aesthetic reasons (it can look better and
+be clearer to match @code{.1} in the pattern with @code{.1} in the
+replacement, for instance).  You cannot use @code{#@var{NUMBER}} here to
+copy in a constant from the left-hand side, though, nor
+@code{#@{1@}@var{NUMBER}}, because the first means something else and
+the second is undefined behaviour (that is, no behaviour for the second
+case has been specifically implemented in the compiler and therefore its
+behaviour is unpredictable and subject to change in future versions);
+use @code{_@var{NUMBER}} to copy over a constant with an unknown at
+optimizer compile time (but known at optimize time) value from the left
+hand side, as you can do with any other operand being copied.
+
+@item #@var{NUMBER}
+
+Insert a constant with the literal value @var{NUMBER} here.
+
+@item #@{@var{EXPRESSION}@}0
+
+Calculate the value of @var{EXPRESSION} (a C expression, which can
+reference the same variables and functions as a C expression in a
+pattern can; @xref{C functions in OIL}.
+
+@end table
+
+As an example, here's an idiom that moves C bitwise AND operations
+inside leftshifts.  (This is useful because if the optimizer has
+generated a large sequence of mixed ANDs and bitshifts, moving all the
+ANDs to one end allows them to be clumped together and optimized down to
+one AND.)
+
+@example
+((_1 << #@{1@}2) & #@{1@}3)->((_1 & #@{x3>>x2@}0) << _2)
+@end example
+
+@node OIL Loops
+@appendixsec OIL Loops
+@cindex loops, OIL
+@cindex OIL, loops
+
+When writing idioms, sometimes instead of using very complicated
+expressions to try to match multiple situations at once it's easier to
+have a separate idiom for each possible situation; for instance, it's
+easier to write idioms for right-shift by 1, right-shift by 2,
+right-shift by 3, etc.@:, rather than a general idiom to rightshift by any
+amount.  When the idioms follow a pattern, as they will do in basically
+every case of this sort, it's possible to automatically generate them
+using a loop.  For instance, idioms to optimize a one-bit rightshift
+and a two-bit rightshift are:
+
+@example
+(_1~#@{xselx(x)<<1==x&&x@}2)->((_1&_2)>>#1)
+(_1~#@{xselx(x)<<2==x&&x@}2)->((_1&_2)>>#2)
+@end example
+
+Adding a loop to automatically generate the idioms, and placing a name
+for the group of idioms at the start, produces the following code:
+
+@example
+[rshift]
+<#1-#31
+(_1~#@{xselx(x)<<r==x&&x@}2)->((_1&_2)>>#@{r@}0)
+>
+@end example
+
+That's 31 different idioms, generated with a loop.  As the above example
+shows, a loop starts with @code{<#@var{NUMBER}-#@var{NUMBER}} and ends
+with @code{>}; a different idiom is generated for each possible value of
+the loop counter @code{r} in the range given by the opening line of the
+loop.  Loops must be placed around idioms, but inside a group of
+idioms.  Note the use of @code{#@{r@}0} to generate a constant whose
+value is equal to the value of the loop counter.
+
+@node OIL Tips
+@appendixsec OIL Tips
+@cindex tips, OIL
+@cindex OIL, tips
+
+Here are some tips for the best use of @acronym{OIL}:
+
+@itemize
+
+@item
+Not all idioms that you might want to write can be expressed in
+@acronym{OIL}, although most can.  (See the @file{idiotism.oil} file
+provided with the distribution for an example of where @acronym{OIL}
+gets stuck; it's due to tricky bitwidth problems.)  There are some
+reasonably obvious ways to fix this deficiency, but if you don't
+understand why a language which has no obvious problems but several
+subtle deficiencies is appropriate for @ical{}, you don't really get
+what @ical{} is about.
+
+@item
+@findex MAXTOFREE
+The @acronym{OIL} compiler has a few deficiencies, such as error
+messages that don't give you much of an idea of what you did wrong (to
+compensate for this, it does give a reasonably accurate line and
+character number where the error happened), limits on things like how
+deep expressions can be nested and how many idioms are allowed (if you
+hit the first, you should really break it up into smaller idioms if
+possible, and if you hit the second, increase @code{MAXTOFREE} in oil.y;
+this isn't a limit on the number of idioms but on the number of strings
+that are allocated internally to process the idioms), and lack of error
+checking (invalid @acronym{OIL} may produce errors in the @acronym{OIL}
+compiler, or cause the output C code to contain errors or warnings, or
+may even appear to work).
+
+@item
+When you have symmetrical operators in an idiom (like C binary logical
+operators), you need to write the idiom both ways round (in the same
+group of idioms, preferably), or write another idiom to standardise the
+format first; the first method can get very tedious when there are many
+symmetrical operators in an idiom, and the second is prone to optimizer
+loops and subtle errors (both methods have been used in the provided
+@file{idiotism.oil} file.)
+
+@item
+Idioms should preferably be as general as possible, broken down into
+many separate idioms rather than all as one big idiom, and match the
+smallest part of the expression being optimized that is necessary for
+the idiom to be correct in all cirucmstances; all of these help to
+improve the performance of the optimizer in terms of what it can
+optimize.
+
+@item
+If a program's optimizing incorrectly, or you just want to see how the
+optimizer deals with a particular program, it's possible to debug the
+optimizer by giving the @option{-h}, @option{-H}, or @option{-hH}
+(@pxref{-h}) switch to the @cic{} compiler, which will cause debug
+information to be output on stderr.  @option{-h} will show the initial
+and final expressions for each expression that was given as input to the
+optimizer, as well as a list of all optimizations used, in a language
+that's a sort of mix of C, @ical{}, and @acronym{OIL}; @option{-H} will
+do the same, and also show the intermediate stages in the optimization.
+@option{-hH} is like @option{-H}, but produces its output entirely in C,
+so that the various intermediate stages can be tried with a C compiler,
+or for people who are fed up of reading @ical{}.  @option{-H} can be a
+useful learning resource for people who want to understand how a
+particular @ical{} expression works.
+
+@item
+Make sure that the optimizer doesn't change a statement from a run-time
+error into something that silently succeeds@!  Checking which bits can
+and can't be 1 is one good way to avoid this, especially with mingles.
+(At present, there are some idioms that can turn run-time errors into
+compile-time errors, such as with the expression
+@code{''#65535$#65535'$#0'}; this could be avoided, but for the time
+being it isn't.)
+
+@item
+You can help@!  If you find an idiom that the optimizer isn't optimizing
+correctly, feel free to add it, or multiple idioms that come to the same
+thing, to @file{idiotism.oil}.  In such a case, it would help other
+users if you would submit your new optimizer idiom to the project
+(@pxref{Reporting Bugs}); this will help other users and future releases
+of @ical{}, and also has a chance of allowing other users to check your
+new idioms to see if they cause problems or could be written better.
+
+@end itemize
+
+@node OIL Example
+@appendixsec OIL Example
+@cindex OIL, example
+@cindex examples, OIL
+
+To finish off this appendix, here's an example of the power of
+@acronym{OIL}; this is the optimization of an idiom from the @icst{}
+system library, as shown with @option{-H}; this should give a good idea
+of how @acronym{OIL} programs work.  (All the relevant idioms are in
+@file{idiotism.oil} as of the time of writing.)  Note how the expression
+is reduced one small step at a time; the smallness of the steps makes
+the optimizer more general, because if the original expression had been
+slightly different, the optimizer wouldn't have come to the same result
+but could have optimized it quite a bit of the way, up to the point
+where the optimizations were no longer valid; in an older version of
+@ical{}, this idiom was simply hardcoded as a special case and so slight
+variations of it weren't optimized at all.  If you look at the idioms
+themselves, it'll also be apparent how @code{c} (the record of which
+bits of an expression can be 1 and which bits can't be) is important
+information in being able to apply an optimization more aggressively.
+
+@smallexample
+.3 <- ((((((((.3 $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[minglefold]
+.3 <- ((((((((.3 $ 0x0) ~ 0x2aaaaaab) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[lshift16]
+.3 <- ((((((((((.3 >> 0x0) & 0x7fff) << 0x1) | 0x0) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[noopor]
+.3 <- (((((((((.3 >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[minglefold]
+.3 <- (((((((((.3 >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ 0x2aaaaaab) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[lshift16]
+.3 <- (((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) | 0x0) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[noopor]
+.3 <- ((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
+[minglefold]
+.3 <- ((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ 0xaaaaaaf) $ 0x0) ~ (0xfff $ 0xf))
+[lshift16]
+.3 <- ((((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) | 0x0) $ 0x0) ~ (0xfff $ 0xf))
+[noopor]
+.3 <- (((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) $ 0x0) ~ (0xfff $ 0xf))
+[minglefold]
+.3 <- (((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) $ 0x0) ~ 0xaaaaff)
+[lshift16]
+.3 <- (((((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7) | 0x0)
+[noopor]
+.3 <- ((((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[nullshift]
+.3 <- (((((((((((.3 & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[combinelrshift]
+.3 <- ((((((((((.3 & 0x7fff) << 0x1) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[andintolshift]
+.3 <- ((((((((((.3 & 0x7fff) & 0x3fff) << 0x1) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[combinellshift]
+.3 <- (((((((((.3 & 0x7fff) & 0x3fff) << 0x2) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[combinelrshift]
+.3 <- ((((((((.3 & 0x7fff) & 0x3fff) << 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[andintolshift]
+.3 <- ((((((((.3 & 0x7fff) & 0x3fff) & 0xfff) << 0x1) << 0x3) >> 0x3) & 0x1ff) << 0x7)
+[combinellshift]
+.3 <- (((((((.3 & 0x7fff) & 0x3fff) & 0xfff) << 0x4) >> 0x3) & 0x1ff) << 0x7)
+[combinelrshift]
+.3 <- ((((((.3 & 0x7fff) & 0x3fff) & 0xfff) << 0x1) & 0x1ff) << 0x7)
+[andintolshift]
+.3 <- ((((((.3 & 0x7fff) & 0x3fff) & 0xfff) & 0xff) << 0x1) << 0x7)
+[combinellshift]
+.3 <- (((((.3 & 0x7fff) & 0x3fff) & 0xfff) & 0xff) << 0x8)
+[combineand]
+.3 <- ((((.3 & 0x3fff) & 0xfff) & 0xff) << 0x8)
+[combineand]
+.3 <- (((.3 & 0xfff) & 0xff) << 0x8)
+[combineand]
+.3 <- ((.3 & 0xff) << 0x8)
+@end smallexample
+
+@node Copying
+@appendix Copying
+@cindex copyright
+@cindex copying conditions
+
+The majority of the files in the @cic{} distribution are licensed under
+the GNU General Public License, but with some exceptions.  The files
+@file{ick-wrap.c} and @file{pickwrap.c} are licensed under a license
+that allows them to be used for any purpose and redistributed at will,
+and are explicitly not GPL'd.  This means that C source code generated
+by the compiler has the same copyright conditions as the original
+@ical{} source.  (Note that the libraries @file{libick.a} and
+@file{libickmt.a} are GPL, though, so you cannot redistribute an
+executable produced by @command{ick} or by linking a C file to either of
+those libraries unless the original @ical{} source was GPL.)  Also, this
+manual, and the files that are the source code for creating it, are
+licensed under the GNU Free Documentation License rather than the GPL,
+and the licenses themselves (@file{fdl-1-2.txi}, @file{gpl-2-0.txi}, and
+@file{COPYING.txt}) are licensed under a license that allows verbatim
+redistribution but not creation of derivative works.
+
+@menu
+* GNU General Public License::      License for copying source and binaries.
+* GNU Free Documentation License::  License for copying this manual.
+@end menu
+
+@node GNU General Public License
+@appendixsec GNU General Public License
+@cindex GPL
+@cindex GNU General Public License
+@cindex General Public License
+
+@include gpl-2-0.txi
+
+@node GNU Free Documentation License
+@appendixsec GNU Free Documentation License
+@cindex GFDL
+@cindex FDL
+@cindex GNU Free Documentation License
+@cindex Free Documentation License
+
+@include fdl-1-2.txi
+
+@node Main Index
+@unnumbered Index
+
+This is the index of everything in this manual.  (Note that in some
+versions of the manual this is called @samp{Main Index} to prevent it
+transforming into a page called @file{index.html} in the HTML version of
+the manual.  The complications that that caused were really odd.)
+
+@printindex cp
+
+@bye

@@ -12,11 +12,11 @@
 #define YYDEBUG 1
 #endif
 
-/* Comment this out if your version of lex automatically supplies yylineno. */
-#define YYLINENO_BY_HAND
-
-/* Comment this out if your version of lex doesn't use yyrestart(). */
-#define USE_YYRESTART
+/* AIS: This is now detected by autoconf and doesn't need to be set by the
+   user. */
+#ifdef NEED_YYRESTART
+# define USE_YYRESTART
+#endif
 
 #define YY_NO_UNPUT
 
@@ -37,7 +37,7 @@ typedef int	bool;
  * Maximum supported statement types; should be equal to (FROM - GETS + 1)
  * AIS: Changed this when I added new statements.
  */
-#define MAXTYPES	28
+#define MAXTYPES	30
 
 /* AIS: Maximum supported spark/ears nesting, divided by 32. The value given
    allows for 256 nested spark/ears groupings, which should be enough. */
@@ -73,6 +73,9 @@ typedef struct tuple_t
     bool                optversion;     /* AIS: Use an optimized version? (Only
 					   set if the optimizer thinks that
 					   it's safe.) */
+    bool                preproc;        /* AIS: Is this line a nonexistent one
+					   that was added to implement a
+					   command in the parser? */
     bool                warn112:1;      /* AIS: Should this line produce warning
 					   112 during degeneration? */
     bool warn128:1, warn534:1, warn018:1, warn016:1, warn276:1, warn239:1,
@@ -88,6 +91,12 @@ typedef struct tuple_t
     int lineno; 			/* source line for error messages */
     bool sharedline;			/* if NZ, two statements on a line */
     enum onceagain onceagainflag;       /* AIS: ONCE / AGAIN */
+    int ppnewtype;                      /* AIS: 'real' type of this line when
+					   the preprocessor is used; 0 on all
+					   statements but the 'real'
+					   statement */
+    signed setweave;                    /* AIS: +1 to turn weaving on, -1 to
+					   turn it off, before this command */
 } tuple;
 
 /* this maps the `external' name of a variable to an internal array index */
@@ -124,7 +133,7 @@ extern assoc vartypes[];
 /* the lexical analyzer keeps copies of the source logical lines */
 extern char **textlines;
 extern int textlinecount;
-extern int yylineno;
+extern int iyylineno;
 
 /* AIS: These are needed to sort out a grammar near-ambiguity */
 extern unsigned long sparkearsstack[SENESTMAX];

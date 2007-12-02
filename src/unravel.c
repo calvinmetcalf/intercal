@@ -29,8 +29,8 @@ LICENSE TERMS
    though I did it a completely different and less efficient way (I think we
    handled mutiple COME FROM recognition in much the same way). This file only
    contains functions necessary for multithreading; some of the code is stored
-   in feh.c (stored in strings), or in perpetrate.c (again stored in strings).
-   The information about the required syntax is in ick.y and lexer.l.
+   in feh2.c (stored in strings), or in perpet.c (again stored in strings).
+   The information about the required syntax is in parser.y and lexer.l.
    A small amount of the multithread code is in ick-wrap.c, although as that
    file is copied almost verbatim (although it's quite a big 'almost') into
    all ick output, it's guarded there by #if...#endif. The whole multithread
@@ -52,7 +52,7 @@ LICENSE TERMS
    multithread version. The only difference between them is this file,
    unravel.c, which is multithread only, so it seemed a good place for this
    comment. To see what the multithreading looks like in the object code,
-   see degenerated code or feh.c. */
+   see degenerated code or feh2.c. */
 
 /* This file also implements Backtracking INTERCAL, which is turned on with
    the same command-line option (-m). This implementation differs from
@@ -84,6 +84,7 @@ LICENSE TERMS
    compiled. */
 
 /* LINTLIBRARY */
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,6 +105,15 @@ extern int lineno; /* Keep track of error-message lines */
 
 extern int printflow; /* from arrgghh.c; a debug option */
 
+int weaving=0; /* Weave newly created threads? */
+
+/* Printflow debugging output */
+static void fluputs(char* s)
+{
+  printf("%s",s);
+  fflush(stdout);
+}
+
 /**********************************************************************
  *
  * This functions deal with choicepoints, which are implemented as
@@ -117,24 +127,30 @@ extern int printflow; /* from arrgghh.c; a debug option */
 void choicepoint(void)
 {
   ickthread* oldprev, *oldtc;
+  int oldweave;
   if(gonebackto)
   { /* Create a stale choicepoint */
-    if(printflow) printf("(back)");
+    if(printflow) fluputs("(back)");
     oldtc = topchoice;
     topchoice = (ickthread*) malloc(sizeof(ickthread));
     if(!topchoice) lose(E991, lineno, (char*) NULL);
-    topchoice->next = oldtc;
+    topchoice->choicepoint = oldtc;
     topchoice->stale = 1;
     topchoice->refcount = 1; /* At the moment, this is the only
 				thread looking at this choicepoint */
+    topchoice->dsi=topchoice;
+    topchoice->usesthis=0;
     return;
   }
   else
   { /* Create a new choicepoint */
-    if(printflow) printf("(maybe)");
+    if(printflow) fluputs("(maybe)");
     oldprev = ickmt_prev;
     choicing = 1;
+    oldweave = weaving;
+    weaving = 0;
     multicome1(lineno,btjb); /* Duplicate data */
+    weaving = oldweave;
     choicing = 0;
     oldprev->next = ickmt_cur;
     ickmt_prev->choicepoint = topchoice;
@@ -155,8 +171,6 @@ void choiceahead(void)
   ickthread* tempthread;
   jmp_buf fakepc;
 
-  if(printflow) printf("(ahead)");
-  
   if(!topchoice) lose(E404, lineno, (char*) NULL); /* That's what E404's for */
   /* GO AHEAD with multithreading requires care. The choicepoint should only
      be removed from this thread. topchoice = topchoice->next almost works, but
@@ -165,6 +179,7 @@ void choiceahead(void)
   /* If other threads are using the choicepoint, don't free it. */
   if(topchoice->refcount > 1)
   {
+    if(printflow) fluputs("(refahead)");
     topchoice->refcount--;
     topchoice = topchoice->choicepoint;
     return;
@@ -175,12 +190,15 @@ void choiceahead(void)
   /* Freeing a stale choicepoint (which contains no data) is easy. */
   if(topchoice->stale)
   {
+    if(printflow) fluputs("(destale)");
     tempthread = topchoice;
     topchoice = topchoice->choicepoint;
     free(tempthread);
     return;
   }
-  
+
+  if(printflow) fluputs("(ahead)");
+    
   /* This code works by converting topchoice back to a thread and placing it
      just before the current thread, and then killing it. First, the data from
      this thread, apart from the choicepoint stack, must be saved. */
@@ -220,7 +238,12 @@ void choiceahead(void)
 void choiceback(void)
 {
   if(!topchoice) lose(E404, lineno, (char *) NULL);
-  if(topchoice->stale) {if(printflow) printf("(back=)"); choiceahead(); return;}
+  if(topchoice->stale)
+  {
+    if(printflow) fluputs("(back=)");
+    choiceahead();
+    return;
+  }
   /* That's two simple cases out of the way (at least once choiceahead's
      been implemented). What we need to do to backtrack is to change
      topchoice to a thread after the current thread (rather than before
@@ -234,6 +257,7 @@ void choiceback(void)
     /* The Threaded INTERCAL standard states that if other threads are using
        the choicepoint, a GO BACK should cause the thread it's in to be
        killed. (Of course, if it's stale, it should just have been removed.)*/
+    if(printflow) fluputs("(desplit)");
     killthread();
     return;
   }
@@ -271,8 +295,10 @@ int multicome1(int errlineno, jmp_buf pc)
   ickmt_prev->next = newthread;
   newthread->next = ickmt_cur;
   ickmt_cur = newthread;
+  newthread->dsi=newthread;
+  newthread->usesthis=0;
 
-  if(printflow && !choicing) printf("(fork)");
+  if(printflow && !choicing) fluputs("(fork)");
 
   if(setjmp(fakepc) == 0)
   {
@@ -289,95 +315,172 @@ int multicome1(int errlineno, jmp_buf pc)
      use storing the values in the 'new' thread, so the 'old' thread
      needs new copies that it can modify independently. */
 
-  /* duplicate variables, forget indicators */
-  i = onespotcount;
-  tvp = onespots;
-  onespots = malloc(i * sizeof *onespots);
-  if(!onespots) lose(E991, errlineno, (char *) NULL);
-  memcpy(onespots, tvp, i * sizeof *onespots);
-  i = twospotcount;
-  tvp = twospots;
-  twospots = malloc(i * sizeof *twospots);
-  if(!twospots) lose(E991, errlineno, (char *) NULL);
-  memcpy(twospots, tvp, i * sizeof *twospots);
-  i = tailcount;
-  tvp = tails;
-  tails = malloc(i * sizeof *tails);
-  if(!tails) lose(E991, errlineno, (char *) NULL);
-  memcpy(tails, tvp, i * sizeof *tails);
-  i = hybridcount;
-  tvp = hybrids;
-  hybrids = malloc(i * sizeof *hybrids);
-  if(!hybrids) lose(E991, errlineno, (char *) NULL);
-  memcpy(hybrids, tvp, i * sizeof *hybrids);
-  i = onespotcount;
-  tvp = oneforget;
-  oneforget = malloc(i * sizeof *oneforget);
-  if(!oneforget) lose(E991, errlineno, (char *) NULL);
-  memcpy(oneforget, tvp, i * sizeof *oneforget);
-  i = twospotcount;
-  tvp = twoforget;
-  twoforget = malloc(i * sizeof *twoforget);
-  if(!twoforget) lose(E991, errlineno, (char *) NULL);
-  memcpy(twoforget, tvp, i * sizeof *twoforget);
-  i = tailcount;
-  tvp = tailforget;
-  tailforget = malloc(i * sizeof *tailforget);
-  if(!tailforget) lose(E991, errlineno, (char *) NULL);  
-  memcpy(tailforget, tvp, i * sizeof *tailforget);
-  i = hybridcount;
-  tvp = hyforget;
-  hyforget = malloc(i * sizeof *hyforget);
-  if(!hyforget) lose(E991, errlineno, (char *) NULL);  
-  memcpy(hyforget, tvp, i * sizeof *hyforget);
+  if(!weaving)
+  {
+    /* duplicate variables, forget indicators */
+    i = onespotcount;
+    tvp = onespots;
+    onespots = malloc(i * sizeof *onespots);
+    if(!onespots) lose(E991, errlineno, (char *) NULL);
+    memcpy(onespots, tvp, i * sizeof *onespots);
+    if(oo_onespots)
+    {
+      tvp = oo_onespots;
+      oo_onespots = malloc(i * sizeof *oo_onespots);
+      if(!oo_onespots) lose(E991, errlineno, (char *) NULL);
+      memcpy(oo_onespots, tvp, i * sizeof *oo_onespots);
+    }
+    i = twospotcount;
+    tvp = twospots;
+    twospots = malloc(i * sizeof *twospots);
+    if(!twospots) lose(E991, errlineno, (char *) NULL);
+    memcpy(twospots, tvp, i * sizeof *twospots);
+    if(oo_twospots)
+    {
+      tvp = oo_twospots;
+      oo_twospots = malloc(i * sizeof *oo_twospots);
+      if(!oo_twospots) lose(E991, errlineno, (char *) NULL);
+      memcpy(oo_twospots, tvp, i * sizeof *oo_twospots);
+    }
+    i = tailcount;
+    tvp = tails;
+    tails = malloc(i * sizeof *tails);
+    if(!tails) lose(E991, errlineno, (char *) NULL);
+    memcpy(tails, tvp, i * sizeof *tails);
+    i = hybridcount;
+    tvp = hybrids;
+    hybrids = malloc(i * sizeof *hybrids);
+    if(!hybrids) lose(E991, errlineno, (char *) NULL);
+    memcpy(hybrids, tvp, i * sizeof *hybrids);
+    i = onespotcount;
+    tvp = oneforget;
+    oneforget = malloc(i * sizeof *oneforget);
+    if(!oneforget) lose(E991, errlineno, (char *) NULL);
+    memcpy(oneforget, tvp, i * sizeof *oneforget);
+    i = twospotcount;
+    tvp = twoforget;
+    twoforget = malloc(i * sizeof *twoforget);
+    if(!twoforget) lose(E991, errlineno, (char *) NULL);
+    memcpy(twoforget, tvp, i * sizeof *twoforget);
+    i = tailcount;
+    tvp = tailforget;
+    tailforget = malloc(i * sizeof *tailforget);
+    if(!tailforget) lose(E991, errlineno, (char *) NULL);  
+    memcpy(tailforget, tvp, i * sizeof *tailforget);
+    i = hybridcount;
+    tvp = hyforget;
+    hyforget = malloc(i * sizeof *hyforget);
+    if(!hyforget) lose(E991, errlineno, (char *) NULL);  
+    memcpy(hyforget, tvp, i * sizeof *hyforget);
 
+  /* duplicate data stored in arrays */
+    j = tailcount;
+    while(j--)
+    {
+      a = tails+j; /* &(tails[j]) */
+      if(!a->rank||!a->dims) continue; /* don't duplicate a deallocated array */
+      tvp = a->dims;
+      /* Much of this code is paraphrased from the stashbox-copying code below,
+	 which was in turn paraphrased from a section in cesspool.c I didn't
+	 write. So any errors in this code are probably mine, but the algorithm
+	 isn't. */
+      a->dims = malloc(a->rank * sizeof(unsigned int));
+      memcpy(a->dims, tvp, a->rank * sizeof(unsigned int));
+      prod = !!a->rank;
+      i = a->rank;
+      while(i--) prod *= a->dims[i];
+      tvp = a->data.tail;
+      a->data.tail = malloc(prod * sizeof(type16));
+      if(!a->data.tail) lose(E991, errlineno, (char *) NULL);
+      memcpy(a->data.tail, tvp, prod * sizeof(type16));
+    }
+    j = hybridcount;
+    while(j--)
+    {
+      a = hybrids+j; /* &(hybrids[j]) */
+      if(!a->rank||!a->dims) continue; /* don't duplicate a deallocated array */
+      tvp = a->dims;
+      /* Much of this code is paraphrased from the stashbox-copying code below,
+	 which was in turn paraphrased from a section in cesspool.c I didn't
+	 write. So any errors in this code are probably mine, but the algorithm
+	 isn't. */
+      a->dims = malloc(a->rank * sizeof(unsigned int));
+      memcpy(a->dims, tvp, a->rank * sizeof(unsigned int));
+      prod = !!a->rank;
+      i = a->rank;
+      while(i--) prod *= a->dims[i];
+      tvp = a->data.hybrid;
+      a->data.hybrid = malloc(prod * sizeof(type32));
+      if(!a->data.hybrid) lose(E991, errlineno, (char *) NULL);
+      memcpy(a->data.hybrid, tvp, prod * sizeof(type32));
+    }
+
+    /* duplicate stashbox */
+    isb2 = first;
+    isbprev = (stashbox*)NULL;
+    while(isb2)
+    {
+      isb = (stashbox*)malloc(sizeof(stashbox));
+      if(!isb) lose(E991, errlineno, (char *) NULL);
+      memcpy(isb,isb2,sizeof(stashbox));
+      if(isbprev) isbprev->next = isb;
+      isbprev = isb;
+      if(isb2==first) first = isb; /* change first only the first time round */
+      if(isb->type == ONESPOT || isb->type == TWOSPOT)
+      { /* all copying already done */
+	isb2 = isb->next;
+	continue;
+      }
+      /* Copy the stashed array. Much of this code is paraphrased from some
+	 code in cesspool.c. In fact, it's the same, with a few idioms added
+	 and variable names changed. So, although it's in this file, I can't
+	 take the credit for it. */
+      isb->save.a = (array*)malloc(sizeof(array));
+      if(!isb->save.a) lose(E991, errlineno, (char *) NULL);
+      isb->save.a->rank = isb2->save.a->rank;
+      isb->save.a->dims = (unsigned int*)malloc(isb2->save.a->rank *
+						sizeof(unsigned int));
+      if(!isb->save.a->dims) lose(E991, errlineno, (char *) NULL);
+      memcpy(isb->save.a->dims, isb2->save.a->dims,
+	     isb2->save.a->rank * sizeof(unsigned int));
+      prod = !!isb2->save.a->rank; /* I use this idiom often enough in the
+				      code produced by my optimizer that I
+				      may as well use it here. */
+      i = isb2->save.a->rank;
+      while(i--) prod *= isb2->save.a->dims[i];
+      if(isb2->type == TAIL)
+      {
+	isb->save.a->data.tail = (type16*)malloc(prod * sizeof(type16));
+	if(!isb->save.a->data.tail) lose(E991, errlineno, (char *) NULL);
+	memcpy(isb->save.a->data.tail, isb2->save.a->data.tail,
+	       prod * sizeof(type16));
+      }
+      else
+      {
+	isb->save.a->data.hybrid = (type32*)malloc(prod * sizeof(type32));
+	if(!isb->save.a->data.hybrid) lose(E991, errlineno, (char *) NULL);
+	memcpy(isb->save.a->data.hybrid, isb2->save.a->data.hybrid,
+	       prod * sizeof(type32));      
+      }
+      isb2 = isb->next;
+    }
+  }
+  else /* we are weaving, reference the old current thread */
+  {
+    ickthread* tempthread;
+    if(printflow) fluputs("(weave)");
+    /* Sanity check to make sure that the threads are arranged correctly */
+    if(newthread->next!=ickmt_cur) lose(E778, errlineno, (char *) NULL);
+    tempthread=newthread->next; /* the old current thread */
+    while(tempthread->usesthis) tempthread=tempthread->usesthis;
+    newthread->dsi=tempthread->dsi;
+    tempthread->usesthis=newthread;
+  }
   /* duplicate NEXT stack */
   tvp = next;
   next = malloc(MAXNEXT * sizeof *next);
   if(!next) lose(E991, errlineno, (char *) NULL);  
   memcpy(next, tvp, MAXNEXT * sizeof *next);
-
-  /* duplicate data stored in arrays */
-  j = tailcount;
-  while(j--)
-  {
-    a = tails+j; /* &(tails[j]) */
-    if(!a->rank||!a->dims) continue; /* don't duplicate a deallocated array */
-    tvp = a->dims;
-    /* Much of this code is paraphrased from the stashbox-copying code below,
-       which was in turn paraphrased from a section in cesspool.c I didn't
-       write. So any errors in this code are probably mine, but the algorithm
-       isn't. */
-    a->dims = malloc(a->rank * sizeof(unsigned int));
-    memcpy(a->dims, tvp, a->rank * sizeof(unsigned int));
-    prod = !!a->rank;
-    i = a->rank;
-    while(i--) prod *= a->dims[i];
-    tvp = a->data.tail;
-    a->data.tail = malloc(prod * sizeof(type16));
-    if(!a->data.tail) lose(E991, errlineno, (char *) NULL);
-    memcpy(a->data.tail, tvp, prod * sizeof(type16));
-  }
-  j = hybridcount;
-  while(j--)
-  {
-    a = hybrids+j; /* &(hybrids[j]) */
-    if(!a->rank||!a->dims) continue; /* don't duplicate a deallocated array */
-    tvp = a->dims;
-    /* Much of this code is paraphrased from the stashbox-copying code below,
-       which was in turn paraphrased from a section in cesspool.c I didn't
-       write. So any errors in this code are probably mine, but the algorithm
-       isn't. */
-    a->dims = malloc(a->rank * sizeof(unsigned int));
-    memcpy(a->dims, tvp, a->rank * sizeof(unsigned int));
-    prod = !!a->rank;
-    i = a->rank;
-    while(i--) prod *= a->dims[i];
-    tvp = a->data.hybrid;
-    a->data.hybrid = malloc(prod * sizeof(type32));
-    if(!a->data.hybrid) lose(E991, errlineno, (char *) NULL);
-    memcpy(a->data.hybrid, tvp, prod * sizeof(type32));
-  }
 
   /* allow for multithreading with choicepoints on the stack */
   if(!choicing && topchoice)
@@ -393,55 +496,6 @@ int multicome1(int errlineno, jmp_buf pc)
        past a fork correctly. */
   }
   
-  /* duplicate stashbox */
-  isb2 = first;
-  isbprev = (stashbox*)NULL;
-  while(isb2)
-  {
-    isb = (stashbox*)malloc(sizeof(stashbox));
-    if(!isb) lose(E991, errlineno, (char *) NULL);
-    memcpy(isb,isb2,sizeof(stashbox));
-    if(isbprev) isbprev->next = isb;
-    isbprev = isb;
-    if(isb2==first) first = isb; /* change first only the first time round */
-    if(isb->type == ONESPOT || isb->type == TWOSPOT)
-    { /* all copying already done */
-      isb2 = isb->next;
-      continue;
-    }
-    /* Copy the stashed array. Much of this code is paraphrased from some
-       code in cesspool.c. In fact, it's the same, with a few idioms added
-       and variable names changed. So, although it's in this file, I can't
-       take the credit for it. */
-    isb->save.a = (array*)malloc(sizeof(array));
-    if(!isb->save.a) lose(E991, errlineno, (char *) NULL);
-    isb->save.a->rank = isb2->save.a->rank;
-    isb->save.a->dims = (unsigned int*)malloc(isb2->save.a->rank *
-					      sizeof(unsigned int));
-    if(!isb->save.a->dims) lose(E991, errlineno, (char *) NULL);
-    memcpy(isb->save.a->dims, isb2->save.a->dims,
-	   isb2->save.a->rank * sizeof(unsigned int));
-    prod = !!isb2->save.a->rank; /* I use this idiom often enough in the
-				    code produced by my optimizer that I
-				    may as well use it here. */
-    i = isb2->save.a->rank;
-    while(i--) prod *= isb2->save.a->dims[i];
-    if(isb2->type == TAIL)
-    {
-      isb->save.a->data.tail = (type16*)malloc(prod * sizeof(type16));
-      if(!isb->save.a->data.tail) lose(E991, errlineno, (char *) NULL);
-      memcpy(isb->save.a->data.tail, isb2->save.a->data.tail,
-	     prod * sizeof(type16));
-    }
-    else
-    {
-      isb->save.a->data.hybrid = (type32*)malloc(prod * sizeof(type32));
-      if(!isb->save.a->data.hybrid) lose(E991, errlineno, (char *) NULL);
-      memcpy(isb->save.a->data.hybrid, isb2->save.a->data.hybrid,
-	     prod * sizeof(type32));      
-    }
-    isb2 = isb->next;
-  }
   return 1; /* Tell the degenerated program to look for yet
 	       another COME FROM */
 }
@@ -467,6 +521,8 @@ void ickmtinit(void)
   ickmt_prev = ickmt_cur;
   ickmt_cur->next = ickmt_cur;
   topchoice = (ickthread*) NULL; /* No choicepoints */
+  ickmt_cur->dsi=ickmt_cur;
+  ickmt_cur->usesthis=0;
 }
 
 /* Destroys the current thread, and switches to the next thread.
@@ -477,44 +533,100 @@ void killthread(void)
   stashbox* isb, *isbi;
   int i;
 
-  if(printflow&&!choicing) printf("(kill)");
-  
-  /* Deallocate the current thread's data */
-  i=tailcount;
-  while(i--)
-  { /* free tail data */
-    if(!tails[i].rank||!tails[i].dims) continue; /* already free */
-    free(tails[i].dims);
-    free(tails[i].data.tail);
-  }
-  i=hybridcount;
-  while(i--)
-  { /* free hybrid data */
-    if(!hybrids[i].rank||!hybrids[i].dims) continue; /* already free */
-    free(hybrids[i].dims);
-    free(hybrids[i].data.hybrid);
-  }  
-  free(onespots); free(twospots); free(tails); free(hybrids);
-  free(oneforget); free(twoforget); free(tailforget); free(hyforget);
-  free(next); /* Free NEXT stack */
+  if(printflow&&!choicing) fluputs("(kill)");
+
   if(!choicing) while(topchoice) choiceahead();
   /* The above line will mark each of the choicepoints as no longer being
-     used by this thread, and free them if neccesary. */
-  isbi = first;
-  while(isbi) /* Free stash */
+     used by this thread, and free them if neccesary. This has to be done
+     first while this thread's pointers are still valid due to the way that
+     choiceahead works. */
+
+  /* If this thread uses another, let the other know about the change */
+  if(ickmt_cur->dsi!=ickmt_cur)
   {
-    isb=isbi->next;
-    if(isbi->type == TAIL || isbi->type == HYBRID)
+    ickthread* temp=ickmt_cur->dsi;
+    if(printflow) fluputs("(deweave)");
+    while(!temp||temp->usesthis!=ickmt_cur)
     {
-      free(isbi->save.a->dims);
-      if(isbi->type == TAIL)
-	free(isbi->save.a->data.tail);
-      else
-	free(isbi->save.a->data.hybrid);
+      if(!temp) lose(E778, -1, (char *) NULL);
+      temp=temp->usesthis;
     }
-    free(isbi);
-    isbi=isb;
+    temp->usesthis=ickmt_cur->usesthis;
   }
+  /* If this thread is holding data for others, move it somewhere safe */
+  if(ickmt_cur->usesthis&&ickmt_cur->usesthis->dsi==ickmt_cur)
+  {
+    ickthread* newuses=ickmt_cur->usesthis;
+    ickthread* temp=ickmt_cur->usesthis;
+    if(printflow) fluputs("(shift)");
+    while(temp)
+    {
+      temp->dsi=newuses;
+      temp=temp->usesthis;
+    }
+    ickmt_cur->dsi=newuses; /* so the data will be transferred later */
+  }
+
+  if(ickmt_cur->dsi==ickmt_cur)
+  {
+    /* We aren't storing data for another thread, and we have data of our own,
+       or dsi would point somewhere else (either naturally or because it was
+       changed higher up). */
+    if(printflow) fluputs("(free)");
+    /* Deallocate the current thread's data */
+    i=tailcount;
+    while(i--)
+    { /* free tail data */
+      if(!tails[i].rank||!tails[i].dims) continue; /* already free */
+      free(tails[i].dims);
+      free(tails[i].data.tail);
+    }
+    i=hybridcount;
+    while(i--)
+    { /* free hybrid data */
+      if(!hybrids[i].rank||!hybrids[i].dims) continue; /* already free */
+      free(hybrids[i].dims);
+      free(hybrids[i].data.hybrid);
+    }  
+    free(onespots); free(twospots); free(tails); free(hybrids);
+    free(oneforget); free(twoforget); free(tailforget); free(hyforget);
+    if(oo_onespots) free(oo_onespots); if(oo_twospots) free(oo_twospots);
+
+    isbi = first;
+    while(isbi) /* Free stash */
+    {
+      isb=isbi->next;
+      if(isbi->type == TAIL || isbi->type == HYBRID)
+      {
+	free(isbi->save.a->dims);
+	if(isbi->type == TAIL)
+	  free(isbi->save.a->data.tail);
+	else
+	  free(isbi->save.a->data.hybrid);
+      }
+      free(isbi);
+      isbi=isb;
+    }
+  }
+  else
+  {
+    /* We still need to save our variables for the benefit of woven threads. */
+    /* save variables */
+    ickmt_cur->dsi->varforget[0] = onespots;
+    ickmt_cur->dsi->varforget[1] = twospots;
+    ickmt_cur->dsi->varforget[2] = tails;
+    ickmt_cur->dsi->varforget[3] = hybrids;
+    ickmt_cur->dsi->varforget[4] = oneforget;
+    ickmt_cur->dsi->varforget[5] = twoforget;
+    ickmt_cur->dsi->varforget[6] = tailforget;
+    ickmt_cur->dsi->varforget[7] = hyforget;
+    ickmt_cur->dsi->varforget[8] = oo_onespots;
+    ickmt_cur->dsi->varforget[9] = oo_twospots;
+
+    /* save stashbox */
+    ickmt_cur->dsi->sb = first;
+  }
+  free(next); /* Free NEXT stack */
     
   ickmt_prev->next = ickmt_cur->next;
   if(ickmt_cur->next == ickmt_cur)
@@ -565,21 +677,23 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
      a goto seemed crystal-clear by comparison. */
   
   /* save variables */
-  ickmt_cur->varforget[0] = onespots;
-  ickmt_cur->varforget[1] = twospots;
-  ickmt_cur->varforget[2] = tails;
-  ickmt_cur->varforget[3] = hybrids;
-  ickmt_cur->varforget[4] = oneforget;
-  ickmt_cur->varforget[5] = twoforget;
-  ickmt_cur->varforget[6] = tailforget;
-  ickmt_cur->varforget[7] = hyforget;
+  ickmt_cur->dsi->varforget[0] = onespots;
+  ickmt_cur->dsi->varforget[1] = twospots;
+  ickmt_cur->dsi->varforget[2] = tails;
+  ickmt_cur->dsi->varforget[3] = hybrids;
+  ickmt_cur->dsi->varforget[4] = oneforget;
+  ickmt_cur->dsi->varforget[5] = twoforget;
+  ickmt_cur->dsi->varforget[6] = tailforget;
+  ickmt_cur->dsi->varforget[7] = hyforget;
+  ickmt_cur->dsi->varforget[8] = oo_onespots;
+  ickmt_cur->dsi->varforget[9] = oo_twospots;
 
   /* save NEXT stack */
   ickmt_cur->nextstack = next;
   ickmt_cur->nextpointer = nextindex;
 
   /* save stashbox */
-  ickmt_cur->sb = first;
+  ickmt_cur->dsi->sb = first;
 
   /* save choicepoints */
   if(!choicing) ickmt_cur->choicepoint = topchoice;
@@ -614,14 +728,16 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
   if(!(flags&2)) goto returnjmp;
 
   /* load variables */
-  onespots   = ickmt_cur->varforget[0];
-  twospots   = ickmt_cur->varforget[1];
-  tails      = ickmt_cur->varforget[2];
-  hybrids    = ickmt_cur->varforget[3];
-  oneforget  = ickmt_cur->varforget[4];
-  twoforget  = ickmt_cur->varforget[5];
-  tailforget = ickmt_cur->varforget[6];
-  hyforget   = ickmt_cur->varforget[7];
+  onespots    = ickmt_cur->dsi->varforget[0];
+  twospots    = ickmt_cur->dsi->varforget[1];
+  tails       = ickmt_cur->dsi->varforget[2];
+  hybrids     = ickmt_cur->dsi->varforget[3];
+  oneforget   = ickmt_cur->dsi->varforget[4];
+  twoforget   = ickmt_cur->dsi->varforget[5];
+  tailforget  = ickmt_cur->dsi->varforget[6];
+  hyforget    = ickmt_cur->dsi->varforget[7];
+  oo_onespots = ickmt_cur->dsi->varforget[8];
+  oo_twospots = ickmt_cur->dsi->varforget[9];
 
   /* load NEXT stack */
   next = ickmt_cur->nextstack;
@@ -631,7 +747,7 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
   if(!choicing) topchoice = ickmt_cur->choicepoint;
   
   /* load stashbox */
-  first = ickmt_cur->sb;
+  first = ickmt_cur->dsi->sb;
 
   /* load comefrom information */
   memcpy(cjb, ickmt_cur->cjb, sizeof(jmp_buf));

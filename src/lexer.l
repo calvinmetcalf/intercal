@@ -23,6 +23,7 @@ LICENSE TERMS
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -41,9 +42,7 @@ static int yywrap(void)
 }
 #endif /* yywrap */
 
-#ifdef YYLINENO_BY_HAND
-int 	yylineno = 1;
-#endif /* YYLINENO_BY_HAND */
+int 	iyylineno = 1;
 
 #ifdef MAIN
 YYSTYPE	yylval;
@@ -82,12 +81,12 @@ int lexer(void);
 static int myatoi(char *text);
 
 #define SETLINENO					\
-    {if (stbeginline == 0)	stbeginline = yylineno;	\
+    {if (stbeginline == 0)	stbeginline = iyylineno;\
      else if (stbeginline < 0)	stbeginline = 0;}
 
 /* AIS: Keep track of the spark/ears situation */
 #define STACKSPARKEARS(a) \
-    if (sparkearslev+1>=SENESTMAX*32) lose(E281, yylineno, (char*) NULL); \
+    if (sparkearslev+1>=SENESTMAX*32) lose(E281, iyylineno, (char*) NULL); \
     sparkearslev++; sparkearsstack[sparkearslev/32]<<=1; \
     sparkearsstack[sparkearslev/32]+=a
 #define CLEARSPARKEARSTACK {int i=SENESTMAX; \
@@ -151,9 +150,7 @@ int getc(FILE *fp)
 	{
 	    do {
 		c = fgetc(fp);
-#ifdef	YYLINENO_BY_HAND
-		if( c == '\n' ) yylineno++;
-#endif	/* YYLINENO_BY_HAND */
+		if( c == '\n' ) iyylineno++;
 	    } while
 		(c != '\\' && isspace(c));
 	}
@@ -175,7 +172,7 @@ int getc(FILE *fp)
 	{
 	    *lineptr = '\0';
 	    lineptr = linebuf;
-	    if (yylineno >= textlinecount)
+	    if (iyylineno >= textlinecount)
 	    {
 		textlinecount += ALLOC_CHUNK;
 		if (textlines)
@@ -184,15 +181,13 @@ int getc(FILE *fp)
 		else
 		    textlines = malloc(textlinecount * sizeof(char*));
 		if (!textlines)
-		    lose(E666, yylineno, (char *)NULL);
+		    lose(E666, iyylineno, (char *)NULL);
 	    }
-	    textlines[yylineno] = malloc(1 + strlen(linebuf));
-	    if (!textlines[yylineno])
-		lose(E666, yylineno, (char *)NULL);
-	    strcpy(textlines[yylineno], linebuf);
-#ifdef YYLINENO_BY_HAND
-	    yylineno++;
-#endif /* YYLINENO_BY_HAND */
+	    textlines[iyylineno] = malloc(1 + strlen(linebuf));
+	    if (!textlines[iyylineno])
+		lose(E666, iyylineno, (char *)NULL);
+	    strcpy(textlines[iyylineno], linebuf);
+	    iyylineno++;
 	    return('\n');
 	}
 	else
@@ -329,7 +324,7 @@ ITERUM          {return(AGAIN);}
                  if (yylval.numval && yylval.numval < 100)
 		   return(OHOHSEVEN);
 		 else
-		   lose(E017, yylineno, (char *)NULL);}
+		   lose(E017, iyylineno, (char *)NULL);}
 SUB		{return(SUB);}
 MULTIPLICATUS{W}A	|
 BY		{return(BY);}
@@ -411,6 +406,9 @@ DESPERARE	|
 GIVE{W}UP	{return(GIVE_UP);}
 CONOR{W}ITERUM  |
 TRY{W}AGAIN     {return(TRY_AGAIN);}
+WHILE           {return(WHILE); /* AIS. Latin for this is needed. */}
+WHILING         |
+LOOPING         {yylval.numval = WHILE; return(GERUND);}
 TRYING{W}AGAIN  {yylval.numval = TRY_AGAIN; return(GERUND);}
 GO{W}BACK       |
 REDIRE          {return(GO_BACK);}
@@ -484,7 +482,6 @@ void yyerror(char *errtype)
 #ifdef MAIN
     (void) printf("lextest: lexer error: %s.\n", errtype);
 #else /* MAIN */
-    /* lose(E017, yylineno, (char *)NULL); */
     (void) errtype;
 #endif /* MAIN */
 }

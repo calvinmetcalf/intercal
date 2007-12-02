@@ -13,51 +13,37 @@ bindir = @bindir@
 # Directory in which to install libraries.
 libdir = @libdir@
 # Directory to install data files.
-datadir = @datadir@/intercal-@PACKAGE_VERSION@
+datadir = @datadir@/ick-@PACKAGE_VERSION@
 # Directory to install the include files in.
-incdir = @includedir@/intercal-@PACKAGE_VERSION@
-
-# Program to install binaries
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-# Program to install the man page.
-INSTALL_DATA = @INSTALL_DATA@
-# Generic install program.
-INSTALL = @INSTALL@
+incdir = @includedir@/ick-@PACKAGE_VERSION@
+# Directory to install Info files in.
+infodir = @infodir@
 
 # This can be overridden from the command line
 DESTDIR=
 
-# Location of GNU GPL. This will be automatically copied if not required during install.
-# If not using install, change this to any copy of the GNU GPL that exists on your system.
-# This is required because the yuk debugger reads commands interactively, and so must be
-# able to display a copy of the GPL on demand. This is only possible if yuk can find a copy.
-# If you want to delete or move the distribution files, then you will have to move COPYING
-# to another directory; otherwise, you can aim this at COPYING.
-# It's also possible to aim this at a copy of COPYING from another GPL program.
-copyloc = ${DESTDIR}${datadir}/COPYING.txt
-
 CC = @CC@
-CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DYYDEBUG -DYUKCOPYLOC=\"$(copyloc)\" -O2 -W -Wall -I./src -I./temp
+CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKLIBDIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DYYDEBUG -O2 -W -Wall -I./src -I./temp
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXFLAGS=
 YACC = @YACC@
-YACCFLAGS = -d # -t
+YACCFLAGS = 
 
-LOADLIBS = @LIBS@ @INTLLIBS@ @LEXLIB@
+LOADLIBS = @LIBS@ @LEXLIB@
 
-CSOURCES = src/parser.y src/lexer.l src/feh2.c src/dekludge.c src/lose.c src/fiddle.c src/perpet.c src/unravel.c
+CSOURCES = src/parser.y src/lexer.l src/feh2.c src/dekludge.c src/lose.c src/fiddle.c src/perpet.c src/unravel.c src/uncommon.c
 ISOURCES = src/cesspool.c src/arrgghh.c src/ick-wrap.c src/numerals.c
 YSOURCES = src/yuk.c
-HEADERS = src/ick.h src/lose.h src/sizes.h src/abcess.h src/fiddle.h src/feh.h src/yuk.h
-BUILD = Makefile.in Makefile configure.ac configure config.h.in intercal.spec.in intercal.spec install.sh
-MISC = etc/intercal.el src/coopt.sh
+HEADERS = src/ick.h src/lose.h src/sizes.h src/abcess.h src/fiddle.h src/feh.h src/yuk.h src/uncommon.h
+BUILD = Makefile.in config.in config.sh src/configh.in ickspec.in ickspec src/cooptsh.in
+MISC = etc/intercal.el src/ctrlmfix.sh src/ctrlmfix.bat
 DOCS = BUGS.txt COPYING.txt NEWS.txt README.txt
 SOURCES = $(CSOURCES) $(ISOURCES) $(YSOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
 
-all: bin/ick lib/libick.a lib/libickmt.a lib/libyuk.a ial
+all: bin/ick@EXEEXT@ lib/libick.a lib/libickmt.a lib/libyuk.a ial
 
-ial: src/fiddle.h src/abcess.h src/lose.h src/yuk.h src/ick-wrap.c src/pickwrap.c src/coopt.sh pit/lib/syslib.i
+ial: src/fiddle.h src/abcess.h src/lose.h src/yuk.h src/ick-wrap.c src/pickwrap.c temp/coopt.sh pit/lib/syslib.i COPYING.txt
 	-cp src/fiddle.h include/fiddle.h
 	-cp src/abcess.h include/abcess.h
 	-cp src/lose.h include/lose.h
@@ -65,89 +51,102 @@ ial: src/fiddle.h src/abcess.h src/lose.h src/yuk.h src/ick-wrap.c src/pickwrap.
 	-cp pit/lib/syslib.i pit/lib/syslib.?i include
 	-cp src/ick-wrap.c lib/ick-wrap.c
 	-cp src/pickwrap.c lib/pickwrap.c
-	-cp src/coopt.sh lib/coopt.sh
+	-cp temp/coopt.sh lib/coopt.sh
+	-cp COPYING.txt lib/COPYING.txt
 
-copycopy: COPYING.txt
-	-mkdir $(DESTDIR)$(datadir)
-	-if cp $(copyloc) /dev/null ; then : ; else cp COPYING.txt $(copyloc) ; fi
+bin/ick@EXEEXT@: temp/parser.@OBJEXT@ temp/lexer.@OBJEXT@ temp/feh2.@OBJEXT@ temp/dekludge.@OBJEXT@ temp/idiotism.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/perpet.@OBJEXT@ temp/uncommon.@OBJEXT@
+	$(CC) temp/perpet.@OBJEXT@ temp/parser.@OBJEXT@ temp/lexer.@OBJEXT@ temp/feh2.@OBJEXT@ temp/dekludge.@OBJEXT@ temp/idiotism.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/uncommon.@OBJEXT@ $(LDFLAGS) -o bin/ick@EXEEXT@
 
-checkcopy:
-	@echo If the following line fails, change \"copyloc\" in your makefile.
-	cp $(copyloc) /dev/null
+temp/oil.c: src/oil.y temp/config.h
+	$(YACC) $(YACCFLAGS) src/oil.y
+	-rm -f temp/oil.c
+	mv y.tab.c temp/oil.c
 
-bin/ick: temp/parser.o temp/lexer.o temp/feh2.o temp/dekludge.o temp/lose.o temp/fiddle.o temp/perpet.o
-	$(CC) temp/perpet.o temp/ick.o temp/lexer.o temp/feh2.o temp/dekludge.o temp/lose.o temp/fiddle.o $(LDFLAGS) -o bin/ick
-
-temp/parser.h temp/parser.c: src/parser.y src/ick.h src/sizes.h src/feh.h src/lose.h
+temp/parser.h temp/parser.c: src/parser.y src/ick.h src/sizes.h src/feh.h src/lose.h temp/config.h
 	$(YACC) -d $(YACCFLAGS) src/parser.y
-	-rm temp/parser.c
+	-rm -f temp/parser.c
 	mv y.tab.c temp/parser.c
-	-rm temp/parser.h
+	-rm -f temp/parser.h
 	mv y.tab.h temp/parser.h
 
-temp/lexer.c: src/lexer.l src/ick.h src/lose.h
+temp/lexer.c: src/lexer.l src/ick.h src/lose.h temp/config.h
 	$(LEX) $(LEXFLAGS) src/lexer.l
-	-rm temp/lexer.c
-	mv lex.yy.c temp/lexer.c 
+	-rm -f temp/lexer.c
+	mv @LEX_OUTPUT_ROOT@.c temp/lexer.c 
 
-# Uncomment the following if using a stock lex
-# LEXLIBS = -ll
-bin/lextest: temp/parser.h src/lexer.c src/ick.h temp/lose.o
-	$(CC) -DMAIN src/lexer.c src/lose.o $(LEXLIBS) -o bin/lextest
+bin/lextest: temp/parser.h src/lexer.c src/ick.h temp/lose.@OBJEXT@
+	$(CC) -DMAIN src/lexer.c src/lose.@OBJEXT@ @LEXLIB@ -o bin/lextest
 
-temp/parser.o: temp/parser.c src/ick.h src/feh.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/ick.o temp/parser.c
-temp/lexer.o: temp/lexer.c temp/parser.h src/ick.h src/lose.h
-	$(CC) $(CFLAGS) -c -o temp/lexer.o temp/lexer.c
-temp/feh2.o: src/feh2.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/feh2.o src/feh2.c
-temp/dekludge.o: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/dekludge.o src/dekludge.c
-temp/perpet.o: src/perpet.c temp/parser.h src/ick.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/perpet.o src/perpet.c
-temp/cesspool.o: src/cesspool.c src/abcess.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/cesspool.o src/cesspool.c
-temp/numerals.o: src/numerals.c src/abcess.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/numerals.o src/numerals.c
-temp/unravel.o: src/unravel.c src/abcess.h src/lose.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/unravel.o src/unravel.c
-temp/lose.o: src/lose.c src/lose.h
-	$(CC) $(CFLAGS) -c -o temp/lose.o src/lose.c
-temp/fiddle.o: src/fiddle.c src/fiddle.h src/sizes.h
-	$(CC) $(CFLAGS) -c -o temp/fiddle.o src/fiddle.c
-temp/arrgghh.o: src/arrgghh.c
-	$(CC) $(CFLAGS) -c -o temp/arrgghh.o src/arrgghh.c
-temp/yuk.o: checkcopy src/yuk.h src/lose.h src/sizes.h src/abcess.h
-	$(CC) $(CFLAGS) -c -o temp/yuk.o src/yuk.c
+temp/oil@EXEEXT@: temp/oil.c temp/config.h
+	$(CC) $(CFLAGS) -o temp/oil@EXEEXT@ temp/oil.c
+temp/parser.@OBJEXT@: temp/parser.c src/ick.h src/feh.h src/lose.h src/sizes.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/parser.@OBJEXT@ temp/parser.c
+temp/lexer.@OBJEXT@: temp/lexer.c temp/parser.h src/ick.h src/lose.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/lexer.@OBJEXT@ temp/lexer.c
+temp/feh2.@OBJEXT@: src/feh2.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/feh2.@OBJEXT@ src/feh2.c
+temp/idiotism.c: src/idiotism.oil temp/oil@EXEEXT@
+	temp/oil@EXEEXT@ < src/idiotism.oil > temp/idiotism.c
+temp/idiotism.@OBJEXT@: temp/idiotism.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/idiotism.@OBJEXT@ temp/idiotism.c
+temp/dekludge.@OBJEXT@: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/dekludge.@OBJEXT@ src/dekludge.c
+temp/perpet.@OBJEXT@: src/perpet.c temp/parser.h src/ick.h src/lose.h src/sizes.h src/uncommon.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/perpet.@OBJEXT@ src/perpet.c
+temp/cesspool.@OBJEXT@: src/cesspool.c src/abcess.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/cesspool.@OBJEXT@ src/cesspool.c
+temp/numerals.@OBJEXT@: src/numerals.c src/abcess.h src/lose.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/numerals.@OBJEXT@ src/numerals.c
+temp/unravel.@OBJEXT@: src/unravel.c src/abcess.h src/lose.h src/sizes.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/unravel.@OBJEXT@ src/unravel.c
+temp/lose.@OBJEXT@: src/lose.c src/lose.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/lose.@OBJEXT@ src/lose.c
+temp/fiddle.@OBJEXT@: src/fiddle.c src/fiddle.h src/sizes.h
+	$(CC) $(CFLAGS) -c -o temp/fiddle.@OBJEXT@ src/fiddle.c
+temp/arrgghh.@OBJEXT@: src/arrgghh.c
+	$(CC) $(CFLAGS) -c -o temp/arrgghh.@OBJEXT@ src/arrgghh.c
+temp/uncommon.@OBJEXT@: src/uncommon.c src/uncommon.h
+	$(CC) $(CFLAGS) -c -o temp/uncommon.@OBJEXT@ src/uncommon.c
+temp/yuk.@OBJEXT@: src/yuk.c src/yuk.h src/lose.h src/sizes.h src/abcess.h src/uncommon.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/yuk.@OBJEXT@ src/yuk.c
 
-lib/libick.a: temp/cesspool.o temp/numerals.o temp/lose.o temp/fiddle.o temp/arrgghh.o
-	ar cr lib/libick.a temp/cesspool.o temp/numerals.o temp/lose.o temp/fiddle.o temp/arrgghh.o
-	-ranlib lib/libick.a
+lib/libick.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@
+	ar cr lib/libick.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@
+	@RANLIB@ lib/libick.a
 
-lib/libickmt.a: temp/cesspool.o temp/numerals.o temp/unravel.o temp/lose.o temp/fiddle.o temp/arrgghh.o
-	ar cr lib/libickmt.a temp/cesspool.o temp/numerals.o temp/unravel.o temp/lose.o temp/fiddle.o temp/arrgghh.o
-	-ranlib libickmt.a
+lib/libickmt.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/unravel.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@
+	ar cr lib/libickmt.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/unravel.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@
+	@RANLIB@ lib/libickmt.a
 
-lib/libyuk.a: temp/yuk.o
-	ar cr lib/libyuk.a temp/yuk.o
-	-ranlib lib/libyuk.a
+lib/libyuk.a: temp/yuk.@OBJEXT@ temp/uncommon.@OBJEXT@
+	ar cr lib/libyuk.a temp/yuk.@OBJEXT@ temp/uncommon.@OBJEXT@
+	@RANLIB@ lib/libyuk.a
 
-install: copycopy all
-	cp bin/ick $(DESTDIR)$(bindir)
+install: all
+	cp bin/ick@EXEEXT@ $(DESTDIR)$(bindir)
 	cp lib/libick.a $(DESTDIR)$(libdir)
 	cp lib/libickmt.a $(DESTDIR)$(libdir)
 	cp lib/libyuk.a $(DESTDIR)$(libdir)
 	-mkdir -p $(DESTDIR)$(incdir)
 	cp src/lose.h src/abcess.h src/fiddle.h src/yuk.h $(DESTDIR)$(incdir)
 	-mkdir $(DESTDIR)$(datadir)
-	(cp -r pit $(DESTDIR)$(datadir))
 	cp src/ick-wrap.c $(DESTDIR)$(datadir)
-	cp etc/coopt.sh $(DESTDIR)$(bindir)
+	cp include/syslib.i include/syslib.?i $(DESTDIR)$(datadir)
+	cp temp/coopt.sh $(DESTDIR)$(libdir)
+	cp COPYING.txt $(DESTDIR)$(libdir)
+	rm -f $(DESTDIR)$(infodir)/ick.info
+	cp doc/ick.inf $(DESTDIR)$(infodir)
+	-mv $(DESTDIR)$(infodir)/ick.inf $(DESTDIR)$(infodir)/ick.info
+# Note that it's necessary to copy the info file to .inf on an 8.3 system
+# and .info otherwise; this is done by copying it to .inf, and then renaming
+# to .info; on an 8.3 system, this leaves the extension as .inf because mv
+# will signal an (unimportant) error.
 
 uninstall:
-	rm -f $(DESTDIR)$(bindir)/ick $(DESTDIR)$(libdir)/libick.a
-	rm -f $(DESTDIR)$(bindir)/coopt.sh
+	rm -f $(DESTDIR)$(bindir)/ick@EXEEXT@ $(DESTDIR)$(libdir)/libick.a
+	rm -f $(DESTDIR)$(libdir)/coopt.sh $(DESTDIR)$(libdir)/COPYING.txt
 	rm -f $(DESTDIR)$(libdir)/libickmt.a $(DESTDIR)$(libdir)/libyuk.a
+	rm -f ${DESTDIR}${infodir}/ick.inf $(DESTDIR)$(infodir)/ick.info
 	rm -fr $(DESTDIR)$(incdir) $(DESTDIR)$(datadir)
 
 TAGS: $(SOURCES)
@@ -162,7 +161,14 @@ ick-@PACKAGE_VERSION@.tgz: $(SOURCES)
 	@(cd ..; rm ick-@PACKAGE_VERSION@)
 
 clean:
-	rm -f temp/* bin/* lib/* include/*
+	-cp temp/config.h .
+	-rm -f temp/* bin/* lib/* include/*
+	mv config.h temp
 
 distr:
-	rm -f temp/*.o bin/* lib/* include/*
+	-rm -f temp/*.@OBJEXT@ temp/parser.h temp/oil@EXEEXT@ temp/idiotism.c
+	-rm -f bin/* lib/* include/*
+
+distclean: distr
+	-rm -f config.status config.cache config.log Makefile
+	-rm -f temp/config.h temp/coopt.sh

@@ -35,7 +35,9 @@ $E
 $P
 int main(int argc, char *argv[])
 {
+#ifndef YUK
     parseargs(argc,argv);
+#endif
 
     skipto = 0;
 
@@ -45,6 +47,8 @@ $N
 #ifdef YUK
     yuklines = $J;
     yukcommands = $B;
+    globalargv = argv;
+    globalargc = argc;
 #endif
     /* set seed for random error generation */
 #ifdef USG

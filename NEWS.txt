@@ -1,5 +1,86 @@
 			NEW IN THIS RELEASE
 
+  Release 0.27 (by Alex Smith)
+
+1.  Joris Huizer pointed out that the manual nowhere says that a GIVE UP line
+    can't be abstained from by line number. This was probably a mistake in the
+    INTERCAL-72 manual, but the behaviour specified by the original manual is
+    now implemented; after all, it wouldn't do to violate the original de facto
+    standard. (Note that if a GIVE UP line is abstained by line number, there
+    is then no way to reinstate it; also, if the -X switch for CLC-INTERCAL
+    compatibility is used, ABSTAINING FROM a GIVE UP line by line number is
+    also silently ignored.)
+
+2.  Rewrote the optimizer in a language (OIL) invented specifically for the
+    purpose; the set of optimizer idioms is now in idiotism.oil, and translated
+    into C and linked with the rest of the compiler at compile time. It
+    contains many of the same idioms, but some have been generalised or reduced
+    into smaller parts and some new ones were added.
+
+3.  Joris Huizer submitted a patch to fix a memory allocation bug which
+    occasionally caused memory corruption when a program had a number of
+    commands that was 1 less than a multiple of 256.
+
+4.  Completely redid the autoconfiguration. The install should now progress
+    with less user interaction than before. As a bonus, if you have a range of
+    GNU utilities including make, sed, tr, and bash (and possibly others),
+    it's now possible to compile using 'sh config.sh' followed by 'make' under
+    DJGPP. (To be specific, some settings that previously sometimes had to be
+    set by the user, such as whether lex provided yylineno and yyrestart, are
+    now either detected by config.sh or no longer relevant. Other settings that
+    were not previously detected, such as what extension executables have, are
+    now detected so that config.sh works on DJGPP as well, now. Note that if
+    config.in is translated to config.sh on a non-DJGPP system, it might cause
+    the resulting shell script to fail on DJGPP; this is an upstream problem.)
+    The autoconfigurer now also adapts coopt.sh so that -F works on DJGPP too,
+    sort of (or else detects that it won't work and disables it).
+
+5.  Improved the action of 'make install', so that it actually installs
+    everything in the right place. It works under DJGPP, now, too, as long as
+    you have the programs installed that allow config.sh and make to work.
+
+6.  Fixed a bug involving COME FROM in multithreaded programs; now, if a line
+    COMEs FROM itself (either because this is written explicitly or because it
+    is a computed COME FROM computing to its own line number), the loop this
+    creates doesn't block all the other threads in the program.
+
+7.  Added support for statement WHILE statement, with similar semantics to CLC-
+    INTERCAL. (The second statement is repeated for as long as the first
+    statement is executing; NEXTing to the statement nexts to the first
+    statement and doesn't set off the loop, and COMING or NEXTING FROM the
+    first statement leaves the loop running until the NEXT FROM returns.) With
+    the current implementation, strange things happen if the same WHILE is
+    simultaneously run by multiple threads, although I decided to work out
+    exactly what the rules were anyway and document them, so those strange
+    things are now official.
+
+8.  Fixed some weird bugs in the multithreader that could cause segfaults in
+    several situations involving backtracking; it's kind of surprising that
+    they didn't turn up sooner.
+
+9.  Prevented a segfault in some situations where a syntax error was the
+    target of a noncomputed COME FROM or NEXT FROM.
+
+10. CALCULATING now includes array dimensioning. (There previously was no
+    gerund for this situation; the original manual doesn't say what to do but
+    implies that this is a special case of calculate.)
+
+11. Made operand overloading interact more sensibly with multithreading.
+    Previously, overloading information was shared between all threads, but the
+    stashes for operand overloading were separate in each thread. Now, the
+    overloading is not shared between threads, except when they are woven by a
+    WHILE statement.
+
+12. There's no longer a need to set or modify copyloc in the makefile by hand;
+    COPYING.txt is now found the same way as syslib and the skeleton. It's also
+    now copied out of the distribution to the same place as the other data
+    files when installing, preventing the need to keep the original
+    installation directory around.
+
+13. The compiler now actually looks for a temporary directory to place a file
+    in when creating a temporary file; this was meant to be fixed in 1.26, but
+    the fix didn't actually work.
+
   Release 1.26 (by Alex Smith) [a bugfix of 0.26]
 
 1.  Fixed an optimizer bug (thanks to Joris Huizer for pointing it out),

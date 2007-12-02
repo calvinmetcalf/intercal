@@ -1,0 +1,73 @@
+A WHILE command starts two threads (the original thread that ran that 
+command and a new one), one of which runs the command to the left and 
+one of which runs the command to the right. Any line number applies to 
+the left-hand command, not the WHILE as a whole, which is a 
+metalanguage construct. NEXTING FROM, ABSTAINING FROM or similar 
+behaviour with respect to the WHILE itself is impossible, although 
+it's certainly possible to abstain from either of its operands or next 
+from the left operands (and abstaining from the left operand has much 
+the same effect as abstaining from the WHILE itself; the right-hand 
+thread deliberately takes a bit of time to get started so that this 
+behaviour happens). The right-command thread starts just before the 
+left command is run (so NEXTing, etc., directly to the left command 
+will not start that loop in the first place); if that command finishes 
+(which may be almost immediately for something like CALCULATE, or take 
+a long time for something like NEXT), that thread loops and reruns 
+that command as long as the left command has not finished; COMING FROM 
+that command, or a NEXT/NEXT FROM from/aiming at that command, doesn't 
+count as finishing that command until it is RESUMEd back to (if 
+possible; if it's come from, that command can never end and the right- 
+hand loop will continue forever). A WHILE command itself exists across 
+all threads of a multithreaded program in a way; for each left-hand 
+command that ends (in any thread), the next time a right-hand command 
+ends it will cause the thread it's looping in to end, regardless of 
+whether that thread corresponds to the thread in which the left-hand 
+command ended. (As well as a right-hand command ending, there's also 
+the possibility that it never got started; there is a delay before the 
+right-hand command runs during which a left-hand command ending can 
+prevent the right-hand thread starting in the first place; this counts 
+as the same sort of event as terminating a right-hand loop, and can 
+substitute for it anywhere a right-hand command ending is mentioned.) 
+There is one exception, in that if two or more left-hand commands end 
+in a space of time in which no right-hand commands for that WHILE 
+ends, they together only cause one right-hand command to end. [This 
+particular behaviour is one of my main concessions to the way the 
+compiler actually behaves, as opposed to the way it 'ought' to behave 
+in some sense; it would be more orthogonal and logical to end the same 
+number of right-hand threads as left-hand threads in this situation, 
+but as this INTERCAL I'm going with the counterintuitive version of 
+the behaviour documented here.] 
+
+
+The two threads produced by a WHILE (the original thread and a new 
+copy of it) have more in common than ordinary INTERCAL threads created 
+by COME FROM; ordinary threads share only ABSTAIN/REINSTATE 
+information, whereas the WHILE-produced threads count as 'woven' 
+threads which also share variables and stashes. (They still have 
+separate instruction pointers, separate IP stacks, such as the NEXT 
+stack, and separate choicepoint lists. Overloading information in my 
+current working version of C-INTERCAL (and in the released version 
+1.26) is shared between all threads, but this is a bug which I intend 
+to fix before the next release, and weaving ought to also share 
+overloading information.) Being woven is a relationship between two or 
+more threads, rather than an attribute of a thread. 
+
+
+Ordinary multithreading cannot create woven threads. When threads are 
+created by multiple COME FROMs from an original thread, which was 
+woven with at least one other thread, one of the resulting threads (an 
+implementation can choose to always select the same one, or to 
+randomize, or use any other means of selection as long as it always 
+chooses exactly one; I hope to cause this to say 'a random thread' in 
+the future, to make programming with woven threads more interesting, 
+but I haven't figured out how to implement that yet) counts as the 
+'original' thread and remains woven; the rest are 'new' threads which 
+initially start out with the same data as the original, but are not 
+woven with anything. Backtracking in a thread causes it to unweave 
+with any threads it may be woven with at the time (so the data in the 
+thread that backtracks is set back to the data it, and the threads it 
+was woven with at the time, had at the time of the MAYBE, but the 
+other threads continue with the same data as before). The only way to 
+cause three or more threads to become woven is with a new WHILE inside 
+one of the threads that is already woven, which causes all the new 
+threads to be woven together (the weaving relationship is transitive). 

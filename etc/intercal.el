@@ -91,6 +91,7 @@
   (define-abbrev intercal-mode-abbrev-table "wr"  "" 'intercal-wr-abbrev)
   (define-abbrev intercal-mode-abbrev-table "co"  "" 'intercal-co-abbrev)
   (define-abbrev intercal-mode-abbrev-table "do"  "" 'intercal-do-abbrev)
+  (define-abbrev intercal-mode-abbrev-table "wh"  "" 'intercal-wh-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "goa" "" 'intercal-goa-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "gob" "" 'intercal-gob-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "ma"  "MAYBE" nil) ;AIS
@@ -121,6 +122,7 @@
 (make-intercal-abbrev intercal-co-abbrev "COMING FROM" "COME FROM")
 (make-intercal-abbrev intercal-tr-abbrev "TRYING AGAIN" "TRY AGAIN") ;AIS
 (make-intercal-abbrev intercal-cal-abbrev "CALCULATING" "cal") ;AIS
+(make-intercal-abbrev intercal-wh-abbrev "WHILING" "WHILE") ;AIS
 (make-intercal-abbrev intercal-goa-abbrev "GOING AHEAD" "GO AHEAD") ;AIS
 (make-intercal-abbrev intercal-gob-abbrev "GOING BACK" "GO BACK") ;AIS
 

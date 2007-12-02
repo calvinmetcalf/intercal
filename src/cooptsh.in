@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 ###########################################################################
 #
 # Name
@@ -34,12 +34,13 @@
 ###########################################################################
 
 rm icktemp.out >/dev/null 2>/dev/null
-if $1 +mystery >icktemp.out 2>/dev/null ; then : ; else exit 0 ; fi
+if $1@EXEEXT@ +mystery >icktemp.out 2>/dev/null ; then : ; else
+rm icktemp.out ; exit 0 ; fi
 if grep 'ickoutTERM???!' icktemp.out ; then rm icktemp.out ; exit 0 ; fi
 echo 'ickoutTERM???!' >> icktemp.out
-rm $1
-echo "#!/bin/sh
-cat <<'ickoutTERM???!'" | cat - icktemp.out > $1
-chmod +x $1
+rm $1@EXEEXT@
+echo "#! /bin/sh
+cat <<'ickoutTERM???!'" | cat - icktemp.out > $1@EXEEXT@
+chmod +x $1@EXEEXT@
 rm icktemp.out
 exit 0

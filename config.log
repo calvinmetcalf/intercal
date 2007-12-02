@@ -1,0 +1,127 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:534: checking for bison
+configure:572: checking for gcc
+configure:700: checking whether the C compiler (gcc  ) works
+configure:716: gcc -o conftest    conftest.c  1>&5
+configure:742: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:747: checking whether we are using GNU C
+configure:756: gcc -E conftest.c
+configure:775: checking whether gcc accepts -g
+configure:809: checking for flex
+configure:848: checking for yywrap in -lfl
+configure:867: gcc -o conftest -g -O2   conftest.c -lfl   1>&5
+configure:892: checking for ranlib
+configure:927: checking how to run the C preprocessor
+configure:948: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1007: checking for ANSI C header files
+configure:1020: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1087: gcc -o conftest -g -O2   conftest.c  1>&5
+configure: In function 'main':
+configure:1082: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1114: checking for sys/time.h
+configure:1124: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1114: checking for unistd.h
+configure:1124: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1152: checking for working const
+configure:1206: gcc -c -g -O2  conftest.c 1>&5
+configure:1227: checking size of long long int
+configure:1246: gcc -o conftest -g -O2   conftest.c  1>&5
+configure: In function 'main':
+configure:1240: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1266: checking size of _Bool
+configure:1285: gcc -o conftest -g -O2   conftest.c  1>&5
+configure: In function 'main':
+configure:1279: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1305: checking whether time.h and sys/time.h may both be included
+configure:1319: gcc -c -g -O2  conftest.c 1>&5
+configure:1340: checking for Cygwin environment
+configure:1356: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:1352: error: '__CYGWIN32__' undeclared (first use in this function)
+configure:1352: error: (Each undeclared identifier is reported only once
+configure:1352: error: for each function it appears in.)
+configure: failed program was:
+#line 1345 "configure"
+#include "confdefs.h"
+
+int main() {
+
+#ifndef __CYGWIN__
+#define __CYGWIN__ __CYGWIN32__
+#endif
+return __CYGWIN__;
+; return 0; }
+configure:1373: checking for mingw32 environment
+configure:1385: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:1381: error: '__MINGW32__' undeclared (first use in this function)
+configure:1381: error: (Each undeclared identifier is reported only once
+configure:1381: error: for each function it appears in.)
+configure: failed program was:
+#line 1378 "configure"
+#include "confdefs.h"
+
+int main() {
+return __MINGW32__;
+; return 0; }
+configure:1404: checking for executable suffix
+configure:1414: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:1435: checking for object suffix
+configure:1441: gcc -c -g -O2  conftest.c 1>&5
+configure:1459: checking lex output file root
+configure:1480: checking whether yytext is a pointer
+configure:1499: gcc -o conftest.exe -g -O2   conftest.c  -lfl 1>&5
+configure:1523: checking whether #! works in shell scripts
+configure:1545: checking whether yyrestart() is needed
+configure:1559: gcc -c -g -O2  conftest.c 1>&5
+In file included from configure:1552:
+<stdin>:3: error: conflicting types for 'yyrestart'
+lexyy.c:1064: error: previous definition of 'yyrestart' was here
+configure: failed program was:
+#line 1551 "configure"
+#include "confdefs.h"
+#include "lexyy.c"
+
+int main() {
+exit(0);
+; return 0; }
+configure:1587: checking return type of signal handlers
+configure:1609: gcc -c -g -O2  conftest.c 1>&5
+configure:1630: checking for gettimeofday
+configure:1658: gcc -o conftest.exe -g -O2   conftest.c  1>&5
+configure:1630: checking for gethrtime
+configure:1658: gcc -o conftest.exe -g -O2   conftest.c  1>&5
+c:\djgpp\tmp/ccgmBLT8.o: In function `main':
+c:/Documents and Settings/Alex/My Documents/esoteric/intercal/ick-0.27/configure:1652: undefined reference to `_gethrtime'
+collect2: ld returned 1 exit status
+configure: failed program was:
+#line 1635 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char gethrtime(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char gethrtime();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_gethrtime) || defined (__stub___gethrtime)
+choke me
+#else
+gethrtime();
+#endif
+
+; return 0; }
+configure:1630: checking for strdup
+configure:1658: gcc -o conftest.exe -g -O2   conftest.c  1>&5
+configure:1630: checking for strtol
+configure:1658: gcc -o conftest.exe -g -O2   conftest.c  1>&5
+configure:1630: checking for strtoul
+configure:1658: gcc -o conftest.exe -g -O2   conftest.c  1>&5

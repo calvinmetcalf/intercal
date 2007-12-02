@@ -24,7 +24,6 @@ LICENSE TERMS
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <setjmp.h>
 #include "abcess.h"
@@ -78,7 +77,6 @@ parseargs(int argc, char **argv)
 	    fprintf(stderr,
 		    "Once you start messing with INTERCAL... \n");
 	    fprintf(stderr,"\t\tthere is no help for you!\n\n");
-	    sleep(3);
 	}
 	fprintf(stderr,"Current flags (and current state) are:\n");
 	for(i = 0;i < nflags;i++) {
@@ -91,7 +89,6 @@ parseargs(int argc, char **argv)
 	fprintf(stderr," do anything, but you can switch them on or off\n");
 	fprintf(stderr," if you like anyway. Isn't this helpful?\n\n");
 	fflush(stderr);
-	sleep(3);
 	lose(E778, 0, (char *)NULL);
     }
     if(wimp_mode) {

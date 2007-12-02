@@ -5,12 +5,13 @@
 
 
 dtou *.*
+dtou ickspec
 dtou etc/intercal.el
 dtou src/*.c
 dtou src/*.h
 dtou src/*.l
 dtou src/*.y
-dtou src/*.sh
+dtou src/*.in
 dtou pit/*.doc
 dtou pit/*.i
 dtou pit/tests/*.doc

@@ -8,7 +8,7 @@ README.txt
 bin
 cleanick.bat
 cleanick.sh
-config.ac
+config.in
 config.sh
 districk.bat
 districk.sh
@@ -17,7 +17,6 @@ etc
 ickspec
 ickspec.in
 include
-install.sh
 lib
 makeick.bat
 makeick.sh
@@ -33,6 +32,7 @@ READ.ME
 THEORY
 chip.spec
 intercal.mm
+oil.txt
 
 ./etc:
 ctrlmfix.bat
@@ -150,12 +150,15 @@ testops.5i
 testsplat.i
 version.4i
 version.doc
+whileadd.i
 
 ./src:
 abcess.h
 arrgghh.c
 cesspool.c
-coopt.sh
+configdj.h
+configh.in
+cooptsh.in
 dekludge.c
 feh.h
 feh2.c
@@ -163,10 +166,12 @@ fiddle.c
 fiddle.h
 ick-wrap.c
 ick.h
+idiotism.oil
 lexer.l
 lose.c
 lose.h
 numerals.c
+oil.y
 parser.y
 perpet.c
 pick1.h
@@ -179,5 +184,5 @@ yuk.h
 
 ./temp:
 lexer.c
+oil.c
 parser.c
-parser.h

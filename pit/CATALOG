@@ -113,6 +113,7 @@ by Alex Smith
   tests/arrtest.doc   The history behind those changes
   tests/permute.i     A permutation-printing program to test backtracking
   tests/permute.doc   Information about the permutation-printer
+  tests/whileadd.i    Adds two input numbers with a single WHILE statement
   sort.i              An insertion-sort program testing computed ABSTAIN
 
 by Malcom Ryan

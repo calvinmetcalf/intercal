@@ -86,7 +86,7 @@ uses, because it's the default everywhere it isn't illegal).
 
 The solution I've used places a limit on the maximum nesting depth of
 an expression. Strangely, it also limits the number of sparks and ears
-that can be written into a 'comment' to 31. As care has to be taken
+that can be written into a 'comment' to 256. As care has to be taken
 anyway that malformed abstained statements don't look sufficiently
 like real statements to cause errors, this should be a trivial extra
 addition.
@@ -101,3 +101,4 @@ far as degenerating C code. I don't believe every line would have come
 out as a valid statement in any version of INTERCAL 0.24 or earlier
 (except the one labeled as invalid, which would have come out as valid
 but is really bad style anyway).
+
