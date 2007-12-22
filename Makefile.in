@@ -28,6 +28,8 @@ incdir = @includedir@/$(ick_specific_subdir)
 infodir = @infodir@
 # Directory to install manpages in.
 mandir = @mandir@
+# Directory file for Info installation.
+infodirfile = @INFODIRFILE@
 
 # This can be overridden from the command line
 DESTDIR=
@@ -213,7 +215,9 @@ install-common: all
 	-mkdir -p $(DESTDIR)$(infodir)
 	rm -f $(DESTDIR)$(infodir)/ick.info
 	cp doc/ick.inf $(DESTDIR)$(infodir)
-	(mv $(DESTDIR)$(infodir)/ick.inf $(DESTDIR)$(infodir)/ick.info && @INSTALLINFO@ --quiet $(DESTDIR)$(infodir)/ick.info) || @INSTALLINFO@ --quiet $(DESTDIR)$(infodir)/ick.inf
+	mv $(DESTDIR)$(infodir)/ick.inf $(DESTDIR)$(infodir)/ick.info
+	sh -c "(test -f $(DESTDIR)$(infodir)/ick.info && @INSTALLINFO@ --quiet $(DESTDIR)$(infodir)/ick.info $(infodirfile)) || true"
+	sh -c "(test -f $(DESTDIR)$(infodir)/ick.inf && @INSTALLINFO@ --quiet $(DESTDIR)$(infodir)/ick.inf $(infodirfile)) || true"
 # Note that it's necessary to copy the info file to .inf on an 8.3 system
 # and .info otherwise; this is done by copying it to .inf, and then renaming
 # to .info; on an 8.3 system, this leaves the extension as .inf because mv
@@ -228,21 +232,22 @@ install: install-common
 	-gzip -9 -f $(DESTDIR)$(infodir)/ick.i*[fo]
 	-gzip -9 -f $(DESTDIR)$(mandir)/man1/ick.1
 	-gzip -9 -f $(DESTDIR)$(mandir)/man1/convickt.1
-	@MANDB@ -q
+	sh -c "@MANDB@ -q"
 
 # install without gzipping the docs
 install-nozip: install-common
-	@MANDB@ -q
+	sh -c "@MANDB@ -q"
 
 uninstall:
-	@INSTALLINFO@ --quiet --remove ick
+	sh -c "@INSTALLINFO@ --quiet --remove ick $(infodirfile)"
 	rm -f $(DESTDIR)$(bindir)/ick@EXEEXT@ $(DESTDIR)$(libdir)/libick.a
+	rm -f $(DESTDIR)$(bindir)/convickt@EXEEXT@
 	rm -f $(DESTDIR)$(libdir)/libickmt.a $(DESTDIR)$(libdir)/libyuk.a
 	rm -f ${DESTDIR}${infodir}/ick.i*
 	rm -f $(DESTDIR)$(mandir)/man1/ick.1*
 	rm -f $(DESTDIR)$(mandir)/man1/convickt.1*
 	rm -fr $(DESTDIR)$(incdir) $(DESTDIR)$(datadir)
-	@MANDB@ -q
+	sh -c "@MANDB@ -q"
 
 TAGS: $(SOURCES)
 	etags $(SOURCES)

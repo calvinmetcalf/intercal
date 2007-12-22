@@ -12,3 +12,6 @@ del /Q temp\*.l
 del /Q temp\*.bat
 del /Q temp\*.sh
 del /Q temp\*.exe
+del /Q temp\*.bin
+del /Q temp\*.in
+del /Q temp\*.oil

@@ -13,6 +13,35 @@ AC_PROG_RANLIB
 AC_CHECK_PROGS(INSTALLINFO,install-info,:)
 AC_CHECK_PROGS(MANDB,mandb,:)
 
+dnl Check the location of the Info dir file if we have install-info
+if test ! INSTALLINFO = ":"; then
+AC_MSG_CHECKING(the location of the Info dir file)
+# Try the following locations in order:
+INFODIRFILELOCATIONGUESSES=${infodir}/dir
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} ${infodir}/dir.gz"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /dev/env/DJDIR/info/dir"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /dev/env/DJDIR/info/dir.gz"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/share/info/dir"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/share/info/dir.gz"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/local/share/info/dir"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/local/share/info/dir.gz"
+for my_ac_infodirfile in ${INFODIRFILELOCATIONGUESSES}
+do
+INFODIRFILE=${my_ac_infodirfile}
+test -f "$INFODIRFILE" && break
+INFODIRFILE=/dev/null
+done
+if test $INFODIRFILE = /dev/null; then
+AC_MSG_RESULT(not found)
+AC_MSG_WARN([Could not find Info directory file, set infodirfile in the Makefile by hand])
+else
+AC_MSG_RESULT($INFODIRFILE)
+fi
+else
+INFODIRFILE=(irrelevant)
+fi
+AC_SUBST(INFODIRFILE)
+
 dnl Checks for libraries.
 
 dnl Checks for header files.

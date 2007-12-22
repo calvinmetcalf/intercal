@@ -26,6 +26,11 @@ set CFLAGS=-gstabs+ -O2 -DICKNOSEARCH -W -Wall
 echo Compiling...
 gcc %CFLAGS% -o oil.exe oil.c
 oil.exe < idiotism.oil > idiotism.c
+gcc %CFLAGS% -o bin2c.exe bin2c.c
+bin2c.exe clc_cset_atari < atari.bin > cset-a.c
+bin2c.exe clc_cset_baudot < baudot.bin > cset-b.c
+bin2c.exe clc_cset_ebcdic < ebcdic.bin > cset-e.c
+bin2c.exe clc_cset_latin1 < latin1.bin > cset-l.c
 gcc -c %CFLAGS% idiotism.c
 gcc -c %CFLAGS% parser.c
 gcc -c %CFLAGS% lexer.c
@@ -40,14 +45,23 @@ gcc -c %CFLAGS% arrgghh.c
 gcc -c %CFLAGS% lose.c
 gcc -c %CFLAGS% uncommon.c
 gcc -c %CFLAGS% yuk.c
-ar cr libick.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o
+gcc -c %CFLAGS% convickt.c
+gcc -c %CFLAGS% clc-cset.c
+gcc -c %CFLAGS% cset-a.c
+gcc -c %CFLAGS% cset-b.c
+gcc -c %CFLAGS% cset-e.c
+gcc -c %CFLAGS% cset-l.c
+
+ar cr libick.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o clc-cset.o cset-?.o uncommon.o
 ranlib libick.a
-ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o unravel.o
+ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o unravel.o clc-cset.o cset-?.o uncommon.o
 ranlib libickmt.a
 ar cr libyuk.a yuk.o uncommon.o
 ranlib libyuk.a
 gcc %CFLAGS% -oick.exe parser.o lexer.o perpet.o feh2.o idiotism.o dekludge.o lose.o fiddle.o uncommon.o
+gcc %CFLAGS% -oconvickt.exe convickt.o clc-cset.o uncommon.o
 copy /y ick.exe ..\bin
+copy /y convickt.exe ..\bin
 copy /y *.a ..\lib
 cd ..
 copy /y src\ick-wrap.c lib
@@ -59,6 +73,7 @@ copy /y src\fiddle.h include
 copy /y src\abcess.h include
 copy /y src\lose.h include
 copy /y src\yuk.h include
+copy /y src\*.bin include
 echo Compilation complete unless there were errors.
 goto :end
 :direrror

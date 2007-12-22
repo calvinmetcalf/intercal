@@ -14,6 +14,9 @@ rm -f temp/*.l
 rm -f temp/*.bat
 rm -f temp/*.sh
 rm -f temp/*.exe
+rm -f temp/*.bin
+rm -f temp/*.in
+rm -f temp/*.oil
 rm -f temp/*~
 rm -f src/*~
 rm -f *~
