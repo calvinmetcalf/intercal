@@ -7,7 +7,7 @@ DESCRIPTION
     File linked into programs as a debugger or profiler.
 
 LICENSE TERMS
-    Copyright (C) 2006 Alex Smith 
+    Copyright (C) 2006 Alex Smith
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ static sig_atomic_t writelines = 1; /* whether to display executed lines onscree
 static int breakpoints[80]; /* initialised to all 0s. Breakpoint locations */
 static int nbreakpoints = 1; /* how many breakpoints we have */
 static int monitors[80]; /* monitors give a message when program flow passes them */
-static int nmonitors = 0; 
+static int nmonitors = 0;
 static int untilnext = -1; /* NEXTING level to break the program at */
 static int firstrun = 1; /* first time an interactive command point is reached */
 static int yukerrcmdg = -1; /* the aboff that indicates an error in the 'g' command */

@@ -30,22 +30,30 @@ etc/intercal.el         -- elisp for editing INTERCAL code under GNU Emacs
 
 doc/READ.ME             -- historical notes on the docs
 doc/ick.txi             -- the Revamped Manual sources, a newer manual
-doc/gpl-2-0.txi         -- the GNU GPL version 2.0 in Texinfo form
 doc/fdl-1-2.txi         -- the GNU FDL version 1.2 in Texinfo form
 doc/html/*.htm          -- the Revamped Manual as an HTML website
 doc/ick.htm             -- the Revamped Manual as one HTML file
 doc/ick.txt             -- the Revamped Manual in plain text form
 doc/ick.inf             -- the Revamped Manual in Info
+doc/ick.pdf		-- printable version of the Revamped Manual
+doc/ickstyle.css	-- styling rules for the Revamped Manual in HTML
+doc/tidy.cfg		-- HTML tidying rules for the Revamped Manual
 doc/fix83.pl            -- script to fixup the HTML output for 8.3 systems
 doc/intercal.mm         -- the old manual in groffable form
 doc/Makefile            -- makefile to build old and new manuals
 doc/THEORY.txt          -- some notes on the internals of the INTERCAL compiler
 doc/chipspec.txt        -- plans for an INTERCAL-based microprocessor
+doc/ick.1               -- man page for ick
+doc/convickt.1          -- man page for convickt
 
 src/abcess.h            -- interface to functions linked with programs
 src/arrgghh.c           -- option argument parsing for generated programs
+src/bin2c.c             -- creates C code representations of binary files
 src/cesspool.c          -- the INTERCAL runtime support code
+src/clc-cset.c          -- compatibility code for CLC-INTERCAL character sets
+src/csetstub.c          -- small file to allow convickt to link
 src/configdj.h          -- config.h substitute for DJGPP without config.sh
+src/convickt.c          -- command line character set converter
 src/coopt.sh            -- script to help out the -F optimizer (POSIX only)
 src/dekludge.c          -- INTERCAL optimizer wrapper and utility functions
 src/feh.h               -- interface to INTERCAL-to-C code generator
@@ -67,6 +75,7 @@ src/sizes.h             -- variables defining the numeric base
 src/uncommon.[ch]       -- code common to the compiler and debugger
 src/unravel.c           -- multithreading functions
 src/yuk.[ch]            -- INTERCAL debugger and profiler
+src/*.bin               -- character set definitions for clc-cset and convickt
 
 temp/parser.[ch]        -- Prebuilt parser (for DJGPP systems without bison)
 temp/lexer.c            -- Prebuilt lexer (for DJGPP systems without flex)
@@ -77,7 +86,7 @@ districk.bat            -- script to remove files not distributed (DJGPP)
 cleanick.bat            -- script to remove all non-source files (DJGPP)
 etc/ctrlmfix.bat        -- script to remove ^Ms that may have got in by mistake
 makeick.sh              --\
-districk.sh             --|the same as above, but in sh format 
+districk.sh             --|the same as above, but in sh format
 cleanick.sh             --|(use .bat under command.com/cmd, and .sh under bash)
 etc/ctrlmfix.sh         --/
 
@@ -96,12 +105,14 @@ pit/*                   -- sample INTERCAL code; see pit/CATALOG
 
                               HOW TO GET STARTED
 
-First, note that there is a much fuller manual than this README file
-available. For full information about C-INTERCAL, including extensive
-installation and usage instructions, see that one; point a web browser at
-doc/html/index.htm, or run `info -f doc/ick.inf', or failing that read the
-plain text version at doc/ick.txt. After C-INTERCAL is installed, the manual is
-also available with just `info ick'.
+First, note that there is a much fuller manual than this file available. For
+full information about C-INTERCAL, including extensive installation and usage
+instructions, see that one; point a PDF reader at doc/ick.pdf, a web browser
+at doc/html/index.htm, or run `info -f doc/ick.inf', or failing that read the
+plain text version at doc/ick.txt. After C-INTERCAL is installed, the manual
+is also available with just `info ick' for information about running ick, the
+compiler, or `info C-INTERCAL' for the available information about ick and
+C-INTERCAL.
 
 You want a man page?  Man pages are for wimps.  To compile an INTERCAL program
 `foo.i' to executable code, just do
@@ -157,13 +168,13 @@ There is an INTERCAL Resource Page at http://www.catb.org/intercal
 The latest version of INTERCAL is also kept available at the Retrocomputing
 Museun, http://www.catb.org/retro.
 
-(Note that the above paragraph appears to be out of date. Looking through the
-alt.lang.intercal archives is usually the best way to find out what the latest
-version of C-INTERCAL (and you'll find out how to get its rival too, for that
-matter) is nowadays; they tend to pop up in various unusual places, so giving
-a URL might be misleading. Note also that contact details, and even who to
-contact, often end up out of date; the newsgroup is also a good way to find out
-who to contact.)
+(Note that the above paragraph appears to be out of date; last I checked, that
+version wasn't the most recent. Looking through the alt.lang.intercal archives
+is usually the best way to find out what the latest version of C-INTERCAL (and
+you'll find out how to get its rival too, for that matter) is nowadays; they
+tend to pop up in various unusual places, so giving a URL might be
+misleading. Note also that contact details, and even who to contact, often end
+up out of date; the newsgroup is also a good way to find out who to contact.)
 
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal.
@@ -208,30 +219,30 @@ alternatives on some system.
 
 This distribution needs prebuilding; you can use the makeick.bat or makeick.sh
 file provided to compile the program if you can't compile using the usual
-POSIX methods via config.sh and make. (Unlike previous releases of C-INTERCAL,
-the configure/make process can work under DJGPP; invoke config.sh as 'sh
-config.sh' (without the sparks), and run make as normal. However, this
-requires that you've installed quite a few utilities in addition to just gcc,
-including at least bash, sed, tr and make, but possibly other things I
-missed.)  Once the implementation has been built, you can install it by adding
-the \bin subdirectory to your PATH environment variable (at either end), or by
-using 'make install' (again without the sparks) if you got config.sh and make
-to work (which will copy the INTERCAL compiler into your main DJGPP
-installation direcrtories). The temporary output from bison and flex is
-included in the distribution (for those people who don't have bison and flex,
-makeick will give error messages, but succeed anyway using the prebuilt
-versions). The districk.bat file will remove all generated files that weren't
-in the distribution, and the cleanick.bat file will remove all files that
-aren't needed for a build (including the temporary bison/flex output). Note
-that makeick.bat and makeick.sh produce DJGPP-specific output; and if you're
-running DJGPP under bash under Windows XP, you may need to either set your
-default command interpreter for batch files to cmd rather than command.com (by
-setting your SHELL environment variable, or use some better workaround that I
-don't know about. (command.com seems to have problems with the PATH
-environment variable under Windows XP when running under bash.) Also try to
-make sure that you use the .sh versions of the makeick.* scripts when running
-under bash or a similar ported shell, and the .bat versions when running under
-a DOS shell.
+POSIX methods via configure and make. (Unlike some previous releases of
+C-INTERCAL, the configure/make process can work under DJGPP; invoke the
+configure script as 'sh configdj.sh' (without the sparks), and run make as
+normal. However, this requires that you've installed quite a few utilities in
+addition to just gcc, including at least bash, perl, sed, tr and make, but
+possibly other things I missed.) Once the implementation has been built, you
+can install it by adding the \bin subdirectory to your PATH environment
+variable (at either end), or by using 'make install' (again without the
+sparks) if you got config.sh and make to work (which will copy the INTERCAL
+compiler into your main DJGPP installation direcrtories). The temporary output
+from bison and flex is included in the distribution (for those people who
+don't have bison and flex, makeick will give error messages, but succeed
+anyway using the prebuilt versions). The districk.bat file will remove all
+generated files that weren't in the distribution, and the cleanick.bat file
+will remove all files that aren't needed for a build (including the temporary
+bison/flex output). Note that makeick.bat and makeick.sh produce
+DJGPP-specific output; and if you're running DJGPP under bash under Windows
+XP, you may need to either set your default command interpreter for batch
+files to cmd rather than command.com (by setting your SHELL environment
+variable, or use some better workaround that I don't know about. (command.com
+seems to have problems with the PATH environment variable under Windows XP
+when running under bash.) Also try to make sure that you use the .sh versions
+of the makeick.* scripts when running under bash or a similar ported shell,
+and the .bat versions when running under a DOS shell.
 
 Some distributions of DJGPP have a bug where they complain that they can't find
 'm4.exe' (or maybe my PATH is still wrong...). You can solve this problem by

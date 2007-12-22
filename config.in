@@ -8,8 +8,10 @@ PACKAGE_VERSION=0.27
 dnl Checks for programs.
 AC_PROG_YACC
 AC_PROG_CC
-AC_PROG_LEX
+dnl AC_PROG_LEX is checked by AC_DECL_YYTEXT below
 AC_PROG_RANLIB
+AC_CHECK_PROGS(INSTALLINFO,install-info,:)
+AC_CHECK_PROGS(MANDB,mandb,:)
 
 dnl Checks for libraries.
 
@@ -55,3 +57,5 @@ AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul)
 AC_SUBST(PACKAGE_VERSION)
 
 AC_OUTPUT(Makefile temp/coopt.sh:src/cooptsh.in)
+dnl After the output, chmod coopt.sh to be executable.
+chmod a+x temp/coopt.sh

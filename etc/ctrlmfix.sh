@@ -19,3 +19,4 @@ dtou pit/tests/*.i
 dtou pit/lib/*.doc
 dtou pit/lib/*.i
 utod *.bat
+utod configdj.sh

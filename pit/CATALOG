@@ -18,7 +18,7 @@ by Jon Blow <jon@sampo.com>
   lib/plus.i    Increment .1
 
 by Hans Olsson <f88ho@efd.lth.se>
-  lib/1910.doc  Listing of a random number routine.  Hans said he wrote this 
+  lib/1910.doc  Listing of a random number routine.  Hans said he wrote this
 		because he couldn't find (1910) in the system library, but
 		it's there in our lib/syslib.i.  We keep this around as an
 		example.  (What? Throw away INTERCAL code? Perish the thought!)
@@ -62,7 +62,7 @@ by Clemens Meier <clmeier@lili.uni-bielefeld.de>
   rot13b.i      Another ROT-13 program
 
 By Brian Raiter <breadbox@muppetlabs.com>
-  lib/numio.i	    I/O routines 
+  lib/numio.i	    I/O routines
   lib/numio.doc	    Description of the I/O routines
   lib/syslib.3i
   lib/syslib.4i
@@ -89,6 +89,10 @@ by Donald Knuth
   tpk.i         Don Knuth's implementation of the TPK algorithm
   tpk.doc       Don's note about the algorithm
 
+by Oerjan Johansen
+  unlambda.i    An Unlambda interpreter in INTERCAL
+  unlambda.doc  Better-commented version of the above
+
 The subdirectory tests contains some programs written only to test the
 compiler.
 
@@ -99,9 +103,9 @@ by David Moews
 David Moews wrote of the latter (test2.i):
 
 The following program reads in two numbers and then prints their product.
-It consists of a trivial calling program followed by a cleaned-up version 
-of a portion of the INTERCAL subroutine library.  (Only a portion of 
-the INTERCAL subroutine library is present in the posted manual, and 
+It consists of a trivial calling program followed by a cleaned-up version
+of a portion of the INTERCAL subroutine library.  (Only a portion of
+the INTERCAL subroutine library is present in the posted manual, and
 that portion is full of typos.)
 
 by Alex Smith
@@ -114,6 +118,8 @@ by Alex Smith
   tests/permute.i     A permutation-printing program to test backtracking
   tests/permute.doc   Information about the permutation-printer
   tests/whileadd.i    Adds two input numbers with a single WHILE statement
+  tests/ignorret.i    Testing interactions of IGNORE and RETRIEVE
+  tests/ignorret.doc  What ignorret does on several compilers
   sort.i              An insertion-sort program testing computed ABSTAIN
 
 by Malcom Ryan

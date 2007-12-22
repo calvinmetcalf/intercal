@@ -21,10 +21,11 @@
 @synindex er cp
 
 @c Adding to the main documentation tree.
-@dircategory INTERCAL compilers
+@dircategory INTERCAL
 @direntry
 * C-INTERCAL: (ick).                 The C-INTERCAL language and compiler.
 * ick: (ick) Invoking ick.           Invoking the C-INTERCAL compiler.
+* convickt: (ick) convickt.          The command-line character set converter.
 @end direntry
 
 @c Some macros to ease writing and updating. (The VERSION is set above because
@@ -37,6 +38,9 @@
 @end macro
 @macro icst{}
 @abbr{INTERCAL-72}
+@end macro
+@macro jic{}
+@abbr{J-INTERCAL}
 @end macro
 @macro ical{}
 @acronym{INTERCAL}
@@ -53,12 +57,15 @@
 @end html
 @c
 @end macro
+@iftex
+@set notsplit
+@end iftex
 
 @c 'Portability' boxes
-@macro portability{st,c,clc}
-@multitable @columnfractions .25 .25 .25
-@headitem @icst{} @tab @cic{} @tab @clcic{}
-@item \st\ @tab \c\ @tab \clc\
+@macro portability{st,c,clc,j}
+@multitable @columnfractions .23 .23 .23 .23
+@headitem @icst{} @tab @cic{} @tab @clcic{} @tab @jic{}
+@item \st\ @tab \c\ @tab \clc\ @tab \j\
 @end multitable
 @c
 @end macro
@@ -107,19 +114,11 @@ Copyright @copyright{} 2007 Alex Smith.
 @quotation
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
-any later version published by the Free Software Foundation; with the
-Invariant Sections being ``GNU General Public License'', with no
-Front-Cover Texts, and with no Back-Cover Texts.  A copy of the license
-is included in the section entitled ``GNU Free Documentation License.''
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+``GNU Free Documentation License.''
 
-As a special exception, you may create a Modified Version of this
-document (with the definition of ``Modified Version'' given in the GNU
-Free Documentation License) in which the Invariant Section ``GNU General
-Public License'' has been deleted entirely, as long as all of that
-license is complied with apart from the requirement to preserve that
-Invariant Section.  (This means that that section must be either
-entirely preserved or entirely deleted in any copies or Modified
-Versions of this document.)
 @end quotation
 @end copying
 
@@ -146,9 +145,10 @@ Versions of this document.)
 @insertcopying
 
 @menu
+* About this manual::               What is covered in this manual
 
 The @cic{} compiler
-* Installation::                    How to install @cic{} @value{VERSION}
+* Installation::                    How to install @cic{}
 * Invoking ick::                    Options to give to the compiler ick
 * Errors and Warnings::             Error messages, and what to do about them
 * The yuk debugger::                How to use the runtime debugger
@@ -166,14 +166,53 @@ Basic @ical{} features
 * Differences to Other Compilers::  @cic{} vs. @clcic{}
 
 Appendices and indices
+* Character Sets::                  A list of character sets used by @ical{}
+* convickt::                        The command-line character set converter
 * Optimizer Idiom Language::        The syntax to specify optimizer idioms
 * Copying::                         License information for the code and manual
 * Main Index::                      An index of all the pages in this manual
 
 @end menu
 @end ifnottex
+
+@node About this manual
+@unnumbered About this manual
+@cindex About this manual
+
+This is the Revamped Instruction Manual for @cic{} (this version is
+distributed with @cic{} version @value{VERSION}).  It is divided into
+four parts.
+
+The first part is about the @cic{} compiler @command{ick}, and how to
+use it. It covers installing the compiler, using the compiler, what
+error and warning messages are produced by the compiler, and some
+information on how to use the debugger.
+
+The second part is about the core @ical{} language, invented in 1972,
+and some other commands since then which don't feel like they're
+extensions.  (This is a pretty arbitrary distinction, but people who
+write the documentation are entitled to arbitrary distinctions.  The
+manual's licensed under a license that lets you change it
+(@pxref{Copying}), so if you disagree you can move the commands from
+section to section yourself.)  Mostly only commands that are
+implemented in @cic{} are covered here (if you're interested in the
+other commands implemented in other compilers, read @clcic{}'s
+documentation).  However, a comprehensive guide to portability of
+these commands between @cic{} and other @ical{} compilers is given.
+
+The third part covers the @ical{} extensions and dialects that are
+implemented by @cic{}, such as TriINTERCAL and Threaded @ical{}.
+Again, extensions and dialects not implemented have been mostly left
+out.
+
+The final part contains appendices (which were known as `tonsils' in
+the original @ical{} manual), such as character sets used by @ical{},
+programs other than @command{ick} in the @cic{} distribution,
+information on how to read and update the list of optimizer idioms
+used by the compiler, and the copyright.
+
 @ifset notsplit
-@partheading PART I: THE @cic{} COMPILER
+@partheading{PART I: THE @cic{} COMPILER}
 @end ifset
 @node Installation
 @chapter Installation
@@ -188,6 +227,12 @@ the software needed to compile source-distributed packages is also
 readily available for free for other operating systems.  The following
 instructions will help you install the distribution in a method
 appropriate for your system.
+
+(If you happen to be using Debian or Ubuntu, you can also obtain and
+install binaries with the command @samp{sudo apt-get install
+intercal}, making the rest of this chapter redundant.  If you do this,
+use Debian's bug tracker to report bugs, rather than reporting them
+directly to the maintainers.)
 
 @menu
 * Obtaining::            How to get a @cic{} distribution to install
@@ -314,6 +359,7 @@ ick-@value{VERSION}}).
 @cindex installation, simple
 @cindex simple installation
 @findex config.sh
+@findex configdj.sh
 @findex make
 @findex make install
 @cindex compiling, @command{ick} itself
@@ -327,32 +373,38 @@ use the following routine:
 @enumerate
 
 @item
-Configure @cic{}, by typing @command{sh config.sh}
+Configure @cic{}, by typing @command{sh config.sh} (or @command{sh
+configdj.sh} if you're using DJGPP)
 
 @item
 Compile the source code, with the command @command{make}
 
 @item
-Install the executables and libraries, using @command{make install}
+Install the executables, help files, include files, and libraries,
+using @command{make install}.  (This is the only step that needs
+root/administrator permissions; so on a system that uses sudo to
+elevate permissions, for instance, write it as @command{sudo make
+install}.)
 
 @end enumerate
 
 On all systems, it's worth just trying this to see if it works.  This
 requires a lot of software on your computer to work, but all of it is
-standard on Linux and UNIX systems.  The first command is a shell-script
-which will analyse your system and set settings accordingly; it will
-explain what it's doing and what settings it detected, and create
-several files in the installation directory to record its results.
-(This is a configure script produced by the DJGPP version of GNU
-autoconf; its autoconf source code is available in the file
-@file{config.in}.)  The second command actually compiles the source code
-to produce binaries; this takes the longest of any of the steps.  You
-will see all the commands that it's running as it runs them.  (The most
-time-consuming one is the compilation of @file{idiotism.c}, by the way;
-be prepared for this to take longer than the other compilations.)  The
-third command will copy the files it's compiled to appropriate shared
-locations on your system so that anyone on the system can just use
-@command{ick}.
+standard on Linux and UNIX systems.  The first command is a
+shell-script which will analyse your system and set settings
+accordingly; it will explain what it's doing and what settings it
+detected, and create several files in the installation directory to
+record its results.  (This is a configure script produced by the GNU
+autoconf (config.sh is produced by the Linux version, configdj.sh by
+the DJGPP version); its autoconf source code is available in the file
+@file{config.in}.)  The second command actually compiles the source
+code to produce binaries; this takes the longest of any of the steps.
+You will see all the commands that it's running as it runs them.  (The
+most time-consuming one is the compilation of @file{idiotism.c}, by
+the way; be prepared for this to take longer than the other
+compilations.)  The third command will copy the files it's compiled to
+appropriate shared locations on your system so that anyone on the
+system can just use @command{ick}.
 
 There may be various factors that prevent this simple installation
 method working.  On a system not based on UNIX or Linux, you may find
@@ -378,6 +430,28 @@ file to say in advance how much memory the lexer-generator needs to
 allocate.  In such cases, pay attention to the error messages you're
 getting; normally they will suggest trivial modifications to the source
 files that will cause the compilation to work again.
+
+@cindex installation, Debian
+@cindex installation, Ubuntu
+@cindex Debian
+@cindex Ubuntu
+Some Linux and UNIX systems (notably Debian and Ubuntu) don't have the
+required files for compilation installed by default.  To install them,
+just download and install the required packages: for Ubuntu at the
+time of writing, they are @samp{binutils}, @samp{bison}, @samp{cpp},
+@samp{flex}, @samp{gcc}, @samp{libc6-dev}, @samp{make} to compile
+@cic{}, and if you want to modify it, you may also need
+@samp{autoconf}.  For debugging help, you may also want @samp{gdb},
+and to recompile the documentation, you may need @samp{groff},
+@samp{tetex-bin}, @samp{texinfo}, and @samp{tidy}.  Of course, if
+@ical{} ever (the author of this sentence was going to write something
+like ``becomes popular, someone will probably package up a compiler
+for Debian or Ubuntu anyway'', but at that point on a whim did an
+Ubunutu package search for 'intercal' and actually came up with two
+results, which look suspiciously like @cic{} and @clcic{}, later
+confirming this.  The author was vaguely aware that there was a
+@clcic{} package floating around, but was unaware of the @cic{}
+package, and as a result was too surprised to finish the sentence.)
 
 If you're trying to do something unusual, you probably want to set some
 of the settings yourself rather than letting the compilation process
@@ -511,7 +585,7 @@ to inability to find files (such as E127 (@pxref{E127}) or E999
 
 You can make a `live' CD or USB-stick version of @cic{} using similar
 methods; configure (if possible) and compile it, but instead of
-installing it, copy the entire @file{@value{VERSION}} directory to the
+installing it, copy the entire @file{ick-@value{VERSION}} directory to the
 CD or USB stick.  @ical{} can then be run from there by explicitly giving
 a pathname to @file{bin/ick} or @file{bin/ick.exe}
 
@@ -660,7 +734,8 @@ installation directory or its subdirectories.
 @item
 Run @command{make distclean}, or @command{districk.sh} or
 @command{districk.bat} if you didn't manage to configure; this will
-remove all files that shouldn't be in the distribution.
+remove all files created by the compilation process that shouldn't be
+in the distribution.
 
 @item
 Update the @file{MANIFEST.txt} file that lists all files in the
@@ -751,9 +826,9 @@ bug was preserved; it is in fact a bug that was carefully preserved
 since the days of @icst{}, in this case, but the option to turn it off
 is available as a workaround.  (There are no plans to fix this or any of
 the other carefully preserved bugs any time soon, because that would
-kind of defeat the point of having preserved them.)   Interestingly, the
+kind of defeat the point of having preserved them.)  Interestingly, the
 @icst{} compiler documentation mentions a similar command-line option
-that is a workaround for the same bug.
+that is a workaround for the same bug.)
 
 @ianchor -m
 @opindex -m
@@ -816,24 +891,33 @@ doing input or output, meaning that they aren't particularly useful.)
 
 @ianchorc -X
 @opindex -X
-@cindex CLC-INTERCAL compatibility mode
-@cindex compatibility, CLC-INTERCAL
+@cindex Princeton syntax, option
+@cindex syntax, Princeton
 The @cic{} and @clcic{} compilers use different notation for various
 things, sometimes to the extent where the same notation is legal in both
 cases but has a different meaning.  As this is the @cic{} compiler, it
 rather guessably uses its own notation by default; however, the @clcic{}
 notation can be used as the default instead using this option.  (In most
 situations where there isn't an ambiguity about what something means,
-you can use the `wrong' syntax freely.)  This option also causes some
-constructs with subtly different meanings in these two @ical{}
-implementations to take on the @clcic{} meaning.  (OK, one construct at
-present, the abstention of a GIVE UP (@pxref{GIVE UP}) command by line
-number, which is possible as long as this switch isn't given; reading
-through the @icst{} manual, there are a lot of things that imply that
-this probably wasn't intended to be possible, but as far as I can tell
-that manual doesn't actually @emph{say} anywhere that this particular
-case is disallowed, even though it rules out all other similar cases.
-However, I intend to add to this list at some point.)
+you can use the `wrong' syntax freely.) The option causes ambiguous
+characters like @code{?} to be interpreted with Princeton rather than
+Atari meanings.
+
+@ianchor -x
+@opindex -x
+@cindex CLC-INTERCAL compatibility mode
+@cindex compatibility, CLC-INTERCAL
+This option causes some constructs with different meanings in @cic{}
+and @clcic{} to use the @clcic{} meaning rather than the @cic{}
+meaning. At present, it affects the abstention of a GIVE UP
+(@pxref{GIVE UP}) command by line number, which is possible as long as
+this switch isn't given; reading through the @icst{} manual, there are
+a lot of things that imply that this probably wasn't intended to be
+possible, but as far as I can tell that manual doesn't actually
+@emph{say} anywhere that this particular case is disallowed, even
+though it rules out all other similar cases.  It also causes I/O on
+array variables to be done in @clcic{}'s extended Baudot syntax,
+rather than using the Turing Tape method.
 
 @end table
 
@@ -1076,7 +1160,8 @@ Some options just can't be classified.
 
 @table @option
 
-@ianchor -@@
+@item -@@
+@anchor{-at}
 @opindex -@@
 @cindex options, help
 @cindex help with options
@@ -1172,7 +1257,7 @@ Various environment variables can be set to affect the operation of
 
 @multitable @columnfractions .3 .7
 @headitem Variable @tab Meaning
-@item ICKINCLUDEDIR@*ICKLIBDIR@*ICKBINDIR
+@item ICKINCLUDEDIR@*ICKLIBDIR@*ICKDATADIR
 @tab
 These three environment variables suggest locations in which
 @command{ick} should look to find various files that it needs: the
@@ -1196,7 +1281,7 @@ temporary file; if none of them are set, the current directory is used.
 
 @node Errors and Warnings
 @chapter Errors and Warnings
-@cindex ick, errors and warnings
+@cindex @command{ick}, errors and warnings
 @cindex errors and warnings
 
 Things may go wrong, either during the compilation or the execution of
@@ -1231,7 +1316,7 @@ it.  (This typo has been carefully preserved for over a decade.)
 @node Errors
 @section Errors
 @cindex errors
-@cindex ick, errors
+@cindex @command{ick}, errors
 
 This is a list of the error messages that might be produced during the
 compilation or execution of an @ical{} program.
@@ -1419,10 +1504,23 @@ error happens at run time.
 VARIABLES MAY NOT BE STORED IN WEST HYPERSPACE
 @end quotation
 
-This error happens at run time when the subscripts given to an array are
-inconsistent with the way the array was dimensioned, either because
-there were the wrong number of subscripts or because a subscript was too
-large to fit in the array.
+This error happens at run time when the subscripts given to an array
+are inconsistent with the way the array was dimensioned, either
+because there were the wrong number of subscripts or because a
+subscript was too large to fit in the array.  It can also happen when
+a multidimensional array is given to a command, such as @code{WRITE
+IN}, that expects it to be monodimensional.
+
+@ieanchor E252
+@cindex I/O, out of memory
+@cindex out of memory, I/O
+@quotation
+I'VE FORGOTTEN WHAT I WAS ABOUT TO SAY
+@end quotation
+
+This run-time error message is caused by the compiler running out of
+memory whilst trying to do I/O; at present, it can only happen during
+@clcic{}-style I/O.
 
 @ieanchor E256
 @cindex PIC-INTERCAL, unsupported command
@@ -1815,19 +1913,19 @@ able to compile @ical{} to C.  If the compiler can't find it, it will
 give this error message.  This indicates a problem with the way the
 compiler has been installed; try using the @option{-u} option
 (@pxref{-u}) to find out where it's looking (you may be able to place a
-copy of the skeleton file in one of those places.)
+copy of the skeleton file in one of those places).
 
 @end table
 
 @node Warnings
 @section Warnings
 @cindex warnings
-@cindex ick, warnings
+@cindex @command{ick}, warnings
 
-This is a list of the warnings stored in the warning database.  Warnings
-only come up when the @option{-l} (@pxref{-l}) is given; even then, some
-of the warnings are not currently implemented and therefore will never
-come up.
+This is a list of the warnings stored in the warning database.
+Warnings only come up when the @option{-l} option (@pxref{-l}) is
+given; even then, some of the warnings are not currently implemented
+and therefore will never come up.
 
 @table @asis
 
@@ -1911,12 +2009,13 @@ necessarily an error because that line of code might never be executed.
 FROM A CONTRADICTION, ANYTHING FOLLOWS
 @end quotation
 
-It's sometimes impossible to reverse an assignment (a reverse assignment
-can happen if the @option{-v} option (@pxref{-v}) is used and an
-expression is placed on the left of an assignment), or in operand
-overloading; if the compiler detects that a reversal failure is
-inevitable, it will cause this warning.  Note that this doesn't always
-cause an error, because the relevant code might never be executed.
+It's sometimes impossible to reverse an assignment (a reverse
+assignment can happen if the @option{-v} option (@pxref{-v}) is used
+and an expression is placed on the left of an assignment, or in
+operand overloading); if the compiler detects that a reversal failure
+is inevitable, it will cause this warning.  Note that this doesn't
+always cause an error, because the relevant code might never be
+executed.
 
 @ieanchor W534
 @cindex unary operators, portability
@@ -2125,7 +2224,7 @@ current command to finish running and the debugger prompt to come back
 up.
 
 @ifset notsplit
-@partheading PART II: THE @ical{} LANGUAGE
+@partheading{PART II: THE @ical{} LANGUAGE}
 @end ifset
 @node Syntax
 @chapter Syntax
@@ -2148,18 +2247,81 @@ identifier, an optional execution chance, the statement itself
 (@pxref{Statements}), and optionally @code{ONCE} or @code{AGAIN}.
 
 @menu
-* Line Labels::               Allowing lines to be referred to
-* Statement Identifiers::     Marking the start of a statement
-* Execution Chance::          Statements that might not execute
-* ONCE and AGAIN::            Self-abstaining and self-reinstating statements
+* Princeton and Atari Syntax:: There are two syntaxes for @ical{}
+* Line Labels::                Allowing lines to be referred to
+* Statement Identifiers::      Marking the start of a statement
+* Execution Chance::           Statements that might not execute
+* ONCE and AGAIN::             Self-abstaining and self-reinstating statements
 @end menu
+
+@node Princeton and Atari Syntax
+@section Princeton and Atari Syntax
+@cindex syntax, dialects
+@cindex dialects of syntax
+@cindex character sets
+
+The history of @ical{} is plagued with multiple syntaxes and character
+sets.  The result has settled down with two versions of the syntax;
+the original Princeton syntax, and the Atari syntax (which is more
+suited to the operating systems of today).
+
+@cindex syntax, Princeton
+@cindex Princeton syntax
+@subheading Princeton syntax
+@portability{some versions, version 0.18+, all versions, no}
+
+The original @icst{} compiler was the Princeton compiler, which
+introduced what has become known as the Princeton syntax for @ical{};
+this is the syntax used in the original manual, for instance, and can
+be considered to be the `original' or `official' @ical{} syntax.  It
+is notable for containing various characters not found in some
+character sets; for instance, it writes the operator for mingle as a
+cent sign (known as `change').  The other operator that often causes
+problems is the bookworm operator @samp{V}, backspace, @samp{-}, which
+is used for exclusive-or; the backspace can cause problems on some
+systems (which was probably the original intention).  This syntax is
+also the default syntax in the @clcic{} compiler, which is the @i{de
+facto} standard for expanding the Princeton syntax to modern @ical{}
+features that are not found in @icst{}; however, it does not appear to
+have been used as the default syntax in any other compilers.
+Nowadays, there are other ways to write the required characters than
+using backspace; for instance, the cent sign appears in Latin-1 and
+UTF-8, and there are various characters that approximate bookworms
+(for instance, @clcic{} uses the Latin-1 yen symbol for this, which
+just to make things confusing, refers to a mingle in modern Atari
+syntax).
+
+@cindex syntax, Atari
+@cindex Atari syntax
+@subheading Atari syntax
+@portability{some versions, yes, version 0.05+, yes}
+
+The other main syntax is the Atari syntax, so called because it was
+originally used by the ``Atari implementation'' of @icst{}.  It is not
+clear why the implementation was given this name, because the authors
+of the implementation are not known; it is not clear whether it has
+any connection with Atari other than running on an Atari computer, for
+instance.  The syntax was designed to work better on ASCII-based
+systems, by avoiding the change character (although it can still be
+written as @samp{c}, backspace, @samp{/}, which the Atari compiler
+documentation claims that the Princeton compiler supported) in favour
+of a `big money' character (@samp{$}), and using the `what' (@samp{?})
+as an alternative character for exclusive-or.  This is the syntax that
+@cic{} and @jic{} have always used, and is the one most commonly used
+for communicating @ical{} programs on Usenet and other similar fora
+(where ASCII is one of the most reliable-to-send character sets).  It
+is also the syntax used for examples in this manual, for much the same
+reason.  The Atari syntax for constructs more modern than @icst{} is
+normally taken to be that used by the @cic{} compiler, because it is
+the only Atari-syntax-based compiler that contains non-@icst{}
+constructs that actually need their own notation.
 
 @node Line Labels
 @section Line Labels
 @cindex line label
 @cindex line number
 
-@portability{yes, all versions, all versions}
+@portability{yes, all versions, all versions, all versions}
 
 The first part of an @ical{} statement is a line label that specifies
 what its line number is.  This is optional; it's allowed to have a
@@ -2201,8 +2363,13 @@ to your program without renumbering in the future.
 @findex PLEASE
 @findex NOT
 @findex N'T
+@cindex abstain, at program start
+@cindex reinstate, at program start
+@cindex initial abstention
+@cindex abstained state
+@cindex reinstated state
 
-@portability{yes, all versions, all versions}
+@portability{yes, all versions, all versions, all versions}
 
 After the line label (if a statement has one) comes the statement
 identifier, which marks where the statement starts.  Either the label or
@@ -2244,10 +2411,10 @@ not end due to the syntax error unless that statement is actually
 executed.  @xref{E000}.)
 
 The @code{ABSTAIN} and @code{REINSTATE} statements can override the
-@code{NOT} or otherwise on a statement identifier; @xref{ABSTAIN}.
+@code{NOT} or otherwise on a statement identifier; see @ref{ABSTAIN}.
 
 In backtracking programs, @code{MAYBE} is also a valid statement
-identifier; @xref{MAYBE}.  It comes before the other keywords in the
+identifier; see @ref{MAYBE}.  It comes before the other keywords in the
 statement identifier, and an implicit @code{DO} is added if there wasn't
 one already in the statement identifier (so @code{MAYBE}, @code{MAYBE
 DO}, @code{MAYBE DON'T}, @code{MAYBE PLEASE}, and so on are all valid
@@ -2259,7 +2426,7 @@ statement identifiers).
 @cindex double-oh-seven
 @findex %
 
-@portability{yes, all versions, all versions}
+@portability{yes, all versions, version 0.02+, all versions}
 
 It's possible to specify that a command should be run only a certain
 proportion of the time, at random.  This is a rarely used feature of
@@ -2287,7 +2454,7 @@ prevents it running and the double-oh-seven cannot override that.
 @findex AGAIN
 @anchor{ONCE}@anchor{AGAIN}
 
-@portability{no, version 0.25+, no}
+@portability{no, version 0.25+, no, no}
 
 The last part of a statement is an optional @code{ONCE} or @code{AGAIN}.
 @code{ONCE} specifies that the statement is self-abstaining or
@@ -2361,7 +2528,7 @@ group each expression.
 @findex ,
 @findex ;
 
-@portability{yes, all versions, all versions}
+@portability{yes, all versions, all versions, all versions}
 
 The basic operands in @ical{} are constants and variables.  These
 together make up what in other languages are known as `lvalues', that
@@ -2373,7 +2540,7 @@ on with the @option{-v} option (@pxref{-v}).)
 Constants can have any integer value from 0 to 65535 inclusive; higher
 values (up to 4294967295) can be generated in programs, but cannot be
 specified literally as constants.  (The usual way to work around this
-limitation is to interleave two constants together; @xref{Mingle}.) A
+limitation is to interleave two constants together; see @ref{Mingle}.) A
 constant is written as a mesh (@code{#}) followed by a number in
 decimal.  At the start of the program, all constants have the same value
 as the number that identifies them; for instance, @code{#100} has 100 as
@@ -2387,7 +2554,8 @@ represented with a spot, twospot, tail, and hybrid (@code{.}, @code{:},
 the range 0 to 65535 inclusive are known as `onespot numbers', and
 integers within the range 0 to 4294967295 inclusive are known as
 `twospot numbers'; variables with those ranges are known as onespot and
-twospot variables.
+twospot variables.  (Note that arrays did not work in @cic{} before
+version 0.7.)
 
 Variables are represented with a character representing their data type,
 followed by an integer from 1 to 65535 inclusive, written in decimal.
@@ -2395,7 +2563,7 @@ Non-array variables don't need to be declared before they are used; they
 automatically exist in any program that uses them.  For instance,
 @code{.1} and @code{.001} are the same variable, onespot number 1.
 Array variables need to be dimensioned before they are used, by
-assigning dimensions to them; @xref{Calculate}.
+assigning dimensions to them; see @ref{Calculate}.
 
 @node Grouping Rules
 @section Grouping Rules
@@ -2518,6 +2686,7 @@ portability.  This section only describes @icst{} operators; many
 * Mingle::                   Interleaving bits in two operands
 * Select::                   Selecting from one operand according to another
 * Unary Binary Logic::       Binary logic on adjacent bits of an operand
+* Array Subscript::          Selecting elements of arrays
 @end menu
 
 @node Mingle
@@ -2526,33 +2695,40 @@ portability.  This section only describes @icst{} operators; many
 @cindex interleave
 @findex $
 
-@portability {yes, all versions, all versions}
+@portability {yes, all versions, all versions, all versions}
 
 Mingle, or interleave, is one of the two binary operators in @icst{}.
 However, different @ical{} compilers represent it in different ways, so
-it is impossible to write a mingle in a program completely portably.
+it is impossible to write a mingle in a program completely portably,
+because it differs between Princeton and Atari syntax, and worse, the
+sequence of character codes needed to represent it in each syntax has
+varied from compiler to compiler.
 
-The original @icst{} compiler (the Princeton compiler) used the 'change'
-(cent) character for a mingle, represented as @code{c}, backspace,
-@code{/}.  (By the way, this is still the most portable way to write a
-mingle; both @cic{} and @clcic{} accept it, at least if a lowercase
-@code{c} is used; @clcic{} also accepts a capital @code{C} before the
-backspace and @code{/}, and allows @code{|} rather than @code{/}.)  The
-Atari compiler, another @icst{} compiler, used a 'big money' character
-(@code{$}) as the mingle character.  @cic{} originally also used the
-@code{$} character for mingle, and this character is the one most
-commonly seen in existing @cic{} programs, and most often used when
-giving examples of @ical{} on Usenet, because it exists in the ASCII-7
-character set, and because it doesnt contain control characters.  From
-version 0.18 of @cic{} onwards, various other units of currency (change,
-quid, and zlotnik if Latin-1 is used as the input, and euro if Latin-9
-is used as the input) are accepted; from version 0.20 onwards, in
-addition to the Latin-1 characters, all the currency symbols in Unicode
-are accepted if UTF-8 is used as the input format.  @cic{} has always
-used the change character (either the Latin-1 version or the version
-that contains a backspace) for mingle.  In this manual, mingle will be
-represented as @code{$}, but it's important to bear in mind that this
-character is not the most portable choice.
+The original @icst{} compiler (the Princeton compiler) used the
+'change' (cent) character for a mingle, represented as @code{c},
+backspace, @code{/}.  (By the way, this is still the most portable way
+to write a mingle; both @cic{} and @clcic{} accept it, at least if a
+lowercase @code{c} is used, the Atari compiler accepted it, and its
+documentation claimed that the Princeton compiler also accepted it;
+@clcic{} also accepts a capital @code{C} before the backspace and
+@code{/}, and allows @code{|} rather than @code{/}.)  The Atari
+compiler, another @icst{} compiler, used a 'big money' character
+(@code{$}) as the mingle character; this character is also the only
+one accepted for mingle by the @jic{} compiler.  @cic{} originally
+also used the @code{$} character for mingle, and this character is the
+one most commonly seen in existing @cic{} programs, and most often
+used when giving examples of @ical{} on Usenet, because it exists in
+the ASCII-7 character set, and because it doesn't contain control
+characters.  From version 0.18 of @cic{} onwards, various other units
+of currency (change, quid, and zlotnik if Latin-1 is used as the
+input, and euro if Latin-9 is used as the input) are accepted; from
+version 0.20 onwards, in addition to the Latin-1 characters, all the
+currency symbols in Unicode are accepted if UTF-8 is used as the input
+format.  @cic{} has always used the change character (either the
+Latin-1 version or the version that contains a backspace) for mingle.
+In this manual, mingle will be represented as @code{$}, but it's
+important to bear in mind that this character is not the most portable
+choice.
 
 The mingle operator should be applied to two operands or expressions.
 To be portable, the operands must both be onespot expressions, that is
@@ -2589,7 +2765,7 @@ binary logic operators found in some other languages.
 @node Select
 @subsection Select
 
-@portablity{yes, all versions, all versions}
+@portability{yes, all versions, all versions, all versions}
 
 The select operator is one of the two binary operators in @icst{};
 unlike mingle, every known implementation of @ical{} ever has used the
@@ -2641,26 +2817,29 @@ than a power of 2), and for many other purposes.
 @cindex ampersand
 @cindex book
 
-@portability{yes, all versions, all versions}
+@portability{yes, all versions, all versions, all versions}
 
-There are three unary operators in @icst{}, each of which carries out a
-binary logic operation on adjacent bits of the number. The operators are
-and, or, and exclusive or; and and or are represented by an ampersand
-(@code{&}) and book (@code{V}) respectively, and exclusive or has the
-same notational problems as mingle.  It was represented by a bookworm,
-written @code{V}, backspace, @code{-}, in the Princeton @icst{}
+There are three unary operators in @icst{}, each of which carries out
+a binary logic operation on adjacent bits of the number. The operators
+are and, or, and exclusive or; and and or are represented by an
+ampersand (@code{&}) and book (@code{V}) respectively, and exclusive
+or has the same notational problems as mingle, as it differs between
+Princeton and Atari syntax.  It was represented by a bookworm, written
+@code{V}, backspace, @code{-}, in the Princeton @icst{}
 implementation, and this is still the most portable way to write it
 (@cic{} and @clcic{} accept it).  The Atari implementation of @icst{}
 wrote it with a what (@code{?}), and this is the representation
-originally used by @cic{} (and still accepted), the one most commonly
-used on Usenet, and the one used in this manual (although again, it's
-worth pointing out that this isn't portable).  @clcic{} approximates a
-bookworm with the yen character, which being a currency character is one
-of the possible representations for mingle in @cic{}; therefore, @cic{}
-will only execute a @clcic{} program which contains yen-represented
-exclusive ors if the @clcic{} compatibility option @code{-X} is used
-(@pxref{-X+,,-X}).  (In the same way, @clcic{} has a @cic{}
-compatibility option to allow the use of @code{?} for exclusive-or.)
+originally used by @cic{} (and still accepted), the only
+representation accepted by @jic{}, the one most commonly used on
+Usenet, and the one used in this manual (although again, it's worth
+pointing out that this isn't portable).  @clcic{} approximates a
+bookworm with the yen character, which being a currency character is
+one of the possible representations for mingle in @cic{}; @cic{} uses
+the rather confusing method of interpreting a yen character as
+exclusive-or if input in Latin-1 but as mingle if input in UTF-8.
+(This usually does the right thing, because @clcic{} doesn't support
+UTF-8.)  In the same way, @clcic{} has a @cic{} compatibility option
+to allow the use of @code{?} for exclusive-or.
 
 The operators take each pair of consecutive bits in their arguments
 (that is, the least significant with the second least significant, the
@@ -2704,7 +2883,7 @@ corresponds to a set bit in :2 or not.  In case that's a bit too
 confusing to read, here's the corresponding optimizer idiom (in OIL):
 
 @example
-((_1~:2)~((?(:2~:2))^#2147483648))->(_1>(:2^_1))
+((_1~:2)~((?32(:2~:2))^#2147483648))->(_1>(:2^_1))
 @end example
 
 (Here, the ^ refers to a bitwise exclusive or, an operation found in OIL
@@ -2712,19 +2891,1195 @@ but not in @ical{}, which is why the @ical{} version is so much longer.)
 The @ical{} version also has some extra code to check for equality and
 to produce 1 or 2 as the output rather than 0 or 1.
 
+@node Array Subscript
+@subsection Array Subscript
+@cindex arrays, subscripting
+@cindex subscripts
+@findex SUB
+
+@portability{yes, version 0.7+, all versions, all versions}
+
+In order to access the elements of an array, either to read or write
+the array, it is necessary to use the array subscript operator
+@code{SUB}.  Note that an array element is not a variable, so it is
+not accepted as an acceptable argument to statements like
+@code{IGNORE}; however, it can be assigned to.
+
+The syntax for an array element is the array, followed by the keyword
+@code{SUB}, followed by an expression for the element number in the
+array.  In the case of a multidimensional array, more than one
+expression is given after the keyword @code{SUB} to give the location
+of the element in each of the array's dimensions.  The first element
+in an array or array dimension is numbered 1.
+
+For instance, this is a legal (but not particularly useful) @ical{}
+program with no syntax errors that shows some of the syntaxes possible
+with array subscripting:
+
+@example
+PLEASE ,1 <- #2
+DO .1 <- #2
+DO ,1 SUB .1 <- #1
+DO ,1 SUB #1 <- ,1 SUB #2
+PLEASE ;1 <- #2 BY #2
+DO ;1 SUB #1 #2 <- ,1 SUB ,1 SUB .1
+DO READ OUT ;1SUB#1.1
+DO GIVE UP
+@end example
+
+Grouping can get complicated when nested array subscripting is used,
+particularly with multiple subscripts.  It is the programmer's job to
+write an unambiguous statement, and also obey the extra grouping rules
+that apply to array subscripts; see @ref{Grouping Rules}.
+
 @node Statements
 @chapter Statements
+@cindex statements
+@cindex statements, INTERCAL
+
+There is a wide range of statements available to @ical{} programs;
+some identifiably belong to a particular variant or dialect (such as
+Backtracking @ical{}), but others can be considered to be part of the
+'core language'.  The statements listed here are those that the @cic{}
+compiler will accept with no compiler switches to turn on particular
+dialect options.  Note that many statements have slightly different
+effects in different implementations of @ical{}; known
+incompatibilities are listed here, but it's important to check your
+program on multiple compilers when attempting to write a portable
+program.
+
+@menu
+* Syntax Error::              Why use a deliberate syntax error?
+* Calculate::                 Assigning to variables and arrays
+* NEXT FORGET and RESUME::    @icst{}-style flow control
+* STASH and RETRIEVE::        Value stacks and scoping
+* IGNORE and REMEMBER::       Creating read-only variables
+* ABSTAIN and REINSTATE::     Dynamic DOs and DON'Ts
+* READ OUT and WRITE IN::     @ical{} input and output
+* GIVE UP::                   How to end a program
+* TRY AGAIN::                 Control flow without loops
+* COME FROM and NEXT FROM::   Time-reversed GOTO
+@end menu
+
+@node Syntax Error
+@section Syntax Error
+@cindex syntax error
+@cindex comment
+@findex COMMENT
+@findex COMMENTS
+@findex COMMENTING
+@portability{yes,version 0.15+,all versions,all versions}
+
+One of the more commonly-used commands in @ical{} is the syntax error.
+A properly-written syntax error looks nothing like any known @ical{}
+command; a syntax error that looks vaguely like a command but isn't
+may confuse @cic{}, and possibly other compilers, into bailing out at
+compile time in some situations (this is known as a `serious syntax
+error'), and so is not portable.  For other syntax errors, though, the
+semantics are easily explained: there is a run-time error whenever the
+syntax error is actually executed, and the line containing the syntax
+error is used as the error message.
+
+One purpose of this is to allow your programs to produce their own
+custom errors at run time; however, it's very important to make sure
+that they start and end in the right place, by manipulating where
+statement identifiers appear.  Here's a correct example from the
+system library:
+
+@example
+DOUBLE OR SINGLE PRECISION ARITHMETIC OVERFLOW
+@end example
+
+This is a valid @ical{} command, that produces an error when run (note
+the @code{DO} at the start).  An even more common use is to produce an
+initially abstained syntax error by using an appropriate statement
+identifier, for instance
+
+@example
+PLEASE NOTE THAT THIS IS A COMMENT
+@end example
+
+This would produce an error if reinstated somehow, but assuming that
+this isn't done, this is a line of code that does nothing, which is
+therefore equivalent to a comment in other programming languages.
+(The initial abstention is achieved with the statement identifier
+@code{PLEASE NOT}; the extra @code{E} causes the command to be a
+syntax error, and this particular construction is idiomatic.)
+
+Referring to the set of all syntax errors in a program (or the set of
+all commands of any other given type) is achieved with a special
+keyword known as a `gerund'; gerund support for syntax errors is
+resonably recent, and only exists in @clcic{} (version 1.-94.-3 and
+later, with @code{COMMENT}, @code{COMMENTS}, or @code{COMMENTING}),
+and @cic{} (@code{COMMENT} in version 0.26 and later, and also
+@code{COMMENTS} and @code{COMMENTING} in version 0.27 and later).
+Therefore, it is not portable to refer to the set of all syntax errors
+by gerund; using a line label is a more portable way to refer to an
+individual syntax-error command.
+
+@node Calculate
+@section Calculate
+@findex CALCULATING
+@cindex calculate
+@cindex assignment
+@cindex arrays, dimensioning
+@cindex dimensioning arrays
+@cindex variables, assignment
+@portability{yes, all versions, all versions, all versions}
+
+At present, the only @ical{} command that contains no keywords (apart
+from the statement identifier and possibly @code{ONCE} or
+@code{AGAIN}) is what is known as the `calculate' command.  It is used
+to assign values to variables, array elements, and arrays; assigning a
+value to an array changes the number of elements that that array can
+hold, and causes the values of all elements previously in that array
+to be lost.  The syntax of a calculate command is as follows:
+
+@example
+DO .1 <- ':2~:3'~#55
+@end example
+
+That is, the command is written as a variable or array element, then
+the @code{<-} operator (known as an `angle-worm' and pronounced
+`gets'), then an expression to assign to it.  In the special case when
+an array is being dimensioned by assigning a value to it, the
+expression can contain the keyword @code{BY} to cause the array to
+become multidimensional; so for a 3 by 4 by 5 array, it would be
+possible to write
+
+@example
+DO ,1 <- #3 BY #4 BY #5
+@end example
+
+The calculate command always evaluates the expression, even if for
+some reason the assignment can't be done (for instance, if the
+variable being assigned to is read-only); this is important if the
+expression has side-effects (for instance, giving an overflow error).
+If the variable does happen to be read-only, there is not an error;
+the expression being assigned to it is just evaluated, with the
+resulting value being discarded.
+
+The gerund to refer to calculations is @code{CALCULATING}; however, if
+you are planning to use this, note that a bug in older versions of
+@cic{} means that assignments to arrays are not affected by this
+gerund before version 0.27.
+
+@node NEXT FORGET and RESUME
+@section NEXT, FORGET and RESUME
+@findex NEXT
+@findex FORGET
+@findex RESUME
+@findex NEXTING
+@findex FORGETTING
+@findex RESUMING
+@cindex NEXT stack
+@cindex flow control, INTERCAL-72
+@cindex stack, NEXT
+@cindex stack, instruction pointer
+@anchor{NEXT}
+@anchor{FORGET}
+@anchor{RESUME}
+@portability{yes, all versions, see text, all versions}
+
+The only flow-control commands in @icst{} were @code{NEXT},
+@code{RESUME}, and @code{FORGET}; together these manipulate a stack of
+locations in the program known as the `NEXT stack'.  Although all
+@ical{} compilers have implemented these, from @clcic{} version 0.05
+onwards @clcic{} has considered them obsolete, and therefore a special
+command-line switch needs to be used to enable them.  (They are still
+the most portable flow-control commands currently available, though,
+precisely because @icst{} implements nothing else.)  Note that there
+is a strict limit of 80 locations on the NEXT stack, enforced by all
+known @ical{} compilers; this helps to enforce good programming style,
+by discouraging NEXT-stack leaks (which are otherwise quite easy to
+write).
+
+Here are examples to show the syntax of these three statements:
+
+@example
+DO (1000) NEXT
+DO FORGET '.1~.1'~#1
+DO RESUME .5
+@end example
+
+The @code{NEXT} command takes a line label as its argument (unlike
+most other @ical{} commands, it comes after its argument rather than
+before); both @code{FORGET} and @code{RESUME} take expressions.
+(@cic{} from version 0.05 onwards also allows an expression in
+@code{NEXT}, rather than a label, to give a computed @code{NEXT}, but
+this behaviour was not implemented in other compilers, and is
+deprecated in @clcic{} along with noncomputed @code{NEXT}; if computed
+@code{NEXT} is ever implemented in @cic{}, it will likely likewise be
+deprecated upon introduction).  Running a @code{NEXT} causes the
+program control to transfer to the command whose line label is
+referenced, and also saves the location in the program immediately
+after the @code{NEXT} command on the top of the NEXT stack.
+
+In order to remove items from the @code{NEXT} stack, to prevent it
+filling up (which is what happens with a naive attempt to use the
+@code{NEXT} command as an equivalent to what some other languages call
+GOTO), it is possible to use the @code{FORGET} or @code{RESUME}
+commands.  They each remove a number of items from the NEXT stack
+equal to their argument; @code{RESUME} also transfers control flow to
+the last location removed from the @code{NEXT} stack this way.  Trying
+to remove no items, or more items than there are in the stack, does
+not cause an error when @code{FORGET} is used (no items or all the
+items are removed respectively); however, both of these cases are
+errors in a @code{RESUME} statement.
+
+Traditionally, boolean values in @ical{} programs have been stored
+using #1 and #2 as the two logic levels.  This is because the easiest
+way to implement an if-like construct in @icst{} is by @code{NEXTING},
+then @code{NEXTING} again, then @code{RESUMING} either by 1 or 2
+according to an expression, and then if the expression evaluated to 1
+@code{FORGETTING} the remaining NEXT stack entry.  By the way, the
+previous sentence also explained what the appropriate gerunds are for
+@code{NEXT}, @code{RESUME}, and @code{FORGET}.
+
+@node STASH and RETRIEVE
+@section STASH and RETRIEVE
+@anchor{STASH}
+@anchor{RETRIEVE}
+@findex STASH
+@findex RETRIEVE
+@findex STASHING
+@findex RETRIEVING
+@cindex stack, variable
+@cindex stashes
+@cindex variables, stashes
+@portability{yes, all versions, all versions, all versions}
+
+The NEXT stack is not the only stack available in an @ical{} program;
+each variable used in the program also has its own stack, which holds
+values of the same type as the variable.  The @code{STASH} command
+pushes a variable's value onto that variable's stack; @code{RETRIEVE}
+can be used in the same way to pop the top element of a variable's
+stack to replace that variable's value.  The syntax is the same as
+most other @ical{} commands, with the word @code{STASH} or
+@code{RETRIEVE} followed by the variable or variables to stash or
+retrieve:
+
+@example
+DO STASH .1 + ;2
+DO RETRIEVE ,3
+@end example
+
+Note that it is possible to stash or retrieve multiple variables at
+once, by listing their names separated by intersections (@code{+});
+it's even possible to stash or retrieve a variable twice in the same
+statement.
+
+It is not entirely clear how @code{RETRIEVE} interacts with
+@code{IGNORE} in historical @icst{} compilers; the three modern
+@ical{} compilers all use different rules for the interaction:
+
+@cindex @code{IGNORE}/@code{RETRIEVE} interaction
+@cindex @code{RETRIEVE}/@code{IGNORE} interaction
+@itemize
+@item
+@cic{} treats a retrieval just like an assignment.  That is, a
+read-only variable will not be changed by a retrieval, and will remain
+read-only, but the side-effect of popping that variable's stash will
+still happen.
+
+@item
+@jic{} ignores the read-only status of a variable when retrieving it
+from a stash; the value of the variable changes despite being
+read-only.  The variable remains read-only; the @code{RETRIEVE} simply
+allows a change to its value despite the read-only status.
+
+@item
+@clcic{} is the most complicated; it stores read-only status or
+otherwise in the stash, along with the variable's value.  This means
+that if a variable was stashed when read-only, retrieving it will
+retrieve its value and set it to read-only regardless of its previous
+read-only status; likewise, if a variable was stashed when read-write,
+retrieving it will retrieve its value and set it to read-write even if
+it was previously read-only.
+
+@end itemize
+
+The appropriate gerunds for @code{STASH} and @code{RETRIEVE} are
+@code{STASHING} and @code{RETRIEVING} respectively.
+
+@node IGNORE and REMEMBER
+@section IGNORE and REMEMBER
+@anchor{IGNORE}
+@anchor{REMEMBER}
+@findex IGNORE
+@findex IGNORING
+@findex REMEMBER
+@findex REMEMBERING
+@cindex variables, read-only
+@cindex variables, read-write
+@cindex read-only variables
+@cindex read-write variables
+@cindex variables, ignoring
+@cindex variables, remembering
+@portability{yes, all versions, all versions, all versions}
+
+Variables in @ical{} can be either read-write or read-only.  At the
+start of a program, all variables are read-only, but this status can
+be changed dynamically during execution of a program using the
+@code{IGNORE} and @code{REMEMBER} statements (whose gerunds are
+@code{IGNORING} and @code{REMEMBERING} respectively).  The syntax is
+the same as for @code{STASH} and @code{RETRIEVE}: the command's name
+followed by an intersection-separated list of variables.  For
+instance:
+
+@example
+DO IGNORE .4
+DO REMEMBER ,4 + ;5
+@end example
+
+Using the @code{IGNORE} statement sets a variable to be read-only (or
+does nothing if it's read-only already); @code{REMEMBER} sets it to be
+read-write.  Any attempt to assign to a read-only variable silently
+fails.  One place that this is used is in the system library; instead
+of not assigning to a variable in certain control flow paths, it
+instead sets it to be read-only so that subsequent assignments don't
+change its value (and sets it to be read-write at the end, which
+succeeds even if it was never set read-only in the first place); the
+advantage of this is that it doesn't need to remember what flow path
+it's on except in the variable's ignorance status.
+
+The interaction between @code{IGNORE} and @code{RETRIEVE} was never
+defined very clearly, and is in fact different in @cic{}, @clcic{} and
+@jic{}; for more details, see @ref{RETRIEVE}.
+
+@node ABSTAIN and REINSTATE
+@section ABSTAIN and REINSTATE
+@anchor{ABSTAIN}
+@anchor{REINSTATE}
+@findex ABSTAIN
+@findex ABSTAINING
+@findex REINSTATE
+@findex REINSTATING
+@cindex abstain, during execution
+@cindex reinstate, during execution
+@portability{yes, all versions, all versions, all versions}
+
+The statement identifier of a statement determines whether it's
+in an abstained or reinstated state at the start of a program; these
+states determine whether the statement runs at all when it's
+encountered.  It is, however, possible to change this state
+dynamically during a program's execution, and the statements to do
+this are rather appropriately named @code{ABSTAIN} and
+@code{REINSTATE}.  There are two forms of each, one which takes a
+single line label (which must be constant in most compilers, but can
+instead be an expression in recent @clcic{} versions), and one which
+takes an intersection-delimited list of gerunds.  They look like this:
+
+@example
+DO ABSTAIN FROM ABSTAINING + REINSTATING
+DO ABSTAIN FROM (10)
+DO REINSTATE CALCULATING
+DO REINSTATE (22)
+@end example
+
+(This also illustrates the gerunds used for these commands; note that
+@code{ABSTAINING} from @code{REINSTATING} is generally a bad idea@!)
+The line referenced, or every command represented by any gerund
+referenced, are reinstated or abstained as appropriate (effectively
+changing the DO to DON'T (or PLEASE to PLEASE DON'T, etc.@:), or vice
+versa).  Using these forms of @code{ABSTAIN} and/or @code{REINSTATE}
+won't abstain from a command that's already abstained, or reinstate a
+command that's already reinstated.
+
+There is a strange set of restrictions on @code{ABSTAIN} and
+@code{REINSTATE} that has existed since @icst{}; historically such
+restrictions have not always been implemented, or have not been
+implemented properly.  They together define an unusual interaction of
+@code{ABSTAIN} and @code{GIVE UP} (note, for instance, that there
+isn't a gerund for @code{GIVE UP}).  The wording used in the @icst{}
+manual is:
+
+@quotation
+[...] the statement DO ABSTAIN FROM GIVING UP is not accepted, even
+though DON'T GIVE UP is. [...] DO REINSTATE GIVING UP is invalid, and
+attempting to REINSTATE a GIVE UP statement by line label will have no
+effect.  Note that this insures that DON'T GIVE UP will always be a
+"do-nothing" statement.
+@end quotation
+
+This restriction was not implemented at all in the only @clcic{}
+version before 0.02 (i.e.@: version 0.01), or in @cic{} versions
+before 1.26.  The restriction was implemented in @cic{} version 1.26
+and @clcic{} versions 0.02 and later as ``@code{GIVE UP} cannot be
+@code{REINSTATED} or @code{ABSTAINED FROM}''; however, this is not
+strictly the same as the definition used by @icst{} (@cic{} still uses
+this definition in @clcic{} compatibility mode).  The @jic{}
+implementation of this restriction is to make @code{REINSTATING} or
+@code{ABSTAINING} from a line label that refers to a @code{GIVE UP}
+statement a compile-time error, but this does not fit the @icst{}
+definition either.  The definition adopted with version 0.27 and
+later of @cic{}, which is hopefully correct, is to allow abstaining
+from a @code{GIVE UP} statement by line number but to rule out the
+other three cases (reinstating by line number silently fails,
+reinstating or abstaining by gerund is impossible because there is no
+gerund).
+
+As well as @clcic{}'s extension to abstain/reinstate by computed line
+number, there is also (since version 0.25) a @cic{}-specific extension
+to @code{ABSTAIN}, also known as `computed abstain', but with a
+different syntax and different semantics.  It's written like an
+ordinary @code{ABSTAIN}, but with an expression between the words
+@code{ABSTAIN} and @code{FROM}, for instance:
+
+@example
+DO ABSTAIN #1 FROM (1000)
+DO ABSTAIN .2 FROM WRITING IN
+@end example
+
+Unlike non-computed @code{ABSTAIN}, this form (available from @cic{}
+version 0.25 onwards) allows a command to be abstained from even if
+it's already been abstained from; so if the first example command is
+run and line (1000) is already abstained, it becomes
+`double-abstained'.  The number of times the statement is abstained
+from is equal to the number of times it was already abstained from,
+plus the expression (whereas with non-computed abstain, it ends up
+abstained once if it wasn't abstained at all, and otherwise stays at
+the same abstention status).  Reinstating a statement always
+de-abstains it exactly once; so double-abstaining from a statement,
+for instance, means it needs to be reinstated twice before it will
+actually execute.
+
+There are many uses for @code{ABSTAIN} (both the computed and
+non-computed versions) and @code{REINSTATE}, especially when
+interacting with @code{ONCE} and @code{AGAIN} (@pxref{ONCE and
+AGAIN}); the computed version, in particular, is a major part of a
+particular concise way to write conditionals and certain kinds of
+loops.  They also play an important role in multithreaded programs.
+
+@node READ OUT and WRITE IN
+@section READ OUT and WRITE IN
+@anchor{READ OUT}
+@anchor{WRITE IN}
+@findex READ OUT
+@findex READING OUT
+@findex WRITE IN
+@findex WRITING IN
+@cindex I/O
+@cindex input
+@cindex output
+
+The @code{READ OUT} and @code{WRITE IN} commands are the output and
+input commands in @ical{}; they allow communication between the
+program and its user.  There was a numeric I/O mechanism implemented
+in @icst{}, and it (or trivial variants) have been likewise
+implemented in all more modern variants.  However, it had some obvious
+deficiences (such as not being able to read its own output) which
+meant that other methods of I/O were implemented in @cic{} and
+@clcic{}.
+
+The syntax of @code{READ OUT} and @code{WRITE IN} is the same in all
+cases: the name of the command followed by an intersection-separated
+list of items; the form of each item, the compiler you are using, and
+its command line arguments together determine what sort of I/O is
+used, which can in be different for different elements in the list.
+
+@menu
+* INTERCAL-72 I/O::        Spelt-out numbers and Roman numerals
+* C-INTERCAL I/O::         The Turing Tape I/O system
+* CLC-INTERCAL I/O::       Baudot and mingled binary
+@end menu
+
+@node INTERCAL-72 I/O
+@subsection INTERCAL-72 I/O
+@cindex I/O, INTERCAL-72
+@cindex input, INTERCAL-72
+@cindex output, INTERCAL-72
+@cindex INTERCAL-72, I/O
+@cindex Roman numerals
+
+@portability{yes, all versions, see text, all versions}
+
+@icst{} had its own versions of I/O commands; these commands are
+available in all modern @ical{} compilers as well (but @clcic{}
+implements output slightly differently).  To distinguish @icst{} input
+and output from the other more modern types of I/O, the @code{READ
+OUT} and @code{WRITE IN} commands must take one of the following
+values: a onespot or twospot variable, a single element of a tail or
+hybrid array, or (in the case of @code{READ OUT}) a constant, meaning
+that these are some examples of the possible forms:
+
+@example
+READ OUT .1
+READ OUT ;2 SUB .3:4
+READ OUT #3
+WRITE IN :4
+WRITE IN ,5 SUB #6
+@end example
+
+The statements do what you would expect; @code{READ OUT} outputs its
+argument to the user, and @code{WRITE IN} inputs a number from the
+user and assigns it to the variable or array element referenced.  (If
+the variable, or the array that contains the array element, happens to
+be read-only, the input or output still happens but in the case of
+@code{WRITE IN} silently skips the assignment, instead throwing away
+the input.)  The formats used for input and output are, however,
+different from each other and from the formats used by most mainstream
+languages.
+
+Input is achieved by writing a number in decimal, one digit at a time,
+with each digit written out as a word; so to input the number 12345, a
+user would have to type @code{ONE TWO THREE FOUR FIVE} as input (if
+they were using English, the most portable choice of language).  In
+@icst{} only English is accepted as a language, but other compilers
+accept other languages in addition.  @cic{} from version
+0.10 onwards accepts English, Sanskrit, Basque, Tagalog, Classical
+Nahuatl, Georgian, and Kwakiutl; also Volap@"uk from version 0.11
+onwards, and Latin from version 0.20 onwards.  @jic{} accepts the same
+languages, except with Esperanto instead of Latin; from version 0.05
+of @clcic{} onwards, the same list of languages as @cic{} is supported
+(apart from Latin, which was added in version 1.-94.-8).
+
+The format that output can be read in is a modified form of Roman
+numerals, known as `butchered' Roman numerals.  @icst{}, @cic{} and
+@jic{} do this the same way; @clcic{} is somewhat different. The
+characters @samp{I}, @samp{V}, @samp{X}, @samp{L}, @samp{C}, @samp{D},
+and @samp{M} mean 1, 5, 10, 50, 100, 500 and 1000 respectively,
+placing a lower-valued letter after a higher-valued letter adds them,
+and placing a lower-valued letter before a higher-valued letter
+subtracts it from the value; so @samp{XI} is 11 and @samp{IX} is 9,
+for instance.  In @icst{}, @cic{}, and @jic{}, a bar over a numeral
+multiplies its value by 1000, and writing a letter in lowercase
+multiplies its value by 1000000; however, @clcic{} uses lowercase to
+represent multiplication by 1000 and for multiplication by 1000000
+writes a backslash before the relevant numeral.
+
+@node C-INTERCAL I/O
+@subsection C-INTERCAL I/O
+@cindex I/O, C-INTERCAL
+@cindex input, C-INTERCAL
+@cindex output, C-INTERCAL
+@cindex C-INTERCAL, I/O
+@cindex Turing Tape
+
+@portability{no, version 0.07+, version 0.05+, no}
+
+@cic{}'s method of character-based (rather than numeric) input and
+output is known as the Turing Tape method; it is a binary
+(character-set-agnostic) input/output mechanism.  To specify that
+@cic{}-style I/O is being used, an array must be used as the argument
+to @code{READ OUT} or @code{WRITE IN}; as the syntax is the same as
+for @clcic{}'s I/O, command-line arguments and the capabilities of the
+version of the compiler being used serve to distinguish the two
+mechanisms.
+
+The character-based input writes as many characters into a tail or
+hybrid array as will fit, one character in each element.  The number
+that's written into the array is not the character code, though, but
+the difference between the character code and the previous character
+code, modulo 256.  (To be precise, the code is the new character minus
+the previous character, or 256 minus (the previous character minus the
+new character) if the previous character had a higher character code;
+the 'previous character' is the previous character from the input, not
+the previous character written into the array.)  End-of-file causes
+256 to be written into the array.  The concept is that of a circular
+tape containing all the characters, where the program measures how
+many spaces it needs to move along the tape to reach the next
+character.  The 'previous character' starts at 0, but is preserved
+throughout the entire program, even from one @code{WRITE IN} to the
+next.
+
+Character-based output uses a similar model, but conceptually the
+output device moves on the inside of the tape, rather than on the
+outside.  Therefore, the character is that is actually output is the
+bit-reversal of the difference between the last character output
+before it was bit-reversed and the number found in the array
+(subtracting in that order, and adding 256 if the result is
+negative).  (Rather than trying to parse the previous sentence, you
+may find it easier to look either at the source code to the compiler
+if you have it (the relevant part is binout in @file{src/cesspool.c})
+or at some example @cic{} programs that do text-based I/O.)
+
+@node CLC-INTERCAL I/O
+@subsection CLC-INTERCAL I/O
+@cindex Baudot
+@cindex I/O, Baudot
+@cindex I/O, CLC-INTERCAL
+@cindex CLC-INTERCAL I/O
+@cindex input, CLC-INTERCAL
+@cindex output, CLC-INTERCAL
+
+@portability{no, version 0.27+, all versions, no}
+
+There are also two @clcic{}-specific I/O mechanisms.  These are
+Baudot-based text I/O (which is also implemented from @cic{} version
+0.27 onwards), and @clcic{} generalised binary I/O (not implemented in
+@cic{}).
+
+Baudot text-based I/O is specified by using a tail array as an
+argument to @code{WRITE IN} or @code{READ OUT}.  (A tail array can
+also be used to specift @cic{}-style Turing Tape I/O.  In order to
+determine which is used: both @cic{} and @clcic{} use their own sort
+of I/O unless a command-line argument instructs them to use the
+other.)  In the case of @code{WRITE IN}, one line of input is
+requested from the user (@cic{} requires this to be input in Latin-1,
+and will then automatically convert it; @clcic{} gives the option of
+various character sets for this input as command-line options); the
+final newline is removed from this line, then it is converted to
+extended Baudot and stored in the tail array specified (causing an
+error if the array is too small).  Because Baudot is only a 5-bit
+character set, each element is padded to 16 bits; @clcic{} pads with
+zeros, @cic{} pads with random bits.  Trying to input at end-of-file
+will act as if the input were a blank line.  @code{READ OUT} is the
+reverse; it interprets the array as extended Baudot and converts it to
+an appropriate character set (Latin-1 for @cic{}, or whatever was
+specified on the command line for @clcic{}), which is output to the
+user, followed by a newline.  Note that the Baudot is often longer
+than the corresponding character in other character sets due to the
+need to insert shift codes; for information on the extended Baudot
+character set, @ref{Character Sets}.
+
+Generalised binary I/O is specified using a hybrid array as an
+argument to @code{WRITE IN} or @code{READ OUT}.  Input works by
+reading in a number of bytes equal to the length of the array (without
+trying to interpret them or translating them to a different character
+set), prepending a byte with 172 to the start, padding each byte to 16
+bits with random data, then replacing each pair of consecutive bytes
+(that is, the first and second, the second and third, the third and
+fourth, and so on) with (the first element selected from the second
+element) mingled with (the complement of the first element selected from
+the complement of the second element).  Output is the exact opposite
+of this process.  End-of-file reads a 0, which is padded with 0s
+rather than random data; if a non-end-of-file 0 comes in from the
+data, its padding will contain at least one 1.  Any
+all-bits-0-even-the-padding being read out will be skipped.
+
+@node GIVE UP
+@section GIVE UP
+@findex GIVE UP
+@cindex quitting
+@cindex exiting
+
+@portability{yes, all versions, all versions, all versions}
+
+The @code{GIVE UP} command causes the program to end (or, in a
+multithreaded program, causes the current thread to end).  It is
+written simply as @code{GIVE UP}.  There is not much else to say about
+it, except to mention that it is the only way to end the program
+without an error unless the last line of the program is @code{TRY
+AGAIN}, and that it has an unusual interaction with @code{ABSTAIN};
+for details of this, see @ref{ABSTAIN}.  (Going past the last command
+in the program is an error.)
+
+There is no gerund for @code{GIVE UP}; in particular, @code{GIVING UP}
+is a syntax error.
+
+@node TRY AGAIN
+@section TRY AGAIN
+@findex TRY AGAIN
+@cindex loops, entire program
+
+@portability{no, version 0.25+, no, no}
+
+The @code{TRY AGAIN} command is a very simple command with many
+limitations; its effect is to place the entire program in a loop.  If
+it exists, it must be the very last command in the program (it cannot
+even be followed by syntax errors), and it causes execution of the
+program to go back to the first command.  If the @code{TRY AGAIN}
+command is abstained or for some other reason doesn't execute when
+reached, it exits the program without the error that would usually be
+caused by going past the last line of code.
+
+The gerund for @code{TRY AGAIN} is @code{TRYING AGAIN}.
+
+@node COME FROM and NEXT FROM
+@section COME FROM and NEXT FROM
+@anchor{COME FROM}
+@anchor{NEXT FROM}
+@findex COME FROM
+@findex NEXT FROM
+@cindex reverse goto
+@cindex goto, time-reversed
+@cindex time-reversed goto
+
+@portability{no, see text, see text, see text}
+
+The @code{COME FROM} statement (incidentally also invented in 1972,
+but not in connection with @ical{}) is the main control-flow command
+in @clcic{} (which deprecates @code{NEXT}), and one of two main
+control flow structures in other modern @ical{} compilers.  It takes
+either a label or an expression as its argument; these forms are
+noncomputed @code{COME FROM} and computed @code{COME FROM}.
+
+Noncomputed @code{COME FROM} was implemented in version 0.5 of @cic{},
+but did not conform to modern-day semantics until version 0.7; it is
+available in every version of @clcic{} and @jic{}.  Computed
+@code{COME FROM} support is available in every version of @clcic{} and
+in @cic{} from version 0.25 onwards, but not in @jic{}; the variant
+@code{NEXT FROM} of @code{COME FROM} is available from @clcic{}
+version 1.-94.-8 and @cic{} version 0.26 (both computed and
+noncomputed).  @cic{} and @clcic{} also have a from-gerund form of
+@code{COME FROM} and @code{NEXT FROM}, which was also implemented from
+@clcic{} version 1.-94.-8 and @cic{} version 0.26.
+
+The basic rule of @code{COME FROM} is that if a @code{COME FROM}
+statement references another statement, whenever that statement is
+reached, control flow will be transferred to the @code{COME FROM}
+after that statement finishes executing.  (@code{NEXT FROM} is
+identical except that in addition to the @code{COME FROM} behaviour,
+the location immediately after the statement that was nexted from is
+saved on the NEXT stack, in much the same way as if the statement
+being nexted from was iteslf a @code{NEXT}.)
+
+Here are examples of noncomputed, computed, and from-gerund @code{COME
+FROM}:
+
+@example
+DO COME FROM (10)
+DO COME FROM #2$'.1~#1'
+DO COME FROM COMING FROM
+@end example
+
+(The last example is an infinite loop.  If it said @code{DO NEXT FROM
+NEXTING FROM}, it would not be an infinite loop because the NEXT stack
+would overflow and cause an error.  This also establishes the gerunds
+used for @code{COME FROM} and @code{NEXT FROM}.)
+
+There are some things to be careful with involving @code{COME FROM}
+and @code{NEXT FROM}.  First, if the statement come from or nexted
+from happens to be a @code{NEXT}, the @code{NEXT} doesn't count as
+'finishing executing' until the NEXT stack entry created by the
+@code{NEXT} is @code{RESUME}d to.  In particular, this means that if
+@code{FORGET} is used to remove the entry, or a @code{RESUME} with a
+large argument resumes a lower entry, the @code{COME FROM} doesn't
+steal execution at all.
+
+Second, you may be wondering what happens if two @code{COME FROM}s or
+@code{NEXT FROM}s aim at the same line.  In a non-multithreaded
+program (whether a program is multithreaded or not is determined by a
+compiler option for those compilers that support it), this is an
+error; but it is only an error if the statement that they both point
+to finishes running, and both @code{COME FROM}s or @code{NEXT FROM}s
+try to execute as a result (they might not if, for instance, one is
+abstained or has a double-oh-seven causing it not to run some of the
+time).  If both @code{COME FROM}s or @code{NEXT FROM}s are
+noncomputed, however, a compiler can (but does not have to) give a
+compile time error if two @code{COME FROM}s or @code{NEXT FROM}s share
+a label, and so that situation should be avoided in portable code.
+(If it is wanted, one solution that works for @cic{} and @clcic{} is
+to use computed @code{COME FROM}s or @code{NEXT FROM}s with a constant
+expression.)
 
 @ifset notsplit
-@partheading PART III: @ical{} DIALECTS AND EXTENSIONS
+@partheading{PART III: @ical{} DIALECTS AND EXTENSIONS}
 @end ifset
 @node TriINTERCAL
 @chapter TriINTERCAL
+@cindex TriINTERCAL
+@cindex ternary
+@cindex whirlpool
+@cindex sharkfin
+@cindex BUT
+@cindex add-without-carry
+@cindex subtract-without-borrow
+@cindex controlled unary operator
+@findex ^
+@findex @@
 
-@c first available in 0.7
+@portability{no, version 0.7+, version 1.-94.-8+, no}
+
+One extension to @ical{} that is implemented by both @cic{} and
+@clcic{} is known as TriINTERCAL, and extends @ical{} to bases other
+than binary.  Unlike ordinary @ical{} programs, which have the
+extension @samp{.i}, TriINTERCAL programs in bases from 3 to 7 (the
+only allowed bases) have extensions from @samp{.3i} to @samp{.7i}
+respectively.
+
+The change of numeric base only affects expressions, and in particular
+the behaviour of operators, and the range of variables.  (The onespot
+and twospot ranges become the highest number of trits or other digits
+in the base required that fit inside the binary ranges, so for
+instance, the maximum value of a onespot variable in ternary is 59048,
+or 3 to the power 10 minus 1.) Interleave/mingle is the simplest to
+explain; it alternates digits just as it alternated bits in binary.
+The other operators all change, as follows:
+
+@itemize
+
+@item
+Exclusive-or becomes two operators, known either as
+subtract-without-borrow and add-without-carry due to their
+mathematical interpretations, or what and sharkfin after their Atari
+syntax representations (@code{?} and @code{^}).  (In Princeton syntax,
+these are the bookworm or yen sign, and a spike (@code{|}).)  The two
+operators do the same thing in binary, but differ in higher bases.
+(Nevertheless, it is an error to use a sharkfin in binary, because it
+is a so-called `controlled unary operator', as are the rest of the
+new operators defined in this section, which has a lower limit on
+which base it is allowed in.)  Instead of doing the exclusive-or
+operation, the bits being combined are either subtracted or added; if
+the result is out of range for the base being used, the base is added
+or subtracted from the result until it is in range.  (For the
+subtraction, the bit that was less significant is subtracted from the
+bit that was more significant in any given pair of bits, except for
+the subtraction between the most and least significant bits, where the
+most significant bit is subtracted from the least.)
+
+@item
+The AND and OR operators are generalised into an entire sequence of
+operators; the number of operators available is the same as the base
+that is being used.  In base 3, the third operator is known as BUT; in
+other bases, there are no commonly accepted names for the extra
+operators, so names that reflect the notation are used here.
+
+The way to think of it is this: in base 2, an AND gives the result 0
+if either argument is a 0, and otherwise a 1, and likewise, an OR
+gives the result 1 if either argument is a 1, and otherwise a 0; they
+could be said to favour 0 over 1 and 1 over 0 respectively.  In base
+3, AND favours 0 over 2 over 1, OR favours 2 over 1 over 0, and BUT
+favours 1 over 0 over 2.  (The symbol for BUT is @code{@@} (a
+`whirlpool', which is another name for the BUT operation) in Atari
+syntax, and @code{?} in Princeton syntax.)  The pattern continues: in
+base 4, AND favours 0 over 3 over 2 over 1, BUT favours 1 over 0 over
+3 over 2, 2BUT (written @code{2@@} or @code{2?}) favours 2 over 1 over
+0 over 3, and OR favours 3 over 2 over 1 over 0.  (This can be
+extended to higher bases following the same pattern, introducing
+operators @code{3@@} or @code{3?}, etc., to favour 3, etc., when
+neither AND (which always favours 0) nor OR (which favours the highest
+digit in the base) are available.)  All the whirlpool operators are
+controlled unary operators, which are only legal when both the base
+contains the favoured digit, and they aren't redundant to AND nor OR.
+
+@item
+Select has its semantics modified to deal with more than one nonzero
+digit in the base.  It starts off by doing an OR (in whatever base is
+being used) between the two numbers being selected; then the bits of
+the result are sorted by the bits of the right-hand argument to the
+select, with bits corresponding to 0s in the right-hand argument
+ending up more significant than bits corresponding to high digits in
+the right-hand argument.  In base 2, this has the same effect as a
+traditional-style select.
+
+@end itemize
+
+Note that the base doesn't affect anything other than variable ranges
+and expressions; in particular, it doesn't affect the bit-reversal
+used by Turing Tape I/O.  (The tape still has characters written on it
+in binary, even though the program uses a different base.)
 
 @node Multithreading and Backtracking
 @chapter Multithreading and Backtracking
+@cindex multithreading
+@cindex threading
+@cindex Threaded INTERCAL
+@cindex Backtracking INTERCAL
+
+The multithreading and backtracking extensions to @ical{} were
+originally invented by Malcom Ryan, who implemented @code{COME
+FROM}-based multithreading as a modified version of @cic{}, but did
+not implement backtracking, known as Threaded @ical{}.  (The same
+functionality is implemented in @cic{} today, but with different code.
+Most likely, this means that the original code was better.)  He also
+invented the original version of Backtracking @ical{}, but did not
+implement it; the only known implementation is the @cic{} one.  A
+different version of multithreading, using @code{WHILE}, was
+implemented as part of @clcic{} (like all extensions first available
+in @clcic{}, it is most likely due to Claudio Calvelli) and then added
+to @cic{}, although its implications were not noticed for some time
+afterwards.
+
+So nowadays, three freely-mixable threading-like extensions to @ical{}
+exist, all of which are implemented in @cic{}.  (A fourth, Quantum
+@ical{}, is implemented in @clcic{} but not @cic{}, and so will not be
+discussed further here.)  If you're wondering about the description of
+backtracking as a threading-like extension, it's implemented with much
+of the same code as multithreading in @cic{}, because the @ical{}
+version can be seen as roughly equivalent to multithreading where the
+threads run one after another rather than simultaneously.  (This
+conceptualisation is probably more confusing than useful, though, and
+is also not strictly correct.  The same could probably be said about
+@ical{} as a whole, for that matter.)
+
+@menu
+* Multithreading using COME FROM::  Creating separate threads.
+* Multithreading using WHILE::      Creating connected threads.
+* Backtracking::                    Multithreading in series, not parallel.
+@end menu
+
+@node Multithreading using COME FROM
+@section Multithreading using COME FROM
+@cindex @code{COME FROM}, multithreading
+@cindex @code{NEXT FROM}, multithreading
+@cindex multithreading, separate threads
+@cindex threading, separate
+@cindex threading, unwoven
+@cindex separate threads
+@cindex unwoven threads
+
+@portability{no, version 0.25+, version 0.05+, no}
+
+The original multithreading implementation worked by giving a new
+meaning to what was previously an error condition.  If in a
+multithreaded program (a program is marked as multithreaded using
+options to a compiler) two or more @code{COME FROM}s or @code{NEXT
+FROM}s (or a mixture of the two) attempt to steal control
+simultaneously, the original thread splits into multiple threads, one
+for each of the commands trying to take control, and a different
+command gains control of the program in each case.
+
+From then on, all the threads run simultaneously.  The only thing
+shared between threads (apart from the environment in which they run)
+is the abstained/reinstated status of each command; everything else is
+separate.  This means, for instance, that it's possible to change the
+value of a variable in one thread, and it will not affect the
+corresponding variable in other threads created this way.  Likewise,
+there is a separate NEXT stack in each thread; if both a @code{COME
+FROM} and a @code{NEXT FROM} aim at the same line, for instance, the
+@code{NEXT FROM} thread will end up with a NEXT stack entry that isn't
+in the @code{COME FROM} thread, created by the @code{NEXT FROM}
+itself.  This is known as unwoven thread creation; none of the threads
+created this way are `woven' with any of the other threads created
+this way.  (Whether threads are woven depends on how they were
+created.)  If the thread being split was itself woven with other
+threads, exactly one of the resulting threads after the split is woven
+with the threads that the original thread was woven to, but the rest
+will not be woven to anything.  (If that seems a somewhat unusual
+rule: well, this is @ical{}.)
+
+In @cic{}, there are other guarantees that can be made about unwoven
+threads (that is, threads not woven to any other thread).  In
+particular, they can all be guaranteed to run at approximately the
+same speed; to be more precise, the number of commands that have been
+given the chance to execute in any given thread will not differ by
+more than 2 from the number of commands that have been given the
+chance to execute in any other thread that was created at the same
+time.  (However, @code{COME FROM}s and @code{NEXT FROM}s can make this
+relationship less precise; it is unspecified (in the technical sense
+that means the compiler can choose any option it likes and change its
+mind on a whim without telling anyone) whether a @code{COME FROM} or
+@code{NEXT FROM} aiming at the current command counts towards the
+command total or not, thus causing the relationship to become weaker
+the more of them have the chance to execute.  In versions of @cic{}
+from 0.27 onwards, there is a third guarantee; that if a @code{COME
+FROM} comes from itself, it will actually give other threads at least
+some chance to run, at some speed, by counting itself as a command
+every now and then; previously this requirement didn't exist, meaning
+that a @code{COME FROM} could block all threads if it aimed for itself
+due to the speed restrictions and the fact that @code{COME FROM}s need
+not count towards the total command count.)  Also, all commands,
+including any @code{ONCE} or @code{AGAIN} attached to the command, are
+atomic; this means that it's impossible for another thread to conflict
+with what the command is doing.  (In a departure from the usual
+@ical{} status quo, these guarantees are somewhat @emph{better} than
+in most other languages that implement threading, amusingly continuing
+to leave @ical{} with the status of being unlike any other mainstream
+language.)
+
+The only way to communicate between unwoven threads is by changing the
+abstention status of commands; this always affects all threads in the
+program, whether woven or not.  (The combination of @code{ABSTAIN} and
+@code{ONCE} is one way to communicate atomically, due to the atomic
+nature of @code{ONCE}.)
+
+If there are at least two threads, the @code{GIVE UP} command ends the
+current thread, rather than the current program.
+
+@node Multithreading using WHILE
+@section Multithreading using WHILE
+@findex WHILE
+@anchor{WHILE}
+@cindex multithreading, connected threads
+@cindex threading, connected
+@cindex threading, woven
+@cindex connected threads
+@cindex woven threads
+
+@portability{no, version 0.27+, version 0.05+, no}
+
+The @code{WHILE} command (which is not strictly speaking a command,
+but more a sort of metacommand that joins commands) is a second method
+of achieving multithreading.  (In @clcic{}, there are at least two
+other meanings for @code{WHILE}, but only the one implemented in
+@cic{} is discussed here.)  The syntax is somewhat unusual, and
+consists of two commands separated by the @code{WHILE} keyword, but
+sharing the statement identifier, execution chance, and any
+@code{ONCE}/@code{AGAIN} keyword that may be present.  For instance:
+
+@example
+(1) DO COME FROM ".2~.2"~#1 WHILE :1 <-
+      "'?.1$.2'~'"':1/.1$.2'~#0"$#65535'"$
+      "'"'&.1$.2'~'#0$#65535'"$#0'~#32767$#1"
+@end example
+
+(OK, maybe that's an unnecessarily complicated example, and maybe it
+shouldn't have included the @code{/} operator which is part of another
+@ical{} extension (@pxref{Operand Overloading}).  Still, I thought
+that maybe you'd want to see how addition can be implemented in @ical{}.)
+
+A @code{WHILE} command starts two threads (the original thread that
+ran that command and a new one), one of which runs the command to the
+left of the @code{WHILE} and one of which runs the command to the
+right.  Any line number applies to the left-hand command, not the
+WHILE as a whole, which is a metalanguage construct.  @code{NEXTING
+FROM}, @code{ABSTAINING FROM} or similar behaviour with respect to the
+@code{WHILE} itself is impossible, although it's certainly possible to
+abstain from either of its operands (and abstaining from the left
+operand has much the same effect as abstaining from the @code{WHILE}
+itself; the right-hand thread deliberately takes a bit of time to get
+started just so that this behaviour happens).  The right-command
+thread starts just before the left command is run (so @code{NEXTING},
+etc.@:, directly to the left command will not start that loop in the
+first place); if that command finishes (which may be almost
+immediately for something like a calculate command, or take a long
+time for something like @code{NEXT}), that thread loops and reruns
+that command as long as the left command has not finished;
+@code{COMING FROM} that command, or a @code{NEXT}/@code{NEXT FROM}
+from/aiming at that command, doesn't count as finishing that command
+until it is @code{RESUME}d back to (if possible; if it's come from,
+that command can never end and the right-hand loop will continue
+forever, or until it @code{GIVE}s @code{UP} or the loop ends due to
+the command ending later in another thread).  A @code{WHILE} command
+itself exists across all threads of a multithreaded program in a way;
+for each left-hand command that ends (in any thread), the next time a
+right-hand command ends it will cause the thread it's looping in to
+end, regardless of whether that thread corresponds to the thread in
+which the left-hand command ended.  (As well as a right-hand command
+ending, there's also the possibility that it never got started; there
+is a delay before the right-hand command runs during which a left-hand
+command ending can prevent the right-hand thread starting in the first
+place; this counts as the same sort of event as terminating a
+right-hand loop, and can substitute for it anywhere a right-hand
+command ending is mentioned.)  There is one exception, in that if two
+or more left-hand commands end in a space of time in which no
+right-hand commands for that @code{WHILE} ends, they together only
+cause one right-hand command to end.  (What, did you expect the
+logical and orthogonal behaviour?)
+
+The two threads produced by a @code{WHILE} (the original thread and a
+new copy of it) have more in common than ordinary @ical{} threads
+created by @code{COME FROM}; ordinary threads share only
+@code{ABSTAIN}/@code{REINSTATE} information, whereas the
+@code{WHILE}-produced threads count as `woven' threads which also
+share variables and stashes.  (They still have separate instruction
+pointers, separate instruction pointer stacks, such as the NEXT stack,
+and separate choicepoint lists.  Overloading information is shared,
+though.  Being woven is a relationship between two or more threads,
+rather than an attribute of a thread, although a thread can be
+referred to as being unwoven if it is not woven to any other thread.
+
+Ordinary multithreading cannot create woven threads. When threads are
+created by multiple @code{COME FROM}s from an original thread, which
+was woven with at least one other thread, one of the resulting threads
+counts as the `original' thread and remains woven; the rest are `new'
+threads which initially start out with the same data as the original,
+but are not woven with anything.  Backtracking in a thread
+(@pxref{Backtracking}) causes it to unweave with any threads it may be
+woven with at the time (so the data in the thread that backtracks is
+set back to the data it, and the threads it was woven with at the
+time, had at the time of the @code{MAYBE}, but the other threads
+continue with the same data as before).  The only way to cause three
+or more threads to become woven is with a new @code{WHILE} inside one
+of the threads that is already woven, which causes all the new threads
+to be woven together (the weaving relationship is transitive).
+
+@node Backtracking
+@section Backtracking
+@cindex backtracking
+@cindex choicepoints
+@cindex dormant thread
+@cindex threading, in series
+@cindex threading, dormant
+
+@portability{no, version 0.25+, no, no}
+
+A somewhat unusual threading construct that's available is
+backtracking.  In case you haven't come across it before (the concept
+exists in other languages but is implemented differently and usually
+in a less general way), the basic idea is that instead of executing or
+not executing a command, you can @code{MAYBE} execute a command.  This
+causes the command to be executed, but also creates a dormant thread
+in which the command wasn't executed; at any time later, the program
+can either decide that it liked the consequences of the command and
+@code{GO AHEAD} and get rid of the dormant thread, or decide that it
+didn't like the consquences of the command and @code{GO BACK} to the
+dormant thread, discarding the current one.  The dormant thread is
+more commonly called a `choicepoint', that is, a point at which a
+choice was made but a different choice can still be made, and is
+generally not thought of as a thread at all by most programmers.  (In
+case you're wondering: dormant threads are always unwoven.)
+
+@anchor{MAYBE}
+@findex MAYBE
+@cindex choicepoints, creating
+To create a choicepoint, the statement identifier @code{MAYBE} is
+used, rather than the more usual @code{DO} or @code{PLEASE}.
+(Combination statement identifiers are still allowed, but must be in
+the order @code{MAYBE DO PLEASE NOT} with optionally some parts
+omitted, or different versions of @code{NOT} used, or both.) Here's an
+example:
+
+@example
+MAYBE DON'T GIVE UP
+@end example
+
+When a command whose statement identifer contains @code{MAYBE} is
+reached, it is executed or not executed as normal, but in addition a
+choicepoint is created containing the program as it is at that time.
+Only @code{ABSTAIN} and @code{REINSTATE}, which always affect all
+threads in a program (even choicepoints), can alter the values stored
+in the choicepoint; so in this way, a choicepoint is also somewhat
+similar to the concept of a continuation in other languages.  The
+choicepoint is placed on a choicepoint stack, which is maintained
+separately for each thread in much the same way that stashes and the
+@code{NEXT} stack are.
+
+@anchor{GO BACK}
+@findex GO BACK
+@cindex choicepoints, activating
+The choicepoint does not actually do anything immediately, but if the
+program doesn't like the look of where it's ended up, or it decides to
+change its mind, or just wants to try all the possibilities, it can
+call the @code{GO BACK} command (which has no arguments, and is just
+the statement identifier, optional execution chance, @code{GO BACK},
+and optional @code{ONCE} or @code{AGAIN}).  This causes the current
+thread to unweave from all other threads and then replace itself with
+the thread created by the choicepoint on top of the choicepoint stack.
+The difference is that this time, the abstention or reinstatement
+status of the command that was modified with @code{MAYBE} is
+temporarily reversed for determining whether it runs or not (this
+reversal only lasts immediately after the @code{GO BACK}, and does not
+affect uses of the command in other threads or later in the same
+thread), so unless it has been @code{ABSTAIN}ed or @code{REINSTATE}d
+in the meantime it will run if and only if it wasn't run the first
+time.  The choicepoint stack's top entry is replaced by a `stale'
+choicepoint that definitely isn't a thread; attempting to @code{GO
+BACK} to a stale choicepoint instead causes the stale choicepoint to
+be deleted and the program to continue executing.  (This is what gives
+@ical{}'s backtracking greater flexibility in some ways than some
+other languages; to get backtracking without the stale choicepoints
+having an effect, simply run @code{COME FROM} the @code{GO BACK} as
+the previous statement.)
+
+Note that, though, when a thread splits into separate threads (whether
+woven or unwoven), the choicepoint stack doesn't split completely, but
+remains joined at the old top of stack.  The two choicepoint stacks
+can add and remove items independently, but an attempt to @code{GO
+BACK} to before the current thread split off from any other threads
+that are still running instead causes the current thread to end,
+although it will @code{GO BACK} as normal if all other threads that
+split off from it or that it split off from since the top choicepoint
+of the stack was created have ended since.  This means that it's
+possible to backtrack past a thread splitting and get the effect of
+the thread unsplitting, as long as both resulting threads backtrack;
+this is another way in which @ical{}'s backtracking is more flexible
+than that of some other languages.
+
+@anchor{GO AHEAD}
+@findex GO AHEAD
+@cindex choicepoints, discarding
+If, on the other hand, a program decides that it likes where it is and
+doesn't need to @code{GO BACK}, or it wants to @code{GO BACK} to a
+choicepoint lower down the stack while skipping some of the ones
+nearer the top of the stack, it can run the @code{GO AHEAD} command,
+which removes the top choicepoint on the stack, whether it's a genuine
+choicepoint or just a stale one.
+
+Both @code{GO AHEAD} and @code{GO BACK} cause errors if an attempt is
+made to use them when the choicepoint stack is empty.
 
 @node Operand Overloading
 @chapter Operand Overloading
@@ -2736,8 +4091,251 @@ to produce 1 or 2 as the output rather than 0 or 1.
 @chapter Differences to Other Compilers
 
 @ifset notsplit
-@partheading PART IV: APPENDICES AND INDICES
+@partheading{PART IV: APPENDICES AND INDICES}
 @end ifset
+@node Character Sets
+@appendix Character Sets
+@cindex character sets
+@cindex Atari, character set
+@cindex Baudot
+@cindex EBCDIC
+@cindex Latin-1
+
+The following table explains the equivalences between the various
+character sets used for @ical{}: 7-bit ASCII Atari syntax, 5-bit
+Baudot Princeton syntax, 8-bit EBCDIC Princeton syntax, and 8-bit
+Latin-1 Princeton syntax.  (The Baudot and EBCDIC are the @clcic{}
+versions, which are used by @ical{} compilers but basically nowhere
+else.)  The characters themselves are not shown in the table below,
+because they would have to be shown in some syntax, which would be
+misleading.  (Atari syntax is used throughout this manual; you could
+convert from that, assuming you have an ASCII table handy.)  You can
+also use the @command{convickt} command-line tool to translate @ical{}
+programs from one format to another (@pxref{convickt}).  Note that
+Baudot has more than one 'shift state'; the shift state (1, 2, 3, or
+4) is written before the hexadecimal code for each character, and *
+represents a character available in every shift state.  To change from
+one shift state to another, use character 1f to change from shift
+states 3 or 4 to 1, or from 1 or 2 to 2, and character 1b to change
+from shift states 1 or 2 to 3, or from 3 or 4 to 4.
+
+@multitable {@b{Atari}}{@b{Baudot}}{@b{EBCDIC}}{@b{Latin-1}}
+@headitem Atari @tab Baudot @tab EBCDIC @tab Latin-1
+@item 09 @tab N/A @tab 09 @tab 09
+@item 0a @tab * 02 @tab 0a @tab 0a
+@item 0d @tab * 08 @tab 0d @tab 0d
+@item 20 @tab * 04 @tab 40 @tab 20
+@item 21 @tab 3 0d @tab 4f @tab 21
+@item 22 @tab 3 11 @tab 7f @tab 22
+@item 23 @tab 4 06 @tab 7b @tab 23
+@item 24 @tab 4 01 @tab 4a @tab a2
+@item 25 @tab 4 1c @tab 6c @tab 25
+@item 26 @tab 3 1a @tab 50 @tab 26
+@item 27 @tab 3 0b @tab 7d @tab 27
+@item 28 @tab 3 0f @tab 4d @tab 28
+@item 29 @tab 3 12 @tab 5d @tab 29
+@item 2a @tab 4 09 @tab 5c @tab 2a
+@item 2b @tab 4 03 @tab 4e @tab 2b
+@item 2c @tab 3 0c @tab 6b @tab 2c
+@item 2d @tab 3 03 @tab 60 @tab 2d
+@item 2e @tab 3 1c @tab 4b @tab 2e
+@item 2f @tab 3 1d @tab 61 @tab 2f
+@item 30 @tab 3 16 @tab f0 @tab 30
+@item 31 @tab 3 17 @tab f1 @tab 31
+@item 32 @tab 3 13 @tab f2 @tab 32
+@item 33 @tab 3 01 @tab f3 @tab 33
+@item 34 @tab 3 0a @tab f4 @tab 34
+@item 35 @tab 3 10 @tab f5 @tab 35
+@item 36 @tab 3 15 @tab f6 @tab 36
+@item 37 @tab 3 07 @tab f7 @tab 37
+@item 38 @tab 3 06 @tab f8 @tab 38
+@item 39 @tab 3 18 @tab f9 @tab 39
+@item 3a @tab 3 0e @tab 7a @tab 3a
+@item 3b @tab 3 1e @tab 5e @tab 3b
+@item 3c @tab 4 0f @tab 4c @tab 3c
+@item 3d @tab 4 07 @tab 7e @tab 3d
+@item 3e @tab 4 12 @tab 6e @tab 3e
+@item 3f @tab 4 0c @tab 65 @tab a5
+@item 40 @tab 3 19 @tab 6f @tab 3f
+@item 41 @tab 1 03 @tab c1 @tab 41
+@item 42 @tab 1 19 @tab c2 @tab 42
+@item 43 @tab 1 0e @tab c3 @tab 43
+@item 44 @tab 1 09 @tab c4 @tab 44
+@item 45 @tab 1 01 @tab c5 @tab 45
+@item 46 @tab 1 0d @tab c6 @tab 46
+@item 47 @tab 1 1a @tab c7 @tab 47
+@item 48 @tab 1 14 @tab c8 @tab 48
+@item 49 @tab 1 06 @tab c9 @tab 49
+@item 4a @tab 1 0b @tab d1 @tab 4a
+@item 4b @tab 1 0f @tab d2 @tab 4b
+@item 4c @tab 1 13 @tab d3 @tab 4c
+@item 4d @tab 1 1c @tab d4 @tab 4d
+@item 4e @tab 1 0c @tab d5 @tab 4e
+@item 4f @tab 1 18 @tab d6 @tab 4f
+@item 50 @tab 1 16 @tab d7 @tab 50
+@item 51 @tab 1 17 @tab d8 @tab 51
+@item 52 @tab 1 0a @tab d9 @tab 52
+@item 53 @tab 1 05 @tab e2 @tab 53
+@item 54 @tab 1 10 @tab e3 @tab 54
+@item 55 @tab 1 07 @tab e4 @tab 55
+@item 56 @tab 1 1e @tab e5 @tab 56
+@item 57 @tab 1 12 @tab e6 @tab 57
+@item 58 @tab 1 1d @tab e7 @tab 58
+@item 59 @tab 1 15 @tab e8 @tab 59
+@item 5a @tab 1 11 @tab e9 @tab 5a
+@item 5b @tab 4 10 @tab 9e @tab 5b
+@item 5c @tab 4 05 @tab N/A @tab 5c
+@item 5d @tab 4 13 @tab 5a @tab 5d
+@item 5e @tab 4 0d @tab 6a @tab 7c
+@item 5f @tab 4 15 @tab 7c @tab 40
+@item 60 @tab N/A @tab N/A @tab 60
+@item 61 @tab 2 03 @tab 81 @tab 61
+@item 62 @tab 2 19 @tab 82 @tab 62
+@item 63 @tab 2 0e @tab 83 @tab 63
+@item 64 @tab 2 09 @tab 84 @tab 64
+@item 65 @tab 2 01 @tab 85 @tab 65
+@item 66 @tab 2 0d @tab 86 @tab 66
+@item 67 @tab 2 1a @tab 87 @tab 67
+@item 68 @tab 2 14 @tab 88 @tab 68
+@item 69 @tab 2 06 @tab 89 @tab 69
+@item 6a @tab 2 0b @tab 91 @tab 6a
+@item 6b @tab 2 0f @tab 92 @tab 6b
+@item 6c @tab 2 13 @tab 93 @tab 6c
+@item 6d @tab 2 1c @tab 94 @tab 6d
+@item 6e @tab 2 0c @tab 95 @tab 6e
+@item 6f @tab 2 18 @tab 96 @tab 6f
+@item 70 @tab 2 16 @tab 97 @tab 70
+@item 71 @tab 2 17 @tab 98 @tab 71
+@item 72 @tab 2 0a @tab 99 @tab 72
+@item 73 @tab 2 05 @tab a2 @tab 73
+@item 74 @tab 2 10 @tab a3 @tab 74
+@item 75 @tab 2 07 @tab a4 @tab 75
+@item 76 @tab 2 1e @tab a5 @tab 76
+@item 77 @tab 2 12 @tab a6 @tab 77
+@item 78 @tab 2 1d @tab a7 @tab 78
+@item 79 @tab 2 15 @tab a8 @tab 79
+@item 7a @tab 2 11 @tab a9 @tab 7a
+@item 7b @tab 4 0a @tab 9c @tab 7b
+@item 7c @tab 4 1e @tab fe @tab N/A
+@item 7d @tab 4 11 @tab dc @tab 7d
+@item 7e @tab 4 0b @tab a1 @tab 7e
+@end multitable
+
+@node convickt
+@appendix convickt
+@cindex convickt
+@cindex character sets, converting
+@cindex converting between character sets
+
+A variety of character sets have historically been used to represent
+@ical{} programs.  Atari syntax was designed specifically for use with
+ASCII-7, and all Atari-syntax-based @ical{} compilers accept that
+character set as possible input.  (@cic{} also accepts Latin-1 and
+UTF-8.)  However, the story is more complicated with Princeton syntax;
+the original Princeton compiler was designed to work with EBCDIC, but
+because modern computers are often not designed to work with this
+character set other character sets are often used to represent it,
+particularly Latin-1.  The @clcic{} compiler accepts Latin-1, a custom
+dialect of EBCDIC, Baudot, and a punched-card format as input; @cic{}
+can cope with Latin-1 Princeton syntax, but for the other character
+sets, for other compilers, or just for getting something
+human-readable, it's useful to have a conversion program.
+@command{convickt} is an @ical{} character set conversion program
+designed with these needs in mind.
+
+The syntax for using @command{convickt} is
+
+@example
+convickt @var{inputset} @var{outputset} [@var{padding}]
+@end example
+
+(that is, the input and output character sets are compulsory, but the
+parameter specifying what sort of padding to use is optional).
+
+The following values for @var{inputset} and @var{outputset} are
+permissible:
+
+@table @samp
+@item latin1
+Latin-1, or to give it its official name ISO-8859-1, is the character
+set most commonly used for transmitting @clcic{} programs, and
+therefore nowadays the most popular character set for Princeton syntax
+programs.  Because it is identical to ASCII-7 in all codepoints that
+don't have the high bit set, most of the characters in it can be read
+by most modern editors and terminals.  It is also far more likely to
+be supported by modern editors than EBCDIC, Baudot, or punched cards,
+all of which have fallen into relative disuse since 1972.  It is also
+the only input character set that @cic{} supports for Princeton syntax
+programs.  It uses 8 bit characters.
+
+@item ebcdic
+EBCDIC is an 8-bit character set that was an alternative to ASCII in
+1972, and is the character set used by the original Princeton
+compiler.  Unfortunately, there is no single standard version; the
+version of EBCDIC used by @command{convickt} is the one that @clcic{}
+uses.  It is the default input character set that @clcic{} uses
+(although more recent versions of @clcic{} instead try to guess the
+input character set based on the input program.)
+
+@item baudot
+Baudot is a 5-bit character set with shift codes; therefore when
+storing it in a file on an 8-bit computer, padding is needed to fill
+in the remaining three bits.  The standard Baudot character set does
+not contain all the characters needed by @ical{}; therefore, @clcic{}
+uses repeated shift codes to add two more sets of characters.
+@command{convickt} uses the @clcic{} version of Baudot, so as to be
+able to translate programs designed for that compiler; however,
+standard Baudot is also accepted in input if it contains no redundant
+shift codes, and if the input contains no characters not in standard
+Baudot, the output will be written so that it is both correct standard
+Baudot and correct @clcic{} Baudot for those characters.
+
+@item atari
+This option causes @command{convickt} to attempt a limited conversion
+to or from Atari syntax; this uses ASCII-7 as the character set, but
+also tries to translate between Atari and Princeton syntax at the
+character level, which is sometimes but not always effective.  For
+instance, @code{?} is translated from Atari to Princeton as a yen
+sign, and from Princeton to Atari as a whirlpool (@code{@@}); this
+sort of behaviour is often capable of translating expressions
+automatically, but will fail when characters outside ASCII-7 (Atari)
+or Latin-1 (Princeton) are used, and will not, for instance, translate
+a Princeton @code{V}, backspace, @code{-} into Atari @code{?}, but
+instead leave it untouched.  ASCII-7 is a 7-bit character set, so on
+an 8 bit computer, there is one bit of padding that needs to be
+generated; note, however, that it is usual nowadays to clear the top
+bit when transmitting ASCII-7, which the `printable' and `zero'
+padding styles will do, but the `random' style may not do.
+
+@end table
+
+When using a character set where not all bits in each byte are
+specified, a third argument can be given to specify what sort of
+padding to use for the top bits of each character. There are three
+options for this:
+
+@multitable {printable}{Keep the output in the range 32-126 where possible}
+@headitem Option @tab Meaning
+@item printable
+@tab Keep the output in the range 32-126 where possible
+@item zero
+@tab Zero the high bits in the output
+@item random
+@tab Pad with random bits (avoiding all-zero bytes)
+@end multitable
+
+Note that not all conversions are possible.  If a character cannot be
+converted, it will normally be converted to a NUL byte (which is
+invalid in every character set); note that this will prevent
+round-tripping, because NUL is interpreted as end-of-input if given in
+the input.  There is one exception; if the character that could not be
+converted is a tab character, it will be converted to the other
+character set's representation of a space character, if possible,
+because the two characters have the same meaning in @ical{} (the only
+difference is if the command is a syntax error that's printed as an
+error message).  (The exception exists to make it possible to
+translate existing @ical{} source code into Baudot.)
+
 @node Optimizer Idiom Language
 @appendix Optimizer Idiom Language
 @cindex Optimizer Idiom Language
@@ -2887,15 +4485,21 @@ The following unary and binary operators are allowed in OIL expressions:
 
 @cindex OIL, operators
 @cindex operators, OIL
-@multitable {@code{@@2..@@5}} {@ical{} unary generalised whirlpool}
+@multitable {@code{@@216..@@516}}{@ical{} unary generalised whirlpool (16-bit)}
 @item @code{$} @tab INTERCAL mingle
 @item @code{~} @tab INTERCAL select
-@item @code{&} @tab INTERCAL unary AND
-@item @code{V} @tab INTERCAL unary OR
-@item @code{?} @tab INTERCAL unary XOR
-@item @code{^} @tab INTERCAL unary sharkfin
-@item @code{@@} @tab INTERCAL unary whirlpool
-@item @code{@@2..@@5} @tab INTERCAL unary generalised whirlpool
+@item @code{&16} @tab INTERCAL unary AND (16-bit)
+@item @code{V16} @tab INTERCAL unary OR (16-bit)
+@item @code{?16} @tab INTERCAL unary XOR (16-bit)
+@item @code{^16} @tab INTERCAL unary sharkfin (16-bit)
+@item @code{@@16} @tab INTERCAL unary whirlpool (16-bit)
+@item @code{@@216..@@516} @tab INTERCAL unary generalised whirlpool (16-bit)
+@item @code{&32} @tab INTERCAL unary AND (32-bit)
+@item @code{V32} @tab INTERCAL unary OR (32-bit)
+@item @code{?32} @tab INTERCAL unary XOR (32-bit)
+@item @code{^32} @tab INTERCAL unary sharkfin (32-bit)
+@item @code{@@32} @tab INTERCAL unary whirlpool (32-bit)
+@item @code{@@232..@@532} @tab INTERCAL unary generalised whirlpool (32-bit)
 @item @code{&} @tab C binary bitwise AND
 @item @code{|} @tab C binary bitwise OR
 @item @code{^} @tab C binary bitwise XOR
@@ -2918,7 +4522,9 @@ The following unary and binary operators are allowed in OIL expressions:
 
 (Note that in some cases two operators are expressed the same way, but
 that this doesn't matter because one is unary and the other is binary so
-that there can't be any ambiguity, only confusion.)
+that there can't be any ambiguity, only confusion.  Also note that
+unlike @ical{} unary logic operators, OIL unary logic operators must
+have a bitwidth stated.)
 
 It hasn't yet been explained what operands these operators have to
 operate on; the syntax for those depends on whether it's a pattern or
@@ -3160,7 +4766,9 @@ and during the course of execution of the optimized program, a value
 that doesn't fit into 16 bits is encountered, that's undefined behaviour
 and anything might happen (most likely, though, the program will just
 act as though its width had been set to 32 bits instead); this error
-condition is not detected.
+condition is not detected.  Also note that operators like @code{&32}
+already have a bitwidth specified, so specifying @code{&3232} (or worse,
+@code{&3216}) is not allowed.
 
 @cindex operands, OIL, in replacements
 @cindex replacements, operands
@@ -3195,7 +4803,7 @@ Insert a constant with the literal value @var{NUMBER} here.
 
 Calculate the value of @var{EXPRESSION} (a C expression, which can
 reference the same variables and functions as a C expression in a
-pattern can; @xref{C functions in OIL}.
+pattern can; see @ref{C functions in OIL}.
 
 @end table
 
@@ -3255,16 +4863,6 @@ value is equal to the value of the loop counter.
 Here are some tips for the best use of @acronym{OIL}:
 
 @itemize
-
-@item
-Not all idioms that you might want to write can be expressed in
-@acronym{OIL}, although most can.  (See the @file{idiotism.oil} file
-provided with the distribution for an example of where @acronym{OIL}
-gets stuck; it's due to tricky bitwidth problems.)  There are some
-reasonably obvious ways to fix this deficiency, but if you don't
-understand why a language which has no obvious problems but several
-subtle deficiencies is appropriate for @ical{}, you don't really get
-what @ical{} is about.
 
 @item
 @findex MAXTOFREE
@@ -3355,6 +4953,7 @@ themselves, it'll also be apparent how @code{c} (the record of which
 bits of an expression can be 1 and which bits can't be) is important
 information in being able to apply an optimization more aggressively.
 
+@ifhtml
 @smallexample
 .3 <- ((((((((.3 $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))
 [minglefold]
@@ -3408,40 +5007,91 @@ information in being able to apply an optimization more aggressively.
 [combineand]
 .3 <- ((.3 & 0xff) << 0x8)
 @end smallexample
+@end ifhtml
+@ifnothtml
+@quotation
+.3 <- ((((((((.3 $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[minglefold]@*
+.3 <- ((((((((.3 $ 0x0) ~ 0x2aaaaaab) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[lshift16]@*
+.3 <- ((((((((((.3 >> 0x0) & 0x7fff) << 0x1) | 0x0) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[noopor]@*
+.3 <- (((((((((.3 >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ (0x7fff $ 0x1)) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[minglefold]@*
+.3 <- (((((((((.3 >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ 0x2aaaaaab) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[lshift16]@*
+.3 <- (((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) | 0x0) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[noopor]@*
+.3 <- ((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ (0x3fff $ 0x3)) $ 0x0) ~ (0xfff $ 0xf))@*
+[minglefold]@*
+.3 <- ((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) $ 0x0) ~ 0xaaaaaaf) $ 0x0) ~ (0xfff $ 0xf))@*
+[lshift16]@*
+.3 <- ((((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) | 0x0) $ 0x0) ~ (0xfff $ 0xf))@*
+[noopor]@*
+.3 <- (((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) $ 0x0) ~ (0xfff $ 0xf))@*
+[minglefold]@*
+.3 <- (((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) $ 0x0) ~ 0xaaaaff)@*
+[lshift16]@*
+.3 <- (((((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7) | 0x0)@*
+[noopor]@*
+.3 <- ((((((((((((.3 >> 0x0) & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[nullshift]@*
+.3 <- (((((((((((.3 & 0x7fff) << 0x1) >> 0x0) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[combinelrshift]@*
+.3 <- ((((((((((.3 & 0x7fff) << 0x1) & 0x7fff) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[andintolshift]@*
+.3 <- ((((((((((.3 & 0x7fff) & 0x3fff) << 0x1) << 0x1) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[combinellshift]@*
+.3 <- (((((((((.3 & 0x7fff) & 0x3fff) << 0x2) >> 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[combinelrshift]@*
+.3 <- ((((((((.3 & 0x7fff) & 0x3fff) << 0x1) & 0x1fff) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[andintolshift]@*
+.3 <- ((((((((.3 & 0x7fff) & 0x3fff) & 0xfff) << 0x1) << 0x3) >> 0x3) & 0x1ff) << 0x7)@*
+[combinellshift]@*
+.3 <- (((((((.3 & 0x7fff) & 0x3fff) & 0xfff) << 0x4) >> 0x3) & 0x1ff) << 0x7)@*
+[combinelrshift]@*
+.3 <- ((((((.3 & 0x7fff) & 0x3fff) & 0xfff) << 0x1) & 0x1ff) << 0x7)@*
+[andintolshift]@*
+.3 <- ((((((.3 & 0x7fff) & 0x3fff) & 0xfff) & 0xff) << 0x1) << 0x7)@*
+[combinellshift]@*
+.3 <- (((((.3 & 0x7fff) & 0x3fff) & 0xfff) & 0xff) << 0x8)@*
+[combineand]@*
+.3 <- ((((.3 & 0x3fff) & 0xfff) & 0xff) << 0x8)@*
+[combineand]@*
+.3 <- (((.3 & 0xfff) & 0xff) << 0x8)@*
+[combineand]@*
+.3 <- ((.3 & 0xff) << 0x8)@*
+@end quotation
+@end ifnothtml
 
 @node Copying
 @appendix Copying
 @cindex copyright
 @cindex copying conditions
 
-The majority of the files in the @cic{} distribution are licensed under
-the GNU General Public License, but with some exceptions.  The files
-@file{ick-wrap.c} and @file{pickwrap.c} are licensed under a license
-that allows them to be used for any purpose and redistributed at will,
-and are explicitly not GPL'd.  This means that C source code generated
-by the compiler has the same copyright conditions as the original
-@ical{} source.  (Note that the libraries @file{libick.a} and
-@file{libickmt.a} are GPL, though, so you cannot redistribute an
-executable produced by @command{ick} or by linking a C file to either of
-those libraries unless the original @ical{} source was GPL.)  Also, this
-manual, and the files that are the source code for creating it, are
-licensed under the GNU Free Documentation License rather than the GPL,
-and the licenses themselves (@file{fdl-1-2.txi}, @file{gpl-2-0.txi}, and
-@file{COPYING.txt}) are licensed under a license that allows verbatim
-redistribution but not creation of derivative works.
+The majority of the files in the @cic{} distribution are licensed
+under the GNU General Public License (version 2 or later), but with
+some exceptions.  The files @file{ick-wrap.c} and @file{pickwrap.c}
+are licensed under a license that allows them to be used for any
+purpose and redistributed at will, and are explicitly not GPL'd.  This
+means that C source code generated by the compiler has the same
+copyright conditions as the original @ical{} source.  (Note that the
+libraries @file{libick.a} and @file{libickmt.a} are GPL, though, so
+you cannot redistribute an executable produced by @command{ick} or by
+linking a C file to either of those libraries unless the original
+@ical{} source was GPL.)  Also, this manual, and the files that are
+the source code for creating it, are licensed under the GNU Free
+Documentation License rather than the GPL, and the licenses themselves
+(@file{fdl-1-2.txi} and @file{COPYING.txt}) are licensed under a
+license that allows verbatim redistribution but not creation of
+derivative works.  All other files, though (including the
+@command{man} pages, which are not part of @emph{this} manual), are
+licensed under the GPL.  For the full text of the GPL, see the file
+@file{COPYING.txt} in the distribution.
 
 @menu
-* GNU General Public License::      License for copying source and binaries.
 * GNU Free Documentation License::  License for copying this manual.
 @end menu
-
-@node GNU General Public License
-@appendixsec GNU General Public License
-@cindex GPL
-@cindex GNU General Public License
-@cindex General Public License
-
-@include gpl-2-0.txi
 
 @node GNU Free Documentation License
 @appendixsec GNU Free Documentation License
@@ -3463,3 +5113,4 @@ the manual.  The complications that that caused were really odd.)
 @printindex cp
 
 @bye
+

@@ -13,9 +13,11 @@
 
 2.  Rewrote the optimizer in a language (OIL) invented specifically for the
     purpose; the set of optimizer idioms is now in idiotism.oil, and translated
-    into C and linked with the rest of the compiler at compile time. It
-    contains many of the same idioms, but some have been generalised or reduced
-    into smaller parts and some new ones were added.
+    into C and linked with the rest of the compiler at metacompile time (that
+    is, when the compiler itself is being compiled). It contains many of the
+    same idioms, but some have been generalised or reduced into smaller parts
+    and some new ones were added. Documentation for OIL has been added as part
+    of the documentation for the distribution as a whole.
 
 3.  Joris Huizer submitted a patch to fix a memory allocation bug which
     occasionally caused memory corruption when a program had a number of
@@ -23,21 +25,22 @@
 
 4.  Completely redid the autoconfiguration. The install should now progress
     with less user interaction than before. As a bonus, if you have a range of
-    GNU utilities including make, sed, tr, and bash (and possibly others),
-    it's now possible to compile using 'sh config.sh' followed by 'make' under
+    GNU utilities including make, sed, tr, and bash (and possibly others), it's
+    now possible to compile using 'sh configdj.sh' followed by 'make' under
     DJGPP. (To be specific, some settings that previously sometimes had to be
     set by the user, such as whether lex provided yylineno and yyrestart, are
     now either detected by config.sh or no longer relevant. Other settings that
     were not previously detected, such as what extension executables have, are
-    now detected so that config.sh works on DJGPP as well, now. Note that if
-    config.in is translated to config.sh on a non-DJGPP system, it might cause
-    the resulting shell script to fail on DJGPP; this is an upstream problem.)
-    The autoconfigurer now also adapts coopt.sh so that -F works on DJGPP too,
-    sort of (or else detects that it won't work and disables it).
+    now detected so that the config script works on DJGPP as well, now;
+    compiling the config script on a non-DJGPP system seems to result in a
+    script that fails on DJGPP, and likewise compiling the script on DJGPP
+    seems to result on a script that fails on other systems, so both scripts
+    are provided. The autoconfigurer now also adapts coopt.sh so that -F works
+    on DJGPP too, sort of (or else detects that it won't work and disables it).
 
 5.  Improved the action of 'make install', so that it actually installs
     everything in the right place. It works under DJGPP, now, too, as long as
-    you have the programs installed that allow config.sh and make to work.
+    you have the programs installed that allow configdj.sh and make to work.
 
 6.  Fixed a bug involving COME FROM in multithreaded programs; now, if a line
     COMEs FROM itself (either because this is written explicitly or because it
@@ -81,7 +84,74 @@
     in when creating a temporary file; this was meant to be fixed in 1.26, but
     the fix didn't actually work.
 
-  Release 1.26 (by Alex Smith) [a bugfix of 0.26]
+14. Added a new program to the pit: an Unlambda interpreter written by Oerjan
+    Johansen in 2001, and also a commented version as documentation.
+
+15. Section 23 of the release notes for version 0.26 is wrong; I was obviously
+    confused when I wrote them because they were speaking nonsense.  For the
+    record: no, there is nothing special about NEXT in connection with
+    backtracking.  It should have said "NEXT", not "choicepoint".  Instead of
+    rewriting history, this changelog entry is added as a fix.
+
+16. Added an entirely new set of documentation, the Revamped Manual, which is
+    available in a wide range of formats and documents recent language changes,
+    as well as many other things INTERCAL. The Revised Manual has been
+    preserved, but it seems unlikely to be updated in the near future (it is
+    still well worth a read anyway).
+
+17. For compatibility, the COMMENT gerund can now be spelt COMMENTS or
+    COMMENTING.
+
+18. Corrected the Emacs INTERCAL mode to work with more recent versions of
+    Emacs than it previously worked with, hopefully without sacrificing too
+    much backward compatibility.
+
+19. Added a conversion program 'convickt'; it can convert between the Latin-1,
+    Baudot and EBCDIC character sets used by CLC-INTERCAL (Latin-1 is also
+    accepted by C-INTERCAL, so this gives a practical way to run CLC-INTERCAL
+    programs in unusual character sets on C-INTERCAL), and can also attempt to
+    convert into the 'Atari character set' (which uses $ instead of the cent
+    sign, ? instead of yen, and so on for the other characters that differ
+    between C-INTERCAL and CLC-INTERCAL).
+
+20. Reorganised the Makefile and environment variable system for finding
+    locations to make more logical sense; various definitions and environment
+    variables now do what their name suggests rather than something completely
+    different, a situation which confused the programmers previously.  The new
+    version should be better at finding files that it needs, and also cuts
+    down on the amount of useless copying that the Makefile did (such copying
+    is now only done if the destination file doesn't already exist or is out
+    of date).
+
+21. Fixed some problems in the PIC-INTERCAL code: one problem with finding the
+    correct location for the skeleton, and some code duplication between the
+    two header files. Also clarified one of the comments.
+
+22. Added support for CLC-INTERCAL-style Baudot I/O (generalised array I/O is
+    currently unimplemented, though). This has a two minor differences to the
+    CLC-INTERCAL version: unrecognised characters, instead of causing an
+    error, become 0 when WRITING IN (except that tabs are translated to single
+    spaces) and ASCII code 26 when READING OUT. (Baudot characters not in
+    ASCII will be translated to Latin-1; there are more of these than might be
+    expected, because the CLC-INTERCAL extended Baudot is being used).
+
+23. The man pages and some fixes for the documentation Makefile from the
+    Debian package were copied into the main distribution. The man page was
+    written originally by Mark W. Eichin and later modified by Joey Hess (and
+    was further modified by me prior to placing it in the distribution); the
+    Makefile fixes are due to Joey Hess. Strangely, many of the changes I made
+    to the Makefile for this version have much the same effect as fixes that
+    the Debian package maintainers had come up with earlier; a new Makefile
+    variable ick_specific_subdir has been added to hopefully make the Debian
+    maintainer's job easier (it allows elimination of versioned
+    subdirectories, replacing them with versionless subdirectories).
+
+24. Added a new test program to the pit, tests/ignorret.i, that demonstrates
+    how the interaction between IGNORE and RETRIEVE is different between
+    C-INTERCAL, CLC-INTERCAL, and J-INTERCAL, and documentation showing the
+    results on each version.
+
+  Release 1.26 (by Alex Smith) [a bugfix of 0.26]  3 Sep 2007
 
 1.  Fixed an optimizer bug (thanks to Joris Huizer for pointing it out),
     relating to active-bits deduction in some expressions involving select.
@@ -113,7 +183,7 @@
     (it was getting a little bored stuck at 0). The next major release will be
     version 0.27.
 
-  Release 0.26 (by Alex Smith)
+  Release 0.26 (by Alex Smith)  1 Apr 2007
 
 1.  Fixed a few bugs in the previous release (some bugfixed by Joris Huizer).
 
@@ -209,7 +279,7 @@
 
 24. Fixed a bug where the yuk debugger accessed unallocated memory.
 
-  Release 0.25 (by Alex Smith)
+  Release 0.25 (by Alex Smith)  21 Jun 2006
 
 1. Added support for computed ABSTAIN and TRY AGAIN.
 
@@ -298,14 +368,14 @@ All the numerous currency symbols of Unicode (ISO 10646) can be used as
 big-money alternatives in their UTF-8 format.  Indeed, a random mixture of
 Latin-1 and UTF-8 also works fine; this seems very much in the spirit of
 Intercal.
- 
+
 2.  Intercal has now been localized for the Ancient Roman as well as the
 Posix/C locale.  You may input numbers in Latin and write Intercal programs
 using Latin keywords.  See lexer.l for a list of equivalences.
 
 3.  The Makefile in the pit directory now works like a real Makefile, and
 won't compile anything that's already been compiled.
- 
+
 	Release 0.19 (by Eric S. Raymond) 16 August 1998
 
 1. Fixed a code-generation error in assignments from tail and hybrid
@@ -340,7 +410,7 @@ Incorporates a minor bug fix by Jeff Uphoff <juphoff@tarsier.cv.nrao.edu>.
 
 	Release 0.16 (by Brian Raiter and Eric S. Raymond) 26 May 1997
 
-This is the 25th-anniversary release of INTERCAL.  This language, conceived 
+This is the 25th-anniversary release of INTERCAL.  This language, conceived
 in irony a quarter century ago today, has outlasted many more serious and
 high-minded essays in computer language design.  This fact should give us
 pause to reflect, or possibly frighten the crap out of us.  Or both.
@@ -390,7 +460,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 2. The optimizer now does complete analysis and evaluation of constant
    expressions at compile time.
 
-3. Added optimization templates for ~, |, &, ^ expressions.  Also added 
+3. Added optimization templates for ~, |, &, ^ expressions.  Also added
    |, &, ^ idioms to the system library, and documented them.
 
 (The following changes are due to Brian Raiter)
@@ -438,7 +508,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 		Release 0.13 (by Eric S. Raymond) 5 Jun 1996
 
 1. I folded in patches by Brian Raiter <breadbox@muppetlabs.com> that port
-   this code to Linux, ANSIfies it, and enables it to use flex.  Note: This 
+   this code to Linux, ANSIfies it, and enables it to use flex.  Note: This
    version has been tested on Linux and SunOS but not yet elsewhere.
 
 2. Another piece of nontrivial INTERCAL code has been found!  (Doubtless
@@ -482,13 +552,13 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 
 3. We fess up to a violation of the INTERCAL-72 standard.  That implementation,
    instead of accepting an entire multiple-digit number per line of input,
-   expected one digit per *card image* (input line).  It is unclear how 
+   expected one digit per *card image* (input line).  It is unclear how
    INTERCAL-72 programs ever managed to input more than one number.
 
 4. Added patches by C.P.Osborne <boris@ibmpcug.co.uk> to make the lexer work
    using flex, for Linux and BSD/386 support.  I didn't use his error-reporting
    patch, though; instead, I changed the parser to catch errors at logical-line
-   level.  I also kept the N in `RESUBNIT'; this is a carefully preserved 
+   level.  I also kept the N in `RESUBNIT'; this is a carefully preserved
    feature of INTERCAL-72.
 
 5. Volapuk digits are now recognized on input.  TO DO: Recognize Volapuk
@@ -497,15 +567,15 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 		Release 0.10 (by Eric S. Raymond) 9 Sep 1994
 
 1. It is now possible to undo a line-number abstention with a gerund
-   reinstatement, or undo a gerund abstention with a line-number 
+   reinstatement, or undo a gerund abstention with a line-number
    reinstatement.  In previous versions, gerund abstention/reinstatements and
    line-number abstention/reinstatements were independent of each other.
 
 2. After release 0.5, I wrote in the TO DO list as follows:
-  
+
    2. (ESR) Input format internationalization -- allow WRITE IN input digits in
      major languages such as Nahuatl, Tagalog, Sanskrit, and Basque.
-  
+
    The twisted loons in the alt.folklore.computers crowd loved this idea,
    and I actually got sent digit lists for Nahuatl, Tagalog, Sanskrit, and
    Basque -- also, Kwakiutl, Georgian, Ojibwe, and Albanian.  I've left
@@ -579,7 +649,7 @@ generated programs; [+/-]traditional is a no-op at this point.
 1. As a convenience to all you junior birdmen out there, `NINER' is accepted as
    a synonym for `NINE' in INTERCAL input.
 
-2. The COME FROM statement is now compiled. 
+2. The COME FROM statement is now compiled.
 
 			-------------
 

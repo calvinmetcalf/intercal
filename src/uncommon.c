@@ -1,5 +1,5 @@
 /*
- * uncommon.c -- functions needed by both the compiler and debugger
+ * uncommon.c -- functions used by ick, convickt, yuk and compiled programs
  *
 LICENSE TERMS
     Copyright (C) 2007 Alex Smith

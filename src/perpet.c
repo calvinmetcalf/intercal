@@ -7,7 +7,7 @@ DESCRIPTION
    This is where all the dirty work begins and ends.
 
 LICENSE TERMS
-    Copyright (C) 1996 Eric S. Raymond 
+    Copyright (C) 1996 Eric S. Raymond
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,11 +41,15 @@ LICENSE TERMS
 #include "lose.h"
 #include "uncommon.h"
 
+/* AIS: split ICKDATADIR from ICKLIBDIR */
 #ifndef ICKINCLUDEDIR
 #define ICKINCLUDEDIR "/usr/local/include"
 #endif
+#ifndef ICKDATADIR
+#define ICKDATADIR "/usr/local/share"
+#endif
 #ifndef ICKLIBDIR
-#define ICKLIBDIR "/usr/local/share"
+#define ICKLIBDIR "/usr/local/lib"
 #endif
 #ifndef ICKBINDIR
 #define ICKBINDIR "/usr/local/bin"
@@ -54,7 +58,7 @@ LICENSE TERMS
 #define CC "gcc"
 #endif
 
-#define ARGSTRING "bcdfghlmoptuvyCFHOPUX@"
+#define ARGSTRING "bcdfghlmoptuvxyCFHOPUX@"
 
 #ifdef USE_YYRESTART
 /* function supplied by lex */
@@ -87,6 +91,7 @@ extern int printfopens; /* AIS: Print messages whenever attempting to open a
 extern int checkforbugs;/* AIS: Try to find possible bugs in the source code */
 int pickcompile;        /* AIS: Compile for PIC? */
 int clclex;             /* AIS: 1 means use CLC-INTERCAL meanings for @, ? */
+int clcsemantics;       /* AIS: CLC semantics for I/O, abstaining GIVE UP, &c*/
 int outtostdout;        /* AIS: Output on stdout rather than the output file */
 
 /* AIS: Autodetected compilation options */
@@ -182,7 +187,6 @@ static void print_usage(char *prog, char *options)
     fprintf(stderr,"Usage: %s [-%s] <file>\n",prog,options);
     fprintf(stderr,"\t-b\t:reduce the probability of E774 to zero\n");
     fprintf(stderr,"\t-c\t:compile INTERCAL to C, but don't compile C\n");
-    fprintf(stderr,"\t-o\t:output to stdout, not to file (implies -c)\n");
     fprintf(stderr,"\t-d\t:print yacc debugging information (implies -c)\n");
     fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
     fprintf(stderr,"\t-C\t:clockface output (e.g. use IIII instead of IV)\n");
@@ -222,8 +226,12 @@ static void print_usage(char *prog, char *options)
 	    "is required\n\t\tif you want operand overloading to change "
 	    "meshes.\n\t\t(prevents -fFOP)\n");
     fprintf(stderr,"\t-P\t:compile PIC-INTERCAL rather than INTERCAL\n");
+    fprintf(stderr,"\t\t(prevents -mFvx, implies -cfO)\n");
     fprintf(stderr,"\t-o\t:output to stdout rather than .c (implies -c)\n");
-    fprintf(stderr,"\t-X\t:aim for CLC-INTERCAL compatibility\n");
+    fprintf(stderr,"\t-X\t:interpret ambiguous syntax as Princeton not\n"
+	    "\t\tAtari (i.e. CLC-INTERCAL not C-INTERCAL)\n");
+    fprintf(stderr,"\t-x\t:use CLC-INTERCAL rules for I/O and abstaining\n"
+	    "\t\tfrom a GIVE UP by label (prevents -P)\n");
     fprintf(stderr,"\t-u\t:print a message whenever the compiler tries to "
 	    "open a file\n");
     fprintf(stderr,"\t-U\t:dump core on E778 after printing an error\n");
@@ -231,8 +239,8 @@ static void print_usage(char *prog, char *options)
     fprintf(stderr,"\t-l\t:attempt to report likely bugs "
 	    "and nonportabilities (implies -O)\n");
     /* AIS: End of options I added. */
-    fprintf(stderr,"\t<file>\tINTERCAL source file(s) (use extension .i)\n");
-    fprintf(stderr,"\t\teach file produces a separate output program.\n");
+    fprintf(stderr,"\t<file>\tINTERCAL source file (use extension .i\n");
+    fprintf(stderr,"\t\tfor base 2 or .3i, etc., for base 3, etc.).\n");
 }
 
 /* AIS: Determine whether an environment variable exists (this is used to
@@ -250,8 +258,9 @@ int main(int argc, char *argv[])
     tuple	*tp;
     atom	*op;
     int		c, i;
-    char	*includedir, *libdir; /* AIS: , *getenv(); */
-    char        *bindir, *cooptsh;
+    char	*includedir, *datadir, *libdir;
+    /* AIS: removed getenv(), added datadir on the line above */
+    char        *cooptsh; /* AIS */
     FILE	*ifp, *ofp;
     int		maxabstain, /* nextcount, AIS */ bugline;
     bool        needsyslib, firstfile;
@@ -263,8 +272,15 @@ int main(int argc, char *argv[])
       includedir = ICKINCLUDEDIR;
     if (!(libdir = getenv("ICKLIBDIR")))
       libdir = ICKLIBDIR;
-    if (!(bindir = getenv("ICKBINDIR"))) /* AIS */
-      bindir = ICKBINDIR;    
+    if (!(datadir = getenv("ICKDATADIR"))) /* AIS */
+      datadir = ICKDATADIR;
+/*
+  AIS: nothing actually uses this at the moment,
+       commenting it out for future use
+
+    if (!(bindir = getenv("ICKBINDIR")))
+      bindir = ICKBINDIR;
+*/
     if (!(compiler = getenv("CC")))
       compiler = CC;
 
@@ -312,7 +328,7 @@ int main(int argc, char *argv[])
 	  yukdebug = yukprofile = FALSE;
 	  variableconstants = FALSE;
 	  break;
-	  
+
 	case 'F': /* By AIS */
 	  coopt = flowoptimize = dooptimize = TRUE;
 	  variableconstants = FALSE;
@@ -320,7 +336,7 @@ int main(int argc, char *argv[])
 	    compile_only = cdebug = FALSE;
 	  if(pickcompile) lose(E256, 1, (char*) NULL);
 	  break;
-	  
+
 	case 'h': /* By AIS */
 	  optdebug|=1;
 	  compile_only=dooptimize=TRUE;
@@ -332,7 +348,7 @@ int main(int argc, char *argv[])
 	  compile_only=dooptimize=TRUE;
 	  coopt=FALSE;
 	  break;
-	  
+
 	case 'y': /* By AIS */
 #ifdef HAVE_UNISTD_H
 	  yukdebug=TRUE;
@@ -361,7 +377,7 @@ int main(int argc, char *argv[])
 	  coopt=FALSE;
 	  pickcompile=FALSE;
 	  break;
-	  
+
 	case 'l': /* By AIS */
 	  checkforbugs=TRUE;
 	  dooptimize=TRUE;
@@ -378,19 +394,25 @@ int main(int argc, char *argv[])
 	case 'P': /* By AIS */
 	  pickcompile=TRUE;
 	  multithread=coopt=variableconstants=FALSE;
+	  clcsemantics=FALSE;
 	  compile_only=TRUE;
 	  dooptimize=flowoptimize=TRUE; /* needed for PICs */
 	  break;
-	  
+
 	case 'X': /* By AIS */
 	  clclex=TRUE;
+	  break;
+
+	case 'x': /* By AIS */
+	  clcsemantics=TRUE;
+	  pickcompile=FALSE;
 	  break;
 
 	case 'g': /* By AIS */
 	  cdebug=TRUE;
 	  coopt=FALSE;
 	  break;
-	    
+
 	case '?':
 	default:
 	case '@':
@@ -423,9 +445,9 @@ int main(int argc, char *argv[])
 
     /* AIS: New function for enhanced file-finding */
     if ((ifp = findandfopen(pickcompile?PSKELETON:SKELETON,
-			    libdir, "r", argv[0])) == 0)
+			    datadir, "r", argv[0])) == 0)
       lose(E999, 1, (char *)NULL);
-	
+
     /* now substitute in tokens in the skeleton */
 
     buf[strlen(buf) - 2] = '\0';
@@ -549,7 +571,7 @@ int main(int argc, char *argv[])
 		(void) sprintf(buf2, "%s.i", SYSLIB);
 	      else
 		(void) sprintf(buf2, "%s.%di", SYSLIB, Base);
-	      if (findandfreopen(buf2, libdir, "r", argv[0], stdin) == 0)
+	      if (findandfreopen(buf2, datadir, "r", argv[0], stdin) == 0)
 		lose(E127, 1, (char*) NULL);
 #ifdef USE_YYRESTART
 	      yyrestart(stdin);
@@ -611,15 +633,15 @@ int main(int argc, char *argv[])
 	    if(outtostdout) ofp=stdout; /* AIS */
 	    else if((ofp = debfopen(buf, "w")) == (FILE *)NULL)
 		lose(E888, 1, (char *)NULL);
-	    
+
 	    fseek(ifp,0L,0);	/* rewind skeleton file */
 
 	    /* AIS: Before changing argv[0], locate coopt.sh. */
-	    cooptsh = findandtestopen("coopt.sh", bindir, "rb", argv[0]);
+	    cooptsh = findandtestopen("coopt.sh", datadir, "rb", argv[0]);
 	    /* AIS: and calculate yukcmdstr. */
 	    sprintf(yukcmdstr,"%s" EXEEXT " %s %s",
-		    argv[optind],libdir,argv[0]);
-	    
+		    argv[optind],datadir,argv[0]);
+
 	    /* AIS: Remove the filename from argv[0], leaving only a directory.
 	       If this would leave it blank, change argv[0] to '.'.
 	       This is so gcc can find the includes/libraries the same way that
@@ -977,15 +999,17 @@ int main(int argc, char *argv[])
 "type32 og2spot%d(type32 t)\n{\n  (void)t;\n  return twospots[%d];\n}\n"
 "void os2spot%d(type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoretwospots%d)"
 " twospots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
-		      }		      
+		      }
 		    }
 		    (void) fprintf(ofp, "#include \"pick2.h\"\n");
 		  }
 		  break;
 
-		case 'F':	/* set clockface option? */
+		case 'F':	/* set options from command line */
 		    if (clockface)
-			(void) fprintf(ofp, "clockface(TRUE);");
+			(void) fprintf(ofp, "clockface(TRUE);\n");
+		    if (clcsemantics) /* AIS */
+		      (void) fprintf(ofp, "clcsemantics(TRUE);\n");
 		    break;
 
 		case 'G':	/* degenerated code */
@@ -1173,7 +1197,7 @@ int main(int argc, char *argv[])
 				       "    hyforget = calloc("
 				       "%d, sizeof *hyforget);\n",
 				       nhybrids);
-		    }		    
+		    }
 		    break;
 		case 'O': /* AIS; for GERUCOME and operand overloading */
 		  if(gerucomesused || nextfromsused)
@@ -1255,7 +1279,7 @@ int main(int argc, char *argv[])
 		remove(buf);
 	      }
 	    }
-#endif	    
+#endif
 #ifdef HAVE_PROG_SH
 # ifdef HAVE_SYS_INTERPRETER
 	    if(coopt) /* AIS */

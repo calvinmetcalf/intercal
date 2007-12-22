@@ -134,16 +134,6 @@ ICK_INT1 roll(ICK_INT8 n)
    return n>50;
 }
 
-/* Volatility is important; some compilers don't notice this. */
-#define seq(a) a
-/* You may need to use the commented-out code instead if your compiler
-   is confused about volatile.
- ICK_INT8 seq(ICK_INT8 n)
- {
-   return n;
- }
-*/
-
 /* Syslib, implemented in C to save ROM space. */
 #if defined(ONESPOT1)&&defined(ONESPOT2)&&defined(TWOSPOT1)
 void syslibopt1050()

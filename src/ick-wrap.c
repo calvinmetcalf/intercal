@@ -27,7 +27,7 @@ jmp_buf cjb;
 int ccfc;
 unsigned skipto=0;
 $O
-
+char* globalargv0;
 int oldabstain;
 int abstained[$B]$C;
 $D
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     next = calloc(80, sizeof *next);
 $N
-    
+    globalargv0=argv[0];
 #ifdef YUK
     yuklines = $J;
     yukcommands = $B;

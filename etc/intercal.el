@@ -20,8 +20,8 @@
 ;; AIS: I corrected the READ/WRITE, IN/OUT reversal independent of the correction
 ;; that happened from 0.22 to 0.24 (this code was originally based on the 0.22
 ;; distribution and updated for 0.24 compatibility); this version is distributed
-;; with C-INTERCAL 0.25.
-;; 
+;; with C-INTERCAL 0.27.
+;;
 ;; I also altered the code for ( so the user didn't have to go to the beginning
 ;; of the line, added C-c C-[a,c,r,s] for convenience when working with
 ;; constants, and added support for TRY AGAIN, ONCE, AGAIN, and Font Lock.
@@ -33,7 +33,7 @@
 (defconst intercal-politesse-level 4
   "Fraction of DOs that are automagically expanded to PLEASE DO.")
 
-(defvar intercal-mode-map nil 
+(defvar intercal-mode-map nil
   "Keymap for INTERCAL mode.")
 (if intercal-mode-map
     nil
@@ -185,17 +185,17 @@
 It activates the following abbrevs (each one appropriately modified to a
 gerund if it occurs on a line with ABSTAIN or REINSTATE).
 
-ab   ABSTAIN	co   COME FROM	fo   FORGET	
-gi   GIVE UP	ig   IGNORE	ne   NEXT	
-rea  READ OUT	rei  REINSTATE	rem  REMEMBER	
-res  RESUME	ret  RETRIEVE	st   STASH	
+ab   ABSTAIN	co   COME FROM	fo   FORGET
+gi   GIVE UP	ig   IGNORE	ne   NEXT
+rea  READ OUT	rei  REINSTATE	rem  REMEMBER
+res  RESUME	ret  RETRIEVE	st   STASH
 wr   WRITE IN	pl   PLEASE     tr   TRY AGAIN
 on   ONCE       ag   AGAIN      ma   MAYBE
 goa  GO AHEAD   gob  GO BACK    do   DO, or sometimes PLEASE DO
-cal  CALCULATING (only as a gerund)
+cal  CALCULATING (gerund only)  wh   WHILE
 
 Carriage return takes you to the first tab stop (code indent level).
-Certain other single keys are bound to things which may or may not be useful.  
+Certain other single keys are bound to things which may or may not be useful.
 You may consider discovering these one of the pleasures awaiting you in your
 discovery of INTERCAL's unique ambience.
 
@@ -323,8 +323,8 @@ a good idea in long files, which take a long time to update."
 ;; be abstained from all program.
 (defvar intercal-font-lock-keywords
   '(("^\\(([0-9]+)\\|\\)[ \t]*\\(PLEASE DO\\|DO\\|PLEASE\\)[ \t]*\\(NOT\\|N'T\\).*$" . font-lock-comment-face)
-    ("\\<\\(ABSTAIN\\|GIVE UP\\|READ OUT\\|RESUME\\|WRITE IN\\|PIN\\|COME\\|FROM\\|IGNORE\\|REINSTATE\\|RETRIEVE\\|PLEASE\\|DO\\|MAYBE\\|ONCE\\|AGAIN\\|FORGET\\|NEXT\\|REMEMBER\\|STASH\\|DON'T\\|NOT\\|TRY AGAIN\\|GO AHEAD\\|GO BACK\\)\\>" . font-lock-keyword-face)
-    ("\\<\\(ABSTAINING\\|GIVING UP\\|READING OUT\\|RESUMING\\|WRITING IN\\|PINNING\\|COMING\\|IGNORING\\|REINSTATING\\|RETRIEVING\\|FORGETTING\\|NEXTING\\|REMEMBERING\\|STASHING\\|TRYING AGAIN\\|CALCULATING\\|GOING AHEAD\\|GOING BACK\\)\\>" . font-lock-builtin-face)
+    ("\\<\\(ABSTAIN\\|GIVE UP\\|READ OUT\\|RESUME\\|WRITE IN\\|PIN\\|COME\\|FROM\\|IGNORE\\|REINSTATE\\|RETRIEVE\\|PLEASE\\|DO\\|MAYBE\\|ONCE\\|AGAIN\\|FORGET\\|NEXT\\|REMEMBER\\|STASH\\|DON'T\\|NOT\\|TRY AGAIN\\|WHILE\\|GO AHEAD\\|GO BACK\\)\\>" . font-lock-keyword-face)
+    ("\\<\\(ABSTAINING\\|GIVING UP\\|READING OUT\\|RESUMING\\|WRITING IN\\|PINNING\\|COMING\\|IGNORING\\|REINSTATING\\|RETRIEVING\\|FORGETTING\\|NEXTING\\|REMEMBERING\\|STASHING\\|TRYING AGAIN\\|CALCULATING\\|WHILING\\|GOING AHEAD\\|GOING BACK\\)\\>" . font-lock-builtin-face)
     ("[.,:;][0-9]+" . font-lock-variable-name-face)
     ("#[0-9]+\\(\\$#[0-9]+\\|\\)" . font-lock-constant-face))
   "Default expressions to highlight in Intercal mode.")
@@ -332,13 +332,13 @@ a good idea in long files, which take a long time to update."
 ;; Find an error message produced by ick. If the famous RESUBNIT spelling error
 ;; is ever corrected, this will need to be corrected too.
 (defvar intercal-error-regexp
-  '("ICL[0-9][0-9][0-9][IW].*\n[ \t]*ON THE WAY TO \\([0-9]+\\)\n[ \t]*\\(CORRECT\\|RECONSIDER\\) SOURCE AND RESUBNIT$" nil 1)
+  '("\\(ICL[0-9][0-9][0-9][IW].*\\)\n[ \t]*ON THE WAY TO \\([0-9]+\\)\n[ \t]*\\(\\(CORRECT\\)\\|\\(RECONSIDER\\)\\) SOURCE AND RESUBNIT$" nil 2 nil (5 . nil) 1)
   "Regexp that identifies an INTERCAL error message, and the file and line number positions in it.")
 
 ;; Detect the line with which ick was invoked, so the filename used can be
 ;; used by Emacs' compile-mode to find the error. This will need to be changed
 ;; if command-line arguments to ick other than letters are allowed.
-(defvar intercal-file-regexp '(".*ick \\(-[a-zA-Z]+ \\)*\\(.*i\\)$" 2)
+(defvar intercal-file-regexp '(".*ick \\(-[a-zA-Z]+ \\)*\\(.*i\\)$" 2 nil nil 0 2)
   "Regexp that identifies the line with which ick was invoked, and the filename it was used on.")
 
 ;; Helper function for the binary I/O routines.
@@ -578,16 +578,22 @@ for the interface it uses."
 	  (function (lambda ()
 		      (make-local-variable 'font-lock-defaults)
 		      (setq font-lock-defaults '(intercal-font-lock-keywords t))
-		      (make-local-variable 'compilation-error-regexp-alist)
-		      (setq compilation-error-regexp-alist (cons intercal-error-regexp
-								 compilation-error-regexp-alist))
-		      (make-local-variable 'compilation-file-regexp-alist)
-		      (setq compilation-file-regexp-alist (cons intercal-file-regexp
-								compilation-file-regexp-alist))
 		      (make-local-variable 'compile-command)
 		      (setq compile-command (concat "ick -O " (buffer-name)))
 		      (make-local-variable 'compilation-parse-errors-function)
 		      (setq compilation-parse-errors-function 'intercal-error-wrap))))
+
+;; In recent versions of Emacs this must apparently be set globally;
+;; also, the -error-regexp and -file-regexp were merged.
+(setq compilation-error-regexp-alist (cons intercal-error-regexp
+					   compilation-error-regexp-alist))
+(if (boundp 'compilation-file-regexp-alist)
+    (setq compilation-file-regexp-alist (cons intercal-file-regexp
+					      compilation-file-regexp-alist))
+  (setq compilation-error-regexp-alist (cons intercal-file-regexp
+					     compilation-error-regexp-alist))
+  )
+
 
 ;; AIS: End of section I wrote.
 

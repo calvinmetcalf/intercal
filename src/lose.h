@@ -92,6 +92,9 @@
 /* Out of stash space */
 #define E222 "222 BUMMER, DUDE!\n\
 	ON THE WAY TO %d\n"
+/* (AIS) Out of memory during I/O */
+#define E252 "252 I'VE FORGOTTEN WHAT I WAS ABOUT TO SAY\n\
+	ON THE WAY TO %d\n"
 /* (AIS) Can't reverse an expression in an assignment. This is the
    same error number as in CLC-INTERCAL, but the message is different. */
 #define E277 "277 YOU CAN ONLY DISTORT THE LAWS OF MATHEMATICS SO FAR\n\

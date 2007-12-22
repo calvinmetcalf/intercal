@@ -83,6 +83,8 @@ struct ickstype
 			 to the node itself to form the condition and c and x
 			 aren't needed */
   mybool width32;     /* Generate a 32-bit node? */
+  mybool ublo;        /* Is this a UBLO (if set, generate conditions
+			 to check width)? */
   unsigned long c;    /* The value to append to the condition */
   int replnum;        /* Number of this group for replacements */
   struct ickstype *n1;/* n1 and n2 are pointers to other conditions that */
@@ -126,11 +128,12 @@ struct ickstype
 			  m->path=0; \
                           m->replnum=0; \
                           m->width32=w; \
+                          m->ublo=0; \
 			  treedepthup(m->n1,0); \
 			  treedepthup(m->n2,1); \
                           } while(0)
 
-#define UNARYEXPR(s,m,r,w) do{ \
+#define UNARYEXPR(s,m,r,w,u) do{ \
                           m=malloc(sizeof(struct ickstype)); \
                           m->n1=0; \
                           m->n2=r; \
@@ -143,6 +146,7 @@ struct ickstype
 			  m->path=0; \
                           m->replnum=0; \
                           m->width32=w; \
+                          m->ublo=u; \
 			  treedepthup(m->n2,1); \
                         } while(0)
 
@@ -259,33 +263,24 @@ expr2: expr '$' expr {BINARYEXPR("MINGLE",$$,$1,$3,1);}
 |      expr '~' expr {BINARYEXPR("SELECT",$$,$1,$3,1);}
 |      expr '~' '1' '6' expr {BINARYEXPR("SELECT",$$,$1,$5,0);}
 |      expr '~' '3' '2' expr {BINARYEXPR("SELECT",$$,$1,$5,1);}
-|      '&' expr {UNARYEXPR("AND",$$,$2,1);}
-|      '&' '1' '6' expr {UNARYEXPR("AND",$$,$4,0);}
-|      '&' '3' '2' expr {UNARYEXPR("AND",$$,$4,1);}
-|      'V' expr {UNARYEXPR("OR",$$,$2,1);}
-|      'V' '1' '6' expr {UNARYEXPR("OR",$$,$4,0);}
-|      'V' '3' '2' expr {UNARYEXPR("OR",$$,$4,1);}
-|      '?' expr {UNARYEXPR("XOR",$$,$2,1);}
-|      '?' '1' '6' expr {UNARYEXPR("XOR",$$,$4,0);}
-|      '?' '3' '2' expr {UNARYEXPR("XOR",$$,$4,1);}
-|      '^' expr {UNARYEXPR("FIN",$$,$2,1);}
-|      '^' '1' '6' expr {UNARYEXPR("FIN",$$,$4,0);}
-|      '^' '3' '2' expr {UNARYEXPR("FIN",$$,$4,1);}
-|      '@' expr {UNARYEXPR("WHIRL",$$,$2,1);}
-|      '@' '2' expr {UNARYEXPR("WHIRL2",$$,$3,1);}
-|      '@' '3' expr {UNARYEXPR("WHIRL3",$$,$3,1);}
-|      '@' '4' expr {UNARYEXPR("WHIRL4",$$,$3,1);}
-|      '@' '5' expr {UNARYEXPR("WHIRL5",$$,$3,1);}
-|      '@' '1' '6' expr {UNARYEXPR("WHIRL",$$,$4,0);}
-|      '@' '2' '1' '6' expr {UNARYEXPR("WHIRL2",$$,$5,0);}
-|      '@' '3' '1' '6' expr {UNARYEXPR("WHIRL3",$$,$5,0);}
-|      '@' '4' '1' '6' expr {UNARYEXPR("WHIRL4",$$,$5,0);}
-|      '@' '5' '1' '6' expr {UNARYEXPR("WHIRL5",$$,$5,0);}
-|      '@' '3' '2' expr {UNARYEXPR("WHIRL",$$,$4,1);}
-|      '@' '2' '3' '2' expr {UNARYEXPR("WHIRL2",$$,$5,1);}
-|      '@' '3' '3' '2' expr {UNARYEXPR("WHIRL3",$$,$5,1);}
-|      '@' '4' '3' '2' expr {UNARYEXPR("WHIRL4",$$,$5,1);}
-|      '@' '5' '3' '2' expr {UNARYEXPR("WHIRL5",$$,$5,1);}
+|      '&' '1' '6' expr {UNARYEXPR("AND",$$,$4,0,1);}
+|      '&' '3' '2' expr {UNARYEXPR("AND",$$,$4,1,1);}
+|      'V' '1' '6' expr {UNARYEXPR("OR",$$,$4,0,1);}
+|      'V' '3' '2' expr {UNARYEXPR("OR",$$,$4,1,1);}
+|      '?' '1' '6' expr {UNARYEXPR("XOR",$$,$4,0,1);}
+|      '?' '3' '2' expr {UNARYEXPR("XOR",$$,$4,1,1);}
+|      '^' '1' '6' expr {UNARYEXPR("FIN",$$,$4,0,1);}
+|      '^' '3' '2' expr {UNARYEXPR("FIN",$$,$4,1,1);}
+|      '@' '1' '6' expr {UNARYEXPR("WHIRL",$$,$4,0,1);}
+|      '@' '2' '1' '6' expr {UNARYEXPR("WHIRL2",$$,$5,0,1);}
+|      '@' '3' '1' '6' expr {UNARYEXPR("WHIRL3",$$,$5,0,1);}
+|      '@' '4' '1' '6' expr {UNARYEXPR("WHIRL4",$$,$5,0,1);}
+|      '@' '5' '1' '6' expr {UNARYEXPR("WHIRL5",$$,$5,0,1);}
+|      '@' '3' '2' expr {UNARYEXPR("WHIRL",$$,$4,1,1);}
+|      '@' '2' '3' '2' expr {UNARYEXPR("WHIRL2",$$,$5,1,1);}
+|      '@' '3' '3' '2' expr {UNARYEXPR("WHIRL3",$$,$5,1,1);}
+|      '@' '4' '3' '2' expr {UNARYEXPR("WHIRL4",$$,$5,1,1);}
+|      '@' '5' '3' '2' expr {UNARYEXPR("WHIRL5",$$,$5,1,1);}
 |      expr '&' expr {BINARYEXPR("C_AND",$$,$1,$3,1);}
 |      expr '&' '1' '6' expr {BINARYEXPR("C_AND",$$,$1,$5,0);}
 |      expr '&' '3' '2' expr {BINARYEXPR("C_AND",$$,$1,$5,1);}
@@ -316,8 +311,8 @@ expr2: expr '$' expr {BINARYEXPR("MINGLE",$$,$1,$3,1);}
 |      expr '<' expr {BINARYEXPR("C_LESS",$$,$1,$3,1);}
 |      expr '<' '1' '6' expr {BINARYEXPR("C_LESS",$$,$1,$5,0);}
 |      expr '<' '3' '2' expr {BINARYEXPR("C_LESS",$$,$1,$5,1);}
-|      '~' '1' '6' expr {UNARYEXPR("C_NOT",$$,$4,0);}
-|      '~' '3' '2' expr {UNARYEXPR("C_NOT",$$,$4,1);}
+|      '~' '1' '6' expr {UNARYEXPR("C_NOT",$$,$4,0,1);}
+|      '~' '3' '2' expr {UNARYEXPR("C_NOT",$$,$4,1,1);}
 |      expr '!' '=' expr {BINARYEXPR("C_NOTEQUAL",$$,$1,$4,0);}
 |      expr '!' '=' '1' '6' expr {BINARYEXPR("C_NOTEQUAL",$$,$1,$6,0);}
 |      expr '!' '=' '3' '2' expr {BINARYEXPR("C_NOTEQUAL",$$,$1,$6,1);}
@@ -336,9 +331,9 @@ expr2: expr '$' expr {BINARYEXPR("MINGLE",$$,$1,$3,1);}
 |      expr '<' '<' expr {BINARYEXPR("C_LSHIFTBY",$$,$1,$4,1);}
 |      expr '<' '<' '1' '6' expr {BINARYEXPR("C_LSHIFTBY",$$,$1,$6,0);}
 |      expr '<' '<' '3' '2' expr {BINARYEXPR("C_LSHIFTBY",$$,$1,$6,1);}
-|      '!' expr {UNARYEXPR("C_LOGICALNOT",$$,$2,0);}
-|      '!' '1' '6' expr {UNARYEXPR("C_LOGICALNOT",$$,$4,0);}
-|      '!' '3' '2' expr {UNARYEXPR("C_LOGICALNOT",$$,$4,1);}
+|      '!' expr {UNARYEXPR("C_LOGICALNOT",$$,$2,0,0);}
+|      '!' '1' '6' expr {UNARYEXPR("C_LOGICALNOT",$$,$4,0,0);}
+|      '!' '3' '2' expr {UNARYEXPR("C_LOGICALNOT",$$,$4,1,0);}
 |      expr ;
 
 replacement: expr3;
@@ -411,6 +406,7 @@ int yylex(void)
       yylval->replnum=0;
       yylval->n1=0;
       yylval->n2=0;
+      yylval->ublo=0;
       yylval->width32=1; /* generate MESH32 not MESH; we can still AND16 it,
 			    etc., if necessary */
       countungetc(c, stdin);
@@ -426,7 +422,9 @@ int yylex(void)
     yylval->depth=0;
     yylval->path=0;
     yylval->condition=0; /* _ or # */
-    yylval->width32=1; /* should never matter, but you never know... */
+    yylval->width32=1; /* should never matter, but you never
+			  know... */
+    yylval->ublo=0;
     if(c==':') yylval->condition="->width==32";
     if(c=='.') {yylval->condition="->width==16"; yylval->width32=0;}
     yylval->nodetypename=0;
@@ -461,6 +459,8 @@ int yylex(void)
       yylval->n1->cxneeded=1;
       yylval->n1->n1=0;
       yylval->n1->n2=0;
+      yylval->n1->width32=yylval->width32;
+      yylval->n1->ublo=0;
     }
     else yylval->n1=0;
     yylval->replnum=0;
@@ -519,6 +519,13 @@ mybool treeshapecond(YYSTYPE v, mybool firstopt)
     gennodepath(v->depth,v->path);
     printf("%s",v->condition);
     if(v->usec) printf("%luLU",v->c);
+    firstopt=0;
+  }
+  if(v->ublo) /* generate a width check */
+  {
+    printf(firstopt?"  if(np":" &&\n     np");
+    gennodepath(v->depth,v->path);
+    printf("->width==%d",v->width32?32:16);
     firstopt=0;
   }
   firstopt=treeshapecond(v->n1,firstopt);

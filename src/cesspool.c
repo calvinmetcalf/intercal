@@ -1,10 +1,10 @@
 /*****************************************************************************
 
-NAME 
+NAME
     cesspool.c -- storage management and runtime support for INTERCAL
 
 LICENSE TERMS
-    Copyright (C) 1996 Eric S. Raymond 
+    Copyright (C) 1996 Eric S. Raymond
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,6 +53,12 @@ LICENSE TERMS
 FILE* cesspoolin=0;
 FILE* cesspoolout=0;
 
+/* AIS: To keep ld happy. This shouldn't ever actually get used, but
+ * give it a sane value just in case it does. (This is referenced by
+ * clc-cset.c, but due to the linking-in of the character sets
+ * themselves the reference should never be used.) */
+char* datadir=".";
+
 /**********************************************************************
  *
  * The following functions manipulate the nexting stack
@@ -61,6 +67,8 @@ FILE* cesspoolout=0;
 
 int* next; /* AIS: now allocated by ick-wrap.c */
 int nextindex = 0;
+
+static int clcsem = 0; /* AIS */
 
 void pushnext(int n)
 {
@@ -109,7 +117,7 @@ unsigned int pin(void)
     extern int wimp_mode;
 
     if(!cesspoolin) cesspoolin=stdin; /* AIS */
-       
+
     if (fgets(buf, BUFSIZ, cesspoolin) == (char *)NULL)
 	lose(E562, lineno, (char *)NULL);
     n = strlen(buf) - 1;
@@ -280,6 +288,11 @@ void clockface(bool mode)
     }
 }
 
+void clcsemantics(bool mode) /* AIS: CLC-INTERCAL semantics mode? */
+{
+  clcsem=mode;
+}
+
 void pout(unsigned int val)
 /* output in `butchered' Roman numerals; see manual, part 4.4.13 */
 {
@@ -287,7 +300,7 @@ void pout(unsigned int val)
     extern int wimp_mode;
 
     if(!cesspoolout) cesspoolout=stdout; /* AIS */
-    
+
     if(wimp_mode) {
 	(void) fprintf(cesspoolout,"%u\n",val);
     }
@@ -296,6 +309,107 @@ void pout(unsigned int val)
 	(void) fprintf(cesspoolout,"%s\n",result);
     }
     fflush(cesspoolout);
+}
+
+/**********************************************************************
+ *
+ * AIS: CLC-INTERCAL bitwise I/O, only used in CLC-INTERCAL semantics
+ * mode. The I/O is done in extended Baudot for a tail array, or in
+ * mingled form for a hybrid array; for the Baudot, we rely on
+ * clc-cset.c and on the Baudot and Latin-1 character sets that are
+ * linked to libick.a (or libickmt.a), so the final executable doesn't
+ * reference the compiler's libraries. clc-cset.c is designed to
+ * handle this all transparently, though, so we don't have to worry
+ * about the details. I wrote the next two functions.
+ *
+ **********************************************************************/
+
+/* AIS: From clc-cset.c */
+extern int clc_cset_convert(char* in, char* out, char* incset,
+			    char* outcset, int padstyle, int outsize,
+			    FILE* errsto);
+
+static void clcbinin(unsigned int type, array *a, bool forget)
+{
+  int i;
+  char* buf, *tempcp;
+  /* Allocating one byte per element in the array must be enough,
+   * because the Baudot version cannot possibly be shorter than the
+   * original Latin-1, plus one for the terminating NUL. */
+  i=a->dims[0]; /* we already know that there's 1 dim only */
+  if(!i) i=1;
+  buf=malloc(i+1);
+  if(!buf) lose(E252, lineno, (char*)NULL);
+  if(!fgets(buf,a->dims[0],cesspoolin))
+    strcpy(buf,"\n"); /* EOF inputs the null string in CLC-INTERCAL */
+  tempcp=strrchr(buf,'\n'); /* still working in ASCII at this point */
+  if(!tempcp) /* input too long for the array is an error */
+  {
+    free(buf);
+    lose(E241, lineno, (char*)NULL);
+  }
+  *tempcp='\0'; /* chomp the final newline */
+  tempcp=malloc(6*i+12); /* to be on the safe side, even though
+			  * Baudot doesn't use 16-byte chars */
+  if(!tempcp) lose(E252, lineno, (char*)NULL);
+  /* Zero the array now. */
+  i=a->dims[0];
+  if(!forget) while(i--)
+		if(type==TAIL)
+		  a->data.tail[i]=0;
+		else
+		  a->data.hybrid[i]=0;
+  i=clc_cset_convert(buf,tempcp,"latin1","baudot",2,6*a->dims[0]+12,0);
+  /* Negative i ought to be impossible here; check anyway, and cause
+   * an internal error if it has happened. */
+  if(i<0) lose(E778, lineno, (char*)NULL);
+  if((unsigned)i>a->dims[0]) lose(E241, lineno, (char*)NULL);
+  if(!forget) while(i--)
+		if(type==TAIL)
+		  a->data.tail[i]=tempcp[i]+(rand()/(RAND_MAX/256))*256;
+		else
+		  a->data.hybrid[i]=tempcp[i]+(rand()/(RAND_MAX/256))*256;
+  free(tempcp);
+  free(buf);
+}
+
+static void clcbinout(unsigned int type, array* a)
+{
+  int i;
+  char* buf, *tempcp;
+  buf=malloc(a->dims[0]+1);
+  if(!buf) lose(E252, lineno, (char*) NULL);
+  i=0; tempcp=buf;
+  while((unsigned)i<a->dims[0])
+  {
+    if(type==TAIL)
+      *tempcp=a->data.tail[i];
+    else
+      *tempcp=a->data.hybrid[i];
+    i++;
+    if(*tempcp) tempcp++; /* NULs are ignored for some reason, but
+			   * that's the behaviour the CLC-INTERCAL
+			   * specs specify */
+  }
+  *tempcp=0;
+  /* tempcp is definitely overkill here, but the *6+6 rule is being
+   * obeyed because that way the code is robust against any future
+   * changes in character sets. */
+  tempcp=malloc(a->dims[0]*6+12);
+  if(!tempcp) lose(E252, lineno, (char*) NULL);
+  i=clc_cset_convert(buf,tempcp,"baudot","latin1",0,6*a->dims[0]+12,0);
+  tempcp[i]=0;
+  /* CLC-INTERCAL bails out on invalid characters. C-INTERCAL uses
+   * instead the behaviour of replacing them with character code 26.
+   * (This is actually the purpose of character code 26 in ASCII, I
+   * think, although this is derived from memory; I don't know of any
+   * other system that uses it for this purpose, though, and the
+   * ability to confuse Windows with it is worth what might be lost
+   * through standards compliance.) */
+  while(i--) if(!tempcp[i]) tempcp[i]=26;
+  fprintf(cesspoolout,"%s\n",tempcp);
+  free(tempcp);
+  free(buf);
 }
 
 /**********************************************************************
@@ -314,8 +428,10 @@ void binin(unsigned int type, array *a, bool forget)
 
   if (a->rank != 1)
     lose(E241, lineno, (char *)NULL);
-  
+
   if(!cesspoolin) cesspoolin=stdin; /* AIS */
+
+  if(clcsem) {clcbinin(type, a, forget); return;} /* AIS */
 
   for (i = 0 ; i < a->dims[0] ; i++) {
     v = ((c=fgetc(cesspoolin)) == EOF) ? 256 : (c - lastin) % 256;
@@ -338,7 +454,9 @@ void binout(unsigned int type, array *a)
     lose(E241, lineno, (char *)NULL);
 
   if(!cesspoolout) cesspoolout=stdout; /* AIS */
-  
+
+  if(clcsem) {clcbinout(type, a); return;} /* AIS */
+
   for (i = 0 ; i < a->dims[0] ; i++) {
     if (type == TAIL)
       c = lastout - a->data.tail[i];

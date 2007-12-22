@@ -57,7 +57,9 @@ LICENSE TERMS
 #define TRISA *(volatile ICK_INT8*)0x85
 #define TRISB *(volatile ICK_INT8*)0x86
 
-/* Volatility is important; some compilers don't notice this. */
+/* This is a hack for compilers that don't interpret volatile correctly.
+   The uncommented code assumes your compiler knows how to work it
+   correctly; use the replacement below if it doesn't. */
 #define seq(a) a
 /* You may need to use the commented-out code instead if your compiler
    is confused about volatile.

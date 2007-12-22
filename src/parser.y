@@ -3,13 +3,13 @@
 NAME
     parser.y -- grammar for the INTERCAL language
 
-DESCRIPTION 
+DESCRIPTION
    This YACC grammar parses the INTERCAL language by designed by Don R. Woods
 and James M. Lyon.  There are several syntax extensions over the original
 INTERCAL-72 language.
 
 LICENSE TERMS
-    Copyright (C) 1996 Eric S. Raymond 
+    Copyright (C) 1996 Eric S. Raymond
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ static int thisline;	/* line number of beginning of current statement */
 
 extern int mark112;    /* AIS: Mark the tuple for W112 when it's created. */
 static int lineuid=65537; /* AIS: a line number not used anywhere else */
- 
+
 static tuple *splat(void);
 
 #define GETLINENO					\
@@ -65,7 +65,7 @@ static tuple *splat(void);
 #define ACTARGET(x, nt, nn, nn2)\
     {x = newtuple(); x->type = nt; x->lineno = thisline;\
       x->u.node = nn; x->u.target = nn2;}
-/* AIS : The macro above was added for ABSTAIN expr FROM. */ 
+/* AIS : The macro above was added for ABSTAIN expr FROM. */
 #define NEWFANGLED mark112 = 1; /* AIS: Added the mention of mark112 */ \
       if (traditional) lose(E111,iyylineno,(char*)NULL); else
 
@@ -302,12 +302,12 @@ gerunds	:   GERUND
 		    np->rval = newnode();
 		    np = np->rval;
 		    np->constant = $3;
-		} 
+		}
 	;
 
 /* OK, here's what a variable reference looks like */
 variable:    scalar | array;
-   
+
 lvalue	:    scalar | subscr;
 
 scalar2s:    TWOSPOT NUMBER /* AIS: for TWOSPOTs only */

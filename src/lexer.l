@@ -2,12 +2,15 @@
 %p 4000
 %n 1000
 %{
+/* the directives above are for Solaris lex, and will be ignored by
+ * flex */
+
 /*
  * NAME
  *   lexer.l -- source for the C-INTERCAL lexical analyzer.
  *
 LICENSE TERMS
-    Copyright (C) 1996 Eric S. Raymond 
+    Copyright (C) 1996 Eric S. Raymond
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -233,7 +236,7 @@ D	[0-9][\ \t\n0-9]*
 
 \xBD            |
 "c^H/"          |
-"c^H|"          {return(MINGLE); /* AIS: CLC-INTERCAL mingle symbols. 
+"c^H|"          {return(MINGLE); /* AIS: CLC-INTERCAL mingle symbols.
 				    The \xBD is ISO-8859-1 for cent. */}
 \$		|
 \xA2		|
@@ -269,7 +272,7 @@ V		{yylval.numval = OR; return(UNARY);}
 \xA5            |
 \xBE            |
 "V^H-"		|
-\xE2\x88\x80    {yylval.numval = XOR; return(UNARY); 
+\xE2\x88\x80    {yylval.numval = XOR; return(UNARY);
                  /* AIS: CLC-INTERCAL uses \xBE, ISO-8859-1 for yen;
                     for some reason, \xA5 is what was detected by the compiler
 		    during my tests, so that's here too */}
@@ -283,7 +286,7 @@ V		{yylval.numval = OR; return(UNARY);}
                  else {yylval.numval = WHIRL; return(UNARY);}}
 [2-5]{W}@	{yylval.numval = WHIRL + myatoi(yytext) - 1; return(UNARY);}
 
-\'		{char temp = sparkearsstack[sparkearslev/32]&1; 
+\'		{char temp = sparkearsstack[sparkearslev/32]&1;
                  STACKSPARKEARS(0); /* AIS: I added all mentions of
 				       STACKSPARKEARS, OPEN\(SPARK\|EARS\),
 				       CLOSE\(SPARK\|EARS\),
@@ -374,6 +377,8 @@ WRITE{W}IN	{return(WRITE_IN);}
 SCRIBENDUM	|
 WRITING{W}IN	{yylval.numval = WRITE_IN; return(GERUND);}
 COMMEMERO       |
+COMMENTS        |
+COMMENTING      |
 COMMENT         {yylval.numval = UNKNOWN; return(GERUND);
                  /* AIS: An idea stolen from CLC-INTERCAL.
 		    The Latin means literally 'remind' or 'mention'. */}

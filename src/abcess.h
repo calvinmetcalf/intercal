@@ -67,6 +67,7 @@ extern unsigned int popnext(int n);
 extern unsigned int resume(unsigned int n);
 extern unsigned int pin(void);
 extern void clockface(bool mode);
+extern void clcsemantics(bool mode); /* AIS */
 extern void pout(unsigned int val);
 extern void binin(unsigned int type, array *a, bool forget);
 extern void binout(unsigned int type, array *a);

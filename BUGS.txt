@@ -50,8 +50,9 @@ AIS = Alex Smith
 4) (AIS) Reverse assignments (those with the expression on the left)
    are very unlikely to work in bases other than 2.
 
-5) (AIS) Most of the features new in 0.26, and many in 0.25, haven't
-   been documented. (This is partly because I can't get groff to work.)
+5) (AIS) Some of the newer features in intercal.el are not yet fully
+   implemented and have a tendency to print 'Unimplemented' rather
+   than doing anything useful.
 
 			TO DO
 
