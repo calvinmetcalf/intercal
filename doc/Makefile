@@ -51,7 +51,7 @@ original.txt: intercal.mm
 	-rm intercal.refs.qrf
 
 clean:
-	rm -f *.ps *.txt *.refs* ick.inf ick.txt ick.htm ick.pdf
+	rm -f *.ps *.txt *.refs* ick.in* ick.txt ick.htm ick.pdf
 	rm -rf html
 
 ick.inf: ick.txi fdl-1-2.txi

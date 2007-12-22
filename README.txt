@@ -31,11 +31,8 @@ etc/intercal.el         -- elisp for editing INTERCAL code under GNU Emacs
 doc/READ.ME             -- historical notes on the docs
 doc/ick.txi             -- the Revamped Manual sources, a newer manual
 doc/fdl-1-2.txi         -- the GNU FDL version 1.2 in Texinfo form
-doc/html/*.htm          -- the Revamped Manual as an HTML website
-doc/ick.htm             -- the Revamped Manual as one HTML file
 doc/ick.txt             -- the Revamped Manual in plain text form
 doc/ick.inf             -- the Revamped Manual in Info
-doc/ick.pdf		-- printable version of the Revamped Manual
 doc/ickstyle.css	-- styling rules for the Revamped Manual in HTML
 doc/tidy.cfg		-- HTML tidying rules for the Revamped Manual
 doc/fix83.pl            -- script to fixup the HTML output for 8.3 systems
@@ -107,12 +104,12 @@ pit/*                   -- sample INTERCAL code; see pit/CATALOG
 
 First, note that there is a much fuller manual than this file available. For
 full information about C-INTERCAL, including extensive installation and usage
-instructions, see that one; point a PDF reader at doc/ick.pdf, a web browser
-at doc/html/index.htm, or run `info -f doc/ick.inf', or failing that read the
-plain text version at doc/ick.txt. After C-INTERCAL is installed, the manual
-is also available with just `info ick' for information about running ick, the
-compiler, or `info C-INTERCAL' for the available information about ick and
-C-INTERCAL.
+instructions, see that one; run `info -f doc/ick.inf', or failing that read the
+plain text version at doc/ick.txt. (You can build a variety of other formats as
+well, such as HTML and PDF, using the Makefile in the doc directory.) After
+C-INTERCAL is installed, the manual is also available with just `info ick' for
+information about running ick, the compiler, or `info C-INTERCAL' for the
+available information about ick and C-INTERCAL.
 
 You want a man page?  Man pages are for wimps.  To compile an INTERCAL program
 `foo.i' to executable code, just do

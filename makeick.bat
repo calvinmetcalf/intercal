@@ -58,7 +58,9 @@ ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o unravel.o clc-c
 ranlib libickmt.a
 ar cr libyuk.a yuk.o uncommon.o
 ranlib libyuk.a
-gcc %CFLAGS% -oick.exe parser.o lexer.o perpet.o feh2.o idiotism.o dekludge.o lose.o fiddle.o uncommon.o
+echo parser.o lexer.o perpet.o feh2.o idiotism.o dekludge.o lose.o fiddle.o uncommon.o > ickmgcc.rsp
+gcc %CFLAGS% -oick.exe @ickmgcc.rsp
+del ickmgcc.rsp
 gcc %CFLAGS% -oconvickt.exe convickt.o clc-cset.o uncommon.o
 copy /y ick.exe ..\bin
 copy /y convickt.exe ..\bin
