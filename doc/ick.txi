@@ -157,6 +157,7 @@ Basic @ical{} features
 * Syntax::                          Holding statements together
 * Expressions::                     Operators, operands, and grouping
 * Statements::                      What an @ical{} statement can do
+* System Library::                  Pre-existing @ical{} routines
 
 @ical{} dialects and extensions
 * TriINTERCAL::                     @ical{} in non-binary bases
@@ -710,13 +711,13 @@ Looking at the @uref{news:alt.lang.intercal,,alt.lang.intercal}
 newsgroup will normally let you know what version is most recent.
 
 @item
-Increment the version number; if you add any new features, increment the
-major version number (after the decimal point) and drop the minor
-version number (before the decimal point) to 0, and otherwise increment
-the minor version number.  You have to update the version number in the
-following files: @file{config.in}, @file{config.sh}, and
-@file{ick.info}.  You also have to rename the installation directory to
-reflect the new version number.
+Increment the version number; if you add any new features, increment
+the major version number (after the decimal point) and drop the minor
+version number (before the decimal point) to 0, and otherwise
+increment the minor version number.  You have to update the version
+number in the following files: @file{config.in}, @file{config.sh},
+@file{configdj.sh}, and @file{doc/ick.txi}.  You also have to rename
+the installation directory to reflect the new version number.
 
 @item
 Add an entry to the @file{NEWS.txt} file explaining what's new in the
@@ -3664,6 +3665,125 @@ a label, and so that situation should be avoided in portable code.
 to use computed @code{COME FROM}s or @code{NEXT FROM}s with a constant
 expression.)
 
+@node System Library
+@chapter System Library
+@cindex system libary
+@cindex syslib
+
+@portability{yes, all versions, no, all versions}
+
+@ical{} has a system library, called @samp{syslib}.  It is included
+automatically at the end of your program by the compiler whenever your
+program refers to a line from (1000) to (1999) without defining any
+line in that range in the program.  (Although it is not added
+automatically by the compiler in @clcic{}, it is trivial to
+concatenate a copy onto the end of the program.)
+
+The intention of the system library is to provide a range of useful
+capabilities, like multiplication, that can otherwise be hard to write
+in @ical{}.  System library routines are used by @code{NEXTING} to
+their line number (@pxref{NEXT}), where they will make changes to
+certain variables depending on certain other variables (depending on
+which routine is called), and @code{RESUME} back to the original
+program.  As the system library is itself written in @ical{}, there
+are some restrictions that need to be obeyed for calls to it to be
+guaranteed to work; none of the variables it uses (@code{.1} to
+@code{.6} and @code{:1} to @code{:5}) should be read-only or
+overloaded (although the value of any variables that aren't mentioned
+in the routine's description will be preserved by the routine), and
+none of the lines in it should have their abstention status changed by
+lines outside it (this can happen with blatant infractions like
+@code{DO ABSTAIN FROM (1500)} or more subtle problems like
+gerund-abstention) or have @code{COME FROM}s or @code{NEXT FROM}s
+aiming at them.
+
+The system library is currently available in all bases from 2 to 7
+(@pxref{TriINTERCAL}), but not every command is available in every
+base, and @cic{} is the only one of the three compilers listed above
+that use the system library to ship with a version in bases other than
+2.  (This table was originally based on the @icst{} manual, but has
+had extra information added for bases other than 2.) Here, ``overflow
+checked'' means that #1 is assigned to .4 if there is not an overflow,
+and #2 is assigned to .4 if there is; ``overflow captured'' means that
+if there is overflow, the digit that overflowed is stored in the
+variable referenced.  In all cases, division by 0 returns 0.
+
+@multitable @columnfractions .1 .7 .15
+@headitem Line @tab Description @tab Bases
+@item (1000) @tab
+.3 <- .1 plus .2, error exit on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1009) @tab
+.3 <- .1 plus .2, overflow checked
+@tab 2, 3, 4, 5, 6, 7
+@item (1010) @tab
+.3 <- .1 minus .2, no action on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1020) @tab
+.1 <- .1 plus #1, no action on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1030) @tab
+.3 <- .1 times .2, error exit on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1039) @tab
+.3 <- .1 times .2, overflow checked
+@tab 2, 3, 4, 5, 6, 7
+@item (1040) @tab
+.3 <- .1 divided by .2
+@tab 2, 3, 4, 5, 6, 7
+@item (1050) @tab
+.2 <- :1 divided by .1, error exit on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1200) @tab
+.2 <- .1 times #2, overflow captured in .3
+@tab 4, 6
+@item (1210) @tab
+.2 <- .1 divided by #2, one digit after the quartic or sextic point
+stored in .3
+@tab 4, 6
+@item (1500) @tab
+:3 <- :1 plus :2, error exit on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1509) @tab
+:3 <- :1 plus :2, overflow checked
+@tab 2, 3, 4, 5, 6, 7
+@item (1510) @tab
+:3 <- :1 minus :2, no action on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1520) @tab
+:1 <- .1 concatenated with .2
+@tab 2, 3, 4, 5, 6, 7
+@item (1530) @tab
+:1 <- .1 times .2
+@tab 2, 3, 4, 5, 6, 7
+@item (1540) @tab
+:3 <- :1 times :2, error exit on overflow
+@tab 2, 3, 4, 5, 6, 7
+@item (1549) @tab
+:3 <- :1 times :2, overflow checked
+@tab 2, 3, 4, 5, 6, 7
+@item (1550) @tab
+:3 <- :1 divided by :2
+@tab 2, 3, 4, 5, 6, 7
+@item (1700) @tab
+:2 <- :1 times #2, overflow captured in .1
+@tab 4, 6
+@item (1710) @tab
+:2 <- :1 divided by #2, one digit after the quartic or sextic point
+stored in .1
+@tab 4, 6
+@item (1720) @tab
+:2 <- :1 times the least significant digit of .1, overflow captured in
+.2
+@item (1900) @tab
+.1 <- uniform random number from #0 to #65535
+@tab 2, 3, 4, 5, 6, 7
+@item (1910) @tab
+.2 <- normal random number from #0 to .1, with standard deviation .1
+divided by #12
+@tab 2, 3, 4, 5, 6, 7
+@end multitable
+
 @ifset notsplit
 @partheading{PART III: @ical{} DIALECTS AND EXTENSIONS}
 @end ifset
@@ -4083,12 +4203,292 @@ made to use them when the choicepoint stack is empty.
 
 @node Operand Overloading
 @chapter Operand Overloading
+@cindex operand overloading
+@findex /
+@cindex slat
+@cindex reverse assignment
+
+@portability{no, version 0.26+, version 0.05+, no}
+
+(Operand overloading in @cic{} is nowhere near as advanced as it is in
+@clcic{}.  This chapter only explains the partial implementation used
+by @cic{}; for a full implementation, see @clcic{} and its
+documentation.)
+
+Operand overloading is a method of using a onespot or twospot variable
+as a substitute for an expression.  When a variable is overloaded to
+an expression (which could be another variable, or something more
+complex), any uses of that variable cause the expression to be
+substituted instead.
+
+At the beginning of the program, all variables stand for themselves;
+so @code{.1} really does mean @code{.1}, for instance.  The meaning of
+a variable can be overloaded using the slat operator (@code{/}), which
+is the same in both Princeton and Atari syntax: it is a binary
+operator whose left argument must be a onespot or variable and whose
+right argument can be any expression.  The slat operator returns the
+true value of its left argument, but as a side effect, changes the
+meaning of its left argument to be its right argument.  Here is an
+example:
+
+@example
+DO .1 <- .2/'.3~.4'
+@end example
+
+The example causes @code{.2}'s true value to be assigned to @code{.1}
+(unless of course @code{.1} is read-only), but also causes @code{.2}
+from then on to actually mean @code{'.3~.4'}, except when it's the
+left operand of a slat operator.  So for instance, @code{DO .1 <- .2}
+would actually assign @code{'.3~.4'} to @code{.1}.  Somewhat
+confusingly, this also works in the other direction; @code{DO .2 <-
+.1} would assign @code{.1} to @code{'.3~.4'}, which would have the
+effect of changing the values of @code{.3} and @code{.4} so that
+@code{'.3~.4'} had the correct value, or throw an error if it couldn't
+manage this.  (The general rule in this case is that any variable or
+constant in the expression that overloads the variable is at risk of
+being changed; this is known as a `reverse assignment'.  Code like
+@code{DO .1 <- .1/#1} is entirely capable of changing the value of
+@code{#1}, although to protect new @ical{} users @cic{} will refuse to
+carry out operations that change the value of constants unless a
+command-line switch (@pxref{-v}) is used to give it permission.  In
+@cic{}, changing the value of a constant only changes meshes with that
+value, but in @clcic{} it can also change non-mesh uses of that
+constant, so doing so is not portable anyway.)
+
+When multiple overloading rules are in effect, they are all applied;
+overloading @code{.1} to @code{'.2~.3'} and @code{.2} to
+@code{'.3$.4'} will cause @code{.1} to refer to @code{''.3$.4'~.3'}.
+However, this expansion stops if this would cause a loop; to be
+precise, overloading is not expanded if the expansion is nested within
+the same expansion at a higher level (so @code{.1/.2} and @code{.2/.1}
+together cause @code{.1} to expand to @code{.2}, which expands to
+@code{.1}, which cannot expand any further).  In @cic{}, the
+expression on the right hand side of a slat is not evaluated and not
+expanded by operand overloading.
+
+@code{STASHING} a variable causes its overloading information to be
+stashed too; @code{RETRIEVING} it causes its overload rule to also be
+retrieved from the stash (or any overload rule on the variable to be
+removed if there wasn't one when the variable was stashed).
+
+Overloading a onespot variable to a twospot variable or vice versa is
+possible, but the results are unlikely to be predictable, especially
+if a onespot variable is used to handle a twospot value.  Possible
+outcomes include truncating the value down to the right bitwidth,
+throwing an error if a value outside the onespot range is used, and
+even temporarily handling the entire twospot value as long as it
+doesn't end up eventually being assigned a value greater than twospot.
+
+Note that reverse assignments can cause unpredictable behaviour if an
+attempt is made to reverse-assign the same variable twice in the same
+expression.  In particular, sequences of commands like @code{DO .1 <-
+.2/'.3$.3' DO .2 <- #6} are liable to succeed assigning garbage to
+@code{.3} rather than failing as they ought to do, and likewise any
+situation where a variable is reverse-assigned twice in the same
+expression may assign garbage to it.  This behaviour is seen as
+unsatisfactory, though, and plans exist to improve it for future
+versions.
 
 @node PIC-INTERCAL
 @chapter PIC-INTERCAL
+@cindex PIC-INTERCAL
+@cindex embedded systems
+@cindex microcontrollers
+
+@portability{no, version 0.26+, no, no}
+
+PIC-INTERCAL is a simplified version of @ical{} designed especially
+for embedded systems, designed to minimise code and data usage by
+@ical{} programs so that they can fit on devices whose memory is
+measured in bytes rather than megabytes.  (It is named after the first
+microcontroller for which code was successfully generated, and which
+influenced the choices of commands, the PIC16F628 manufactured by
+Microchip, and is most likely to be portable to other microcontrollers
+in the same range.)  @cic{} only compilers as far as C code when
+producing PIC-INTERCAL; it is up to the user to find the appropriate
+cross-compiler to translate this C into the relevant dialect of
+machine code.  (Two header files in the distribution,
+@file{src/pick1.h} and @file{src/pick2.h}, don't have any affect on
+the compiler but are referenced by the generated code, and the intent
+is for the user to change them to suit the behaviour of the PIC
+compiler used, because these are not as standardised as C compilers
+for everyday systems.)
+
+There are several restrictions on PIC-INTERCAL programs:
+
+@itemize
+
+@item
+It's impossible to store more than one item in the STASH for any given
+variable.
+
+@item
+Many errors are not checked at runtime; it is the programmer's job to
+ensure that runtime errors are avoided.  (The few errors that are
+detected will send the program into an infinite loop, as there is no
+sensible way to exit from a PIC program.)
+
+@item
+Double-oh-sevens are not randomised, but instead depend merely on
+whether the probability given is greater than 50% or not.
+
+@item
+The NEXT stack is limited to 16 entries rather than the usual 80.
+
+@item
+@code{ABSTAIN} and @code{REINSTATE} still work, but cannot be computed
+@code{ABSTAIN}s, and will not necessarily work when used to affect the
+system library or calls to it.
+
+@item
+@code{READ OUT} and @code{WRITE IN} don't work.  (See below for a
+replacement.)
+
+@item
+@code{COME FROM} and @code{NEXT FROM} must aim at a label, not an
+expression or gerund.
+
+@item
+Multithreading and TriINTERCAL cannot be used on PICs.  (Operand
+overloading can be used, but only if your PIC cross-compiler supports
+function pointers; some don't.)
+
+@end itemize
+
+@anchor{PIN}
+@findex PIN
+@cindex I/O, PIC-INTERCAL
+In order to provide I/O capabilities, a new command @code{PIN} is
+available. It controls up to 16 I/O pins on the PIC or other embedded
+system; an I/O pin is capable of receiving or sending voltages to an
+electrical or electronic circuit.  This explanation assumes that the
+device being controlled is a PIC16F628A, and therefore has its pins in
+two blocks of 8 named @samp{PORTA} and @samp{PORTB}; for other
+microcontrollers, adapting the code in @file{src/pick1.h} is likely to
+be necessary to tell the compiler how to control the I/O pins, and the
+way in which this done will affect which I/O pins it is that the
+program will end up being able to communicate with.
+
+The @code{PIN} command takes one twospot variable as its argument,
+like this:
+
+@example
+DO PIN :2
+@end example
+
+The twospot variable is conceptually divided into 4 blocks of 8 bits.
+The highet two blocks control the directions of the pins in
+@code{PORTB} (most significant block) and @code{PORTA} (second most
+significant block); a 1 on any bit means that the corresponding I/O
+pin should be set to send data, and a 0 means that it should be set to
+receive data.  The lower two blocks control the values on the pins
+that are sending (and are ignored for receiving pins); the second
+least significant block controls @code{PORTB} and the least
+significant block controls @code{PORTA}, with a 1 causing the program
+to set the output voltage to that of the microcontroller's negative
+voltage supply rail, and a 0 causing the program to set the output
+voltage to that of the microcontroller's positive voltage supply
+rail.  (These voltages may vary on other systems; consult your
+system's datasheet and the changes you made to the header files.)
+After setting the pins, the @code{PIN} command then reads them as part
+of the same operation, this time setting the values of the lower
+blocks that are receiving, rather than setting the pins from the lower
+blocks that are sending.  However, 1 and 0 bits on all bits of the
+twospot variable have the opposite meaning when doing this, so that 1
+means receiving/positive voltage rail and 0 means sending/negative
+voltage rail.  There is no way to input without output, or vice versa,
+but it's trivial to just send the same output again (which has no
+effect, because the voltage on sending pins is maintained at the same
+level until it is changed), or to ignore the input received.
 
 @node Differences to Other Compilers
 @chapter Differences to Other Compilers
+@cindex INTERCAL compilers
+
+The @cic{} compiler exists in a world of several other compilers.
+
+@subheading Differences to the Princeton compiler
+The Princeton compiler was the first @ical{} compiler available, and
+compiled @icst{}.  Using @command{convickt} (@pxref{convickt}) to
+translate its programs from the original EBCDIC to Latin-1 or
+Atari-syntax ASCII is required to run them under the @cic{} compiler,
+but apart from that there should be no problems; everything that that
+compiler can do can be reproduced by @cic{}, even including some of
+its bugs.  The only potential problems may be where constructs were
+nonportable or dubious to begin with (such as the
+@code{IGNORE}/@code{RETRIEVE} interaction), or where commands intended
+to be syntax errors were used in the program but have a meaning in
+@cic{}.  For extra portability, it's possible to use the @code{-t}
+compiler option to @command{ick} (@pxref{-t}) to tell it to interpret
+the program as @icst{}, but as @cic{}'s dialect of @ical{} is
+basically backward-compatible anyway this mostly serves to check newer
+programs for compatibility with older compilers.
+
+@subheading Differences to the Atari compiler
+The Atari compiler was another implementation of @icst{}, which was
+basically identical to the Princeton compiler apart from its use of
+ASCII and Atari syntax.  Everything said under the previous section
+applies, except that as it uses the same syntax as @cic{} anyway
+(@cic{}'s syntax was based on the Atari compiler's), there is no need
+to use @command{convickt}.
+
+@subheading Differences to @jic{}
+The @jic{} compiler is an implementation of @ical{} written in Java
+that compiles @ical{} into Java (and so has a similar relationship
+with Java to that of the @cic{} compiler (which is written in C and
+compiles into C) with C).  @jic{} has much the same feature set as
+older versions of @cic{}, with a few changes (such as the addition of
+Esperanto and error messages coming up in different situations).
+@jic{} programs should run fine on @cic{} without trouble (as it is
+also an Atari syntax compiler), except in nonportable cases such as
+@code{IGNORE}/@code{RETRUEVE} interaction.
+
+@subheading Differences to @clcic{}
+The @clcic{} compiler is the most modern @ical{} compiler apart from
+@cic{} (both compilers are maintained and updated every now and then
+as of the time of writing, so which is more modern is normally a
+matter of when you happen to check).  Unlike the other three compilers
+mentioned above, it has a quite significant feature set, including
+many features not implemented or only partially implemented in @cic{},
+and is responsible for the origin of many of the features added in
+more recent versions of @cic{}.  Generally speaking, a @clcic{}
+program that uses its advanced features is unlikely to run on @cic{},
+or vice versa, whatever you do (apart from completely rewriting the
+more advanced parts of the program.)
+
+However, there are certain steps that can be taken to transfer less
+advanced programs from one compiler to the other.  First, translate
+the program to Latin-1 Princeton syntax (if translating from @clcic{}
+to @cic{}) or Atari syntax (if translating from @cic{} to @clcic{}),
+maybe using @command{convickt}, if necessary.  (Note that here the
+program is being translated to the syntax that is not default for the
+target compiler.)  Then use command-line arguments to switch the
+compiler into the correct emulation mode for the other compiler;
+@cic{} uses the options @option{-xX}, and on @clcic{} this is done by
+selecting the appropriate preloads, or by changing the program's file
+extension to @samp{.ci}.  In each case other options may be needed to
+turn on various extensions (maybe @option{-m} or @option{-v} if
+translating to @cic{}, maybe the preload for gerund-based @code{COME
+FROM} if translating to @clcic{}), and if translating to @clcic{} you
+need to append the system library to your program yourself because
+@clcic{} doesn't load it automatically.
+
+In the case of very simple programs, or if you want to spend the
+effort in translating compiler-specific code from one compiler to
+another, you may be able to work without emulation options.  (This is
+a good target to aim for, in any case.)  In such a case, you would do
+nothing other than possibly edit the program to be more portable and a
+possible character set and syntax change using @command{convickt}.  If
+you need compiler-specific code, you may be able to detect the
+compiler in the code itself and adapt accordingly; making use of the
+@code{IGNORE}/@code{RETRIEVE} interaction is one way to do this, as it
+differs between @cic{}, @jic{}, and @clcic{}.  The other things to
+watch out for when doing this are that @clcic{} needs an explicit
+option to enable the use of @code{NEXT}, that @clcic{} doesn't load
+the system library iteslf (you need to manually append it to the end
+of the program) and that you probably shouldn't number a line (666)
+unless you know what you're doing, because that line number has a
+special meaning in @clcic{}.
 
 @ifset notsplit
 @partheading{PART IV: APPENDICES AND INDICES}

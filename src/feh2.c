@@ -2203,7 +2203,7 @@ void emit(tuple *tn, FILE *fp)
       }
       (void) fprintf(fp,"(TRISB<<24) | (TRISA<<16) | (PORTB<<8) | PORTA;\n");
       break;
-	
+
     case SPLATTERED:
       /* AIS: The code previously here could access unallocated memory due to
 	 a bug if the comment was a COME FROM target. The problem is that

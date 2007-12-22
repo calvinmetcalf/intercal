@@ -55,7 +55,8 @@ clean:
 	rm -rf html
 
 ick.inf: ick.txi fdl-1-2.txi
-	makeinfo -o ick.inf ick.txi
+	makeinfo -o ick.info ick.txi
+	-mv ick.info ick.inf
 
 # The --css-include is skipped here because it seems to cause makeinfo
 # to leak open file space, and it fails with an EMFILE error. Instead,

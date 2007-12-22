@@ -214,10 +214,8 @@ install-common: all
 	cp doc/ick.1 doc/convickt.1 $(DESTDIR)$(mandir)/man1
 	-mkdir -p $(DESTDIR)$(infodir)
 	rm -f $(DESTDIR)$(infodir)/ick.info
-	cp doc/ick.inf $(DESTDIR)$(infodir)
+	cp doc/ick.in* $(DESTDIR)$(infodir)
 	mv $(DESTDIR)$(infodir)/ick.inf $(DESTDIR)$(infodir)/ick.info
-	sh -c "(test -f $(DESTDIR)$(infodir)/ick.info && @INSTALLINFO@ --quiet $(DESTDIR)$(infodir)/ick.info $(infodirfile)) || true"
-	sh -c "(test -f $(DESTDIR)$(infodir)/ick.inf && @INSTALLINFO@ --quiet $(DESTDIR)$(infodir)/ick.inf $(infodirfile)) || true"
 # Note that it's necessary to copy the info file to .inf on an 8.3 system
 # and .info otherwise; this is done by copying it to .inf, and then renaming
 # to .info; on an 8.3 system, this leaves the extension as .inf because mv
@@ -229,17 +227,22 @@ install-common: all
 # The pattern i*[fo] matches ick.info only when uncompressed, even on
 # an 8.3 system.
 install: install-common
-	-gzip -9 -f $(DESTDIR)$(infodir)/ick.i*[fo]
+	-gzip -9 -f $(DESTDIR)$(infodir)/ick.in*
 	-gzip -9 -f $(DESTDIR)$(mandir)/man1/ick.1
 	-gzip -9 -f $(DESTDIR)$(mandir)/man1/convickt.1
 	sh -c "@MANDB@ -q"
+	sh -c "(test -f $(DESTDIR)$(infodir)/ick.info.gz && @INSTALLINFO@ --quiet --dir-file=$(infodirfile) $(DESTDIR)$(infodir)/ick.info.gz) || true"
+	sh -c "(test -f $(DESTDIR)$(infodir)/ick.igz && @INSTALLINFO@ --quiet --dir-file=$(infodirfile) $(DESTDIR)$(infodir)/ick.igz) || true"
 
 # install without gzipping the docs
 install-nozip: install-common
 	sh -c "@MANDB@ -q"
+	sh -c "(test -f $(DESTDIR)$(infodir)/ick.info && @INSTALLINFO@ --quiet --dir-file=$(infodirfile) $(DESTDIR)$(infodir)/ick.info) || true"
+	sh -c "(test -f $(DESTDIR)$(infodir)/ick.inf && @INSTALLINFO@ --quiet --dir-file=$(infodirfile) $(DESTDIR)$(infodir)/ick.inf) || true"
+
 
 uninstall:
-	sh -c "@INSTALLINFO@ --quiet --remove ick $(infodirfile)"
+	sh -c "@INSTALLINFO@ --quiet --remove --dir-file=$(infodirfile) ick"
 	rm -f $(DESTDIR)$(bindir)/ick@EXEEXT@ $(DESTDIR)$(libdir)/libick.a
 	rm -f $(DESTDIR)$(bindir)/convickt@EXEEXT@
 	rm -f $(DESTDIR)$(libdir)/libickmt.a $(DESTDIR)$(libdir)/libyuk.a

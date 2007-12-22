@@ -662,6 +662,7 @@ OBJEXT
 RANLIB
 INSTALLINFO
 MANDB
+INFODIRFILE
 CPP
 GREP
 EGREP
@@ -2832,6 +2833,38 @@ fi
   test -n "$MANDB" && break
 done
 test -n "$MANDB" || MANDB=":"
+
+
+if test ! INSTALLINFO = ":"; then
+{ echo "$as_me:$LINENO: checking the location of the Info dir file" >&5
+echo $ECHO_N "checking the location of the Info dir file... $ECHO_C" >&6; }
+# Try the following locations in order:
+INFODIRFILELOCATIONGUESSES=${infodir}/dir
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} ${infodir}/dir.gz"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /dev/env/DJDIR/info/dir"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /dev/env/DJDIR/info/dir.gz"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/share/info/dir"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/share/info/dir.gz"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/local/share/info/dir"
+INFODIRFILELOCATIONGUESSES="${INFODIRFILELOCATIONGUESSES} /usr/local/share/info/dir.gz"
+for my_ac_infodirfile in ${INFODIRFILELOCATIONGUESSES}
+do
+INFODIRFILE=${my_ac_infodirfile}
+test -f "$INFODIRFILE" && break
+INFODIRFILE=/dev/null
+done
+if test $INFODIRFILE = /dev/null; then
+{ echo "$as_me:$LINENO: result: not found" >&5
+echo "${ECHO_T}not found" >&6; }
+{ echo "$as_me:$LINENO: WARNING: Could not find Info directory file, set infodirfile in the Makefile by hand" >&5
+echo "$as_me: WARNING: Could not find Info directory file, set infodirfile in the Makefile by hand" >&2;}
+else
+{ echo "$as_me:$LINENO: result: $INFODIRFILE" >&5
+echo "${ECHO_T}$INFODIRFILE" >&6; }
+fi
+else
+INFODIRFILE=(irrelevant)
+fi
 
 
 
@@ -5711,6 +5744,7 @@ OBJEXT!$OBJEXT$ac_delim
 RANLIB!$RANLIB$ac_delim
 INSTALLINFO!$INSTALLINFO$ac_delim
 MANDB!$MANDB$ac_delim
+INFODIRFILE!$INFODIRFILE$ac_delim
 CPP!$CPP$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
@@ -5721,7 +5755,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 57; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 58; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
