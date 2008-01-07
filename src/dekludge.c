@@ -139,6 +139,8 @@ void optimizef(void)
   /* ignorable holds whether a variable's ignorance status can change */
   for (tp = tuples; tp < tuples + lineno; tp++)
   {
+    /* allow for warnings to be generated during flow optimisations */
+    optuple = tp; /* Patch by Joris Huizer */
     if(tp->maybe) tp->abstainable = 1;
     if(tp->exechance < 0) tp->initabstain = 1;
     if(tp->exechance != 100 && tp->exechance != -100) tp->abstainable = 1;

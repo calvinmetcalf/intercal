@@ -485,16 +485,13 @@ lunambig:   constant	{$$ = $1;}
 		    $$->rval = newnode();
 		    $$->rval->opcode = $1;
 		    if($1 == MESH) {
-		      /* enforce the 16-bit constant constraint */
-		      if ((unsigned int)$3 > Max_small)
-			lose(E017, iyylineno, (char *)NULL);
-		      if(variableconstants) /* AIS */
-			$$->rval->constant = intern(MESH, $2);
-		      else
-			$$->rval->constant = $2;
+			    /* enforce the 16-bit constant constraint */
+			    if ((unsigned int)$3 > Max_small)
+				lose(E017, iyylineno, (char *)NULL);
+			    $$->rval->constant = intern(MESH, $3);
 		    }
 		    else {
-		      $$->rval->constant = intern($1, $3);
+			$$->rval->constant = intern($1, $3);
 		    }
 		}
 
