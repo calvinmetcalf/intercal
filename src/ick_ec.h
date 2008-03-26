@@ -63,7 +63,7 @@ void id(void)					  \
   {						  \
     goto ick_l1_ICK_EC_PP_1;			  \
   }						  \
-  else
+  ick_local_checkmode=ick_global_checkmode=0;
 
 #define ick_linelabel(expr) ick_labeledblock(expr,0)
 
@@ -136,7 +136,7 @@ ick_l2_ICK_EC_PP_2: return;			\
 #define ick_resume(amount) ick_doresume((amount),-1)
 
 #define ick_return_or_resume() do{		\
-    ick_global_checkmode=5;			\
+    if(ick_local_checkmode) ick_doresume(1,-1); \
     return;					\
   } while(0)
 

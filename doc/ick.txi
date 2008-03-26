@@ -846,6 +846,15 @@ commands cause error E555 (@pxref{E555}) when that line is encountered
 time).)  Attempts to use non-COME FROM multithreading or backtracking
 commands without this option produce error E405 (@pxref{E405}).
 
+@ianchor -e
+@opindex -e
+@cindex external calls, enabling
+This option makes it possible to link non-@ical{} programs with
+@ical{} programs; instead of giving @ical{} programs only on the
+command line, give one @ical{} program, followed by any number of
+programs in other languages that have been written to be able to link
+to @ical{} programs. For more information, @xref{External Calls}.
+
 @ianchor -t
 @opindex -t
 @cindex INTERCAL-72 compatibility mode
@@ -3641,7 +3650,7 @@ after that statement finishes executing.  (@code{NEXT FROM} is
 identical except that in addition to the @code{COME FROM} behaviour,
 the location immediately after the statement that was nexted from is
 saved on the NEXT stack, in much the same way as if the statement
-being nexted from was iteslf a @code{NEXT}.)
+being nexted from was itself a @code{NEXT}.)
 
 Here are examples of noncomputed, computed, and from-gerund @code{COME
 FROM}:
@@ -4242,9 +4251,9 @@ At the beginning of the program, all variables stand for themselves;
 so @code{.1} really does mean @code{.1}, for instance.  The meaning of
 a variable can be overloaded using the slat operator (@code{/}), which
 is the same in both Princeton and Atari syntax: it is a binary
-operator whose left argument must be a onespot or variable and whose
-right argument can be any expression.  The slat operator returns the
-true value of its left argument, but as a side effect, changes the
+operator whose left argument must be a onespot or twospot variable and
+whose right argument can be any expression.  The slat operator returns
+the true value of its left argument, but as a side effect, changes the
 meaning of its left argument to be its right argument.  Here is an
 example:
 
@@ -4432,10 +4441,10 @@ model.
 
 To create a combined program containing @ical{} and non-@ical{} code,
 use @command{ick} as the compiler as normal, but specify both the
-@ical{} and non-@ical{} source files on the command line.
-@command{ick} will invoke other compilers as necessary, possibly after
-modifying the source files accordingly.  At present, external calls
-are only supported to and from C.
+@ical{} and non-@ical{} source files on the command line, and use the
+@option{-e} command-line option.  @command{ick} will invoke other
+compilers as necessary, after modifying the source files accordingly.
+At present, external calls are only supported to and from C.
 
 In each case, it will be the @ical{} program that is invoked first.
 (This means that it is impossible to link together more than one
@@ -4534,9 +4543,11 @@ differences are that it can be jumped into from @ical{} code and that
 it is constrained to take no arguments and return no data.  (It can
 still access global and @ical{} variables.)  If the function is jumped
 into from @ical{} code, but then control flow reaches the end of the
-function, a @code{RESUME #1} is automatically done to give the program
-some way to continue.  (There will be the usual error message if the
-@code{NEXT} stack happens to be empty at the time.)
+function, or the function @code{return;}s but was not called from C,
+the resulting behaviour is undefined; @cic{} will attempt to continue
+by some means at that point, but may fail.  If a function is unsure
+whether it gained control from C or from INTERCAL code, it may use
+@code{ick_return_or_resume} (described below).
 
 @item ick_linelabel
 @findex ick_linelabel
@@ -4558,14 +4569,15 @@ constant; however, the behaviour is undefined if the expression has
 side-effects.  Upon encountering the line label, any @code{COME FROM}s
 or @code{NEXT FROM}s aiming at the line label (including
 @code{ick_comefrom}s and @code{ick_nextfrom}s) will steal control from
-the program; @code{RESUM}ing after a @code{NEXT FROM} will work, but
+the program; @code{RESUMING} after a @code{NEXT FROM} will work, but
 suffers from the same caveats as setjmp/longjmp do (any auto variables
 that change their value between the @code{NEXT FROM} and @code{RESUME}
 will have their value clobbered (i.e. their value is no longer
 reliable and should not be accessed)).  Note that the @ical{}
-variables are immune to this problem.
+variables are immune to this problem.  You can also avoid the problem
+by marking variables as @code{volatile} in the C program.
 
-It is possible to @code{NEXT} or @code{ick_donext} to a
+It is possible to @code{NEXT} or @code{ick_next} to a
 @code{ick_linelabel}, which has the same effect as saving the
 @code{NEXT} stack, calling the function containing the
 @code{ick_linelabel} and then immediately doing a C @code{goto} to an
@@ -4573,8 +4585,147 @@ imaginary label preceding it.  Due to this possibility, an
 @code{ick_linelabel} is only allowed within a function defined with
 @code{ICK_EC_FUNC_START}.
 
+@item ick_labeledblock
+@findex ick_labeledblock
+@cindex labeled blocks
+@cindex blocks, labeled
 
+In @ical{} programs, labels don't stand on their own, but instead
+label a statement.  The difference between a standalone line label and
+a line label that labels a statement is that @code{COME FROM}s will
+come from the @emph{label itself} (which is before the next statement)
+when aiming at a standalone line label, but the @emph{end of the
+statement} when aiming at a labeled statement.  To achieve the same
+effect in C, the macro @code{ick_labeledblock} is available; it can be
+used as @code{ick_labeledblock(expression,expression)} or
+@code{ick_labeledblock(expression,statement)}; the first argument is
+the label, and the second argument is an expression or statement to
+label (if an expression is labeled, it will be converted to a
+statement that evaluates it for its side effects and discards the
+result).  It is even permitted to label a block statement in this way.
+Note, however, that you have to contend with the C preprocessor's
+ideas of where macro arguments begin and end when doing this.  Other
+than the position of the @code{COME FROM} target created by the label,
+this behaves the same way as @code{ick_linelabel} (so for instance,
+computed line labels are allowed, but the expression that computes
+them must not have side effects, and it is only allowed within a
+function defined with @code{ICK_EC_FUNC_START}).
 
+@item ick_comefrom
+@itemx ick_nextfrom
+@findex ick_comefrom
+@findex ick_nextfrom
+@cindex COME FROM, in C
+@cindex NEXT FROM, in C
+
+The @code{ick_comefrom} and @code{ick_nextfrom} macros are, like the
+other @ical{} flow control macros (as opposed to functions), only
+allowed within a function defined with @code{ICK_EC_FUNC_START}.  They
+act almost exactly like the @ical{} statements of the same name
+(although note that C statements cannot be @code{ABSTAIN}ed
+@code{FROM} even if they act the same way as @ical{} statements);
+they are written as @code{ick_comefrom(expression);} and
+@code{ick_nextfrom(expression);} respectively (note that they must be
+called as statements, and cannot be used as part of an expression).
+Whenever a standalone line label is encountered whose expression
+evaluates to the same number as the expression inside the
+@code{ick_comefrom} or @code{ick_nextfrom}, and that number is at most
+65535, then control will be transferred to the @code{ick_comefrom} or
+@code{ick_nextfrom}, leaving a @code{NEXT} stack entry behind in the
+case of @code{ick_nextfrom}; likewise, if the end of a labeled
+statement, expression or block is reached and the label has the right
+number.  Some caveats: the expression need not be constant, but must
+not have side effects, must not be negative, and must fit into the
+range of an @code{unsigned long} in the C program (and the statement
+will do nothing if the expression evaluates to a value larger than
+65535).  In keeping with the best C traditions, these caveats are not
+checked, but instead result in undefined behaviour if breached.
+
+@item ick_next
+@findex ick_next
+@cindex NEXT, in C
+
+@code{ick_next} is a macro that acts like the @ical{} statement
+@code{NEXT}.  Contrary to the other @ical{}-like macros, it can be
+used in any function regardless of whether it was defined with
+@code{ICK_EC_FUNC_START}; however, it must still be used as a
+statement by itself, and a call to it looks like
+@code{ick_next(expression);}.  The expression is the label to
+@code{NEXT} to, and works under the same rules as the expressions for
+@code{ick_comefrom}; it need not be constant (unlike in @cic{}!), but
+must not have side effects, must not be negative, must fit into the
+range of an unsigned long, and is ignored if it is over 65535.  If
+there happen to be multiple labels with the correct value at the time,
+the compiler will @code{NEXT} to one of them.
+
+If the resulting @code{NEXT} stack entry is @code{RESUME}d to, the
+program will continue after the @code{ick_next} as if via
+@code{setjmp}, with all the usual restrictions that that entails; if
+the resulting @code{NEXT} stack entry is forgotten, then the
+@code{ick_next} call will never return.
+
+@item ick_resume
+@findex ick_resume
+@cindex RESUME, in C
+
+@code{ick_resume} is a macro, but there are few restrictions on its
+use; it is permitted to use it inside an expression (but it returns
+void, making this not particularly useful), and acts like a function
+which takes an unsigned short argument, returns void, and has a
+prototype (but you cannot take its address; if you need to be able to
+do that, write a wrapper function for it).  It can be used within any
+function regardless of how it was declared, and never returns;
+instead, it pops the specified number of @code{NEXT} stack entries and
+resumes execution at the last one popped, just as the @ical{}
+statement does.  This causes the same errors as the @ical{} statement
+if the amount of entries popped is zero or larger than the @code{NEXT}
+stack.
+
+@item ick_return_or_resume
+@findex ick_return_or_resume
+
+This macro must be called as @code{ick_return_or_resume();}; it can
+only be used inside a function defined with @code{ICK_EC_FUNC_START},
+and is equivalent to @code{return;} if the function was called from C,
+or @code{ick_resume(1);} if the function was called from @ical{}.
+It's therefore a safe way to return from such a C function if you
+don't know how control reached it in the first place.
+
+@item ick_forget
+@findex ick_forget
+@cindex FORGET, in C
+
+This is actually a function (prototype @code{void ick_forget(unsigned
+short)}), that serves the purpose of removing items from the
+@code{NEXT} stack.  More so than other @ical{} flow control
+statements, though, this one has several technical issues.  As it is a
+function, it can be called from anywhere (and it's even possible to
+take its address), and it always removes the stated number of items
+from the @code{NEXT} stack (or as many as possible if that number is
+more than the number of items on the @code{NEXT} stack), but it is
+incapable of deallocating the corresponding entries on C's call
+stack.  To avoid causing a memory leak, therefore, it is neccessary to
+make sure that the C call stack entries are deallocated, which will
+happen in the following situations:
+
+@itemize
+@item
+when a @code{NEXT} stack entry below the forgotten @code{NEXT} stack
+entries is @code{RESUME}d to (note that @code{RESUMING} to a low
+@code{NEXT} stack entry is not a problem), all those forgotten entries
+will have their memory deallocated, and
+@item
+whenever a line label is encountered, all but one of the @code{NEXT}
+stack entries that were forgotten before the most recent @code{NEXT}
+or @code{NEXT FROM} will have their memory deallocated.  (This second
+situation is not particularly useful, as it cannot prevent the C stack
+entries leaking out of control, but it can help to some extent.)
+@end itemize
+
+Even worse, even @code{FORGET}s in an @ical{} program have the same
+problem if it is linked to a C program (due to their need to be able
+to handle @code{NEXT} stack entries in a general manner), so the moral
+of the story is: @code{FORGET} is evil. Use @code{COME FROM} instead.
 @end table
 
 @node Differences to Other Compilers
@@ -4617,7 +4768,7 @@ older versions of @cic{}, with a few changes (such as the addition of
 Esperanto and error messages coming up in different situations).
 @jic{} programs should run fine on @cic{} without trouble (as it is
 also an Atari syntax compiler), except in nonportable cases such as
-@code{IGNORE}/@code{RETRUEVE} interaction.
+@code{IGNORE}/@code{RETRIEVE} interaction.
 
 @subheading Differences to @clcic{}
 The @clcic{} compiler is the most modern @ical{} compiler apart from
@@ -4661,7 +4812,7 @@ compiler in the code itself and adapt accordingly; making use of the
 differs between @cic{}, @jic{}, and @clcic{}.  The other things to
 watch out for when doing this are that @clcic{} needs an explicit
 option to enable the use of @code{NEXT}, that @clcic{} doesn't load
-the system library iteslf (you need to manually append it to the end
+the system library itself (you need to manually append it to the end
 of the program) and that you probably shouldn't number a line (666)
 unless you know what you're doing, because that line number has a
 special meaning in @clcic{}.
@@ -5332,7 +5483,7 @@ operating on the expression being optimized.  This is an exception to
 the normal bitwidth rules for a replacement.)  In cases where it does
 matter (due to @cic{}'s lenient interpretation of bitwidth on mingle
 inputs, the only place it matters is in the input to @ical{} unary
-logical operators), both the bidwidth of the operator and the argument
+logical operators), both the bitwidth of the operator and the argument
 on which it operates must be explicitly given, and given as the same
 value; to set the bitwidth of an operator's result, simply write the
 bitwidth (16 or 32 for onespot and twospot respectively) immediately
@@ -5379,7 +5530,7 @@ Insert a constant with the literal value @var{NUMBER} here.
 
 Calculate the value of @var{EXPRESSION} (a C expression, which can
 reference the same variables and functions as a C expression in a
-pattern can; see @ref{C functions in OIL}.
+pattern can); see @ref{C functions in OIL}.
 
 @end table
 
@@ -5468,7 +5619,7 @@ loops and subtle errors (both methods have been used in the provided
 Idioms should preferably be as general as possible, broken down into
 many separate idioms rather than all as one big idiom, and match the
 smallest part of the expression being optimized that is necessary for
-the idiom to be correct in all cirucmstances; all of these help to
+the idiom to be correct in all circumstances; all of these help to
 improve the performance of the optimizer in terms of what it can
 optimize.
 
