@@ -32,7 +32,7 @@ LICENSE TERMS
 
 /* Autoconf lets us know if we have _Bool available, usually. On DJGPP there's
    an occasional bug that I haven't managed to reproduce that leaves
-   SIZEOF_BOOL as the null string, so detect that first. */
+   SIZEOF_BOOL as the null string, so detect that ick_first. */
 #if 100 - SIZEOF__BOOL - 1 == 101
 /* The bug happened, so play safe. */
   typedef int mybool;
@@ -165,8 +165,8 @@ struct ickstype
    #{x==1}3 A constant which equals 1 (number 3, for replacements)
    Note that in the last example, the expression is written strictly in C;
    for instance,
-   #{iselect(x,x)==1}4
-   would select a constant that's a power of 2 (iselect is the C name for the
+   #{ick_iselect(x,x)==1}4
+   would select a constant that's a power of 2 (ick_iselect is the C name for the
    INTERCAL operation 'select').
    .{c&0xfffffffe==0}5 A 16-bit expression (number 5, for replacements) which
    has been analysed to not possibly have any bits other than the least
@@ -503,7 +503,7 @@ void gennodepath(unsigned depth, unsigned long path)
 mybool treeshapecond(YYSTYPE v, mybool firstopt)
 {
   if(!v) return firstopt;
-  /* To prevent possibly dereferencing a null pointer, check the root first */
+  /* To prevent possibly dereferencing a null pointer, check the root ick_first */
   if(v->mustbemesh) /* it's a must-be-constant constraint */
   {
     printf(firstopt?"  if((np":" &&\n     (np");
@@ -581,7 +581,7 @@ void treerepcount(YYSTYPE v, int* rc)
 void treerepgen(YYSTYPE v, YYSTYPE* refs, int* rc)
 {
   if(!v) return;
-  /* We absolutely have to generate the root node first here, because otherwise
+  /* We absolutely have to generate the root node ick_first here, because otherwise
      the nodes in question won't exist. */
   if(v->nodetypename) /* Generate an intermediate node */
   {
@@ -592,7 +592,7 @@ void treerepgen(YYSTYPE v, YYSTYPE* refs, int* rc)
     printf("->opcode=%s;\n    tp",v->nodetypename);
     gennodepath(v->depth,v->path);
     printf("->width=%d;\n",v->width32?32:16);
-    /* optdata will be filled in by checknodeactbits before the next idiom is
+    /* optdata will be filled in by checknodeactbits before the ick_next idiom is
        tested; constant is irrelevant, lval and rval are NULL at present and
        will be filled in by later recursions of this function, and I seriously
        hope that nextslat is never filled in by an optimizer idiom. */
@@ -600,7 +600,7 @@ void treerepgen(YYSTYPE v, YYSTYPE* refs, int* rc)
   else if(v->replnum&&!(v->cxneeded))
   {
     /* Copy a node from the template. The node ought not to be allocated at
-       this point, so we can safely just assign to it with a new malloced
+       this point, so we can safely just ick_assign to it with a new malloced
        node. */
     if(refs[v->replnum])
     {
@@ -699,9 +699,9 @@ int main(void)
          "/* machine-generated code; modify the corresponding .oil file\n"
          "   and recompile, not this one, to change this file */\n\n"
 	 "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n"
-	 "#include <signal.h>\n"
+	 "#include <signal.h>\n#include \"oil.h\"\n"
          "#include \"sizes.h\"\n#include \"ick.h\"\n#include \"parser.h\"\n"
-	 "#include \"fiddle.h\"\n#include \"lose.h\"\n#include \"feh.h\"\n\n"
+	 "#include \"fiddle.h\"\n#include \"ick_lose.h\"\n#include \"feh.h\"\n\n"
          "#define OPTING(x) if(optdebug == 2) {\\\n"
          "                     explexpr(optdebugnode,stderr);\\\n"
          "                    putc('\\n',stderr); } \\\n"

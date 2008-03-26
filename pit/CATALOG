@@ -2,6 +2,11 @@ This is the directory of programs written in INTERCAL.  Most of these
 are no doubt full of bugs.  Don't complain, you're lucky if anything
 written in INTERCAL works at all.
 
+Some of these programs are explicitly licenced under the GNU GPL, just
+like the C-INTERCAL compiler is; therefore, remember to include
+COPYING.txt from the main installation directory if you want to
+redistribute these separately from that compiler.
+
 The subdirectory lib contains code fragments that are not complete
 programs.
 
@@ -92,6 +97,9 @@ by Donald Knuth
 by Oerjan Johansen
   unlambda.i    An Unlambda interpreter in INTERCAL
   unlambda.doc  Better-commented version of the above
+
+by Jeffrey Lee
+  interfunge.i  A Befunge-93 interpreter in INTERCAL
 
 The subdirectory tests contains some programs written only to test the
 compiler.

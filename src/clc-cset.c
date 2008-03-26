@@ -28,7 +28,7 @@ LICENSE TERMS
   the character set (number of characters in each shift state), the
   number of shift states, and the bit order of the input. The bit
   order can either be 8 characters long (msb down to lsb) or 16 (the
-  first byte in a pair, followed by the second); each bit of the input
+  ick_first byte in a pair, followed by the second); each bit of the input
   is transferred to the corresponding bit in a binary table that
   follows (a for the lsb, b for the second least significant bit, up
   to l for the 12th least significant bit; at most 12 significant bits
@@ -56,25 +56,27 @@ LICENSE TERMS
  * rather than reading them from disk; in this case, these extern
  * variables will be set non-null by object files invented
  * specifically for the purpose. */
-extern char* clc_cset_atari;
-extern char* clc_cset_baudot;
-extern char* clc_cset_ebcdic;
-extern char* clc_cset_latin1;
+extern /*@null@*/ char* ick_clc_cset_atari;
+extern /*@null@*/ char* ick_clc_cset_baudot;
+extern /*@null@*/ char* ick_clc_cset_ebcdic;
+extern /*@null@*/ char* ick_clc_cset_latin1;
 
-static char* clc_cset_ptr=0;
+static /*@null@*/ char* ick_clc_cset_ptr=0;
 
 /* Fake that we're reading hardcoded characters from a file. This
  * method of doing it is obviously not thread-safe. */
-int clc_cset_hardcoderead(FILE* ignored)
+static int ick_clc_cset_hardcoderead(FILE* ignored)
 {
+  /*@-noeffect@*/
   (void) ignored;
-  return *clc_cset_ptr++;
+  /*@=noeffect@*/
+  return (int)*ick_clc_cset_ptr++;
 }
 
 struct cset
 {
   unsigned char set[4096]; /* allow up to 12 bits of data+shifts */
-  int setlen;
+  unsigned short setlen;
   int shifts;
   char setname[9]; /* 8.3 filenames are enforced! */
   char bitorder[16];
@@ -84,14 +86,18 @@ struct cset
 /* In particular, this initialises the setnames to the null string,
  * and clears nbytes. Both of these are used to determine whether a
  * cset is valid or not. */
-static struct cset cset_recent[NCSETRECENT]={{{0},0,0,{0},{0},0}};
-static int csetow=0; /* which cset to overwrite next */
+/*@-initallelements@*/ /*@-type@*/
+static struct cset ick_cset_recent[NCSETRECENT]={{{0},0,0,{0},{0},0}};
+/*@=initallelements@*/ /*@=type@*/
+static int ick_csetow=0; /* which cset to overwrite ick_next */
 
 /* For help finding files */
-extern char* globalargv0;
-extern char* datadir;
+/*@observer@*/ extern char* ick_globalargv0;
+/*@observer@*/ extern char* ick_datadir;
 
-static void clc_cset_load(struct cset* cs, char* fname)
+/*@-mustfreefresh@*/
+/* because Splint doesn't understand how findandfopen works */
+static void ick_clc_cset_load(/*@unique@*/ struct cset* cs, /*@unique@*/ char* fname)
 {
   FILE* in;
   char buf[13]; /* enough for an 8.3 filename */
@@ -99,47 +105,61 @@ static void clc_cset_load(struct cset* cs, char* fname)
   int (*ipf)(FILE*);
   /* Avoid buffer-overflow attacks. */
   if(strlen(fname)>8) return;
-  /* If clc_cset_atari is non-null, then don't read from disk. */
-  if(clc_cset_atari)
+  /* If ick_clc_cset_atari is non-null, then don't read from disk. */
+  if(ick_clc_cset_atari)
   {
     /* If the character sets have been hardcoded, only accept
      * hardcoded chararacter sets. */
-    clc_cset_ptr=0;
-    if(!strcmp(fname,"atari")) clc_cset_ptr=clc_cset_atari;
-    if(!strcmp(fname,"baudot")) clc_cset_ptr=clc_cset_baudot;
-    if(!strcmp(fname,"ebcdic")) clc_cset_ptr=clc_cset_ebcdic;
-    if(!strcmp(fname,"latin1")) clc_cset_ptr=clc_cset_latin1;
-    if(!clc_cset_ptr) return; /* not a hardcoded charset */
-    in=0;
-    ipf=clc_cset_hardcoderead;
+    ick_clc_cset_ptr=0;
+    if(!strcmp(fname,"atari")) ick_clc_cset_ptr=ick_clc_cset_atari;
+    if(!strcmp(fname,"baudot")) ick_clc_cset_ptr=ick_clc_cset_baudot;
+    if(!strcmp(fname,"ebcdic")) ick_clc_cset_ptr=ick_clc_cset_ebcdic;
+    if(!strcmp(fname,"latin1")) ick_clc_cset_ptr=ick_clc_cset_latin1;
+    if(!ick_clc_cset_ptr) return; /* not a hardcoded charset */
+    in=(FILE*)0;
+    ipf=ick_clc_cset_hardcoderead;
   }
   else
   {
+    /* We already checked above that this isn't a buffer overflow. */
+    /*@-bufferoverflowhigh@*/
     sprintf(buf,"%s.bin",fname);
-    if(!(in=findandfopen(buf,datadir,"rb",globalargv0))) return;
+    /*@=bufferoverflowhigh@*/
+    if(!(in=ick_findandfopen(buf,ick_datadir,"rb",ick_globalargv0))) return;
     ipf=fgetc;
   }
   /* First row: setlen */
   cs->setlen=0;
-  for(;;)
+  do
   {
     /* The input is definitely in ASCII, even if the C program isn't,
        which is why numeric codes are used. */
+    /* Here, ipf allows NULL input iff in is actually NULL; this situation
+       is impossible to explain with an annotation, so instead just disable
+       the warning. */
+    /*@-nullpass@*/
     c=ipf(in);
-    if(c==EOF) {if(in) fclose(in); return;} /* error or EOF */
+    /*@=nullpass@*/
+    if(c==EOF) {if(in) (void)fclose(in); return;}
     if(c<48||c>57) break;
     cs->setlen*=10;
     cs->setlen+=c-48;
-  }
-  if(c!=10) {if(in) fclose(in); return;}
+  } while(1);
+  if(c!=10) {if(in) (void)fclose(in); return;}
   /* Second row: shifts. This can be from 1 to 9. */
+  /*@-nullpass@*/
   c=ipf(in);
-  if(c<49||c>57) {if(in) fclose(in); return;}
+  /*@=nullpass@*/
+  if(c<49||c>57) {if(in) (void)fclose(in); return;}
   cs->shifts=c-48;
-  if(ipf(in)!=10) {if(in) fclose(in); return;}
+  /*@-nullpass@*/
+  if(ipf(in)!=10) {if(in) (void)fclose(in); return;}
+  /*@=nullpass@*/
   /* Third row: byte order. */
   i=0;
-  while(((c=ipf(in)))>96&&i<16) cs->bitorder[i++]=c;
+  /*@-nullpass@*/
+  while(((c=ipf(in)))>96&&i<16) cs->bitorder[i++]=(char)c;
+  /*@=nullpass@*/
   /* Sanity check; that it is a whole number of bytes, that the input
    * format is correct, and that there are at most 4096 bytes of data
    * total. */
@@ -148,33 +168,39 @@ static void clc_cset_load(struct cset* cs, char* fname)
    * there's an error later. */
   /* Rest of file: the bytes themselves. */
   j=0;
+  /*@-nullpass@*/
   while(j<cs->setlen*cs->shifts)
-    if((cs->set[j++]=c=ipf(in)),c==EOF&&in) {if(in) fclose(in); return;}
-  if(in) fclose(in);
+    if((cs->set[j++]=(unsigned char)(c=ipf(in))),c==EOF && in != NULL)
+    {if(in) (void)fclose(in); return;}
+  /*@=nullpass@*/
+  if(in) (void) fclose(in);
   /* Now set the name and number of bytes, indicating a successful
    * load. */
   cs->nbytes=i/8;
   strcpy(cs->setname,fname);
 }
+/*@=mustfreefresh@*/
 
 /* Helper function for fixing bit order in output. */
-static void bitencout(char** pop, struct cset* co,
+static void ick_bitencout(char** pop, struct cset* co,
 		      unsigned short val, int padstyle)
 {
   unsigned short outword=0;
   int i=co->nbytes*8;
+  /*@-shiftnegative@*/ /* i can't go above it's initial value here */
   while(i--)
-    /* 108 is 'l' in Latin-1 */
-    if(co->bitorder[i]>108)
+    if(co->bitorder[i]>'l')
     {
-      if((padstyle==1&&(i==1||i==9)&&!(outword&(1<<(co->nbytes*8-i))))||
+      if((padstyle==1&&(i==1||i==9) && !(outword&(1<<(co->nbytes*8-i)))) ||
 	 (padstyle==2&&(rand()>RAND_MAX/2||!outword)))
 	outword |= 1<<(co->nbytes*8-i-1);
     }
     /* Copy the appropriate bit from val to outword. */
-    else outword |= ((val>>(co->bitorder[i]-97))&1)<<(co->nbytes*8-i-1);
-  if(co->nbytes==2) *(*pop)++=outword/256;
-  *(*pop)++=outword%256;
+    else outword |= (unsigned short)((val>>(co->bitorder[i]-'a'))&1)
+	   << (co->nbytes*8-i-1);
+  /*@=shiftnegative@*/
+  if(co->nbytes==2) *(*pop)++=(char)(outword/256);
+  *(*pop)++=(char)(outword%256);
 }
 
 /* padstyle is 0 to pad with zeros, 1 to pad to make the output
@@ -186,8 +212,9 @@ static void bitencout(char** pop, struct cset* co,
  * outsize-1 characters and a NUL will be written to out. The code is
  * conservative about this; to be safe, make outsize six times as long
  * as the in is (including in's terminal NUL), plus 6. */
-int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
-		     int padstyle, int outsize, FILE* errsto)
+int ick_clc_cset_convert(char* in, /*@partial@*/ char* out, char* incset,
+			 char* outcset, int padstyle, size_t outsize,
+			 /*@null@*/ FILE* errsto)
 {
   int ic=-1, oc=-1;
   int i;
@@ -201,23 +228,23 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
   i=NCSETRECENT;
   while(i--)
   {
-    (void)(strcmp(incset,cset_recent[i].setname) || (ic=i));
-    (void)(strcmp(outcset,cset_recent[i].setname) || (oc=i));
+    (void)(strcmp(incset,ick_cset_recent[i].setname) || (ic=i));
+    (void)(strcmp(outcset,ick_cset_recent[i].setname) || (oc=i));
   }
   /* Find a blank entry to load on top of. */
-  if(ic==-1) for(i=NCSETRECENT;i--;) if(!cset_recent[i].nbytes) ic=i;
-  if(oc==-1) for(i=NCSETRECENT;i--;) if(!cset_recent[i].nbytes&&i!=ic) oc=i;
+  if(ic==-1) for(i=NCSETRECENT;i--;) if(!ick_cset_recent[i].nbytes) ic=i;
+  if(oc==-1) for(i=NCSETRECENT;i--;) if(!ick_cset_recent[i].nbytes&&i!=ic) oc=i;
   /* Failing that, find any entry to load on top of. */
-  (void)(ic==-1 && (cset_recent[ic=csetow++].nbytes=0));
-  if(csetow==ic) csetow++;
-  csetow%=NCSETRECENT;
-  (void)(oc==-1 && (cset_recent[oc=csetow++].nbytes=0));
-  csetow%=NCSETRECENT;
+  (void)(ic==-1 && (ick_cset_recent[ic=ick_csetow++].nbytes=0));
+  if(ick_csetow==ic) ick_csetow++;
+  ick_csetow%=NCSETRECENT;
+  (void)(oc==-1 && (ick_cset_recent[oc=ick_csetow++].nbytes=0));
+  ick_csetow%=NCSETRECENT;
   /* If the character set hasn't been loaded, load it now. */
-  cset_recent[ic].nbytes || (clc_cset_load(cset_recent+ic,incset),0);
-  cset_recent[oc].nbytes || (clc_cset_load(cset_recent+oc,outcset),0);
-  csri=cset_recent+ic;
-  csro=cset_recent+oc;
+  ick_cset_recent[ic].nbytes || (ick_clc_cset_load(ick_cset_recent+ic,incset),0);
+  ick_cset_recent[oc].nbytes || (ick_clc_cset_load(ick_cset_recent+oc,outcset),0);
+  csri=ick_cset_recent+ic;
+  csro=ick_cset_recent+oc;
   /* If a character set failed to load, bail out. */
   if(!csri->nbytes)
   {
@@ -234,27 +261,29 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
   csri->shifts==1 && (ssi=1);
   csro->shifts==1 && (sso=1);
   ip=in; op=out;
-  while(*ip&&(op-out)<outsize-6)
+  while(*ip != '\0' && (size_t)(op-out)<outsize-6)
   {
-    tus=(unsigned char)*ip++;
+    tus=(unsigned short)(unsigned char)*ip++;
     if(csri->nbytes==2)
     {
       tus*=256;
-      tus+=(unsigned char)*ip++;
+      tus+=(unsigned short)(unsigned char)*ip++;
     }
     i=csri->nbytes*8;
     csi=0;
     while(i--)
     {
-      /* 108 is 'l' in Latin-1 */
-      if(csri->bitorder[i]>108) continue;
+      if(csri->bitorder[i]>'l') continue;
       /* Copy the appropriate bit from tus to csi. */
-      csi |= ((tus>>(csri->nbytes*8-i-1))&1)<<(csri->bitorder[i]-97);
+      /*@-shiftnegative@*/
+      csi |= (unsigned short)((tus>>(csri->nbytes*8-i-1))&1)
+	<< (csri->bitorder[i]-'a');
+      /*@=shiftnegative@*/
     }
     if(csi>csri->setlen)
     {
-      bitencout(&op,csro,0,padstyle); /* not in the charset */
-      if(!noconvwarn&&errsto)
+      ick_bitencout(&op,csro,0,padstyle); /* not in the charset */
+      if(!noconvwarn && errsto != NULL)
 	fprintf(errsto,"Warning: some characters could not be translated,"
 		" they were replaced with NUL.\n");
       noconvwarn=1;
@@ -271,25 +300,25 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
 	   state in turn, choose the option that takes the longest
 	   until it ends up not changing shift state, then perform one
 	   shift from that option. */
-	int sstesting, ssbestsf, ssrecord, j;
+	int sstesting, ssbestsf, ssrecord, j, k;
 	sstesting=csri->shifts+1; ssbestsf=ssrecord=0;
 	while(--sstesting)
 	{
-	  i=sstesting; j=0;
-	  while(csri->set[csi+i-1]&&
-		csri->set[csi+i-1]!=i&&
-		csri->set[csi+i-1]<=csri->shifts)
-	  {i=csri->set[csi+i-1]; j++;}
+	  k=sstesting; j=0;
+	  while(csri->set[csi+i-1] != (unsigned char)0 &&
+		(int)csri->set[csi+i-1]!=k &&
+		(int)csri->set[csi+i-1]<=csri->shifts)
+	  {k=(int)csri->set[csi+i-1]; j++;}
 	  if(ssbestsf<j) {ssbestsf=sstesting; ssrecord=j;}
 	}
 	ssi=ssbestsf;
       }
       csi+=ssi-1;
-      tus=csri->set[csi]; /* we now have the Latin-1 conversion! */
-      if(tus>=1&&tus<=csri->shifts&&csri->shifts>1)
+      tus=(unsigned short)csri->set[csi]; /* we now have the Latin-1 conversion! */
+      if(tus>=1&&tus<=(unsigned short)csri->shifts&&csri->shifts>1)
       {
 	/* That wasn't a character, but a shift command. */
-	ssi=tus;
+	ssi=(int)tus;
 	continue;
       }
       /* Look for the character in the output's character
@@ -299,11 +328,12 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
       i=csro->shifts*csro->setlen;
       csi=10000;
       while(i--)
-	(void)(csro->set[i]==tus && (csi==10000||csi%csro->shifts!=sso-1)
-	       && (csi=i));
+	(void)((unsigned short)csro->set[i]==tus &&
+	       (csi==10000 || (int)csi%csro->shifts!=sso-1) &&
+	       (csi=(unsigned short)i));
       if(csi==10000&&tus==9 /* latin-1 tab */)
       {
-	if(!substwarn&&errsto)
+	if(!substwarn && errsto != NULL)
 	  fprintf(errsto,"Warning: no tab in output character set,"
 		  " space was used instead.\n");
 	substwarn=1;
@@ -312,15 +342,15 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
       }
       if(csi==10000)
       {
-	bitencout(&op,csro,0,padstyle); /* not in the charset */
-	if(!noconvwarn&&errsto)
+	ick_bitencout(&op,csro,0,padstyle); /* not in the charset */
+	if(!noconvwarn && errsto != NULL)
 	  fprintf(errsto,"Warning: some characters could not be translated,"
 		  " they were replaced with NUL.\n");
 	noconvwarn=1;
       }
-      else if(csi%csro->shifts==sso-1)
+      else if((int)(csi%csro->shifts)==(int)sso-1)
 	/* in the right shift state already */
-	bitencout(&op,csro,csi/csro->shifts,padstyle);
+	ick_bitencout(&op,csro,(unsigned short)(csi/csro->shifts),padstyle);
       else
       {
 	int tempi;
@@ -333,23 +363,23 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
 	  int j=csro->shifts+1;
 	  while(--j>0)
 	  {
-	    if(j-1==csi%csro->shifts) continue;
-	    i=csro->setlen;
+	    if(j-1==(int)(csi%csro->shifts)) continue;
+	    i=(int)csro->setlen;
 	    while(i--)
-	      if(csro->set[i*csro->shifts+j-1]==csi%csro->shifts+1)
+	      if((int)csro->set[i*csro->shifts+j-1]==csi%csro->shifts+1)
 	      {j=-j; break; /* there is one in this set */};
 	    j=-j;
 	    if(j<0) break;
 	  }
 	  /* Pick the worst-case if we found one, or otherwise just
 	   * any state we aren't in at the moment. */
-	  sso=(j<0?-j:csi%csro->shifts);
+	  sso=(j<0?-j:(int)(csi%csro->shifts));
 	  if(!sso) sso=csro->shifts;
 	}
 	/* Look for the shift code, if there is one. */
-	i=csro->setlen;
+	i=(int)csro->setlen;
 	while(i--)
-	  if(csro->set[i*csro->shifts+sso-1]==csi%csro->shifts+1) break;
+	  if((int)csro->set[i*csro->shifts+sso-1]==csi%csro->shifts+1) break;
 	tempi=i*csro->shifts+sso-1;
 	if(i==-1)
 	{
@@ -359,26 +389,26 @@ int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
 	retry:
 	  i=csro->setlen*csro->shifts;
 	  while(i--)
-	    if(csro->set[i]==csi%csro->shifts+1&&
-	       i%csro->shifts!=csi%csro->shifts&&
+	    if((int)csro->set[i]==csi%csro->shifts+1&&
+	       i%csro->shifts!=(int)(csi%csro->shifts)&&
 	       i%csro->shifts+1!=intershift) break;
 	  if(i==-1) return -1; /* no way to get into the right state */
 	  intershift=i%csro->shifts+1;
 	  tempi=i;
-	  i=csro->setlen;
+	  i=(int)csro->setlen;
 	  while(i--)
-	    if(csro->set[i*csro->shifts+sso-1]==intershift) break;
+	    if((int)csro->set[i*csro->shifts+sso-1]==intershift) break;
 	  if(i==-1) goto retry; /* try once more */
-	  bitencout(&op,csro,i,padstyle);
+	  ick_bitencout(&op,csro,(unsigned short)i,padstyle);
 	  /* sso=intershift here but we're going to overwrite it
 	   * immediately anyway, so no point in the assignment */
 	}
-	bitencout(&op,csro,tempi/csro->shifts,padstyle);
-	bitencout(&op,csro,csi/csro->shifts,padstyle);
+	ick_bitencout(&op,csro,(unsigned short)(tempi/csro->shifts),padstyle);
+	ick_bitencout(&op,csro,(unsigned short)(csi/csro->shifts),padstyle);
 	sso=csi%csro->shifts+1;
       }
     }
   }
-  *op=0;
+  *op='\0';
   return op-out;
 }

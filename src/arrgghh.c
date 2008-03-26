@@ -1,6 +1,6 @@
 /* 
- *	SYNOPSIS:	parseargs(argc,argv)
- *	FILE :		parseargs.c
+ *	SYNOPSIS:	ick_parseargs(argc,argv)
+ *	FILE :		ick_parseargs.c
  *	AUTHOR :	Steve Swales
  *	DATE:		October 7, 1990
  *	PURPOSE: 	Parse arguments for INTERCAL programs.
@@ -27,17 +27,19 @@ LICENSE TERMS
 #include <string.h>
 #include <setjmp.h>
 #include "abcess.h"
-#include "lose.h"
+#include "ick_lose.h"
 
-int traditional = 0;
-int wimp_mode = 0;
-int printflow = 0; /* AIS */
-int mystery = 0; /* AIS */
+/*@-redef@*/ /* it's never the case that both are used at once */
+int ick_traditional = 0;
+/*@=redef@*/
+int ick_wimp_mode = 0;
+int ick_printflow = 0; /* AIS */
+int ick_mystery = 0; /* AIS */
 
-unsigned long mysteryc = 0; /* AIS */
+unsigned long ick_mysteryc = 0; /* AIS */
 
 void
-parseargs(int argc, char **argv)
+ick_parseargs(int argc, char **argv)
 {
     register int i, j;
     static int helpflag = -1;
@@ -50,10 +52,10 @@ parseargs(int argc, char **argv)
       };
     static int *bools[] = {
 	&helpflag,
-	&wimp_mode,
-	&traditional,
-	&printflow, /* AIS */
-	&mystery, /* AIS */
+	&ick_wimp_mode,
+	&ick_traditional,
+	&ick_printflow, /* AIS */
+	&ick_mystery, /* AIS */
       };
     static int nflags = (int)(sizeof(flags)/sizeof(flags[0]));
 
@@ -88,10 +90,10 @@ parseargs(int argc, char **argv)
 	fprintf(stderr," but not always, and not all of them currently\n");
 	fprintf(stderr," do anything, but you can switch them on or off\n");
 	fprintf(stderr," if you like anyway. Isn't this helpful?\n\n");
-	fflush(stderr);
-	lose(E778, 0, (char *)NULL);
+	(void) fflush(stderr);
+	ick_lose(IE778, 0, (char *)NULL);
     }
-    if(wimp_mode) {
+    if(ick_wimp_mode) {
 	fprintf(stderr,"How sad... you have selected to run an INTERCAL\n");
 	fprintf(stderr,"program in WIMP MODE.\n\n");
 	fprintf(stderr,"This means that:\n");
@@ -103,6 +105,6 @@ parseargs(int argc, char **argv)
 	fprintf(stderr,"    you will have to settle for plain old number\n");
 	fprintf(stderr,"    representations like 1972063; and,\n");
 	fprintf(stderr," B) You are a WIMP!\n\n");
-	fflush(stderr);
+	(void) fflush(stderr);
     }
 }

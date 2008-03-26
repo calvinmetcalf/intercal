@@ -28,32 +28,38 @@ LICENSE TERMS
 #include <string.h>
 #include <unistd.h>
 
-int clc_cset_convert(char* in, char* out, char* incset, char* outcset,
-		     int padstyle, int outsize, FILE* errsto);
+int ick_clc_cset_convert(char* in, /*@partial@*/ char* out, char* incset,
+			 char* outcset, int padstyle, size_t outsize,
+			 /*@null@*/ FILE* errsto);
 
 /* For communication with clc_cset.c */
-char* globalargv0;
-char* datadir;
+/*@observer@*/ char* ick_globalargv0;
+/*@-redef@*/ /* it's never the case that both definitions are used at once */
+/*@observer@*/ /*@dependent@*/ char* ick_datadir;
+/*@=redef@*/
 /* We want to read the latest versions of the character sets from disk. */
-char* clc_cset_atari=0;
-char* clc_cset_baudot=0;
-char* clc_cset_ebcdic=0;
-char* clc_cset_latin1=0;
+/*@null@*/ char* ick_clc_cset_atari=0;
+/*@null@*/ char* ick_clc_cset_baudot=0;
+/*@null@*/ char* ick_clc_cset_ebcdic=0;
+/*@null@*/ char* ick_clc_cset_latin1=0;
 
 #ifndef ICKDATADIR
 #define ICKDATADIR "/usr/local/share/ick-0.27"
 #endif
 
+/*@-redef@*/ /* because only one main is used at a time */
 int main(int argc, char** argv)
+/*@=redef@*/
 {
-  int allocsize=100;
+  size_t allocsize=100;
   char* in;
   char* out;
-  int i=0;
+  size_t i=0;
+  int ti;
   int c;
   int padding=-1;
-  globalargv0=argv[0];
-  srand(time(NULL));
+  ick_globalargv0=argv[0];
+  srand((unsigned)time(NULL));
   if(argc!=3&&argc!=4)
   {
     fprintf(stderr,"Usage: convickt informat outformat [padding]\n");
@@ -77,13 +83,13 @@ int main(int argc, char** argv)
     fprintf(stderr,"Error: padding value not recognized.\n");
     return 1;
   }
-  if(!(datadir=getenv("ICKDATADIR")))
-    datadir=ICKDATADIR;
+  if(!(ick_datadir=getenv("ICKDATADIR")))
+    ick_datadir=ICKDATADIR;
   in=malloc(allocsize);
   if(!in) {perror("Error: Memory allocation failure"); return 0;}
   while((c=getchar())!=EOF)
   {
-    in[i++]=c;
+    in[i++]=(char)c;
     if(i+1>=allocsize)
     {
       char* temp=in;
@@ -92,12 +98,16 @@ int main(int argc, char** argv)
       if(!in)
       {
 	perror("Error: Memory allocation failure");
-	free(temp);
+	/* Annotation, because in hasn't been freed here; that's what the
+	   error return from realloc means. */
+	/*@-usereleased@*/
+	if(temp) free(temp);
+	/*@=usereleased@*/
 	return 0;
       }
     }
   }
-  in[i]=0;
+  in[i]='\0';
   out=malloc(allocsize*6+6);
   if(!out)
   {
@@ -105,9 +115,9 @@ int main(int argc, char** argv)
     free(in);
     return 0;
   }
-  i=clc_cset_convert(in,out,argv[1],argv[2],padding,allocsize*6+6,stderr);
-  if(i>=0) fwrite(out,1,i,stdout);
+  ti=ick_clc_cset_convert(in,out,argv[1],argv[2],padding,allocsize*6+6,stderr);
+  if(ti>=0) (void) fwrite(out,1,(size_t)ti,stdout);
   free(in);
   free(out);
-  return i<0;
+  return ti<0;
 }

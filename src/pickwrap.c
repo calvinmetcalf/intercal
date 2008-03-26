@@ -9,24 +9,24 @@ $E
 $K
 
 #define ICKABSTAINED(d) abstain##d
-#define ICKSTASH(a,b,c,d) c##stash[b]=c[b]
-#define ICKRETRIEVE(a,b,c,d,e) a[b]=a##stash[b]
+#define ICKSTASH(a,b,c,d) c##ick_stash[b]=c[b]
+#define ICKRETRIEVE(a,b,c,d,e) a[b]=a##ick_stash[b]
 #define ICKIGNORE(a,b,c) ignore##c##b
 
-ICK_INT16 skipto=0;
+ICK_INT16 ick_skipto=0;
 $O
 
 $C
 
 $D
 $P
-int main(void)
+int ick_main(void)
 {
   pickinit();
       /* degenerated code */
  ick_restart: 
  top:
-    switch(skipto)
+    switch(ick_skipto)
     {
     case 0:
       $G
@@ -35,7 +35,7 @@ int main(void)
 #ifdef YUK
     if(yukloop) goto ick_restart; 
 #endif
-    lose(E633, $J, (char *)0);
+    ick_lose(IE633, $J, (char *)0);
 
     $H
     

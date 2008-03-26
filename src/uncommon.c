@@ -24,42 +24,47 @@ LICENSE TERMS
 #include "uncommon.h"
 
 /* Options that might affect this */
-int printfopens=0;
+int ick_printfopens=0;
 
-FILE* debfopen(char* fname, char* mode)
+/*@dependent@*/ /*@null@*/ FILE* ick_debfopen(/*@observer@*/ char* fname,
+					      /*@observer@*/ char* mode)
 {
   FILE* t;
-  if(printfopens) fprintf(stderr,"Trying to open '%s'...\n",fname);
+  if(ick_printfopens) fprintf(stderr,"Trying to open '%s'...\n",fname);
   t=fopen(fname,mode);
-  if(printfopens&&t) fprintf(stderr,"Success!\n");
-  if(printfopens&&!t) fprintf(stderr,"Failed!\n");
+  if(ick_printfopens && t != NULL) fprintf(stderr,"Success!\n");
+  if(ick_printfopens && t == NULL) fprintf(stderr,"Failed!\n");
   return t;
 }
 
-/* This function looks for the skeleton and syslib, searching first the
+/* This function looks for the skeleton and syslib, searching ick_first the
    path they should be in, then the current directory, then argv[0]'s
    directory (if one was given). This function avoids possible buffer
    overflows, instead truncating filenames (and if that manages to find them,
    I'll be incredibly surprised). It also tries argv[0]/../lib and
    argv[0]/../include (where they are when running without installing). */
-FILE* findandfopen(char* file, char* guessdir, char* mode, char* argv0)
+/*@dependent@*/ /*@null@*/ FILE* ick_findandfopen(/*@observer@*/ char* file,
+						  /*@observer@*/ char* guessdir,
+						  /*@observer@*/ char* mode,
+						  /*@observer@*/ char* argv0)
 {
-  char buf2[BUFSIZ], *fileiter;
-  int i = 0, j;
+  static char buf2[BUFSIZ];
+  /*@observer@*/ static char *fileiter;
+  size_t i = 0, j;
   FILE* ret;
-  while(*guessdir&&i<BUFSIZ-2) buf2[i++] = *guessdir++;
+  while(*guessdir != '\0' && i<BUFSIZ-2) buf2[i++] = *guessdir++;
   buf2[i++] = '/';
   fileiter = file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i] = 0;
-  ret = debfopen(buf2,mode); /* where it ought to be */
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i] = '\0';
+  ret = ick_debfopen(buf2,mode); /* where it ought to be */
   if(ret) return ret;
-  ret = debfopen(file,mode); /* current dir */
+  ret = ick_debfopen(file,mode); /* current dir */
   if(ret) return ret;
   if(!strchr(argv0,'/')&&
-     !strchr(argv0,'\\')) return 0; /* argv[0] has no dir specified */
+     !strchr(argv0,'\\')) return NULL; /* argv[0] has no dir specified */
   i = j = 0;
-  while(*argv0&&i<BUFSIZ-2)
+  while(*argv0 != '\0' && i<BUFSIZ-2)
   {
     buf2[i++] = *argv0++;
     if(*argv0=='/') j = i;
@@ -67,49 +72,52 @@ FILE* findandfopen(char* file, char* guessdir, char* mode, char* argv0)
   }
   i = j + 1;
   fileiter=file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i] = 0;
-  ret = debfopen(buf2,mode); /* argv[0]'s dir */
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i] = '\0';
+  ret = ick_debfopen(buf2,mode); /* argv[0]'s dir */
   if(ret) return ret;
   i = j + 1;
   fileiter="../lib/"; /* correct for POSIX and DJGPP */
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
   fileiter=file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i]=0;
-  ret = debfopen(buf2,mode); /* argv[0]/../lib/ */
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]='\0';
+  ret = ick_debfopen(buf2,mode); /* argv[0]/../lib/ */
   if(ret) return ret;
   i = j + 1;
   fileiter="../include/"; /* correct for POSIX and DJGPP */
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
   fileiter=file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i]=0;
-  ret = debfopen(buf2,mode); /* argv[0]/../include/ */
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]='\0';
+  ret = ick_debfopen(buf2,mode); /* argv[0]/../include/ */
   if(ret) return ret;
-  return 0; /* just return 0 if even this failed */
+  return NULL; /* just return 0 if even this failed */
 }
 
 /* AIS: The same, looking for an executable */
-char* findandtestopen(char* file, char* guessdir, char* mode,
-		      char* argv0)
+/*@observer@*/ /*@null@*/ char* ick_findandtestopen(/*@observer@*/ char* file,
+						     /*@observer@*/ char* guessdir,
+						     /*@observer@*/ char* mode,
+						     /*@observer@*/ char* argv0)
 {
-  static char buf2[BUFSIZ], *fileiter;
-  int i = 0, j;
+  static char buf2[BUFSIZ];
+  /*@observer@*/ static char *fileiter;
+  size_t i = 0, j;
   FILE* ret;
-  while(*guessdir&&i<BUFSIZ-2) buf2[i++] = *guessdir++;
+  while(*guessdir != '\0' && i<BUFSIZ-2) buf2[i++] = *guessdir++;
   buf2[i++] = '/';
   fileiter = file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i] = 0;
-  ret = debfopen(buf2,mode); /* where it ought to be */
-  if(ret) {fclose(ret); return buf2;}
-  ret = debfopen(file,mode); /* current dir */
-  if(ret) {fclose(ret); return file;}
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i] = '\0';
+  ret = ick_debfopen(buf2,mode); /* where it ought to be */
+  if(ret) {(void) fclose(ret); return buf2;}
+  ret = ick_debfopen(file,mode); /* current dir */
+  if(ret) {(void) fclose(ret); return file;}
   if(!strchr(argv0,'/')&&
      !strchr(argv0,'\\')) return 0; /* argv[0] has no dir specified */
   i = j = 0;
-  while(*argv0&&i<BUFSIZ-2)
+  while(*argv0 != '\0' && i<BUFSIZ-2)
   {
     buf2[i++] = *argv0++;
     if(*argv0=='/') j = i;
@@ -117,33 +125,39 @@ char* findandtestopen(char* file, char* guessdir, char* mode,
   }
   i = j + 1;
   fileiter=file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i] = 0;
-  ret = debfopen(buf2,mode); /* argv[0]'s dir */
-  if(ret) {fclose(ret); return buf2;}
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i] = '\0';
+  ret = ick_debfopen(buf2,mode); /* argv[0]'s dir */
+  if(ret) {(void) fclose(ret); return buf2;}
   i = j + 1;
   fileiter="../lib/"; /* correct for POSIX and DJGPP */
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
   fileiter=file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i]=0;
-  ret = debfopen(buf2,mode); /* argv[0]/../lib/ */
-  if(ret) {fclose(ret); return buf2;}
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]='\0';
+  ret = ick_debfopen(buf2,mode); /* argv[0]/../lib/ */
+  if(ret) {(void) fclose(ret); return buf2;}
     i = j + 1;
   fileiter="../include/"; /* correct for POSIX and DJGPP */
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
   fileiter=file;
-  while(*fileiter&&i<BUFSIZ-1) buf2[i++] = *fileiter++;
-  buf2[i]=0;
-  ret = debfopen(buf2,mode); /* argv[0]/../include/ */
-  if(ret) {fclose(ret); return buf2;}
+  while(*fileiter != '\0' && i<BUFSIZ-1) buf2[i++] = *fileiter++;
+  buf2[i]='\0';
+  ret = ick_debfopen(buf2,mode); /* argv[0]/../include/ */
+  if(ret) {(void) fclose(ret); return buf2;}
   return 0; /* just return 0 if even this failed */
 }
 
 /* AIS: The same thing, but with freopen */
-FILE* findandfreopen(char* file, char* guessdir, char* mode,
-		     char* argv0, FILE* over)
+/*@dependent@*/ /*@null@*/ FILE* ick_findandfreopen(/*@observer@*/ char* file,
+						    /*@observer@*/ char* guessdir,
+						    /*@observer@*/ char* mode,
+						    /*@observer@*/ char* argv0,
+						    FILE* over)
 {
-  char* s=findandtestopen(file,guessdir,mode,argv0);
-  return freopen(s,mode,over);
+  char* s=ick_findandtestopen(file,guessdir,mode,argv0);
+  if(s != NULL)
+    return freopen(s,mode,over);
+  else
+    return NULL;
 }

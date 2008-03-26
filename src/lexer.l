@@ -33,7 +33,7 @@ LICENSE TERMS
 #include <string.h>
 #include "ick.h"
 #include "parser.h"
-#include "lose.h"
+#include "ick_lose.h"
 
 /*#undef wchar_t*/
 /*#define wchar_t unsigned char*/
@@ -78,7 +78,7 @@ static char linebuf[YYLMAX];
 
 static char *lineptr = linebuf;
 
-bool re_send_token = FALSE;
+ick_bool re_send_token = ick_FALSE;
 
 int lexer(void);
 static int myatoi(char *text);
@@ -89,7 +89,7 @@ static int myatoi(char *text);
 
 /* AIS: Keep track of the spark/ears situation */
 #define STACKSPARKEARS(a) \
-    if (sparkearslev+1>=SENESTMAX*32) lose(E281, iyylineno, (char*) NULL); \
+    if (sparkearslev+1>=SENESTMAX*32) ick_lose(IE281, iyylineno, (char*) NULL); \
     sparkearslev++; sparkearsstack[sparkearslev/32]<<=1; \
     sparkearsstack[sparkearslev/32]+=a
 #define CLEARSPARKEARSTACK {int i=SENESTMAX; \
@@ -110,18 +110,18 @@ int getc(FILE *fp)
 {
     extern FILE* yyin;
 
-    static bool bangflag = FALSE;
-    static bool backflag = FALSE;
+    static ick_bool bangflag = ick_FALSE;
+    static ick_bool backflag = ick_FALSE;
 
     if (bangflag)
     {
-	bangflag = FALSE;
+	bangflag = ick_FALSE;
 	/*	*lineptr++ = '!'; */
 	return('.');
     }
     else if (backflag)	/* converting ctrl-H (backspace) to two chars "^H" */
     {
-	backflag = FALSE;
+	backflag = ick_FALSE;
 	/*	*lineptr++ = '\b'; */
 	return('H');
     }
@@ -133,7 +133,7 @@ int getc(FILE *fp)
 
       c_char=0; /* AIS */
       (void)fread(&c_char,1,1,fp);
-      /* AIS: ignore the first \r in a row to deal with DOS newlines. The
+      /* AIS: ignore the ick_first \r in a row to deal with DOS newlines. The
 	 second in a row is definitely an error, though, and will be caught
 	 later on. */
       if(c_char=='\r') (void)fread(&c_char,1,1,fp);
@@ -161,14 +161,14 @@ int getc(FILE *fp)
 	if (c == '!')
 	{
 	    *lineptr++ = '!';
-	    bangflag = TRUE;
+	    bangflag = ick_TRUE;
 	    return(c = '\'');
 	}
 	else if (c == '\b')	/* convert ctrl-H (backspace) to
 				   two chars "^" and "H" so lex can take it */
 	{
 	    *lineptr++ = '\b';
-	    backflag = TRUE;
+	    backflag = ick_TRUE;
 	    return(c = '^');
 	}
 	else if (c == '\n')
@@ -184,11 +184,11 @@ int getc(FILE *fp)
 		else
 		    textlines = malloc(textlinecount * sizeof(char*));
 		if (!textlines)
-		    lose(E666, iyylineno, (char *)NULL);
+		    ick_lose(IE666, iyylineno, (char *)NULL);
 	    }
 	    textlines[iyylineno] = malloc(1 + strlen(linebuf));
 	    if (!textlines[iyylineno])
-		lose(E666, iyylineno, (char *)NULL);
+		ick_lose(IE666, iyylineno, (char *)NULL);
 	    strcpy(textlines[iyylineno], linebuf);
 	    iyylineno++;
 	    return('\n');
@@ -228,15 +228,15 @@ D	[0-9][\ \t\n0-9]*
 
 {D}		{yylval.numval = myatoi(yytext); return(NUMBER);}
 \_              {return(NOSPOT);}
-\.		{return(ONESPOT);}
-\:		{return(TWOSPOT);}
-\,		{return(TAIL);}
-\;		{return(HYBRID);}
+\.		{return(ick_ONESPOT);}
+\:		{return(ick_TWOSPOT);}
+\,		{return(ick_TAIL);}
+\;		{return(ick_HYBRID);}
 \#		{return(MESH);}
 
 \xBD            |
 "c^H/"          |
-"c^H|"          {return(MINGLE); /* AIS: CLC-INTERCAL mingle symbols.
+"c^H|"          {return(MINGLE); /* AIS: CLC-INTERCAL ick_mingle symbols.
 				    The \xBD is ISO-8859-1 for cent. */}
 \$		|
 \xA2		|
@@ -327,7 +327,7 @@ ITERUM          {return(AGAIN);}
                  if (yylval.numval && yylval.numval < 100)
 		   return(OHOHSEVEN);
 		 else
-		   lose(E017, iyylineno, (char *)NULL);}
+		   ick_lose(IE017, iyylineno, (char *)NULL);}
 SUB		{return(SUB);}
 MULTIPLICATUS{W}A	|
 BY		{return(BY);}
@@ -389,7 +389,7 @@ DEINDERE{W}A{W}\({W}{D}\) |
 NEXT{W}FROM{W}\({W}{D}\) {/* AIS */ yylval.numval = myatoi(yytext);
 			  return(NEXTFROMLABEL);}
 DEINDERE{W}A    |
-NEXT{W}FROM     {/* AIS: 'next' is not a verb, so the Latin is invented */
+NEXT{W}FROM     {/* AIS: 'ick_next' is not a verb, so the Latin is invented */
                  return(NEXTFROMEXPR);}
 DEINDENDUM	|
 NEXTING{W}FROM	{/* AIS */ yylval.numval = NEXTFROMLABEL; return(GERUND);}
@@ -442,7 +442,7 @@ int lexer(void)
     static int tok = BADCHAR;
 
     if (re_send_token)
-	re_send_token = FALSE;
+	re_send_token = ick_FALSE;
     else 
     {
 	tok = yylex();
@@ -492,7 +492,7 @@ void yyerror(char *errtype)
 }
 
 #ifdef MAIN
-int main(void)
+int ick_main(void)
 {
 	int	t;
 

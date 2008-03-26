@@ -34,11 +34,12 @@ LICENSE TERMS
 #include <string.h>
 #include <signal.h>
 #include <time.h>
+#include <assert.h>
 #include "ick.h"
 #include "feh.h"
 #include "parser.h"
 #include "sizes.h"
-#include "lose.h"
+#include "ick_lose.h"
 #include "uncommon.h"
 
 /* AIS: split ICKDATADIR from ICKLIBDIR */
@@ -58,7 +59,7 @@ LICENSE TERMS
 #define CC "gcc"
 #endif
 
-#define ARGSTRING "bcdfghlmoptuvxyCFHOPUX@"
+#define ARGSTRING "bcdefghlmoptuvxyCFHOPUX@"
 
 #ifdef USE_YYRESTART
 /* function supplied by lex */
@@ -72,27 +73,30 @@ extern int yyparse(void);
 int yydebug;
 
 /* compilation options */
-bool compile_only; 	/* just compile into C, don't run the linker */
-bool traditional;	/* insist on strict INTERCAL-72 conformance */
-bool nocompilerbug;	/* disable error E774 */
+ick_bool compile_only; 	/* just compile into C, don't run the linker */
+ick_bool ick_traditional;	/* insist on strict INTERCAL-72 conformance */
+ick_bool nocompilerbug;	/* disable error IE774 */
 int yukdebug;           /* AIS: Use the yuk debugger. */
 int yukprofile;         /* AIS: Use the yuk profiler. */
-extern int coreonerr;   /* AIS: Dump core on E778. (defined in lose.c) */
+extern int ick_coreonerr;   /* AIS: Dump core on IE778. (defined in ick_lose.c) */
 int multithread;        /* AIS: Allow multithreading and backtracking. */
 int variableconstants;  /* AIS: Allow anything on the left of an assignment. */
-int cdebug;             /* AIS: Pass -g to our C compiler, and leave C code. */
+int useickec;           /* AIS: Link together INTERCAL and C. */
+static int cdebug;      /* AIS: Pass -g to our C compiler, and leave C code. */
 int optdebug;           /* AIS: Debug the optimizer. Value is 0, 1, 2, or 3. */
 int flowoptimize;       /* AIS: Do flow optimizations (in INTERCAL!). */
 int coopt;              /* AIS: The constant-output optimization. This should
 			   mean that INTERCAL will beat any other language at
 			   many benchmark programs (!) */
-extern int printfopens; /* AIS: Print messages whenever attempting to open a
+extern int ick_printfopens; /* AIS: Print messages whenever attempting to open a
 			   file: from uncommon.c */
-extern int checkforbugs;/* AIS: Try to find possible bugs in the source code */
+extern int ick_checkforbugs;/* AIS: Try to find possible bugs in the source code */
 int pickcompile;        /* AIS: Compile for PIC? */
+/*@-exportlocal@*/      /* AIS: relevant to the lexer */
 int clclex;             /* AIS: 1 means use CLC-INTERCAL meanings for @, ? */
-int clcsemantics;       /* AIS: CLC semantics for I/O, abstaining GIVE UP, &c*/
-int outtostdout;        /* AIS: Output on stdout rather than the output file */
+/*@=exportlocal@*/
+int ick_clcsemantics;       /* AIS: CLC semantics for I/O, abstaining GIVE UP, &c*/
+static int outtostdout;        /* AIS: Output on stdout rather than the output file */
 
 /* AIS: Autodetected compilation options */
 int compucomecount=0;   /* Computed COME FROM count */
@@ -100,11 +104,11 @@ int compucomesused=0;   /* Are computed COME FROMs used? */
 int gerucomesused=0;    /* Is COME FROM gerund used? */
 int nextfromsused=0;    /* Is NEXT FROM used? */
 int opoverused=0;       /* Is operand overloading used? */
-node* firstslat=0;      /* The first slat expression in the program */
-node* prevslat=0;       /* The last slat expression used so far */
+/*@null@*/ node* firstslat=0;      /* The first slat expression in the program */
+/*@null@*/ node* prevslat=0;       /* The last slat expression used so far */
 
-static bool dooptimize;	/* do optimizations? (controlled by -O) */
-static bool clockface;	/* set up output to do IIII for IV */
+static ick_bool dooptimize;	/* do optimizations? (controlled by -O) */
+static ick_bool ick_clockface;	/* set up output to do IIII for IV */
 
 #define SKELETON  "ick-wrap.c"
 #define PSKELETON "pickwrap.c"
@@ -118,13 +122,13 @@ static bool clockface;	/* set up output to do IIII for IV */
 #define DEFAULT_MAX_SMALL 0xffffL
 #define DEFAULT_MAX_LARGE 0xffffffffL
 
-int Base;
-int Small_digits;
-int Large_digits;
-unsigned int Max_small;
-unsigned int Max_large;
+int ick_Base;
+int ick_Small_digits;
+int ick_Large_digits;
+unsigned int ick_Max_small;
+unsigned int ick_Max_large;
 
-int lineno;	/* after yyparse, this is the total number of statements */
+int ick_lineno;	/* after yyparse, this is the total number of statements */
 
 /* currently supported numeric bases, not exported */
 static int maxbase = 7;
@@ -132,7 +136,7 @@ static int smallsizes[8] = {0, 0, 16, 10, 8, 6, 6, 5};
 static unsigned int maxsmalls[8] =
   {0, 0, 65535, 59048, 65535, 15624, 46655, 16806};
 
-static char *compiler;
+/*@observer@*/ static char *compiler;
 
 atom *oblist = NULL, *obdex;
 int obcount = 0;
@@ -157,7 +161,7 @@ int getopt(int argc, char * const *argv, const char *options)
   if(!argv[optind]) return EOF; /* Out of command line */
   while(!strcmp(argv[optind],"-"))
   {
-    optind++; /* Go to next argument */
+    optind++; /* Go to ick_next argument */
     if(!argv[optind]) return EOF;
   }
   if(*(argv[optind])!='-') return EOF; /* this arg is not an option */
@@ -172,24 +176,28 @@ int getopt(int argc, char * const *argv, const char *options)
 static int myfgetc(FILE* in)
 {
   char c;
-  fread(&c,1,1,in);
+  (void) fread(&c,1,1,in);
   if(feof(in)) return EOF;
   return (int)c;
 }
 
 static RETSIGTYPE abend(int signim)
 {
-    lose(E778, iyylineno, (char *)NULL);
-    (void) signim;
+    /*@-noeffect@*/ (void) signim; /*@=noeffect@*/
+    ick_lose(IE778, iyylineno, (char *)NULL);
 }
 static void print_usage(char *prog, char *options)
 {
-    fprintf(stderr,"Usage: %s [-%s] <file>\n",prog,options);
-    fprintf(stderr,"\t-b\t:reduce the probability of E774 to zero\n");
+    fprintf(stderr,"Usage: %s [-%s] <file> [<file> ...]\n",prog,options);
+    fprintf(stderr,"\t-b\t:reduce the probability of IE774 to zero\n");
     fprintf(stderr,"\t-c\t:compile INTERCAL to C, but don't compile C\n");
     fprintf(stderr,"\t-d\t:print yacc debugging information (implies -c)\n");
-    fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
-    fprintf(stderr,"\t-C\t:clockface output (e.g. use IIII instead of IV)\n");
+    fprintf(stderr,"\t-e\t:link together INTERCAL and C files as one program\n");
+    fprintf(stderr,"\t\t (without this option, all INTERCAL files produce\n");
+    fprintf(stderr,"\t\t separate output files; with it, the first file given\n");
+    fprintf(stderr,"\t\t must be the only INTERCAL file) (prevents -mypPf)\n");
+    fprintf(stderr,"\t-t\t:ick_traditional mode, accept only INTERCAL-72\n");
+    fprintf(stderr,"\t-C\t:ick_clockface output (e.g. use IIII instead of IV)\n");
     fprintf(stderr,"\t-O\t:optimize expresssions in generated code\n");
     /* AIS: Changed the help message for the previous line (because the
        function of -O has changed). I wrote the next group of options. */
@@ -200,7 +208,7 @@ static void print_usage(char *prog, char *options)
     fprintf(stderr,"\t-F\t:optimize everything in generated code for\n"
 	    "\t\tspeed, regardless of how slow the compiler becomes or how\n"
 	    "\t\tlarge the object file becomes. Implies -fO, "
-	    "prevents -cdghpyH\n");
+	    "prevents -cdeghpyH\n");
 # else
     fprintf(stderr,"\t-F\t:unsupported on computers without #! support\n");
 # endif
@@ -214,19 +222,19 @@ static void print_usage(char *prog, char *options)
     fprintf(stderr,"\t-hH\t:print optimizer debugging information in a\n"
 	    "\t\tdifferent form (implies -cO)\n");
 #ifdef HAVE_UNISTD_H
-    fprintf(stderr,"\t-y\t:run the yuk debugger on the code (prevents -fm)\n");
-    fprintf(stderr,"\t-p\t:run the yuk profiler on the code (prevents -fm)\n");
+    fprintf(stderr,"\t-y\t:run the yuk debugger on the code (prevents -fme)\n");
+    fprintf(stderr,"\t-p\t:run the yuk profiler on the code (prevents -fme)\n");
 #else
-    fprintf(stderr,"\t-y\t:unsupported on computers without unistd.h\n");
-    fprintf(stderr,"\t-p\t:unsupported on computers without unistd.h\n");
+    fprintf(stderr,"\t-y\t:unsupported on computers without <unistd.h>\n");
+    fprintf(stderr,"\t-p\t:unsupported on computers without <unistd.h>\n");
 #endif
     fprintf(stderr,"\t-m\t:allow multithreading and backtracking "
-	    "(prevents -yp)\n");
+	    "(prevents -ype)\n");
     fprintf(stderr,"\t-v\t:allow anything on the left of an assignment. This "
 	    "is required\n\t\tif you want operand overloading to change "
 	    "meshes.\n\t\t(prevents -fFOP)\n");
     fprintf(stderr,"\t-P\t:compile PIC-INTERCAL rather than INTERCAL\n");
-    fprintf(stderr,"\t\t(prevents -mFvx, implies -cfO)\n");
+    fprintf(stderr,"\t\t(prevents -mFvxe, implies -cfO)\n");
     fprintf(stderr,"\t-o\t:output to stdout rather than .c (implies -c)\n");
     fprintf(stderr,"\t-X\t:interpret ambiguous syntax as Princeton not\n"
 	    "\t\tAtari (i.e. CLC-INTERCAL not C-INTERCAL)\n");
@@ -234,7 +242,7 @@ static void print_usage(char *prog, char *options)
 	    "\t\tfrom a GIVE UP by label (prevents -P)\n");
     fprintf(stderr,"\t-u\t:print a message whenever the compiler tries to "
 	    "open a file\n");
-    fprintf(stderr,"\t-U\t:dump core on E778 after printing an error\n");
+    fprintf(stderr,"\t-U\t:dump core on IE778 after printing an error\n");
     fprintf(stderr,"\t-g\t:compile to both debuggable executable and C\n");
     fprintf(stderr,"\t-l\t:attempt to report likely bugs "
 	    "and nonportabilities (implies -O)\n");
@@ -248,22 +256,29 @@ static void print_usage(char *prog, char *options)
 int isenv(char* e)
 {
   char* x=getenv(e);
-  return x&&*x;
+  return x != NULL && *x != '\0';
 }
 
+/*@-redef@*/
 int main(int argc, char *argv[])
+/*@=redef@*/
 {
-    extern int	optind;		/* set by getopt */
-    char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ];
+  /*@-nestedextern@*/
+  extern int	optind;		/* set by getopt */
+  /*@=nestedextern@*/
+    char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ], path[BUFSIZ];
     tuple	*tp;
     atom	*op;
     int		c, i;
-    char	*includedir, *datadir, *libdir;
-    /* AIS: removed getenv(), added datadir on the line above */
+    /*@-shadow@*/ /* no it doesn't, cesspool isn't linked to perpet */
+    char	*includedir, *libdir, *ick_datadir;
+    /*@=shadow@*/
+    /* AIS: removed getenv(), added ick_datadir */
     char        *cooptsh; /* AIS */
     FILE	*ifp, *ofp;
     int		maxabstain, /* nextcount, AIS */ bugline;
-    bool        needsyslib, firstfile;
+    ick_bool        needsyslib, firstfile;
+    int         oldoptind;
 #ifdef HAVE_UNISTD_H
     int         oldstdin; /* AIS: for keeping track of where stdin was */
 #endif
@@ -272,8 +287,8 @@ int main(int argc, char *argv[])
       includedir = ICKINCLUDEDIR;
     if (!(libdir = getenv("ICKLIBDIR")))
       libdir = ICKLIBDIR;
-    if (!(datadir = getenv("ICKDATADIR"))) /* AIS */
-      datadir = ICKDATADIR;
+    if (!(ick_datadir = getenv("ICKDATADIR"))) /* AIS */
+      ick_datadir = ICKDATADIR;
 /*
   AIS: nothing actually uses this at the moment,
        commenting it out for future use
@@ -284,150 +299,152 @@ int main(int argc, char *argv[])
     if (!(compiler = getenv("CC")))
       compiler = CC;
 
+    /* getopt is POSIX, and I provide my own version if the POSIX version
+       isn't found, so the unrecog warning is a false positive. */
+    /*@-unrecog@*/
     while ((c = getopt(argc, argv, ARGSTRING)) != EOF)
+      /*@=unrecog@*/
     {
 	switch (c)
 	{
 	case 'b':
-	    nocompilerbug = TRUE;
+	    nocompilerbug = ick_TRUE;
 	    break;
 
 	case 'c':
-	    compile_only = TRUE;
-	    /* AIS */ coopt = FALSE;
+	    compile_only = ick_TRUE;
+	    /* AIS */ coopt = ick_FALSE;
 	    break;
 
 	case 'o': /* AIS */
-	  compile_only = TRUE;
-	  outtostdout = TRUE;
-	  coopt = FALSE;
+	  compile_only = ick_TRUE;
+	  outtostdout = ick_TRUE;
+	  coopt = ick_FALSE;
 	  break;
 
 	case 'd':
-	    yydebug = compile_only = TRUE;
-	    /* AIS */ coopt = FALSE;
+	    yydebug = compile_only = ick_TRUE;
+	    /* AIS */ coopt = ick_FALSE;
 	    break;
 
+	case 'e': /* AIS */
+	  useickec = ick_TRUE;
+	  multithread = pickcompile = coopt = yukdebug = yukprofile = ick_FALSE;
+	  break;
+
 	case 'C':
-	    clockface = TRUE;
+	    ick_clockface = ick_TRUE;
 	    break;
 
 	case 't':
-	    traditional = TRUE;
-	    if(multithread) lose(E111, 1, (char*) NULL); /* AIS */
-	    if(pickcompile) lose(E111, 1, (char*) NULL); /* AIS */
+	    ick_traditional = ick_TRUE;
+	    if(multithread) ick_lose(IE111, 1, (char*) NULL); /* AIS */
+	    if(pickcompile) ick_lose(IE111, 1, (char*) NULL); /* AIS */
 	    break;
 
 	case 'O':
-	    dooptimize = TRUE;
-	    variableconstants = FALSE; /* AIS */
+	    dooptimize = ick_TRUE;
+	    variableconstants = ick_FALSE; /* AIS */
 	    break;
 
 	case 'f': /* By AIS */
-	  flowoptimize = TRUE;
-	  yukdebug = yukprofile = FALSE;
-	  variableconstants = FALSE;
+	  flowoptimize = ick_TRUE;
+	  yukdebug = yukprofile = ick_FALSE;
+	  variableconstants = ick_FALSE;
 	  break;
 
 	case 'F': /* By AIS */
-	  coopt = flowoptimize = dooptimize = TRUE;
-	  variableconstants = FALSE;
+	  coopt = flowoptimize = dooptimize = ick_TRUE;
+	  variableconstants = useickec = ick_FALSE;
 	  yukdebug = yukprofile = yydebug = outtostdout =
-	    compile_only = cdebug = FALSE;
-	  if(pickcompile) lose(E256, 1, (char*) NULL);
+	    compile_only = cdebug = ick_FALSE;
+	  if(pickcompile) ick_lose(IE256, 1, (char*) NULL);
 	  break;
 
 	case 'h': /* By AIS */
 	  optdebug|=1;
-	  compile_only=dooptimize=TRUE;
-	  coopt=FALSE;
+	  compile_only=dooptimize=ick_TRUE;
+	  coopt=ick_FALSE;
 	  break;
 
 	case 'H': /* By AIS */
 	  optdebug|=2;
-	  compile_only=dooptimize=TRUE;
-	  coopt=FALSE;
+	  compile_only=dooptimize=ick_TRUE;
+	  coopt=ick_FALSE;
 	  break;
 
 	case 'y': /* By AIS */
 #ifdef HAVE_UNISTD_H
-	  yukdebug=TRUE;
-	  multithread=flowoptimize=coopt=FALSE;
+	  yukdebug=ick_TRUE;
+	  multithread=flowoptimize=coopt=useickec=ick_FALSE;
 #endif
 	  break;
 
 	case 'p': /* By AIS */
 #ifdef HAVE_UNISTD_H
-	  yukprofile=TRUE;
-	  multithread=flowoptimize=coopt=FALSE;
+	  yukprofile=ick_TRUE;
+	  multithread=flowoptimize=coopt=useickec=ick_FALSE;
 #endif
 	  break;
 
 	case 'm': /* By AIS */
-	  multithread=TRUE;
-	  yukprofile=FALSE;
-	  yukdebug=FALSE;
-	  if(traditional) lose(E111, 1, (char*) NULL);
+	  multithread=ick_TRUE;
+	  yukprofile=ick_FALSE;
+	  yukdebug=ick_FALSE;
+	  useickec=ick_FALSE;
+	  if(ick_traditional) ick_lose(IE111, 1, (char*) NULL);
 	  break;
 
 	case 'v': /* By AIS */
-	  variableconstants=TRUE;
-	  dooptimize=FALSE;
-	  flowoptimize=FALSE;
-	  coopt=FALSE;
-	  pickcompile=FALSE;
+	  variableconstants=ick_TRUE;
+	  dooptimize=ick_FALSE;
+	  flowoptimize=ick_FALSE;
+	  coopt=ick_FALSE;
+	  pickcompile=ick_FALSE;
 	  break;
 
 	case 'l': /* By AIS */
-	  checkforbugs=TRUE;
-	  dooptimize=TRUE;
+	  ick_checkforbugs=ick_TRUE;
+	  dooptimize=ick_TRUE;
 	  break;
 
 	case 'U': /* By AIS */
-	  coreonerr=TRUE;
+	  ick_coreonerr=ick_TRUE;
 	  break;
 
 	case 'u': /* By AIS */
-	  printfopens=TRUE;
+	  ick_printfopens=ick_TRUE;
 	  break;
 
 	case 'P': /* By AIS */
-	  pickcompile=TRUE;
-	  multithread=coopt=variableconstants=FALSE;
-	  clcsemantics=FALSE;
-	  compile_only=TRUE;
-	  dooptimize=flowoptimize=TRUE; /* needed for PICs */
+	  pickcompile=ick_TRUE;
+	  multithread=coopt=variableconstants=ick_FALSE;
+	  ick_clcsemantics=useickec=ick_FALSE;
+	  compile_only=ick_TRUE;
+	  dooptimize=flowoptimize=ick_TRUE; /* needed for PICs */
 	  break;
 
 	case 'X': /* By AIS */
-	  clclex=TRUE;
+	  clclex=ick_TRUE;
 	  break;
 
 	case 'x': /* By AIS */
-	  clcsemantics=TRUE;
-	  pickcompile=FALSE;
+	  ick_clcsemantics=ick_TRUE;
+	  pickcompile=ick_FALSE;
 	  break;
 
 	case 'g': /* By AIS */
-	  cdebug=TRUE;
-	  coopt=FALSE;
+	  cdebug=ick_TRUE;
+	  coopt=ick_FALSE;
 	  break;
 
 	case '?':
 	default:
 	case '@':
 	    print_usage(argv[0], ARGSTRING);
-	    exit(1);
-	    break;
+	    exit(EXIT_FAILURE);
+	    /*@-unreachable@*/ break; /*@=unreachable@*/
 	}
-    }
-
-    /* AIS: This has only been able to compile 1 file at a time for ages,
-       as far as I can tell, without problems. */
-    if(optind+1<argc)
-    {
-      print_usage(argv[0], ARGSTRING);
-      exit(1);
     }
 
     (void) signal(SIGSEGV, abend);
@@ -439,72 +456,87 @@ int main(int argc, char *argv[])
 #ifdef USG
 	srand48(time(NULL) + getpid());
 #else
-	srand(time(NULL));
+	srand((unsigned)time(NULL));
 #endif /* UNIX */
     }
 
     /* AIS: New function for enhanced file-finding */
-    if ((ifp = findandfopen(pickcompile?PSKELETON:SKELETON,
-			    datadir, "r", argv[0])) == 0)
-      lose(E999, 1, (char *)NULL);
+    ifp = ick_findandfopen(pickcompile?PSKELETON:SKELETON,
+		       ick_datadir, "r", argv[0]);
+    if(!ifp) ick_lose(IE999, 1, (char *)NULL);
 
     /* now substitute in tokens in the skeleton */
 
-    buf[strlen(buf) - 2] = '\0';
+    /* AIS: This doesn't actually seem to do anything, and buf is
+       uninitialised at this point, so it's actually dangerous
+       because it's undefined behaviour.
+       buf[strlen(buf) - 2] = '\0'; */
 
     /* AIS: Save the old stdin, if we can */
 #ifdef HAVE_UNISTD_H
     oldstdin=dup(0);
 #endif
 
-    for (firstfile = TRUE; optind < argc; optind++, firstfile = FALSE)
+    oldoptind=optind; /* AIS */
+    for (firstfile = ick_TRUE; optind < argc; optind++, firstfile = ick_FALSE)
     {
       /* AIS: Read as binary to pick up Latin-1 and UTF-8 better */
 	if (freopen(argv[optind], "rb", stdin) == (FILE *)NULL)
-	    lose(E777, 1, (char *)NULL);
+	    ick_lose(IE777, 1, (char *)NULL);
 	else
 	{
 	    /* strip off the file extension */
 	    if(!(chp = strrchr(argv[optind],'.')))
 	    {
-		lose(E998, 1, (char *)NULL);
+		ick_lose(IE998, 1, (char *)NULL);
 	    }
 	    *chp++ = '\0';
+
+	    if(useickec && (!strcmp(chp,"c") || !strcmp(chp,"cio"))) /* AIS */
+	    {
+	      break; /* don't process C or cio files further yet */
+	    }
+
+	    if(useickec && firstfile == ick_FALSE) /* AIS */
+	      ick_lose(IE998, 1, (char *)NULL);
 
 	    /* wwp: reset the base variables to defaults, because if the  */
 	    /* sourcefile has extension .i they will not be reset in the  */
 	    /* following chunk of code. but i don't want to modify the    */
 	    /* following chunk of code because i think it is very clever; */
-	    /* grabs the base on the first pass, then validates the rest  */
+	    /* grabs the base on the ick_first pass, then validates the rest  */
 	    /* of the extension on the second.                            */
-	    Base = DEFAULT_BASE;
-	    Small_digits = DEFAULT_SMALL_DIGITS;
-	    Large_digits = DEFAULT_LARGE_DIGITS;
-	    Max_small = DEFAULT_MAX_SMALL;
-	    Max_large = DEFAULT_MAX_LARGE;
+	    ick_Base = DEFAULT_BASE;
+	    ick_Small_digits = DEFAULT_SMALL_DIGITS;
+	    ick_Large_digits = DEFAULT_LARGE_DIGITS;
+	    ick_Max_small = (unsigned)DEFAULT_MAX_SMALL;
+	    ick_Max_large = (unsigned)DEFAULT_MAX_LARGE;
 
 	    /* determine the file type from the extension */
 	    while (strcmp(chp,"i"))
 	    {
-		Base = strtol(chp,&chp,10);
-		if (Base < 2 || Base > maxbase)
-		    lose(E998, 1, (char *)NULL);
-		else if (traditional && Base != 2)
-		    lose(E111, 1, (char *)NULL);
-		else if (pickcompile && Base != 2)
-		    lose(E256, 1, (char *)NULL); /* AIS */
-		Small_digits = smallsizes[Base];
-		Large_digits = 2 * Small_digits;
-		Max_small = maxsmalls[Base];
-		if (Max_small == 0xffff)
-		    Max_large = 0xffffffffLU;
+	      ick_Base = (int)strtol(chp,&chp,10);
+		if (ick_Base < 2 || ick_Base > maxbase)
+		    ick_lose(IE998, 1, (char *)NULL);
+		else if (ick_traditional && ick_Base != 2)
+		    ick_lose(IE111, 1, (char *)NULL);
+		else if (pickcompile && ick_Base != 2)
+		    ick_lose(IE256, 1, (char *)NULL); /* AIS */
+		ick_Small_digits = smallsizes[ick_Base];
+		ick_Large_digits = 2 * ick_Small_digits;
+		ick_Max_small = maxsmalls[ick_Base];
+		if (ick_Max_small == 0xffff)
+		  ick_Max_large = (unsigned)0xffffffffLU;
 		else
-		    Max_large = (Max_small + 1) * (Max_small + 1) - 1;
+		    ick_Max_large = (ick_Max_small + 1) * (ick_Max_small + 1) - 1;
 	    }
 
 	    /* zero out tuple and oblist storage */
 	    treset();
 	    politesse = 0;
+            /* JH: default to no op-overusage and no computed come from */
+            opoverused = 0;
+            compucomesused = compucomecount = 0;
 
 	    /* reset the lex/yacc environment */
 	    if (!firstfile)
@@ -516,33 +548,33 @@ int main(int argc, char *argv[])
 	    }
 
 	    /* compile tuples from current input source */
-	    yyparse();
+	    (void) yyparse();
 
 	    if(variableconstants)
 	    {
 	      /* AIS: Up to 4 extra meshes may be needed by feh.c. */
-	      intern(MESH, 0xFFFFFFFFLU);
-	      intern(MESH, 0xFFFFLU);
-	      intern(MESH, 0xAAAAAAAALU);
-	      intern(MESH, 0x55555555LU);
+	      (void) intern(MESH, 0xFFFFFFFFLU);
+	      (void) intern(MESH, 0xFFFFLU);
+	      (void) intern(MESH, 0xAAAAAAAALU);
+	      (void) intern(MESH, 0x55555555LU);
 	    }
-	    
+
 
 	    /*
 	     * Miss Manners lives.
 	     */
-	    if (lineno > 2)
+	    if (ick_lineno > 2)
 	    {
-		if (politesse == 0 || (lineno - 1) / politesse >= 5)
-		    lose(E079, iyylineno, (char *)NULL);
-		else if (lineno / politesse < 3)
-		    lose(E099, iyylineno, (char *)NULL);
+		if (politesse == 0 || (ick_lineno - 1) / politesse >= 5)
+		    ick_lose(IE079, iyylineno, (char *)NULL);
+		else if (ick_lineno / politesse < 3)
+		    ick_lose(IE099, iyylineno, (char *)NULL);
 	    }
 
 	    /*
 	     * check if we need to magically include the system library
 	     */
-	    needsyslib = FALSE;
+	    needsyslib = ick_FALSE;
 	    if(!pickcompile) /* AIS: We never need syslib when compiling
 				for PIC, because it's preoptimized. */
 	    {
@@ -554,7 +586,7 @@ int main(int argc, char *argv[])
 		 * can stop searching and won't need the syslib.
 		 */
 		if (tp->label >= 1000 && tp->label <= 1999) {
-		  needsyslib = FALSE;
+		  needsyslib = ick_FALSE;
 		  break;
 		}
 		/*
@@ -563,23 +595,32 @@ int main(int argc, char *argv[])
 		 */
 		if (tp->type == NEXT && tp->u.target >= 1000 &&
 		    tp->u.target <= 1999)
-		  needsyslib = TRUE;
+		  needsyslib = ick_TRUE;
 	      }
 	    }
-	    if ( needsyslib ) { /* AIS: modified to use findandfreopen */
-	      if (Base == 2)    /* see code for opening the skeleton */
+	    if ( needsyslib ) { /* AIS: modified to use ick_findandfreopen */
+	      if (ick_Base == 2)    /* see code for opening the skeleton */
+#ifndef HAVE_SNPRINTF
 		(void) sprintf(buf2, "%s.i", SYSLIB);
+#else
+	      (void) snprintf(buf2, sizeof buf2, "%s.i", SYSLIB);
+#endif
 	      else
-		(void) sprintf(buf2, "%s.%di", SYSLIB, Base);
-	      if (findandfreopen(buf2, datadir, "r", argv[0], stdin) == 0)
-		lose(E127, 1, (char*) NULL);
+#ifndef HAVE_SNPRINTF
+		(void) sprintf(buf2, "%s.%di", SYSLIB, ick_Base);
+#else
+	      (void) snprintf(buf2, sizeof buf2, "%s.%di", SYSLIB, ick_Base);
+#endif
+	      if (ick_findandfreopen(buf2, ick_datadir, "r", argv[0], stdin) == NULL)
+		ick_lose(IE127, 1, (char*) NULL);
 #ifdef USE_YYRESTART
 	      yyrestart(stdin);
 #endif /* USE_YYRESTART */
-	      yyparse();
+	      (void) yyparse();
+	      textlinecount=iyylineno;
 	    }
 
-	    /* 
+	    /*
 	     * Now propagate type information up the expression tree.
 	     * We need to do this because the unary-logical operations
 	     * are sensitive to the type widths of their operands, so
@@ -600,12 +641,17 @@ int main(int argc, char *argv[])
 
 	    codecheck();	/* check for compile-time errors */
 	    /* AIS: And importantly, sort out line number references */
-	    
+
 	    /* perform optimizations */
 	    if (dooptimize)
 		for (tp = tuples; tp->type; tp++)
 		{
+		  /* AIS: Allow breaching of the only specification on tuples
+		     at this point; I've checked that tuples isn't reallocated
+		     during the block, so this is fine. */
+		  /*@-onlytrans@*/
 		  optuple = tp;
+		  /*@=onlytrans@*/
 		  if (tp->type == GETS || tp->type == RESIZE
 		      || tp->type == FORGET || tp->type == RESUME
 		      || tp->type == FROM || tp->type == COMPUCOME)
@@ -619,10 +665,10 @@ int main(int argc, char *argv[])
 	    /* decide if and where to place the compiler bug */
 #ifdef USG
 	    if (!nocompilerbug && lrand48() % 10 == 0)
-		bugline = (int)(lrand48() % lineno);
+		bugline = (int)(lrand48() % ick_lineno);
 #else
 	    if (!nocompilerbug && rand() % 10 == 0)
-		bugline = rand() % lineno;
+		bugline = rand() % ick_lineno;
 #endif
 	    else
 		bugline = -1;
@@ -630,26 +676,44 @@ int main(int argc, char *argv[])
 	    /* set up the generated C output file name */
 	    (void) strcpy(buf, argv[optind]);
 	    (void) strcat(buf, ".c");
+	    /* AIS: ofp holds fopened storage if !outtostdout, and local-copy
+	       storage if outtostdout, and this is not a bug, although it
+	       confuses Splint. */
+	    /*@-branchstate@*/
 	    if(outtostdout) ofp=stdout; /* AIS */
-	    else if((ofp = debfopen(buf, "w")) == (FILE *)NULL)
-		lose(E888, 1, (char *)NULL);
+	    else if((ofp = ick_debfopen(buf, "w")) == (FILE *)NULL)
+		ick_lose(IE888, 1, (char *)NULL);
+	    /*@=branchstate@*/
 
-	    fseek(ifp,0L,0);	/* rewind skeleton file */
+	    (void) fseek(ifp,0L,0);	/* rewind skeleton file */
 
 	    /* AIS: Before changing argv[0], locate coopt.sh. */
-	    cooptsh = findandtestopen("coopt.sh", datadir, "rb", argv[0]);
+	    cooptsh = ick_findandtestopen("coopt.sh", ick_datadir, "rb", argv[0]);
 	    /* AIS: and calculate yukcmdstr. */
-	    sprintf(yukcmdstr,"%s" EXEEXT " %s %s",
-		    argv[optind],datadir,argv[0]);
+#ifndef HAVE_SNPRINTF
+	    (void) sprintf(yukcmdstr,"%s" EXEEXT " %s %s",
+		    argv[optind],ick_datadir,argv[0]);
+#else
+	    (void) snprintf(yukcmdstr, sizeof yukcmdstr, "%s" EXEEXT " %s %s",
+		    argv[optind], ick_datadir, argv[0]);
+#endif
 
 	    /* AIS: Remove the filename from argv[0], leaving only a directory.
 	       If this would leave it blank, change argv[0] to '.'.
 	       This is so gcc can find the includes/libraries the same way that
-	       findandfreopen does. */
-	    if(strchr(argv[0],'/')) *(strrchr(argv[0],'/')) = 0;
-	    else strcpy(argv[0],".");
-	    
+	       ick_findandfreopen does. */
+            /* JH: use a copy of argv[0] for the path, to ensure argv[0] is
+             * available for the next round
+             */
+            strcpy(path,argv[0]);
+	    if(strchr(path,'/')) *(strrchr(path,'/')) = '\0';
+	    else strcpy(path,".");
+
+#ifndef HAVE_SNPRINTF
 	    (void) sprintf(buf2,
+#else
+            (void) snprintf(buf2, sizeof buf2,
+#endif
 			   "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s"
 #ifdef __DJGPP__
 			   EXEEXT " -lick%s%s","",
@@ -657,15 +721,17 @@ int main(int argc, char *argv[])
 			   EXEEXT " -lick%s%s",compiler,
 #endif
 			   buf, yukdebug||yukprofile?" -lyuk ":" ",
-			   includedir, argv[0], argv[0], libdir, argv[0], argv[0],
+			   includedir, path, path, libdir, path, path,
 			   coopt?'3':'2', /* AIS: If coopting, optimize as much as possible */
 			   argv[optind], multithread?"mt":"", cdebug?" -g":"");
 	    /* AIS: Possibly link in the debugger yuk and/or libickmt.a here. */
 	    /* AIS: Added -g support. */
-	    /* AIS: Added argv[0] to the -I, -L settings. */
-	    
+	    /* AIS: Added argv[0] (now path) to the -I, -L settings. */
+
+	    textlinecount=0; /* AIS: If there are no files, there's
+				no need to free any textlines */
 	    while ((c = myfgetc(ifp)) != EOF)
-		if (c != '$')
+	      if (c != (int)'$')
 		    (void) fputc(c, ofp);
 	        else switch(myfgetc(ifp))
 		{
@@ -674,7 +740,7 @@ int main(int argc, char *argv[])
 		    break;
 
 		case 'B':	/* # of statements */
-		    (void) fprintf(ofp, "%d", lineno);
+		    (void) fprintf(ofp, "%d", ick_lineno);
 		    break;
 
 		case 'C':	/* initial abstentions */
@@ -713,7 +779,7 @@ int main(int argc, char *argv[])
 				(void) fprintf(ofp, "1, ");
 				tp->exechance = -tp->exechance;
 				tp->initabstain=1; /* AIS: As above */
-				/* AIS: If the line was abstained, we need to
+				/* AIS: If the line was ick_abstained, we need to
 				   swap ONCEs and AGAINs on it round, to suit
 				   the code degenerator. */
 				if(tp->onceagainflag == onceagain_ONCE)
@@ -735,14 +801,14 @@ int main(int argc, char *argv[])
 			      if(tp->exechance > 0)
 				(void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=0;\n",tp-tuples);
 			      else
-				(void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=1;\n",tp-tuples);				
+				(void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=1;\n",tp-tuples);
 			    }
 			}
 			if(!pickcompile) (void) fprintf(ofp, "}");
 		    }
 		    break;
 
-		case 'D':	/* linetypes array for abstention handling */
+		case 'D':	/* linetypes ick_array for abstention handling */
 		    maxabstain = 0;
 		    for (tp = tuples; tp->type; tp++)
 			if (tp->type == ENABLE || tp->type == DISABLE || tp->type == MANYFROM)
@@ -778,15 +844,15 @@ int main(int argc, char *argv[])
 		case 'E':	/* extern to intern map */
 		  if(!pickcompile)
 		  {
-		    (void) fprintf(ofp,"int Base = %d;\n",Base);
-		    (void) fprintf(ofp,"int Small_digits = %d;\n",
-				   Small_digits);
-		    (void) fprintf(ofp,"int Large_digits = %d;\n",
-				   Large_digits);
-		    (void) fprintf(ofp,"unsigned int Max_small = 0x%x;\n",
-				   Max_small);
-		    (void) fprintf(ofp,"unsigned int Max_large = 0x%x;\n",
-				   Max_large);
+		    (void) fprintf(ofp,"int ick_Base = %d;\n",ick_Base);
+		    (void) fprintf(ofp,"int ick_Small_digits = %d;\n",
+				   ick_Small_digits);
+		    (void) fprintf(ofp,"int ick_Large_digits = %d;\n",
+				   ick_Large_digits);
+		    (void) fprintf(ofp,"unsigned int ick_Max_small = 0x%x;\n",
+				   ick_Max_small);
+		    (void) fprintf(ofp,"unsigned int ick_Max_large = 0x%x;\n",
+				   ick_Max_large);
 		    if (yukprofile || yukdebug || multithread)
 		    { /* AIS: yuk.c, multithreading require all these to exist */
 		      if(!nonespots) nonespots = 1;
@@ -815,25 +881,25 @@ int main(int argc, char *argv[])
 		    if (variableconstants) /* AIS */
 		    {
 		      int temp=0;
-		      (void) fprintf(ofp, "type32 meshes[%d] = {",nmeshes);
+		      (void) fprintf(ofp, "ick_type32 meshes[%d] = {",nmeshes);
 		      while(temp<nmeshes)
 		      {
-			(void) fprintf(ofp, "%luLU, ", varextern(temp,MESH));
+			(void) fprintf(ofp, "%luLU, ", varextern((unsigned long)temp,MESH));
 			temp++;
 		      }
 		      (void) fprintf(ofp, "};\n");
 		    }
-		    
+
 		    if (nonespots)
 		    {
 			(void) fprintf(ofp,
-				       "type16* onespots;\n");
+				       "ick_type16* ick_onespots;\n");
 			(void) fprintf(ofp,
-				       "bool* oneforget;\n");
+				       "ick_bool* ick_oneforget;\n");
 			if(yukprofile || yukdebug)
 			{
 			  (void) fprintf(ofp,
-					 "type16 oneold[%d];\n",
+					 "ick_type16 oneold[%d];\n",
 					 nonespots);
 			  (void) fprintf(ofp,
 					 "signed char onewatch[%d];\n",
@@ -849,26 +915,26 @@ int main(int argc, char *argv[])
 			{
 			  int temp=nonespots;
 			  (void) fprintf(ofp,
-					 "overop* oo_onespots;\n");
+					 "ick_overop* ick_oo_onespots;\n");
 			  while(temp--)
 			    (void) fprintf(ofp,
-"type32 og1spot%d(type32 t)\n{\n  (void)t;\n  return onespots[%d];\n}\n"
-"void os1spot%d(type32 val, void(*f)())\n{\n  (void)f;\n  assign((void*)"
-"(onespots+%d), ONESPOT, oneforget[%d], val);\n}\n",temp,temp,temp,temp,temp);
+"ick_type32 og1spot%d(ick_type32 t)\n{\n  (void)t;\n  return ick_onespots[%d];\n}\n"
+"void os1spot%d(ick_type32 val, void(*f)())\n{\n  (void)f;\n  ick_assign((void*)"
+"(ick_onespots+%d), ick_ONESPOT, ick_oneforget[%d], val);\n}\n",temp,temp,temp,temp,temp);
 			}
 			else if(multithread)
-			  (void) fprintf(ofp, "overop* oo_onespots=0;\n");
+			  (void) fprintf(ofp, "ick_overop* ick_oo_onespots=0;\n");
 		    }
 		    if (ntwospots)
 		    {
 			(void) fprintf(ofp,
-				       "type32* twospots;\n");
+				       "ick_type32* ick_twospots;\n");
 			(void) fprintf(ofp,
-				       "bool* twoforget;\n");
+				       "ick_bool* ick_twoforget;\n");
 			if(yukprofile || yukdebug)
 			{
 			  (void) fprintf(ofp,
-					 "type32 twoold[%d];\n",
+					 "ick_type32 twoold[%d];\n",
 					 ntwospots);
 			  (void) fprintf(ofp,
 					 "signed char twowatch[%d];\n",
@@ -884,22 +950,22 @@ int main(int argc, char *argv[])
 			{
 			  int temp=ntwospots;
 			  (void) fprintf(ofp,
-					 "overop* oo_twospots;\n");
+					 "ick_overop* ick_oo_twospots;\n");
 			  while(temp--)
 			    (void) fprintf(ofp,
-"type32 og2spot%d(type32 t)\n{\n  (void)t;\n  return twospots[%d];\n}\n"
-"void os2spot%d(type32 val, void(*f)())\n{\n  (void)f;\n  assign((void*)"
-"(twospots+%d), TWOSPOT, twoforget[%d], val);\n}\n",temp,temp,temp,temp,temp);
+"ick_type32 og2spot%d(ick_type32 t)\n{\n  (void)t;\n  return ick_twospots[%d];\n}\n"
+"void os2spot%d(ick_type32 val, void(*f)())\n{\n  (void)f;\n  ick_assign((void*)"
+"(ick_twospots+%d), ick_TWOSPOT, ick_twoforget[%d], val);\n}\n",temp,temp,temp,temp,temp);
 			}
 			else if(multithread)
-			  (void) fprintf(ofp, "overop* oo_twospots=0;\n");
+			  (void) fprintf(ofp, "ick_overop* ick_oo_twospots=0;\n");
 		    }
 		    if (ntails)
 		    {
 			(void) fprintf(ofp,
-				       "array* tails;\n");
+				       "ick_array* ick_tails;\n");
 			(void) fprintf(ofp,
-				       "bool* tailforget;\n");
+				       "ick_bool* ick_tailforget;\n");
 			if(multithread)
 			{
 			  (void) fprintf(ofp,
@@ -910,9 +976,9 @@ int main(int argc, char *argv[])
 		    if (nhybrids)
 		    {
 			(void) fprintf(ofp,
-				       "array* hybrids;\n");
+				       "ick_array* ick_hybrids;\n");
 			(void) fprintf(ofp,
-				       "bool* hyforget;\n");
+				       "ick_bool* ick_hyforget;\n");
 			if(multithread)
 			{
 			  (void) fprintf(ofp,
@@ -921,18 +987,22 @@ int main(int argc, char *argv[])
 			}
 		    }
 		    if (yydebug || compile_only)
-			for (op = oblist; op < obdex; op++)
-			  if(op->type!=MESH) /* AIS: Added this check */
-			    (void) fprintf(ofp, " /* %s %d -> %d */\n",
-					   nameof(op->type, vartypes),
-					   op->extindex,
-					   op->intindex);
+		    {
+		      assert(oblist != NULL);
+		      for (op = oblist; op < obdex; op++)
+			if(op->type!=MESH) /* AIS: Added this check */
+			  (void) fprintf(ofp, " /* %s %lu -> %lu */\n",
+					 nameof(op->type, vartypes),
+					 op->extindex,
+					 op->intindex);
+		    }
 		    if (yukdebug || yukprofile)
 		    { /* AIS: drop intern to extern map into the program */
 		      (void) fprintf(ofp, "\nyukvar yukvars[]={\n");
+		      assert(oblist != NULL);
 		      for (op = oblist; op < obdex; op++)
 			if(op->type!=MESH) /* AIS: Added this check */
-			  (void) fprintf(ofp,"    {%s,%d,%d},\n",
+			  (void) fprintf(ofp,"    {%s,%lu,%lu},\n",
 					 nameof(op->type, vartypes),
 					 op->extindex,
 					 op->intindex);
@@ -944,23 +1014,24 @@ int main(int argc, char *argv[])
 		    /* Compiling for PIC */
 		    /* Arrays not supported on PICs */
 		    if(ntails || nhybrids)
-		      lose(E256, iyylineno, (char*) NULL);
+		      ick_lose(IE256, iyylineno, (char*) NULL);
 		    /* and neither are variable constants */
 		    if(variableconstants)
-		      lose(E256, iyylineno, (char*) NULL);
+		      ick_lose(IE256, iyylineno, (char*) NULL);
+		    assert(oblist != NULL);
  		    for (op = oblist; op < obdex; op++)
  		    {
- 		      (void) fprintf(ofp, " /* %s %d -> %d */\n",
+ 		      (void) fprintf(ofp, " /* %s %lu -> %lu */\n",
  				     nameof(op->type, vartypes),
  				     op->extindex,
  				     op->intindex);
- 		      (void) fprintf(ofp, "#define %s%d %s[%d]\n",
+ 		      (void) fprintf(ofp, "#define %s%lu %s[%lu]\n",
  				     nameof(op->type, vartypes),
  				     op->extindex,
  				     nameof(op->type, varstores),
  				     op->intindex);
  		      if(op->ignorable)
- 			(void) fprintf(ofp, "ICK_INT1 ignore%s%d = 0;\n",
+ 			(void) fprintf(ofp, "ICK_INT1 ignore%s%lu = 0;\n",
  				       nameof(op->type, varstores),
   				       op->intindex);
   		    }
@@ -968,37 +1039,37 @@ int main(int argc, char *argv[])
 		    if(nonespots)
 		    {
 		      (void) fprintf(ofp,
-				     "ICK_INT16 onespots[%d];\n"
+				     "ICK_INT16 ick_onespots[%d];\n"
 				     "ICK_INT16 onespotsstash[%d];\n",
 				     nonespots,
 				     nonespots);
 		      if(opoverused) /* AIS */
 		      {
 			int temp=nonespots;
-			(void) fprintf(ofp,"overop* oo_onespots;\n");
+			(void) fprintf(ofp,"ick_overop* ick_oo_onespots;\n");
 			while(temp--)
 			  (void) fprintf(ofp,
-"type32 og1spot%d(type32 t)\n{\n  (void)t;\n  return onespots[%d];\n}\n"
-"void os1spot%d(type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoreonespots%d)"
-" onespots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
+"ick_type32 og1spot%d(ick_type32 t)\n{\n  (void)t;\n  return ick_onespots[%d];\n}\n"
+"void os1spot%d(ick_type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoreonespots%d)"
+" ick_onespots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
 		      }
 		    }
 		    if(ntwospots)
 		    {
 		      (void) fprintf(ofp,
-				     "ICK_INT32 twospots[%d];\n"
+				     "ICK_INT32 ick_twospots[%d];\n"
 				     "ICK_INT32 twospotsstash[%d];\n",
 				     ntwospots,
 				     ntwospots);
 		      if(opoverused) /* AIS */
 		      {
 			int temp=ntwospots;
-			(void) fprintf(ofp,"overop* oo_twospots;\n");
+			(void) fprintf(ofp,"ick_overop* ick_oo_twospots;\n");
 			while(temp--)
 			  (void) fprintf(ofp,
-"type32 og2spot%d(type32 t)\n{\n  (void)t;\n  return twospots[%d];\n}\n"
-"void os2spot%d(type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoretwospots%d)"
-" twospots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
+"ick_type32 og2spot%d(ick_type32 t)\n{\n  (void)t;\n  return ick_twospots[%d];\n}\n"
+"void os2spot%d(ick_type32 val,void(*f)())\n{\n  (void)f;\n  if(!ignoretwospots%d)"
+" ick_twospots[%d]=val;\n}\n",temp,temp,temp,temp,temp);
 		      }
 		    }
 		    (void) fprintf(ofp, "#include \"pick2.h\"\n");
@@ -1006,10 +1077,10 @@ int main(int argc, char *argv[])
 		  break;
 
 		case 'F':	/* set options from command line */
-		    if (clockface)
-			(void) fprintf(ofp, "clockface(TRUE);\n");
-		    if (clcsemantics) /* AIS */
-		      (void) fprintf(ofp, "clcsemantics(TRUE);\n");
+		    if (ick_clockface)
+			(void) fprintf(ofp, "ick_clockface(ick_TRUE);\n");
+		    if (ick_clcsemantics) /* AIS */
+		      (void) fprintf(ofp, "ick_setclcsemantics(ick_TRUE);\n");
 		    break;
 
 		case 'G':	/* degenerated code */
@@ -1017,7 +1088,7 @@ int main(int argc, char *argv[])
 		    {
 			emit(tp, ofp);
 			if (i == bugline)
-			    (void) fprintf(ofp, "    lose(E774, lineno, "
+			    (void) fprintf(ofp, "    ick_lose(IE774, ick_lineno, "
 						"(char *)NULL);\n");
 		    }
 		    break;
@@ -1025,14 +1096,14 @@ int main(int argc, char *argv[])
 		case 'H':	/* COMPUCOME, and dispatching for resumes */
                  /* AIS: Added COMPUCOME here. This line must be fully guarded
 		    to prevent a longjmp to an uninitialised buffer (it's
-		    guarded by a lose() in ick-wrap.c.) Also checks for
+		    guarded by a ick_lose() in ick-wrap.c.) Also checks for
 		    multithread; programs that mix normal and computed COME
 		    FROM need to use the same conventions for both, so even
 		    if no computed COME FROMs are used, the normal ones need
 		    this line so that COME FROMs can be handled consistently.*/
 		    if(compucomesused || multithread)
 		    {
-		      (void) fprintf(ofp, "CCFL: ; CCF%d: longjmp(cjb,1);\n",
+		      (void) fprintf(ofp, "CCFL: ; CCF%d: longjmp(ick_cjb,1);\n",
 				     compucomecount);
 		    }
 #if 0
@@ -1045,7 +1116,7 @@ int main(int argc, char *argv[])
 		    if (nextcount)
 		    {
 			(void) fputs("/* generated switch for resumes */",ofp);
-			(void) fputs("top:\n    switch(skipto)\n    {\n", ofp);
+			(void) fputs("top:\n    switch(ick_skipto)\n    {\n", ofp);
 			for (tp = tuples; tp->type; tp++)
 			    if (tp->type == NEXT)
 				(void) fprintf(ofp,
@@ -1085,13 +1156,13 @@ int main(int argc, char *argv[])
 		    (void) fprintf(ofp, "int lineofaboff[] = {\n");
 		    for (tp = tuples; tp->type; tp++)
 		    {
-		      fprintf(ofp,"%d,",tp->lineno);
+		      fprintf(ofp,"%d,",tp->ick_lineno);
 		    }
 		    (void) fprintf(ofp, "-1};\n\n");
 		    (void) fprintf(ofp, "int yukopts = %d;\n", yukprofile+yukdebug*2);
-		    (void) fprintf(ofp, "yptimer ypexectime[%d];\n", lineno);
-		    (void) fprintf(ofp, "ypcounter ypexecount[%d];\n",lineno);
-		    (void) fprintf(ofp, "ypcounter ypabscount[%d];\n",lineno);
+		    (void) fprintf(ofp, "yptimer ypexectime[%d];\n", ick_lineno);
+		    (void) fprintf(ofp, "ypcounter ypexecount[%d];\n",ick_lineno);
+		    (void) fprintf(ofp, "ypcounter ypabscount[%d];\n",ick_lineno);
 		  }
 		  break;
 
@@ -1114,6 +1185,9 @@ int main(int argc, char *argv[])
 		     overloads operands (I don't think this is used at
 		     the moment, though) */
 		  (void) fprintf(ofp, "#define OPOVERUSED %d\n",opoverused);
+		  /* and whether to use the ICK_EC code */
+		  if(useickec)
+		    (void) fprintf(ofp, "#define ICK_EC 1\n");
 		  break;
 
 		case 'N':	/* allocate variables */
@@ -1133,22 +1207,22 @@ int main(int argc, char *argv[])
 		      if(!pickcompile) /* AIS */
 		      {
 			(void) fprintf(ofp,
-				       "    onespots = calloc("
-				       "%d, sizeof *onespots);\n",
+				       "    ick_onespots = calloc("
+				       "%d, sizeof *ick_onespots);\n",
 				       nonespots);
 			(void) fprintf(ofp,
-				       "    oneforget = calloc("
-				       "%d, sizeof *oneforget);\n",
+				       "    ick_oneforget = calloc("
+				       "%d, sizeof *ick_oneforget);\n",
 				       nonespots);
 		      }
 		      if(opoverused)
 		      {
 			int temp=nonespots;
 			(void) fprintf(ofp,
-"    oo_onespots=malloc(%d*sizeof*oo_onespots);\n",temp);
+"    ick_oo_onespots=malloc(%d*sizeof*ick_oo_onespots);\n",temp);
 			while(temp--)
 			  (void) fprintf(ofp,
-"    oo_onespots[%d].get=og1spot%d;\n    oo_onespots[%d].set=os1spot%d;\n",
+"    ick_oo_onespots[%d].get=og1spot%d;\n    ick_oo_onespots[%d].set=os1spot%d;\n",
 					 temp,temp,temp,temp);
 		      }
 		    }
@@ -1157,45 +1231,45 @@ int main(int argc, char *argv[])
 		      if(!pickcompile)
 		      {
 			(void) fprintf(ofp,
-				       "    twospots = calloc("
-				       "%d, sizeof *twospots);\n",
+				       "    ick_twospots = calloc("
+				       "%d, sizeof *ick_twospots);\n",
 				       ntwospots);
 			(void) fprintf(ofp,
-				       "    twoforget = calloc("
-				       "%d, sizeof *twoforget);\n",
+				       "    ick_twoforget = calloc("
+				       "%d, sizeof *ick_twoforget);\n",
 				       ntwospots);
 		      }
 		      if(opoverused)
 		      {
 			int temp=ntwospots;
 			(void) fprintf(ofp,
-"    oo_twospots=malloc(%d*sizeof*oo_twospots);\n",temp);
+"    ick_oo_twospots=malloc(%d*sizeof*ick_oo_twospots);\n",temp);
 			while(temp--)
 			  (void) fprintf(ofp,
-"    oo_twospots[%d].get=og2spot%d;\n    oo_twospots[%d].set=os2spot%d;\n",
+"    ick_oo_twospots[%d].get=og2spot%d;\n    ick_oo_twospots[%d].set=os2spot%d;\n",
 					 temp,temp,temp,temp);
 		      }
 		    }
 		    if (ntails&&!pickcompile)
 		    {
 			(void) fprintf(ofp,
-				       "    tails = calloc("
-				       "%d, sizeof *tails);\n",
+				       "    ick_tails = calloc("
+				       "%d, sizeof *ick_tails);\n",
 				       ntails);
 			(void) fprintf(ofp,
-				       "    tailforget = calloc("
-				       "%d, sizeof *tailforget);\n",
+				       "    ick_tailforget = calloc("
+				       "%d, sizeof *ick_tailforget);\n",
 				       ntails);
 		    }
 		    if (nhybrids&&!pickcompile)
 		    {
 			(void) fprintf(ofp,
-				       "    hybrids = calloc("
-				       "%d, sizeof *hybrids);\n",
+				       "    ick_hybrids = calloc("
+				       "%d, sizeof *ick_hybrids);\n",
 				       nhybrids);
 			(void) fprintf(ofp,
-				       "    hyforget = calloc("
-				       "%d, sizeof *hyforget);\n",
+				       "    ick_hyforget = calloc("
+				       "%d, sizeof *ick_hyforget);\n",
 				       nhybrids);
 		    }
 		    break;
@@ -1204,7 +1278,7 @@ int main(int argc, char *argv[])
 		    fprintf(ofp,"unsigned truelineno = 0;\n");
 		  if(opoverused)
 		    fprintf(ofp,"%s trueval;\n",
-			    pickcompile?"ICK_INT32":"type32");
+			    pickcompile?"ICK_INT32":"ick_type32");
 		  break;
 		case 'P': /* AIS: for operand overloading */
 		  if(opoverused)
@@ -1218,21 +1292,21 @@ int main(int argc, char *argv[])
 
 	    if(!outtostdout) (void) fclose(ofp);
 
-#ifndef __DJGPP__	    
+#ifndef __DJGPP__
 	    /* OK, now sic the C compiler on the results */
-	    if (!compile_only&&!yukdebug&&!yukprofile)
+	    if (!compile_only&&!yukdebug&&!yukprofile&&!useickec)
 	    {
 	      /* AIS: buf2 now assigned elsewhere so $L works */
 	      (void) system(buf2);
 	      /* AIS: no unlink if cdebug */ if(!cdebug) (void) unlink(buf);
 	    }
-	    else if(!compile_only)
+	    else if(!compile_only&&!useickec)
 	    { /* AIS: run, then delete all output but yuk.out */
 	      /* Note that the output must be deleted for copyright
 		 reasons (so as not to GPL a non-GPL file automatically) */
 	      (void) system(buf2);
 #ifdef HAVE_UNISTD_H
-	      dup2(oldstdin,0); /* restore stdin */
+	      (void) dup2(oldstdin,0); /* restore stdin */
 #endif
 	      (void) system(yukcmdstr);
 	      (void) unlink(buf);
@@ -1240,7 +1314,7 @@ int main(int argc, char *argv[])
 	    }
 #else /* we are using DJGPP */
 	    /* OK, now sic the C compiler on the results */
-	    if (!compile_only)
+	    if (!compile_only&&!useickec)
 	    {
 	      /* AIS: buf2 now assigned elsewhere so $L works */
 	      /* AIS: This changes somewhat for DJGPP, due to the
@@ -1249,7 +1323,7 @@ int main(int argc, char *argv[])
 	      FILE* rsp;
 	      /* Use current dir as temp if needed */
 	      char* tempfn="gcc @ickgcc.rsp";
-	      /* Three tries are used to find a temp directory.
+	      /* Four tries are used to find a temp directory.
 		 ICKTEMP is the preferred environment variable to check;
 	         if, as expected, this isn't set, try TMPDIR (which DJGPP
 	         sets to its own temp directory, at least when running under
@@ -1259,7 +1333,7 @@ int main(int argc, char *argv[])
 	      if(isenv("TEMP")) tempfn="gcc @/dev/env/TEMP/ickgcc.rsp";
 	      if(isenv("TMPDIR")) tempfn="gcc @/dev/env/TMPDIR/ickgcc.rsp";
 	      if(isenv("ICKTEMP")) tempfn="gcc @/dev/env/ICKTEMP/ickgcc.rsp";
-	      rsp=debfopen(tempfn+5,"w");
+	      rsp=ick_debfopen(tempfn+5,"w");
 	      fprintf(rsp,"%s\n",buf2);
 	      fclose(rsp);
 	      system(tempfn);
@@ -1269,7 +1343,11 @@ int main(int argc, char *argv[])
 #ifdef HAVE_UNISTD_H
 		dup2(oldstdin,0); /* restore stdin */
 #endif
+#ifndef HAVE_SNPRINTF
 		sprintf(buf2,"%s" EXEEXT,argv[optind]);
+#else
+		snprintf(buf2,"%s" EXEEXT,argv[optind]);
+#endif
 		system(yukcmdstr);
 		remove(buf);
 		remove(buf2);
@@ -1292,7 +1370,12 @@ int main(int argc, char *argv[])
 		 WRITE IN. Double-oh-sevens screw this up, too. */
 	      if(cooptsh)
 	      {
-		sprintf(buf2,"sh %s %s", cooptsh, argv[optind]);
+#ifndef HAVE_SNPRINTF
+		(void) sprintf(buf2,"sh %s %s", cooptsh, argv[optind]);
+#else
+		(void) snprintf(buf2, sizeof buf2,
+				"sh %s %s", cooptsh, argv[optind]);
+#endif
 		(void) system(buf2); /* replaces the output executable if
 					neccesary */
 	      }
@@ -1302,10 +1385,187 @@ int main(int argc, char *argv[])
 	}
     }
     (void) fclose(ifp);
+
+    if(!compile_only && useickec) /* AIS */
+    {
+      FILE* cioin;
+      FILE* cioallec;
+      char* buf2ptr;
+      long remspace;
+      char* tempfn="ickectmp.c";
+#if __DJGPP__
+      /* Look for a temp directory, as above. */
+      if(isenv("TMP")) tempfn="/dev/env/TMP/ickectmp.c";
+      if(isenv("TEMP")) tempfn="/dev/env/TEMP/ickectmp.c";
+      if(isenv("TMPDIR")) tempfn="/dev/env/TMPDIR/ickectmp.c";
+      if(isenv("ICKTEMP")) tempfn="/dev/env/ICKTEMP/ickectmp.c";
+#else
+      tempfn="/tmp/ickectmp.c"; /* always a valid temporary folder on POSIX */
+#endif
+      cioallec=ick_debfopen(tempfn,"w");
+      if(cioallec == NULL)
+	ick_lose(IE888, -1, (char*) NULL);
+      (void) fprintf(cioallec,"void ick_doresume(unsigned short,int);\n");
+      (void) fprintf(cioallec,"extern int ick_global_checkmode;\n");
+      (void) fprintf(cioallec,"void ick_allecfuncs(void)\n{\n");
+
+      /* Here, we run the C preprocessor on the files in question, then our
+	 own preprocessor, and finally link all the files together into one
+	 executable. */
+      for(optind=oldoptind; optind < argc; optind++)
+      {
+#ifndef HAVE_SNPRINTF
+	(void) sprintf(buf2,
+#else
+	(void) snprintf(buf2, sizeof buf2,
+#endif
+			"%s -E -I%s -I%s -I%s/../include %s.c > %s.cio",
+			compiler, includedir, path, path, argv[optind], argv[optind]);
+#if 0
+	  ); /* for Emacs' autoindenter */
+#endif
+	if(argv[optind][strlen(argv[optind])+2]=='\0' /* it was a .c or .i file */
+	   ||argv[optind][strlen(argv[optind])+3]!='o') /* it was a .2-7i file */
+	  (void) system(buf2); /* run the C preprocessor */
+	  buf2ptr = strrchr(buf2,'>'); /* get the .cio's filename */
+	  cioin=NULL;
+	/* Do our preprocessing, by editing the file in place using rb+. */
+	if(buf2ptr != NULL && buf2ptr[1] != '\0' && buf2ptr[2] != '\0')
+	  cioin=ick_debfopen(buf2ptr+2,"rb+");
+	if(cioin)
+	{
+	  int inchar=fgetc(cioin);
+	  int toparencount=0;
+	  /* The ppnums are replacements for strings in the .cio file.
+	     The choice of 65538 means that we don't clash with any
+	     line numbers in the program, but do clash with the other
+	     C-INTERCAL preprocessor (that handles WHILE); that isn't a
+	     problem because external calls are inconsistent with
+	     multithreading anyway. */
+	  long ppnum1=65538L*2L;
+	  long ppnum2=65538L*2L;
+	  long ppnum3=65538L*2L;
+	  long ciopos=0L;
+	  /*@+charintliteral@*/ /* literal chars are ints */
+	  while(inchar != EOF)
+	  {
+	    if(inchar=='I')
+	    {
+	      /* Look for the ICK_EC_PP_ string that indicates preprocessing
+		 is needed. This method of doing it works as long as the
+	         ICK_EC_PP_ string is never preceded by something which looks
+		 like part of the same string, but luckily, it never is. */
+	      if((inchar=fgetc(cioin))!='C') continue;
+	      if((inchar=fgetc(cioin))!='K') continue;
+	      if((inchar=fgetc(cioin))!='_') continue;
+	      if((inchar=fgetc(cioin))!='E') continue;
+	      if((inchar=fgetc(cioin))!='C') continue;
+	      if((inchar=fgetc(cioin))!='_') continue;
+	      if((inchar=fgetc(cioin))!='P') continue;
+	      if((inchar=fgetc(cioin))!='P') continue;
+	      if((inchar=fgetc(cioin))!='_') continue;
+	      inchar=fgetc(cioin);
+	      toparencount=0;
+	      if(inchar=='0')
+	      {
+		fprintf(cioallec,"#define X ");
+		while(fputc(fgetc(cioin),cioallec) != ')') toparencount++;
+	      }
+	      (void) fseek(cioin,ciopos,SEEK_SET);
+	      switch(inchar)
+	      {
+	      case '0': /* a function exists */
+		fprintf(cioin,"            ");
+		fprintf(cioallec,"\nvoid X(void); X();\n"
+			"if(ick_global_checkmode==5) ick_doresume(1,-1);\n");
+		while(toparencount--) (void) fputc(' ',cioin);
+		break;
+	      case '1':
+		fprintf(cioin,"%-11ld",ppnum1++/2);
+		break;
+	      case '2':
+		fprintf(cioin,"%-11ld",ppnum2++/2);
+		break;
+	      case '3':
+		fprintf(cioin,"%-11ld",ppnum3++/2);
+		break;
+	      case '4':
+		fprintf(cioin,"%-11d",optind);
+		break;
+	      default:
+		ick_lose(IE778, -1, (char*) NULL);
+	      }
+	      (void) fseek(cioin,0L,SEEK_CUR); /* synch the file */
+	    }
+	    ciopos=ftell(cioin);
+	    inchar=fgetc(cioin);
+	  }
+	  /*@=charintliteral@*/
+	  (void) fclose(cioin);
+	}
+      }
+      fprintf(cioallec,"if(ick_global_checkmode==2)\n");
+      fprintf(cioallec,"  ick_global_checkmode=4;\n");
+      fprintf(cioallec,"};\n");
+      (void) fclose(cioallec);
+
+      /* This command line needs some explanation, and is specific to gcc and
+	 GNU ld. The -x causes gcc to interpret the .cio files as C; the
+	 -Wl,-z,muldefs is an instruction to GNU ld, telling it to link in the
+	 first main found and ignore the others.  (That way, there can be a
+	 main function in each .cio, but the .cios can be linked in any order,
+	 with the right main function foremost each time.)
+      */
+#ifdef HAVE_SNPRINTF
+      (void) snprintf(buf2, sizeof buf2,
+#else
+      (void) sprintf(buf2,
+#endif
+	      "%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT
+              "%s -Wl,-z,muldefs -x c %s", compiler, libdir,
+	      path, path, argv[oldoptind], cdebug?" -g":"", tempfn);
+#if 0
+	); /* for Emacs' autoindenter */
+#endif
+      remspace = (long)(sizeof buf2 - strlen(buf2) - 1);
+      for(optind=oldoptind; optind < argc; optind++)
+      {
+	remspace -= strlen(argv[optind]) - 5; /* 5 for <space>.cio */
+	if(remspace <= 0)
+	  ick_lose(IE666, -1, (char*)NULL);
+	strcat(buf2," ");
+	strcat(buf2,argv[optind]);
+	strcat(buf2,".cio");
+      }
+      remspace -= strlen(" -lickec");
+      if(remspace <= 0)
+	ick_lose(IE666, -1, (char*)NULL);
+      strcat(buf2," -lickec");
+      (void) system(buf2);
+    }
+
+    /* AIS: Free malloc'd memory. */
+    if(textlines)
+    {
+      /* Marking what textlines points to as only would be the 'right'
+	 way to do this (because it is only), but I can't figure out the
+	 syntax to do it, so instead I'm supressing the warning that comes
+	 up because it isn't marked as only. */
+      /*@-unqualifiedtrans@*/
+      while(textlinecount--) free(textlines[textlinecount]);
+      free(textlines);
+      /*@=unqualifiedtrans@*/
+    }
+
 #ifdef HAVE_UNISTD_H
     (void) close(oldstdin); /* AIS */
 #endif
+    /* This point is the very end of the program. So it's correct for
+       normal DO NOT FREE UNDER ANY CIRCUMSTANCES globals to be free
+       at this point, so supressing the warning given as a result. */
+    /*@-globstate@*/
     return 0;
+    /*@=globstate@*/
 }
 
 /* perpet.c ends here */

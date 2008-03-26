@@ -1,7 +1,7 @@
 /*
  *
  * NAME
- *    lose.c -- report INTERCAL compile- or run-time error
+ *    ick_lose.c -- report INTERCAL compile- or run-time error
  *
 LICENSE TERMS
     Copyright (C) 1996 Eric S. Raymond 
@@ -25,13 +25,14 @@ LICENSE TERMS
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include "lose.h"
+#include "ick_lose.h"
 
-int coreonerr = 0; /* AIS */
+int ick_coreonerr = 0; /* AIS */
 
-int checkforbugs; /* AIS */
+int ick_checkforbugs; /* AIS */
 
-void lose(char *m, int n, char *s)
+/*@-formatconst@*/
+void ick_lose(char *m, int n, char *s)
 {
     (void) fflush(stdout); /* AIS: To stop stdout getting muddled with stderr*/
     (void) fprintf(stderr,
@@ -42,18 +43,18 @@ void lose(char *m, int n, char *s)
     else
 	(void) fprintf(stderr, m + 4, n);
     (void) fprintf(stderr, "        CORRECT SOURCE AND RESUBNIT\n");
-    if(atoi(m)==778&&coreonerr) /* AIS */
+    if(atoi(m)==778&&ick_coreonerr) /* AIS */
     {
       /* AIS: Dump core. */
-      raise(SIGABRT);
+      (void) raise(SIGABRT);
     }
     exit(atoi(m));
 }
 
-/* AIS: This function reports potential bugs. It's paraphrased from lose. */
-void lwarn(char *m, int n, char *s)
+/* AIS: This function reports potential bugs. It's paraphrased from ick_lose. */
+void ick_lwarn(char *m, int n, char *s)
 {
-  if(!checkforbugs) return; /* Don't report a potential bug without -l */
+  if(!ick_checkforbugs) return; /* Don't report a potential bug without -l */
   (void) fflush(stdout);
   (void) fprintf(stderr,
 		 "ICL%c%c%cW\t",
@@ -68,5 +69,6 @@ void lwarn(char *m, int n, char *s)
   /* Don't exit. This is not any error except one not causing immediate
      termination of program execution. */
 }
+/*@=formatconst@*/
 
-/* lose.c ends here */
+/* ick_lose.c ends here */

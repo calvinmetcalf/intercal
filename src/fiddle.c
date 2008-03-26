@@ -23,14 +23,14 @@ LICENSE TERMS
 
 #include "fiddle.h"
 #include "sizes.h"
-#include "lose.h"
+#include "ick_lose.h"
 #include <stdio.h>
 
-unsigned int mingle(register unsigned int r, register unsigned int s)
+unsigned int ick_mingle(register unsigned int r, register unsigned int s)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     if (r>0xffff || s>0xffff)
-      lose(E533, lineno, (char *)NULL);
+      ick_lose(IE533, ick_lineno, (char *)NULL);
     r = ((r & 0x0000ff00) << 8) | (r & 0x000000ff);
     r = ((r & 0x00f000f0) << 4) | (r & 0x000f000f);
     r = ((r & 0x0c0c0c0c) << 2) | (r & 0x03030303);
@@ -44,21 +44,21 @@ unsigned int mingle(register unsigned int r, register unsigned int s)
   else {
     unsigned int result = 0, fac = 1;
     int i;
-    for (i = 0 ; i < Small_digits ; i++) {
-      result += fac * (s % Base);
-      s /= Base;
-      fac *= Base;
-      result += fac * (r % Base);
-      r /= Base;
-      fac *= Base;
+    for (i = 0 ; i < ick_Small_digits ; i++) {
+      result += fac * (s % ick_Base);
+      s /= ick_Base;
+      fac *= ick_Base;
+      result += fac * (r % ick_Base);
+      r /= ick_Base;
+      fac *= ick_Base;
     }
     return result;
   }
 }
 
-unsigned int iselect(register unsigned int r, register unsigned int s)
+unsigned int ick_iselect(register unsigned int r, register unsigned int s)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     register unsigned int i = 1, t = 0;
     while (s) {
       if (s & i) {
@@ -75,189 +75,189 @@ unsigned int iselect(register unsigned int r, register unsigned int s)
   }
   else {
     unsigned int j, result = 0, fac, digit, ofac = 1;
-    for (j = Base - 1 ; j > 0 ; j--) {
+    for (j = (unsigned)ick_Base - 1 ; j > 0 ; j--) {
       int i;
       fac = 1;
-      for (i = 0; i < Large_digits ; i++) {
-	if ((s / fac) % Base == j) {
-	  digit = (r / fac) % Base;
+      for (i = 0; i < ick_Large_digits ; i++) {
+	if ((s / fac) % ick_Base == j) {
+	  digit = (r / fac) % ick_Base;
 	  if (digit)
 	    result += ofac * (digit > j ? digit : j);
-	  ofac *= Base;
+	  ofac *= ick_Base;
 	}
-	fac *= Base;
+	fac *= ick_Base;
       }
     }
     return result;
   }
 }
 
-static unsigned int whirl(unsigned int len, unsigned int p, unsigned int n)
+static unsigned int ick_whirl(unsigned int len, unsigned int p, unsigned int n)
 {
   unsigned int i, fac = 1, result = 0, d1, d2, dsave;
-  d1 = n % Base;
+  d1 = n % ick_Base;
   dsave = d1;
   for (i = 1 ; i <= len ; i++) {
     d2 = d1;
-    d1 = (i < len) ? (n /= Base, n % Base) : dsave;
+    d1 = (i < len) ? (n /= ick_Base, n % ick_Base) : dsave;
     if (d1 <= p)
       result += fac * ((d2 < d1 || d2 > p) ? d1 : d2);
     else
       result += fac * ((d2 < d1 && d2 > p) ? d1 : d2);
-    fac *= Base;
+    fac *= ick_Base;
   }
   return result;
 }
 
-unsigned int and16(unsigned int n)
+unsigned int ick_and16(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x8000;
     return(m & n);
   }
   else {
-    return whirl(Small_digits,0,n);
+    return ick_whirl((unsigned)ick_Small_digits,0,n);
   }
 }
 
-unsigned int or16(unsigned int n)
+unsigned int ick_or16(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x8000;
     return(m | n);
   }
   else {
-    return whirl(Small_digits,Base-1,n);
+    return ick_whirl((unsigned)ick_Small_digits,(unsigned)ick_Base-1,n);
   }
 }
 
-unsigned int whirl16(unsigned int p, unsigned int n)
+unsigned int ick_whirl16(unsigned int p, unsigned int n)
 {
-  return whirl(Small_digits,p,n);
+  return ick_whirl((unsigned)ick_Small_digits,p,n);
 }
 
-unsigned int and32(unsigned int n)
+unsigned int ick_and32(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x80000000;
     return(m & n);
   }
   else {
-    return whirl(Large_digits,0,n);
+    return ick_whirl((unsigned)ick_Large_digits,0,n);
   }
 }
 
-unsigned int or32(unsigned int n)
+unsigned int ick_or32(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x80000000;
     return(m | n);
   }
   else {
-    return whirl(Large_digits,Base-1,n);
+    return ick_whirl((unsigned)ick_Large_digits,(unsigned)ick_Base-1,n);
   }
 }
 
-unsigned int whirl32(unsigned int p, unsigned int n)
+unsigned int ick_whirl32(unsigned int p, unsigned int n)
 {
-  return whirl(Large_digits,p,n);
+  return ick_whirl((unsigned)ick_Large_digits,p,n);
 }
 
-unsigned int xor(unsigned int len, unsigned int n)
+static unsigned int ick_xor(unsigned int len, unsigned int n)
 {
   unsigned int i, fac = 1, result = 0, d1, d2, dsave;
-  d1 = n % Base;
+  d1 = n % ick_Base;
   dsave = d1;
   for (i = 1 ; i <= len ; i++) {
     d2 = d1;
-    d1 = (i < len) ? (n /= Base, n % Base) : dsave;
-    result += fac * ((Base + d1 - d2) % Base);
-    fac *= Base;
+    d1 = (i < len) ? (n /= ick_Base, n % ick_Base) : dsave;
+    result += fac * ((ick_Base + d1 - d2) % ick_Base);
+    fac *= ick_Base;
   }
   return result;
 }
 
-unsigned int xor16(unsigned int n)
+unsigned int ick_xor16(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x8000;
     return(m ^ n);
   }
   else {
-    return xor(Small_digits,n);
+    return ick_xor((unsigned)ick_Small_digits,n);
   }
 }
 
-unsigned int xor32(unsigned int n)
+unsigned int ick_xor32(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x80000000;
     return(m ^ n);
   }
   else {
-    return xor(Large_digits,n);
+    return ick_xor((unsigned)ick_Large_digits,n);
   }
 }
 
-static unsigned int fin(unsigned int len, unsigned int n)
+static unsigned int ick_fin(unsigned int len, unsigned int n)
 {
   unsigned int i, fac = 1, result = 0, d1, d2, dsave;
-  d1 = n % Base;
+  d1 = n % ick_Base;
   dsave = d1;
   for (i = 1 ; i <= len ; i++) {
     d2 = d1;
-    d1 = (i < len) ? (n /= Base, n % Base) : dsave;
-    result += fac * ((d1 + d2) % Base);
-    fac *= Base;
+    d1 = (i < len) ? (n /= ick_Base, n % ick_Base) : dsave;
+    result += fac * ((d1 + d2) % ick_Base);
+    fac *= ick_Base;
   }
   return result;
 }
 
-unsigned int fin16(unsigned int n)
+unsigned int ick_fin16(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x8000;
     return(m ^ n);
   }
   else {
-    return fin(Small_digits,n);
+    return ick_fin((unsigned)ick_Small_digits,n);
   }
 }
 
-unsigned int fin32(unsigned int n)
+unsigned int ick_fin32(unsigned int n)
 {
-  if (Base == 2) {
+  if (ick_Base == 2) {
     unsigned int m = (n >> 1);
     if (n & 1)
       m |= 0x80000000;
     return(m ^ n);
   }
   else {
-    return fin(Large_digits,n);
+    return ick_fin((unsigned)ick_Large_digits,n);
   }
 }
 
 /* AIS: Reversed operations, for operand overloading */
 
-static unsigned int rotleft16(unsigned int n)
+static unsigned int ick_rotleft16(unsigned int n)
 {
   return !!(n&0x8000)|((n&0x7FFF)<<1);
 }
-static unsigned int rotleft32(unsigned int n)
+static unsigned int ick_rotleft32(unsigned int n)
 {
   return !!(n&0x80000000)|((n&0x7FFFFFFF)<<1);
 }
@@ -265,35 +265,35 @@ static unsigned int rotleft32(unsigned int n)
 /* For the time being, just work out the answer in binary, and test using
    the base-whatever operation. This means that there'll nearly always be
    a failure in reversing in bases other than 2. */
-unsigned int rev_or16(unsigned int n)
+unsigned int ick_rev_or16(unsigned int n)
 {
-  if(or16(rotleft16(and16(n)))==n) return rotleft16(and16(n));
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_or16(ick_rotleft16(ick_and16(n)))==n) return ick_rotleft16(ick_and16(n));
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_or32(unsigned int n)
+unsigned int ick_rev_or32(unsigned int n)
 {
-  if(or32(rotleft32(and32(n)))==n) return rotleft32(and32(n));
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_or32(ick_rotleft32(ick_and32(n)))==n) return ick_rotleft32(ick_and32(n));
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_and16(unsigned int n)
+unsigned int ick_rev_and16(unsigned int n)
 {
-  if(and16(rotleft16(or16(n)))==n) return rotleft16(or16(n));
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_and16(ick_rotleft16(ick_or16(n)))==n) return ick_rotleft16(ick_or16(n));
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_and32(unsigned int n)
+unsigned int ick_rev_and32(unsigned int n)
 {
-  if(and32(rotleft32(or32(n)))==n) return rotleft32(or32(n));
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_and32(ick_rotleft32(ick_or32(n)))==n) return ick_rotleft32(ick_or32(n));
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_xor16(unsigned int n)
+unsigned int ick_rev_xor16(unsigned int n)
 {
   unsigned int a=0, l=1, t=0;
   while(l<=0x4000)
@@ -304,13 +304,13 @@ unsigned int rev_xor16(unsigned int n)
       a+=l*2;
     l*=2;
   }
-  if(xor16(a)==n) return a;
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_xor16(a)==n) return a;
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
 
-unsigned int rev_xor32(unsigned int n)
+unsigned int ick_rev_xor32(unsigned int n)
 {
   unsigned int a=0, l=1, t=0;
   while(l<=0x4000000)
@@ -321,12 +321,12 @@ unsigned int rev_xor32(unsigned int n)
       a+=l*2;
     l*=2;
   }
-  if(xor32(a)==n) return a;
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_xor32(a)==n) return a;
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_fin16(unsigned int n)
+unsigned int ick_rev_fin16(unsigned int n)
 {
   unsigned int a=0, l=1, t=0;
   while(l<=0x4000)
@@ -337,13 +337,13 @@ unsigned int rev_fin16(unsigned int n)
       a+=l*2;
     l*=2;
   }
-  if(fin16(a)==n) return a;
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_fin16(a)==n) return a;
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
 
-unsigned int rev_fin32(unsigned int n)
+unsigned int ick_rev_fin32(unsigned int n)
 {
   unsigned int a=0, l=1, t=0;
   while(l<=0x4000000)
@@ -354,45 +354,45 @@ unsigned int rev_fin32(unsigned int n)
       a+=l*2;
     l*=2;
   }
-  if(fin32(a)==n) return a;
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_fin32(a)==n) return a;
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_whirl16(unsigned int p, unsigned int n)
+unsigned int ick_rev_whirl16(unsigned int p, unsigned int n)
 {
   /* Only reverse if all digits are the same. */
-  if(whirl16(p,n)==n) return n;
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_whirl16(p,n)==n) return n;
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
-unsigned int rev_whirl32(unsigned int p, unsigned int n)
+unsigned int ick_rev_whirl32(unsigned int p, unsigned int n)
 {
   /* Only reverse if all digits are the same. */
-  if(whirl32(p,n)==n) return n;
-  lose(E277, lineno, (char*) NULL);
-  return 0;
+  if(ick_whirl32(p,n)==n) return n;
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
 /* AIS: Some helper functions for the optimizer, only working in base 2 */
 
-unsigned int xselx(unsigned int x)
+unsigned int ick_xselx(unsigned int x)
 {
-  register int r=0;
-  if(Base != 2) lose(E778, lineno, (char*) NULL);
+  register unsigned int r=0;
+  if(ick_Base != 2) ick_lose(IE778, ick_lineno, (char*) NULL);
   while(x) {if(x&1) r=(r<<1)|1; x>>=1;}
   return r;
 }
 
-unsigned int setbitcount(unsigned int x)
+unsigned int ick_setbitcount(unsigned int x)
 {
-  register int r=0;
+  register unsigned int r=0;
   while(x) {if(x&1) r++; x>>=1;}
   return r;
 }
 
-unsigned int smudgeright(unsigned int x)
+unsigned int ick_smudgeright(unsigned int x)
 {
   x=x|(x>>1);
   x=x|(x>>2);
@@ -402,7 +402,7 @@ unsigned int smudgeright(unsigned int x)
   return x;
 }
 
-unsigned int smudgeleft(unsigned int x)
+unsigned int ick_smudgeleft(unsigned int x)
 {
   x=x|(x<<1);
   x=x|(x<<2);

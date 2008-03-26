@@ -1,9 +1,10 @@
+dnl -*- autoconf -*-
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/abcess.h)
 AC_CONFIG_HEADER(temp/config.h:src/configh.in)
 
 dnl Information about this version of INTERCAL.
-PACKAGE_VERSION=0.27
+PACKAGE_VERSION=0.28
 
 dnl Checks for programs.
 AC_PROG_YACC
@@ -81,7 +82,7 @@ AC_DEFINE_UNQUOTED(EXEEXT,"$EXEEXT")
 
 dnl Checks for library functions.
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul)
+AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul snprintf asprintf)
 
 AC_SUBST(PACKAGE_VERSION)
 

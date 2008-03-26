@@ -1,6 +1,8 @@
 /* uncommon.h -- declarations for uncommon.c and C files linked to it */
 
-extern FILE* debfopen(char*, char*);
-extern FILE* findandfopen(char*, char*, char*, char*);
-extern char* findandtestopen(char*, char*, char*, char*);
-extern FILE* findandfreopen(char*, char*, char*, char*, FILE*);
+#include "config.h"
+
+/*@null@*/ /*@dependent@*/ extern FILE* ick_debfopen(/*@observer@*/ char*, /*@observer@*/ char*);
+/*@null@*/ /*@dependent@*/ extern FILE* ick_findandfopen(/*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*);
+/*@observer@*/ /*@null@*/ extern char* ick_findandtestopen(/*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*);
+/*@null@*/ /*@dependent@*/ extern FILE* ick_findandfreopen(/*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, FILE*);

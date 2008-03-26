@@ -9,7 +9,8 @@ live it down.
 This implementation was created by Eric S. Raymond <esr@snark.thyrsus.com>
 during a fit of lunacy from which he has since mostly recovered.  It has been
 considerably hacked upon and improved by Steve Swales, Michael Ernst, Louis
-Howell, Brian Raiter, Alex Smith, and others.  For detailed credits see NEWS.
+Howell, Brian Raiter, Alex Smith, Joris Huizer and others.  For detailed
+credits see NEWS.
 
                                      FILES
 
@@ -58,11 +59,13 @@ src/feh2.c              -- INTERCAL-to-C code generator
 src/fiddle.[ch]         -- the INTERCAL operators
 src/ick-wrap.c          -- the driver for generated C-from-INTERCAL code
 src/ick.h               -- compilation types and defines
+src/ick_ec.[ch]		-- external call support for INTERCAL
+src/ick_lose.[ch]       -- INTERCAL compile- and run-time error handling
 src/idiotism.oil        -- list of INTERCAL idioms to optimize
 src/lexer.l             -- the lexical analyzer specification (in LEX)
-src/lose.[ch]           -- INTERCAL compile- and run-time error handling
 src/numerals.c          -- numerals table for INTERCAL input
 src/oil.y               -- compiler to translate idiotism.oil into C
+src/oil.h               -- name mangling for OIL files
 src/parser.y            -- the grammar specification (in YACC)
 src/perpet.c            -- main routine for compiler
 src/pick1.h             -- template for compiler-dependent PIC C headers
@@ -169,9 +172,12 @@ Museun, http://www.catb.org/retro.
 version wasn't the most recent. Looking through the alt.lang.intercal archives
 is usually the best way to find out what the latest version of C-INTERCAL (and
 you'll find out how to get its rival too, for that matter) is nowadays; they
-tend to pop up in various unusual places, so giving a URL might be
-misleading. Note also that contact details, and even who to contact, often end
-up out of date; the newsgroup is also a good way to find out who to contact.)
+tend to pop up in various unusual places, so giving a URL might be misleading.
+Note also that contact details, and even who to contact, often end up out of
+date; the newsgroup is also a good way to find out who to contact.
+
+As of when I wrote this, the current homepage for C-INTERCAL and CLC-INTERCAL
+is http://intercal.freeshell.org.)
 
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal.
@@ -235,7 +241,7 @@ bison/flex output). Note that makeick.bat and makeick.sh produce
 DJGPP-specific output; and if you're running DJGPP under bash under Windows
 XP, you may need to either set your default command interpreter for batch
 files to cmd rather than command.com (by setting your SHELL environment
-variable, or use some better workaround that I don't know about. (command.com
+variable), or use some better workaround that I don't know about. (command.com
 seems to have problems with the PATH environment variable under Windows XP
 when running under bash.) Also try to make sure that you use the .sh versions
 of the makeick.* scripts when running under bash or a similar ported shell,
@@ -243,7 +249,7 @@ and the .bat versions when running under a DOS shell.
 
 Some distributions of DJGPP have a bug where they complain that they can't find
 'm4.exe' (or maybe my PATH is still wrong...). You can solve this problem by
-copying m4.exe into the \temp subdirectory before running makeick.bat.
+copying m4.exe into the temp\ subdirectory before running makeick.bat.
 
 (P.S. It was my PATH that was wrong. Still, if you made the same mistake as me,
 you may want to try the same fix.)

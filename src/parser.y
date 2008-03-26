@@ -34,11 +34,11 @@ LICENSE TERMS
 #include "sizes.h"
 #include "ick.h"
 #include "feh.h"
-#include "lose.h"
+#include "ick_lose.h"
 
 extern int yyerror(char*);
 
-/* Intervene our first-stage lexer. */
+/* Intervene our ick_first-stage lexer. */
 extern int lexer(void);
 #define yylex() lexer()
 
@@ -59,15 +59,15 @@ static tuple *splat(void);
      else {thisline = stbeginline; stbeginline = 0;}}
 
 #define ACTION(x, nt, nn)	\
-    {x = newtuple(); x->type = nt; x->lineno = thisline; x->u.node = nn;}
+    {x = newtuple(); x->type = nt; x->ick_lineno = thisline; x->u.node = nn;}
 #define TARGET(x, nt, nn)	\
-    {x = newtuple(); x->type = nt; x->lineno = thisline; x->u.target = nn;}
+    {x = newtuple(); x->type = nt; x->ick_lineno = thisline; x->u.target = nn;}
 #define ACTARGET(x, nt, nn, nn2)\
-    {x = newtuple(); x->type = nt; x->lineno = thisline;\
+    {x = newtuple(); x->type = nt; x->ick_lineno = thisline;\
       x->u.node = nn; x->u.target = nn2;}
 /* AIS : The macro above was added for ABSTAIN expr FROM. */
 #define NEWFANGLED mark112 = 1; /* AIS: Added the mention of mark112 */ \
-      if (traditional) lose(E111,iyylineno,(char*)NULL); else
+      if (ick_traditional) ick_lose(IE111,iyylineno,(char*)NULL); else
 
 #define DESTACKSE1 sparkearsstack[sparkearslev--/32] >>= 1
 #define DESTACKSPARKEARS DESTACKSE1; DESTACKSE1
@@ -110,7 +110,7 @@ static tuple *splat(void);
 
 /* AIS: ONCE and AGAIN added, for multithread support; also, NOSPOT added,
    so that I can reserve _ for future use (it's nowhere in the grammar yet) */
-%token MAYBE DO PLEASE NOT ONCE AGAIN MESH NOSPOT ONESPOT TWOSPOT TAIL HYBRID
+%token MAYBE DO PLEASE NOT ONCE AGAIN MESH NOSPOT ick_ONESPOT ick_TWOSPOT ick_TAIL ick_HYBRID
 %token MINGLE SELECT /* AIS: SPARK EARS */ SUB BY BADCHAR
 /* AIS: For operand overloading */
 %token SLAT BACKSLAT
@@ -136,7 +136,7 @@ static tuple *splat(void);
 %token REV_WHIRL REV_WHIRL2 REV_WHIRL3 REV_WHIRL4 REV_WHIRL5
 
 %type <node> expr limexpr varlist variable constant lvalue inlist outlist
-%type <node> subscr byexpr scalar scalar2s array initem outitem sublist
+%type <node> subscr byexpr scalar scalar2s ick_array initem outitem sublist
 %type <node> unambig limunambig subscr1 sublist1 oparray osubscr osubscr1
 %type <node> notanlvalue nlunambig lunambig
 %type <tuple> preproc perform mtperform
@@ -175,7 +175,7 @@ command	:    please mtperform
 	|    LABEL please OHOHSEVEN mtperform
 		{checklabel($1); $4->label = $1; $4->exechance = $2 * $3;}
 	|    error
-		{lose(E017, iyylineno, (char *)NULL);}
+		{ick_lose(IE017, iyylineno, (char *)NULL);}
 	;
 /*
  * AIS: added for the ONCE/AGAIN qualifiers. It copies a pointer to the tuple,
@@ -205,7 +205,7 @@ mtperform :  preproc
 preproc : perform {$$ = $1;} /* the simple case */
         | perform WHILE perform
 {
-  if(!multithread) lose(E405, iyylineno, (char*)NULL);
+  if(!multithread) ick_lose(IE405, iyylineno, (char*)NULL);
   NEWFANGLED{
   /*    (x)  DO a WHILE b
     is equivalent to
@@ -236,9 +236,9 @@ preproc : perform {$$ = $1;} /* the simple case */
   temptuple->preproc=1; temptuple->setweave=-1; temptuple->exechance=-100; 
   politesse += 3; /* Keep the politeness checker happy */
   ppinit(11); tupleswap(10,9); tupleswap(11,2); lineuid+=4; /* #2, #9 */
-  tuples[lineno-10].onceagainflag=onceagain_AGAIN;
-  tuples[lineno-1].onceagainflag=onceagain_AGAIN;
-  $$=&(tuples[lineno-2]);
+  tuples[ick_lineno-10].onceagainflag=onceagain_AGAIN;
+  tuples[ick_lineno-1].onceagainflag=onceagain_AGAIN;
+  $$=&(tuples[ick_lineno-2]);
 }}
 
 /* There are two (AIS: now four) forms of preamble returned by the lexer */
@@ -250,7 +250,7 @@ please	:    DO			{GETLINENO; $$ = 1;}
 
 /* Here's how to parse statement bodies */
 perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
-	|    array GETS byexpr	{ACTION($$, RESIZE,    cons(RESIZE,$1,$3));}
+	|    ick_array GETS byexpr	{ACTION($$, RESIZE,    cons(RESIZE,$1,$3));}
 	|    notanlvalue GETS expr %prec LOWPREC
 	  {/* AIS: This is for variableconstants, and an error otherwise.*/
 	   if(variableconstants) ACTION($$, GETS, cons(GETS,$1,$3))
@@ -265,7 +265,7 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
 	|    ABSTAIN FROM LABEL	{stbeginline=0; TARGET($$, ABSTAIN,   $3);}
 	|    ABSTAIN FROM gerunds	{ACTION($$, DISABLE,   rlist);}
 	|    ABSTAIN expr FROM LABEL {/* AIS */ NEWFANGLED {stbeginline=0; ACTARGET($$, FROM, $2, $4);}}
-	|    ABSTAIN expr FROM gerunds {/* AIS */ NEWFANGLED {$$ = newtuple(); $$->type = MANYFROM; $$->lineno = thisline; \
+	|    ABSTAIN expr FROM gerunds {/* AIS */ NEWFANGLED {$$ = newtuple(); $$->type = MANYFROM; $$->ick_lineno = thisline; \
 	  {node* tempnode=newnode(); $$->u.node = tempnode; tempnode->lval=$2; tempnode->rval=rlist; tempnode->opcode=MANYFROM;}}}
 	|    REINSTATE LABEL	{stbeginline=0; TARGET($$, REINSTATE, $2);}
 	|    REINSTATE gerunds	{ACTION($$, ENABLE,    rlist);}
@@ -306,61 +306,61 @@ gerunds	:   GERUND
 	;
 
 /* OK, here's what a variable reference looks like */
-variable:    scalar | array;
+variable:    scalar | ick_array;
 
 lvalue	:    scalar | subscr;
 
-scalar2s:    TWOSPOT NUMBER /* AIS: for TWOSPOTs only */
+scalar2s:    ick_TWOSPOT NUMBER /* AIS: for TWOSPOTs only */
 		{
 		  $$ = newnode();
-		  $$->opcode = TWOSPOT;
-		  $$->constant = intern(TWOSPOT, $2);
+		  $$->opcode = ick_TWOSPOT;
+		  $$->constant = intern(ick_TWOSPOT, $2);
 		}
-scalar	:    ONESPOT NUMBER
+scalar	:    ick_ONESPOT NUMBER
 		{
 		    $$ = newnode();
-		    $$->opcode = ONESPOT;
-		    $$->constant = intern(ONESPOT, $2);
+		    $$->opcode = ick_ONESPOT;
+		    $$->constant = intern(ick_ONESPOT, $2);
 		}
-	|    TWOSPOT NUMBER
+	|    ick_TWOSPOT NUMBER
 		{
 		    $$ = newnode();
-		    $$->opcode = TWOSPOT;
-		    $$->constant = intern(TWOSPOT, $2);
+		    $$->opcode = ick_TWOSPOT;
+		    $$->constant = intern(ick_TWOSPOT, $2);
 		}
 	;
 
-array	:    TAIL NUMBER
+ick_array	:    ick_TAIL NUMBER
 		{
 		    $$ = newnode();
-		    $$->opcode = TAIL;
-		    $$->constant = intern(TAIL, $2);
+		    $$->opcode = ick_TAIL;
+		    $$->constant = intern(ick_TAIL, $2);
 		}
-	|    HYBRID NUMBER
+	|    ick_HYBRID NUMBER
 		{
 		    $$ = newnode();
-		    $$->opcode = HYBRID;
-		    $$->constant = intern(HYBRID, $2);
+		    $$->opcode = ick_HYBRID;
+		    $$->constant = intern(ick_HYBRID, $2);
 		}
 	;
 
 /* Array with unary operator is a special intermediate case; these
    nodes will be rearranged when the subscript list is added */
-oparray :    TAIL UNARY NUMBER %prec UNARYPREC
+oparray :    ick_TAIL UNARY NUMBER %prec UNARYPREC
 		{
 		    $$ = newnode();
 		    $$->opcode = $2;
 		    $$->rval = newnode();
-		    $$->rval->opcode = TAIL;
-		    $$->rval->constant = intern(TAIL, $3);
+		    $$->rval->opcode = ick_TAIL;
+		    $$->rval->constant = intern(ick_TAIL, $3);
 		}
-	|    HYBRID UNARY NUMBER %prec UNARYPREC
+	|    ick_HYBRID UNARY NUMBER %prec UNARYPREC
 		{
 		    $$ = newnode();
 		    $$->opcode = $2;
 		    $$->rval = newnode();
-		    $$->rval->opcode = HYBRID;
-		    $$->rval->constant = intern(HYBRID, $3);
+		    $$->rval->opcode = ick_HYBRID;
+		    $$->rval->constant = intern(ick_HYBRID, $3);
 		}
 	;
 
@@ -368,8 +368,8 @@ oparray :    TAIL UNARY NUMBER %prec UNARYPREC
 constant:   MESH NUMBER
 		{
 		    /* enforce the 16-bit constant constraint */
-		    if ((unsigned int)$2 > Max_small)
-			lose(E017, iyylineno, (char *)NULL);
+		    if ((unsigned int)$2 > ick_Max_small)
+			ick_lose(IE017, iyylineno, (char *)NULL);
 		    $$ = newnode();
 		    $$->opcode = MESH;
 		    if(variableconstants) /* AIS */
@@ -387,30 +387,30 @@ varlist :   variable				{rlist = np = $1;}
 
 /* scalars and subscript exprs are permitted in WRITE IN lists */
 /* new: arrays are also permitted to allow for bitwise I/0 */
-initem	:    scalar | subscr | array;
+initem	:    scalar | subscr | ick_array;
 inlist	:    initem INTERSECTION inlist		{$$=cons(INTERSECTION,$1,$3);}
 	|    initem				{$$=cons(INTERSECTION,$1,0);}
 	;
 
 /* scalars, subscript exprs & constants are permitted in READ OUT lists */
 /* new: arrays are also permitted to allow for bitwise I/0 */
-outitem	:    scalar | subscr | constant | array;
+outitem	:    scalar | subscr | constant | ick_array;
 outlist	:    outitem INTERSECTION outlist	{$$=cons(INTERSECTION,$1,$3);}
 	|    outitem				{$$=cons(INTERSECTION,$1,0);}
 	;
 
 /* Now the gnarly part -- expression syntax */
 
-/* Support array dimension assignment */
+/* Support ick_array dimension assignment */
 byexpr	:   expr BY byexpr		{$$ = cons(BY, $1, $3);}
 	|   expr			{$$ = cons(BY, $1, 0);}
 	;
 
-/* Support array subscripts (as lvalues) */
+/* Support ick_array subscripts (as lvalues) */
 subscr	:   subscr1			{$$ = $1;}
-	|   array SUB sublist		{$$ = cons(SUB, $1, $3);}
+	|   ick_array SUB sublist		{$$ = cons(SUB, $1, $3);}
 	;
-subscr1 :   array SUB sublist1		{$$ = cons(SUB, $1, $3);}
+subscr1 :   ick_array SUB sublist1		{$$ = cons(SUB, $1, $3);}
 	;
 sublist :   unambig sublist		{$$ = cons(INTERSECTION, $1, $2);}
 	|   unambig sublist1		{$$ = cons(INTERSECTION, $1, $2);}
@@ -471,7 +471,7 @@ limexpr :   limunambig			{$$ = $1;}
 	;
 
 
-preftype:   MESH {$$=MESH; } | ONESPOT {$$=ONESPOT;} | TWOSPOT {$$=TWOSPOT;};
+preftype:   MESH {$$=MESH; } | ick_ONESPOT {$$=ick_ONESPOT;} | ick_TWOSPOT {$$=ick_TWOSPOT;};
 
 /* AIS: unambig split into limunambig (unambigs that don't start with a
 	unary operator), nlunambig (unambigs that aren't lvalues),
@@ -486,8 +486,8 @@ lunambig:   constant	{$$ = $1;}
 		    $$->rval->opcode = $1;
 		    if($1 == MESH) {
 		      /* enforce the 16-bit constant constraint */
-		      if ((unsigned int)$3 > Max_small)
-			lose(E017, iyylineno, (char *)NULL);
+		      if ((unsigned int)$3 > ick_Max_small)
+			ick_lose(IE017, iyylineno, (char *)NULL);
 		      if(variableconstants) /* AIS */
 			$$->rval->constant = intern(MESH, $2);
 		      else
@@ -555,26 +555,26 @@ static tuple *splat(void)
 {
     tuple *sp;
     int tok, i;
-    extern bool re_send_token;
+    extern ick_bool re_send_token;
 
     /*
      * The idea
-     * here is to skip to the next DO, PLEASE or label, then unget that token.
+     * here is to skip to the ick_next DO, PLEASE or label, then unget that token.
      * which we can do with a tricky flag on the lexer (re_send_token).
      */
 
     /*	fprintf(stderr,"attempting to splat at line %d....\n",iyylineno); */
-    for(i = 0,re_send_token = FALSE;;i++) {
+    for(i = 0,re_send_token = ick_FALSE;;i++) {
 	tok = lexer();
 	if (!tok)
 	{
-	    re_send_token = TRUE;
+	    re_send_token = ick_TRUE;
 	    tok = ' ';		/* scanner must not see a NUL */
 	    break;
 	}
 	else if (tok == DO || tok == PLEASE || tok == LABEL
 		 /* AIS */ || tok == MAYBE) {
-	    re_send_token = TRUE;
+	    re_send_token = ick_TRUE;
 	    break;
 	}
     }

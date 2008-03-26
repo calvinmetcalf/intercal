@@ -44,28 +44,27 @@ YACCFLAGS =
 
 LOADLIBS = @LIBS@ @LEXLIB@
 
-CSOURCES = src/parser.y src/lexer.l src/feh2.c src/dekludge.c src/lose.c src/fiddle.c src/perpet.c src/unravel.c src/uncommon.c src/convickt.c src/clc-cset.c src/bin2c.c
+CSOURCES = src/parser.y src/lexer.l src/feh2.c src/dekludge.c src/ick_lose.c src/fiddle.c src/perpet.c src/unravel.c src/uncommon.c src/convickt.c src/clc-cset.c src/bin2c.c
 ISOURCES = src/cesspool.c src/arrgghh.c src/ick-wrap.c src/pickwrap.c src/numerals.c
 YSOURCES = src/yuk.c
-HEADERS = src/ick.h src/lose.h src/sizes.h src/abcess.h src/fiddle.h src/feh.h src/yuk.h src/uncommon.h
+HEADERS = src/ick.h src/ick_lose.h src/sizes.h src/abcess.h src/fiddle.h src/feh.h src/yuk.h src/uncommon.h src/ick_ec.h
 BUILD = Makefile.in config.in config.sh src/configh.in ickspec.in ickspec src/cooptsh.in
 MISC = etc/intercal.el src/ctrlmfix.sh src/ctrlmfix.bat src/*.bin
 DOCS = BUGS.txt COPYING.txt NEWS.txt README.txt
 SOURCES = $(CSOURCES) $(ISOURCES) $(YSOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS) pit doc
 
-all: bin/ick@EXEEXT@ bin/convickt@EXEEXT@ lib/libick.a lib/libickmt.a lib/libyuk.a ial
+all: bin/ick@EXEEXT@ bin/convickt@EXEEXT@ lib/libick.a lib/libickmt.a lib/libyuk.a lib/libickec.a ial
 
-ial: include/fiddle.h include/abcess.h include/lose.h include/yuk.h include/syslib.i include/syslib.3i include/syslib.4i include/syslib.5i include/syslib.6i include/syslib.7i lib/ick-wrap.c lib/pickwrap.c lib/coopt.sh lib/COPYING.txt include/atari.bin include/baudot.bin include/ebcdic.bin include/latin1.bin
+ial: include/ick_ec.h include/fiddle.h include/abcess.h include/ick_lose.h include/yuk.h include/syslib.i include/syslib.3i include/syslib.4i include/syslib.5i include/syslib.6i include/syslib.7i lib/ick-wrap.c lib/pickwrap.c lib/coopt.sh lib/COPYING.txt include/atari.bin include/baudot.bin include/ebcdic.bin include/latin1.bin
 
+include/ick_ec.h: src/ick_ec.h
+	-cp src/ick_ec.h include/ick_ec.h
 include/fiddle.h: src/fiddle.h
 	-cp src/fiddle.h include/fiddle.h
-
 include/abcess.h:src/abcess.h
 	-cp src/abcess.h include/abcess.h
-
-include/lose.h:src/lose.h
-	-cp src/lose.h include/lose.h
-
+include/ick_lose.h:src/ick_lose.h
+	-cp src/ick_lose.h include/ick_lose.h
 include/yuk.h:src/yuk.h
 	-cp src/yuk.h include/yuk.h
 
@@ -103,8 +102,8 @@ include/ebcdic.bin:src/ebcdic.bin
 include/latin1.bin:src/latin1.bin
 	-cp src/latin1.bin include/latin1.bin
 
-bin/ick@EXEEXT@: temp/parser.@OBJEXT@ temp/lexer.@OBJEXT@ temp/feh2.@OBJEXT@ temp/dekludge.@OBJEXT@ temp/idiotism.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/perpet.@OBJEXT@ temp/uncommon.@OBJEXT@
-	$(CC) temp/perpet.@OBJEXT@ temp/parser.@OBJEXT@ temp/lexer.@OBJEXT@ temp/feh2.@OBJEXT@ temp/dekludge.@OBJEXT@ temp/idiotism.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/uncommon.@OBJEXT@ $(LDFLAGS) -o bin/ick@EXEEXT@
+bin/ick@EXEEXT@: temp/parser.@OBJEXT@ temp/lexer.@OBJEXT@ temp/feh2.@OBJEXT@ temp/dekludge.@OBJEXT@ temp/idiotism.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/perpet.@OBJEXT@ temp/uncommon.@OBJEXT@
+	$(CC) temp/perpet.@OBJEXT@ temp/parser.@OBJEXT@ temp/lexer.@OBJEXT@ temp/feh2.@OBJEXT@ temp/dekludge.@OBJEXT@ temp/idiotism.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/uncommon.@OBJEXT@ $(LDFLAGS) -o bin/ick@EXEEXT@
 
 bin/convickt@EXEEXT@: temp/convickt.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/uncommon.@OBJEXT@
 	$(CC) temp/convickt.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/uncommon.@OBJEXT@ $(LDFLAGS) -o bin/convickt@EXEEXT@
@@ -114,54 +113,70 @@ temp/oil.c: src/oil.y temp/config.h
 	-rm -f temp/oil.c
 	mv y.tab.c temp/oil.c
 
-temp/parser.h temp/parser.c: src/parser.y src/ick.h src/sizes.h src/feh.h src/lose.h temp/config.h
+temp/parser.h temp/parser.c: src/parser.y src/ick.h src/sizes.h src/feh.h src/ick_lose.h temp/config.h
 	$(YACC) -d $(YACCFLAGS) src/parser.y
 	-rm -f temp/parser.c
 	mv y.tab.c temp/parser.c
 	-rm -f temp/parser.h
 	mv y.tab.h temp/parser.h
 
-temp/lexer.c: src/lexer.l src/ick.h src/lose.h temp/config.h
+temp/lexer.c: src/lexer.l src/ick.h src/ick_lose.h temp/config.h
 	$(LEX) $(LEXFLAGS) src/lexer.l
 	-rm -f temp/lexer.c
 	mv @LEX_OUTPUT_ROOT@.c temp/lexer.c
 
-bin/lextest: temp/parser.h src/lexer.c src/ick.h temp/lose.@OBJEXT@
-	$(CC) -DMAIN src/lexer.c src/lose.@OBJEXT@ @LEXLIB@ -o bin/lextest
+bin/lextest: temp/parser.h src/lexer.c src/ick.h temp/ick_lose.@OBJEXT@
+	$(CC) -DMAIN src/lexer.c src/ick_lose.@OBJEXT@ @LEXLIB@ -o bin/lextest
 
 temp/oil@EXEEXT@: temp/oil.c temp/config.h
 	$(CC) $(CFLAGS) -o temp/oil@EXEEXT@ temp/oil.c
 temp/bin2c@EXEEXT@: src/bin2c.c
 	$(CC) $(CFLAGS) -o temp/bin2c@EXEEXT@ src/bin2c.c
-temp/parser.@OBJEXT@: temp/parser.c src/ick.h src/feh.h src/lose.h src/sizes.h temp/config.h
+temp/parser.@OBJEXT@: temp/parser.c src/ick.h src/feh.h src/ick_lose.h src/sizes.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/parser.@OBJEXT@ temp/parser.c
-temp/lexer.@OBJEXT@: temp/lexer.c temp/parser.h src/ick.h src/lose.h temp/config.h
+temp/lexer.@OBJEXT@: temp/lexer.c temp/parser.h src/ick.h src/ick_lose.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/lexer.@OBJEXT@ temp/lexer.c
-temp/feh2.@OBJEXT@: src/feh2.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h temp/config.h
+temp/feh2.@OBJEXT@: src/feh2.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/feh2.@OBJEXT@ src/feh2.c
 temp/idiotism.c: src/idiotism.oil temp/oil@EXEEXT@
 	temp/oil@EXEEXT@ < src/idiotism.oil > temp/idiotism.c
-temp/idiotism.@OBJEXT@: temp/idiotism.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h temp/config.h
-	$(CC) $(CFLAGS) -c -o temp/idiotism.@OBJEXT@ temp/idiotism.c
-temp/dekludge.@OBJEXT@: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/lose.h src/sizes.h temp/config.h
+# There is a situation that some operating systems can get into known as memory
+# overcommit. Linux (talking specifically about the kernel) can reach this
+# situation in its default configuration, where it has been reporting to malloc
+# that memory is available when in fact it isn't, and reaches the situation when
+# the computer is actually completely out of memory but programs on it believe
+# that they aren't. For some reason, using the default options, gcc can somehow
+# cause memory overcommit when acting on a file as big as idiotism.c. The
+# solution here, therefore, is to put two protections to prevent this happening;
+# first, turn off optimisation specifically for that file, and second, put an
+# artificial memory limit on the compilation so that no more than 128 megabytes
+# can be allocated, using the ulimit feature on bash. As memory overcommit can
+# make a system unusable, and as it can be preceded by 'thrashing' (hugely
+# rapid swaps to disk in an attempt to get more memory) that can also make a
+# system unusable, steps to avoid this are necessary.
+temp/idiotism.@OBJEXT@: temp/idiotism.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
+	bash -c 'ulimit -Sv 131072 && ulimit -Sd 131072 && $(CC) $(CFLAGS) -c -o temp/idiotism.@OBJEXT@ -O0 temp/idiotism.c'
+temp/dekludge.@OBJEXT@: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/dekludge.@OBJEXT@ src/dekludge.c
-temp/perpet.@OBJEXT@: src/perpet.c temp/parser.h src/ick.h src/lose.h src/sizes.h src/uncommon.h temp/config.h
+temp/perpet.@OBJEXT@: src/perpet.c temp/parser.h src/ick.h src/ick_lose.h src/sizes.h src/uncommon.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/perpet.@OBJEXT@ src/perpet.c
-temp/cesspool.@OBJEXT@: src/cesspool.c src/abcess.h src/lose.h src/sizes.h
+temp/cesspool.@OBJEXT@: src/cesspool.c src/abcess.h src/ick_lose.h src/sizes.h
 	$(CC) $(CFLAGS) -c -o temp/cesspool.@OBJEXT@ src/cesspool.c
-temp/numerals.@OBJEXT@: src/numerals.c src/abcess.h src/lose.h src/sizes.h
+temp/numerals.@OBJEXT@: src/numerals.c src/abcess.h src/ick_lose.h src/sizes.h
 	$(CC) $(CFLAGS) -c -o temp/numerals.@OBJEXT@ src/numerals.c
-temp/unravel.@OBJEXT@: src/unravel.c src/abcess.h src/lose.h src/sizes.h temp/config.h
+temp/unravel.@OBJEXT@: src/unravel.c src/abcess.h src/ick_lose.h src/sizes.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/unravel.@OBJEXT@ src/unravel.c
-temp/lose.@OBJEXT@: src/lose.c src/lose.h temp/config.h
-	$(CC) $(CFLAGS) -c -o temp/lose.@OBJEXT@ src/lose.c
+temp/ick_lose.@OBJEXT@: src/ick_lose.c src/ick_lose.h temp/config.h
+	$(CC) $(CFLAGS) -c -o temp/ick_lose.@OBJEXT@ src/ick_lose.c
 temp/fiddle.@OBJEXT@: src/fiddle.c src/fiddle.h src/sizes.h
 	$(CC) $(CFLAGS) -c -o temp/fiddle.@OBJEXT@ src/fiddle.c
 temp/arrgghh.@OBJEXT@: src/arrgghh.c
 	$(CC) $(CFLAGS) -c -o temp/arrgghh.@OBJEXT@ src/arrgghh.c
 temp/uncommon.@OBJEXT@: src/uncommon.c src/uncommon.h
 	$(CC) $(CFLAGS) -c -o temp/uncommon.@OBJEXT@ src/uncommon.c
-temp/yuk.@OBJEXT@: src/yuk.c src/yuk.h src/lose.h src/sizes.h src/abcess.h src/uncommon.h temp/config.h
+temp/ick_ec.@OBJEXT@: src/ick_ec.c src/ick_ec.h src/abcess.h
+	$(CC) $(CFLAGS) -c -o temp/ick_ec.@OBJEXT@ src/ick_ec.c
+temp/yuk.@OBJEXT@: src/yuk.c src/yuk.h src/ick_lose.h src/sizes.h src/abcess.h src/uncommon.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/yuk.@OBJEXT@ src/yuk.c
 temp/clc-cset.@OBJEXT@: src/clc-cset.c src/uncommon.h
 	$(CC) $(CFLAGS) -c -o temp/clc-cset.@OBJEXT@ src/clc-cset.c
@@ -169,13 +184,13 @@ temp/convickt.@OBJEXT@: src/convickt.c
 	$(CC) $(CFLAGS) -c -o temp/convickt.@OBJEXT@ src/convickt.c
 
 temp/cset-a.c: temp/bin2c@EXEEXT@ src/atari.bin
-	temp/bin2c@EXEEXT@ clc_cset_atari < src/atari.bin > temp/cset-a.c
+	temp/bin2c@EXEEXT@ ick_clc_cset_atari < src/atari.bin > temp/cset-a.c
 temp/cset-b.c: temp/bin2c@EXEEXT@ src/baudot.bin
-	temp/bin2c@EXEEXT@ clc_cset_baudot < src/baudot.bin > temp/cset-b.c
+	temp/bin2c@EXEEXT@ ick_clc_cset_baudot < src/baudot.bin > temp/cset-b.c
 temp/cset-e.c: temp/bin2c@EXEEXT@ src/ebcdic.bin
-	temp/bin2c@EXEEXT@ clc_cset_ebcdic < src/ebcdic.bin > temp/cset-e.c
+	temp/bin2c@EXEEXT@ ick_clc_cset_ebcdic < src/ebcdic.bin > temp/cset-e.c
 temp/cset-l.c: temp/bin2c@EXEEXT@ src/latin1.bin
-	temp/bin2c@EXEEXT@ clc_cset_latin1 < src/latin1.bin > temp/cset-l.c
+	temp/bin2c@EXEEXT@ ick_clc_cset_latin1 < src/latin1.bin > temp/cset-l.c
 temp/cset-a.@OBJEXT@: temp/cset-a.c
 	$(CC) $(CFLAGS) -c -o temp/cset-a.@OBJEXT@ temp/cset-a.c
 temp/cset-b.@OBJEXT@: temp/cset-b.c
@@ -185,13 +200,17 @@ temp/cset-e.@OBJEXT@: temp/cset-e.c
 temp/cset-l.@OBJEXT@: temp/cset-l.c
 	$(CC) $(CFLAGS) -c -o temp/cset-l.@OBJEXT@ temp/cset-l.c
 
-lib/libick.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
-	ar cr lib/libick.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
+lib/libick.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
+	ar cr lib/libick.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
 	@RANLIB@ lib/libick.a
 
-lib/libickmt.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/unravel.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
-	ar cr lib/libickmt.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/unravel.@OBJEXT@ temp/lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
+lib/libickmt.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/unravel.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
+	ar cr lib/libickmt.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/unravel.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
 	@RANLIB@ lib/libickmt.a
+
+lib/libickec.a: temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/ick_ec.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
+	ar cr lib/libickec.a temp/cesspool.@OBJEXT@ temp/numerals.@OBJEXT@ temp/ick_ec.@OBJEXT@ temp/ick_lose.@OBJEXT@ temp/fiddle.@OBJEXT@ temp/arrgghh.@OBJEXT@ temp/clc-cset.@OBJEXT@ temp/cset-a.@OBJEXT@ temp/cset-b.@OBJEXT@ temp/cset-e.@OBJEXT@ temp/cset-l.@OBJEXT@ temp/uncommon.@OBJEXT@
+	@RANLIB@ lib/libickec.a
 
 lib/libyuk.a: temp/yuk.@OBJEXT@
 	ar cr lib/libyuk.a temp/yuk.@OBJEXT@
@@ -201,9 +220,11 @@ install-common: all
 	cp bin/ick@EXEEXT@ bin/convickt@EXEEXT@ $(DESTDIR)$(bindir)
 	cp lib/libick.a $(DESTDIR)$(libdir)
 	cp lib/libickmt.a $(DESTDIR)$(libdir)
+	cp lib/libickec.a $(DESTDIR)$(libdir)
 	cp lib/libyuk.a $(DESTDIR)$(libdir)
 	-mkdir -p $(DESTDIR)$(incdir)
-	cp src/lose.h src/abcess.h src/fiddle.h src/yuk.h $(DESTDIR)$(incdir)
+	cp src/ick_lose.h src/abcess.h src/fiddle.h src/yuk.h $(DESTDIR)$(incdir)
+	cp src/ick_ec.h $(DESTDIR)$(incdir)
 	-mkdir -p $(DESTDIR)$(datadir)
 	cp include/*.bin $(DESTDIR)$(datadir)
 	cp src/ick-wrap.c src/pickwrap.c $(DESTDIR)$(datadir)
@@ -225,8 +246,12 @@ install-common: all
 
 # install, and gzip the docs after installing.
 # The pattern i*[fo] matches ick.info only when uncompressed, even on
-# an 8.3 system.
+# an 8.3 system. ick.i*gz matches compressed Info files, but some DOS
+# command interpreters buggily also match it to uncompressed Info files
+# even though gz appears nowhere in the filename, so care must be taken
+# only to use that pattern with sh.
 install: install-common
+	sh -c "rm -f $(DESTDIR)$(infodir)/ick.i*gz"
 	-gzip -9 -f $(DESTDIR)$(infodir)/ick.in*
 	-gzip -9 -f $(DESTDIR)$(mandir)/man1/ick.1
 	-gzip -9 -f $(DESTDIR)$(mandir)/man1/convickt.1

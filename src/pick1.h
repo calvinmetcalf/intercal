@@ -44,7 +44,7 @@ LICENSE TERMS
    This should block the program; the SLEEP command is one possibility,
    somehow getting the PIC to disconnect its own power supply and signal
    an error is another. */
-#define lose(a,b,c) for(;;)
+#define ick_lose(a,b,c) for(;;)
 
 /* PORTA, PORTB, TRISA, and TRISB must be variables which, when read or
    modified, read or modify the corresponding location in the PIC's RAM;
@@ -76,11 +76,11 @@ void pickinit()
 
 /* If your implementation doesn't use function pointers, delete this and
    don't write any code that uses operator-overloading. */
-typedef struct overop_t
+typedef struct ick_overop_t
 {
   ICK_INT32 (*get)(ICK_INT32);
   void (*set)(ICK_INT32);
-} overop;
+} ick_overop;
 
-#define type16 ICK_INT16
-#define type32 ICK_INT32
+#define ick_type16 ICK_INT16
+#define ick_type32 ICK_INT32

@@ -8,11 +8,11 @@
 # DESCRIPTION
 #    This optimizer is only run on noninteractive code that takes no
 #    output. (It's designed to run on executables produced by INTERCAL
-#    code, but will run on other executables that support the +mystery
+#    code, but will run on other executables that support the +ick_mystery
 #    option). It optimizes the file by replacing it by one that simply
 #    produces the required output! Therefore, it creates fast but
 #    inefficient code. If the file to be optimized hits an error or
-#    is terminated by +mystery, then no changes are made.
+#    is terminated by +ick_mystery, then no changes are made.
 #
 # LICENSE TERMS
 #    Copyright (C) 2006 Alex Smith
@@ -34,7 +34,7 @@
 ###########################################################################
 
 rm icktemp.out >/dev/null 2>/dev/null
-if $1@EXEEXT@ +mystery >icktemp.out 2>/dev/null ; then : ; else
+if $1@EXEEXT@ +ick_mystery >icktemp.out 2>/dev/null ; then : ; else
 rm icktemp.out ; exit 0 ; fi
 if grep 'ickoutTERM???!' icktemp.out ; then rm icktemp.out ; exit 0 ; fi
 echo 'ickoutTERM???!' >> icktemp.out

@@ -48,11 +48,17 @@ AIS = Alex Smith
    there's not much we can do about it as things stand.
 
 4) (AIS) Reverse assignments (those with the expression on the left)
-   are very unlikely to work in bases other than 2.
+   are very unlikely to work in bases other than 2. (The current code
+   calculates what the answer would be in base 2 and throws an error
+   if it isn't correct for the current base.)
 
 5) (AIS) Some of the newer features in intercal.el are not yet fully
    implemented and have a tendency to print 'Unimplemented' rather
    than doing anything useful.
+
+6) (AIS) The external call system only works with gcc (due to its need
+   to pass command-line arguments like -x and -E to it), and fails
+   when mixed with come-from-gerund and next-from-gerund.
 
 			TO DO
 

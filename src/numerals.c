@@ -14,7 +14,7 @@
  * Nahuatl, Tagalog, Sanskrit, Basque, Georgian, Kwakiutl, and
  * Volap\"uk are now supported in addition to English.
  *
- * As of release 0.18, Volap\"uk digits can be entered in either traditional
+ * As of release 0.18, Volap\"uk digits can be entered in either ick_traditional
  * Tex format, Latin-1, or UTF-8.  Latin is also now a supported language,
  * to fulfill the requirement for Ancient Roman localization.
  *
@@ -43,7 +43,7 @@ typedef struct
 }
 numeral;
 
-numeral numerals[] =
+numeral ick_numerals[] =
 {
 /* English */
     { "OH",		0 },

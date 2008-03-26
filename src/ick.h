@@ -20,9 +20,15 @@
 
 #define YY_NO_UNPUT
 
-typedef int	bool;
-#define TRUE	1
-#define FALSE	0
+#ifndef ICKBOOL_DEFINED
+/*@-redef@*/
+typedef int ick_bool;
+/*@=redef@*/
+#define ICKBOOL_DEFINED
+#endif
+
+#define ick_TRUE	1
+#define ick_FALSE	0
 
 #define ALLOC_CHUNK	256
 
@@ -52,7 +58,7 @@ typedef struct node_t
     unsigned long       optdata;        /* AIS: Temp used by the optimizer */
     int			width;		/* is this 32-bit data? */
     struct node_t	*lval, *rval;	/* attached expression nodes */
-    struct node_t       *nextslat;      /* AIS: The next node with a slat */
+    struct node_t       *nextslat;      /* AIS: The ick_next node with a slat */
 } node;
 
 typedef struct tuple_t
@@ -62,23 +68,23 @@ typedef struct tuple_t
 					   have this line as a suck-point */
     int         	exechance;	/* chance of execution, initial abstain,
 					   (AIS) MAYBE details */
-    bool                maybe;          /* AIS: Where MAYBE details go when
+    ick_bool                maybe;          /* AIS: Where MAYBE details go when
 					   exechance has been parsed */
-    bool                abstainable;    /* AIS: Is it possible for this line to
-					   be abstained from? */
-    bool                initabstain;    /* AIS: Is this line initially
-					   abstained from? */
-    bool                nextable;       /* AIS: Can this line be a NEXT
+    ick_bool                abstainable;    /* AIS: Is it possible for this line to
+					   be ick_abstained from? */
+    ick_bool                initabstain;    /* AIS: Is this line initially
+					   ick_abstained from? */
+    ick_bool                nextable;       /* AIS: Can this line be a NEXT
 					   target? */
-    bool                optversion;     /* AIS: Use an optimized version? (Only
+    ick_bool                optversion;     /* AIS: Use an optimized version? (Only
 					   set if the optimizer thinks that
 					   it's safe.) */
-    bool                preproc;        /* AIS: Is this line a nonexistent one
+    ick_bool                preproc;        /* AIS: Is this line a nonexistent one
 					   that was added to implement a
 					   command in the parser? */
-    bool                warn112:1;      /* AIS: Should this line produce warning
+    ick_bool                warn112:1;      /* AIS: Should this line produce warning
 					   112 during degeneration? */
-    bool warn128:1, warn534:1, warn018:1, warn016:1, warn276:1, warn239:1,
+    ick_bool warn128:1, warn534:1, warn018:1, warn016:1, warn276:1, warn239:1,
       warn622:1; /* AIS: As warn112. The warnings are a bitfield to save space. */
     unsigned int	type;		/* statement type */
     struct
@@ -88,8 +94,8 @@ typedef struct tuple_t
     } u;
     unsigned int        nexttarget;     /* AIS: The target tuple of a NEXT must
 					   also be recorded for optimizef */
-    int lineno; 			/* source line for error messages */
-    bool sharedline;			/* if NZ, two statements on a line */
+    int ick_lineno; 			/* source line for error messages */
+    ick_bool sharedline;			/* if NZ, two statements on a line */
     enum onceagain onceagainflag;       /* AIS: ONCE / AGAIN */
     int ppnewtype;                      /* AIS: 'real' type of this line when
 					   the preprocessor is used; 0 on all
@@ -99,12 +105,12 @@ typedef struct tuple_t
 					   turn it off, before this command */
 } tuple;
 
-/* this maps the `external' name of a variable to an internal array index */
+/* this maps the `external' name of a variable to an internal ick_array index */
 typedef struct
 {
   int type;
-  unsigned int extindex;
-  unsigned int intindex;
+  unsigned long extindex;
+  unsigned long intindex;
   int ignorable; /* AIS: Can this variable be IGNOREd? */
   int memloc; /* AIS: Where does a PIC store this in memory? */
 }
@@ -117,21 +123,22 @@ typedef struct
 }
 assoc;
 
-extern atom *oblist, *obdex;
+/*@null@*/ /*@owned@*/ /*@partial@*/ extern atom *oblist;
+/*@null@*/ /*@dependent@*/ /*@partial@*/ extern atom *obdex;
 extern int obcount, nonespots, ntwospots, ntails, nhybrids;
 extern int nmeshes; /* AIS */
 
-extern tuple *tuples;
+/*@only@*/ extern tuple *tuples;
 extern int tuplecount;
 
-extern tuple *optuple; /* AIS: The tuple currently being optimized */
+/*@dependent@*/ extern tuple *optuple; /* AIS: The tuple currently being optimized */
 
 extern char **enablers;
 extern char *enablersm1[MAXTYPES+1];
 extern assoc vartypes[];
 
 /* the lexical analyzer keeps copies of the source logical lines */
-extern char **textlines;
+/*@only@*/ extern char **textlines;
 extern int textlinecount;
 extern int iyylineno;
 
@@ -140,9 +147,9 @@ extern unsigned long sparkearsstack[SENESTMAX];
 extern int sparkearslev;
 
 /* compilation options */
-extern bool compile_only;  /* just compile into C, don't run the linker */
-extern bool nocompilerbug; /* set possibility of E774 to zero */
-extern int traditional;    /* compile as INTERCAL-72 */
+extern ick_bool compile_only;  /* just compile into C, don't run the linker */
+extern ick_bool nocompilerbug; /* set possibility of IE774 to zero */
+extern int ick_traditional;    /* compile as INTERCAL-72 */
 extern int yydebug;        /* print debugging information while parsing */
 
 extern int politesse;
@@ -156,14 +163,15 @@ extern int compucomesused; /* are computed COME FROMs used? */
 extern int nextfromsused;  /* is NEXT FROM used? */
 extern int gerucomesused;  /* is COME FROM gerund used? */
 extern int opoverused;     /* is operand overloading used? */
-extern node* firstslat;    /* the first node with a slat */
-extern node* prevslat;     /* the last node so far with a slat */
+extern int useickec;       /* are external calls used? */
+/*@null@*/ extern node* firstslat;    /* the ick_first node with a slat */
+/*@null@*/ extern node* prevslat;     /* the last node so far with a slat */
 extern int multithread;    /* is the program multithreaded? */
 extern int variableconstants; /* is any assignment allowed? */
-extern int coreonerr;      /* dump core on E778? */
+extern int ick_coreonerr;      /* dump core on IE778? */
 extern int optdebug;       /* debug the optimizer */
 extern int flowoptimize;   /* optimize program flow */
-extern int checkforbugs;   /* check for bugs */
+extern int ick_checkforbugs;   /* check for bugs */
 extern int coopt;          /* constant-output optimizer */
 
 /* ick.h ends here */

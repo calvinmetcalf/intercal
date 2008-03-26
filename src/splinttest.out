@@ -1,0 +1,11 @@
+-*- compilation -*-
+yuk.h:21:14: Variable textlines redeclared with inconsistent type (arrays and
+                pointers are not identical in variable declarations): char * []
+  A function, variable or constant is redefined with a different type. (Use
+  -incondefs to inhibit warning)
+   ick.h:141:26: Previous declaration of textlines: char **
+dekludge.c:101:5: Function exported but not used outside dekludge: abstainmatch
+  A declaration is exported, but not used outside this module. Declaration can
+  use static qualifier. (Use -exportlocal to inhibit warning)
+   dekludge.c:113:1: Definition of abstainmatch
+

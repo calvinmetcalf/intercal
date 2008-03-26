@@ -523,7 +523,7 @@ fi
 
 
 
-PACKAGE_VERSION=0.27
+PACKAGE_VERSION=0.28
 
 for ac_prog in 'bison -y' byacc
 do

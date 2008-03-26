@@ -23,9 +23,9 @@ LICENSE TERMS
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#define resume popnext
+#define ick_resume ick_popnext
 
-ICK_INT32 mingle(ICK_INT16 r, ICK_INT16 s)
+ICK_INT32 ick_mingle(ICK_INT16 r, ICK_INT16 s)
 {
   r = ((r & 0x0000ff00) << 8) | (r & 0x000000ff);
   r = ((r & 0x00f000f0) << 4) | (r & 0x000f000f);
@@ -38,7 +38,7 @@ ICK_INT32 mingle(ICK_INT16 r, ICK_INT16 s)
   return (r << 1) | s;
 }
 
-ICK_INT32 iselect(ICK_INT32 r, ICK_INT32 s)
+ICK_INT32 ick_iselect(ICK_INT32 r, ICK_INT32 s)
 {
   ICK_INT32 i = 1, t = 0;
   while (s) {
@@ -55,7 +55,7 @@ ICK_INT32 iselect(ICK_INT32 r, ICK_INT32 s)
   return t;
 }
 
-ICK_INT16 and16(ICK_INT16 n)
+ICK_INT16 ick_and16(ICK_INT16 n)
 {
   ICK_INT16 m;
   m = (n >> 1);
@@ -64,7 +64,7 @@ ICK_INT16 and16(ICK_INT16 n)
   return(m & n);
 }
 
-ICK_INT16 or16(ICK_INT16 n)
+ICK_INT16 ick_or16(ICK_INT16 n)
 {
   ICK_INT16 m;
   m = (n >> 1);
@@ -73,7 +73,7 @@ ICK_INT16 or16(ICK_INT16 n)
   return(m | n);
 }
 
-ICK_INT32 and32(ICK_INT32 n)
+ICK_INT32 ick_and32(ICK_INT32 n)
 {
   ICK_INT32 m;
   m = (n >> 1);
@@ -82,7 +82,7 @@ ICK_INT32 and32(ICK_INT32 n)
   return(m & n);
 }
 
-ICK_INT32 or32(ICK_INT32 n)
+ICK_INT32 ick_or32(ICK_INT32 n)
 {
   ICK_INT32 m;
   m = (n >> 1);
@@ -91,7 +91,7 @@ ICK_INT32 or32(ICK_INT32 n)
   return(m | n);
 }
 
-ICK_INT16 xor16(ICK_INT16 n)
+ICK_INT16 ick_xor16(ICK_INT16 n)
 {
   ICK_INT16 m;
   m = (n >> 1);
@@ -100,7 +100,7 @@ ICK_INT16 xor16(ICK_INT16 n)
   return(m ^ n);
 }
 
-ICK_INT32 xor32(ICK_INT32 n)
+ICK_INT32 ick_xor32(ICK_INT32 n)
 {
   ICK_INT32 m;
   m = (n >> 1);
@@ -109,27 +109,27 @@ ICK_INT32 xor32(ICK_INT32 n)
   return(m ^ n);
 }
 
-ICK_INT8 nextindex = 0;
-ICK_INT16 next[16];
+ICK_INT8 ick_nextindex = 0;
+ICK_INT16 ick_next[16];
 
-void pushnext(ICK_INT16 n)
+void ick_pushnext(ICK_INT16 n)
 {
-	next[nextindex++] = n;
+	ick_next[ick_nextindex++] = n;
 }
 
-ICK_INT16 popnext(ICK_INT8 n)
+ICK_INT16 ick_popnext(ICK_INT8 n)
 {
-    if (nextindex < n) {
-   	nextindex = 0;
+    if (ick_nextindex < n) {
+   	ick_nextindex = 0;
    	return (ICK_INT16)-1;
     }
     else
-      nextindex -= n;
-    return(next[nextindex]);
+      ick_nextindex -= n;
+    return(ick_next[ick_nextindex]);
 }
 
 /* It's hard to do randomization on a PIC. */
-ICK_INT1 roll(ICK_INT8 n)
+ICK_INT1 ick_roll(ICK_INT8 n)
 {
    return n>50;
 }

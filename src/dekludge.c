@@ -33,7 +33,7 @@ LICENSE TERMS
 #include "ick.h"
 #include "parser.h"
 #include "fiddle.h"
-#include "lose.h"
+#include "ick_lose.h"
 #include "feh.h"
 
 extern int emitlineno; /* AIS: From feh2.c */
@@ -55,8 +55,11 @@ void checknodeactbits(node *np); /* AIS: This prototype needed early */
 extern void prexpr(node *np, FILE* fp, int freenode); /* AIS */
 
 /* By AIS. This function looks remarkably like a C++ copy-constructor to me,
-   just with extra arrows in. */
-node *nodecopy(node* n)
+   just with extra arrows in. The annotations here show that nulls are allowed
+   when called recursively, but not otherwise. */
+/*@-incondefs@*/
+/*@null@*/ node *nodecopy(/*@null@*/ node* n)
+/*@=incondefs@*/
 {
   node* np;
   if(!n) return 0;
@@ -69,7 +72,7 @@ node *nodecopy(node* n)
 
 /* This function by AIS. Compares expressions. In C++, I'd call this
    node::operator== . */
-bool nodessame(node* n1, node* n2)
+ick_bool nodessame(node* n1, node* n2)
 {
   if(!n1) return !n2;
   if(!n2) return 0;
@@ -78,10 +81,10 @@ bool nodessame(node* n1, node* n2)
   if(!nodessame(n1->rval,n2->rval)) return 0;
   switch(n1->opcode)
   {
-  case ONESPOT:
-  case TWOSPOT:
-  case HYBRID:
-  case TAIL:
+  case ick_ONESPOT:
+  case ick_TWOSPOT:
+  case ick_HYBRID:
+  case ick_TAIL:
   case MESH:
   case MESH32:
     return n1->constant == n2->constant;
@@ -104,6 +107,8 @@ int abstainmatch(int npconstant, int tptype)
     if(tptype == ENABLE) return 1;
   if(npconstant == GETS)
     if(tptype == RESIZE) return 1;
+  if(npconstant == UNKNOWN) /* JH */
+    if(tptype == SPLATTERED) return 1;
   return 0;
 }
 
@@ -118,10 +123,10 @@ int abstainmatch(int npconstant, int tptype)
  * this information into account, producing faster and shorter source code.
  * In an ideal world, we'd end up with the produced INTERCAL looking like
  * proper C code, but somehow I think that's unlikely to happen.
- * At the moment, it just checks for unused !abstained[] guards on
+ * At the moment, it just checks for unused !ick_abstained[] guards on
  * statements and removes them (possibly removing comments altogether).
  * This is minor, but should clear up degenerated code substantially.
- * It also allows the code for gets to replace assign() with the faster =
+ * It also allows the code for gets to replace ick_assign() with the faster =
  * in cases where this doesn't affect the behaviour of the program.
  * See the function itself for what I did to NEXT.
  *
@@ -132,15 +137,21 @@ void optimizef(void)
   tuple* tp, *tpa, *tpb;
   atom* op;
   node* np;
-  if(!flowoptimize) lose(E778, iyylineno, (char *) NULL);
-  for (tp = tuples; tp < tuples + lineno; tp++) tp->abstainable = 0;
+  if(!flowoptimize) ick_lose(IE778, iyylineno, (char *) NULL);
+  for (tp = tuples; tp < tuples + ick_lineno; tp++) tp->abstainable = 0;
   /* abstainable holds whether a line's abstention status can change */
-  for (op = oblist; op < obdex; op++) op->ignorable = 0;
+  for (op = oblist; op != NULL && op < obdex; op++) op->ignorable = 0;
   /* ignorable holds whether a variable's ignorance status can change */
-  for (tp = tuples; tp < tuples + lineno; tp++)
+  for (tp = tuples; tp < tuples + ick_lineno; tp++)
   {
     /* allow for warnings to be generated during flow optimisations */
-    optuple = tp; /* Patch by Joris Huizer */
+    /* AIS: I marked tuples as only deliberately, so that it produced warnings
+       when aliased in an unsafe way. However, tuples isn't realloced during
+       optimisation, so we can safely ignore the warning for it produced
+       here. */
+    /*@-onlytrans@*/
+    optuple = tp;
+    /*@=onlytrans@*/
     if(tp->maybe) tp->abstainable = 1;
     if(tp->exechance < 0) tp->initabstain = 1;
     if(tp->exechance != 100 && tp->exechance != -100) tp->abstainable = 1;
@@ -157,37 +168,37 @@ void optimizef(void)
     }
     if(tp->type == DISABLE || tp->type == MANYFROM)
     {
-      for (tpa = tuples; tpa < tuples + lineno; tpa++)
+      for (tpa = tuples; tpa < tuples + ick_lineno; tpa++)
       {
 	np = tp->u.node;
 	if(tp->type == MANYFROM) np = np->rval;
 	for(; np; np = np -> rval)
-	  if(abstainmatch(np->constant, tpa->type))
+	  if(abstainmatch((int)np->constant, (int)tpa->type))
 	    if(tpa->exechance >= 0) tpa->abstainable = 1;
       }
     }
     if(tp->type == ENABLE)
     {
-      for (tpa = tuples; tpa < tuples + lineno; tpa++)
+      for (tpa = tuples; tpa < tuples + ick_lineno; tpa++)
       {
 	np = tp->u.node;
 	for(; np; np = np -> rval)
-	  if(abstainmatch(np->constant, tpa->type))
+	  if(abstainmatch((int)np->constant, (int)tpa->type))
 	    if(tpa->exechance < 0) tpa->abstainable = 1;
       }
     }
-    if(tp->type == GETS && Base == 2 && !opoverused)
+    if(tp->type == GETS && ick_Base == 2 && !opoverused)
       checknodeactbits(tp->u.node->rval);
     /* If optdata shows that the value must always fit in the variable,
-       and the variable cannot be ignored, assign can be replaced by the
+       and the variable cannot be ignored, ick_assign can be replaced by the
        cheaper =. */
     if(tp->type == IGNORE)
     {
       for (np = tp->u.node; np; np = np->rval)
       {
-	for (op = oblist; op < obdex; op++)
+	for (op = oblist; op != NULL && op < obdex; op++)
 	{
-	  if(op->type == np->opcode && (unsigned)op->intindex == np->constant)
+	  if(op->type == np->opcode && (unsigned long)op->intindex == np->constant)
 	    op->ignorable = 1;
 	}
       }
@@ -213,9 +224,9 @@ void optimizef(void)
      problems and common variations.
      First, the FORGET might be placed elsewhere, or replaced with a higher
      FORGET later or a higher RESUME later. If there is, in fact, a RESUME #1
-     as the next NEXT-control statement, the idiom won't quite work properly.
+     as the ick_next NEXT-control statement, the idiom won't quite work properly.
      So to handle this, we need to push the original return address on the
-     NEXT stack if block 1 is taken, unless the next statement is a FORGET #1.
+     NEXT stack if block 1 is taken, unless the ick_next statement is a FORGET #1.
      Second, there may be abstentions or COME FROMs messing with control flow
      in the area. The flow optimizer ought to be able to detect this and not
      optimize the statement if true. (This means that a program which uses
@@ -229,10 +240,10 @@ void optimizef(void)
      relevant variable needs to be checked for also. The checks are done partly
      in optimizef() and partly in emit().
   */
-  if(compucomesused||Base!=2||opoverused) return;
+  if(compucomesused||ick_Base!=2||opoverused) return;
 
   np = (node*) NULL;
-  for (tp = tuples; tp < tuples + lineno; tp++)
+  for (tp = tuples; tp < tuples + ick_lineno; tp++)
   {
     if(tp->type == GETS)
     {
@@ -246,20 +257,20 @@ void optimizef(void)
 	   most of them. */
 	if(tp->u.node->lval->opcode != SUB) np = tp->u.node->lval;
       }
-      else if(np&&nodessame(np, tp->u.node->lval)) np = (node*) NULL;
+      else if(np != NULL && nodessame(np, tp->u.node->lval)) np = (node*) NULL;
       if(tp->nextable) np = (node*) NULL;
       if(tp->maybe||tp->abstainable) np = (node*) NULL;
       if(tp->ncomefrom&&multithread) np = (node*) NULL;
       if(np)
       {	/* IGNORING np might prevent it getting its <1-or-2-value>. */
-	atom* op;
+	atom* op2;
 	int ignorable = 1;
-	for(op = oblist; op < obdex; op++)
+	for(op2 = oblist; op2 != NULL && op2 < obdex; op2++)
 	{
-	  if(op->type == np->opcode &&
-	     (unsigned)op->intindex == np->constant)
+	  if(op2->type == np->opcode &&
+	     (unsigned long)op2->intindex == np->constant)
 	  {
-	    ignorable &= op->ignorable;
+	    ignorable &= op2->ignorable;
 	  }
 	}
 	if(ignorable) np = (node*) NULL;
@@ -285,11 +296,12 @@ void optimizef(void)
 				    ((tpb->u.node->opcode == C_1PLUS ||
 				      tpb->u.node->opcode == C_2MINUS) &&
 				      tpb->u.node->rval->optdata == 1)) ||*/
-				   (np&&nodessame(tpb->u.node,np))) &&
+				   (np != NULL && nodessame(tpb->u.node,np))) &&
 				    !tpb->abstainable)
 	  /* No COMING FROM a nonabstainable RESUME line! */
 	{
-	  tp->optversion = TRUE;
+	  tp->optversion = ick_TRUE;
+	  free(tp->u.node);
 	  tp->u.node = nodecopy(tpb->u.node);
 	  /* If tp->u.node is 2, then the statement should translate to a
 	     no-op (NEXT...NEXT...RESUME #2). However, if tp->u.node is 1,
@@ -304,7 +316,9 @@ void optimizef(void)
       np = (node*) NULL;
     }
   }
+  /*@-nullstate@*/ /* no tuples->u.node can't be null */
 }
+/*@=nullstate@*/
 
 /*************************************************************************
  *
@@ -333,7 +347,7 @@ void optimize(node *np)
 {
   int optflag;
   if(opoverused) return; /* what chance do we have of optimizing this? */
-  if(Base==2)
+  if(ick_Base==2)
   {
     checknodeactbits(np);
     checkW534(np); /* This must be done before optimization, and depends on
@@ -342,8 +356,8 @@ void optimize(node *np)
   if(optdebug == 1) explexpr(np,stderr);
   if(optdebug == 1) fprintf(stderr," becomes ");
   if(optdebug >= 2) optdebugnode = np;
-  if(Base==2) optimize_pass1(np); /* Optimize idioms; from idiotism.oil */
-  if(Base!=2)
+  if(ick_Base==2) (void) optimize_pass1(np); /* Optimize idioms; from idiotism.oil */
+  if(ick_Base!=2)
   {
     if(optdebug && optdebug != 3) explexpr(np,stderr);
     if(optdebug == 3) prexpr(np,stderr,0);
@@ -363,14 +377,19 @@ void optimize(node *np)
   if(optuple->type == RESUME && !np->optdata) optuple->warn622 = 1;
 }
 
-/* By AIS. This relies on free'd pointers being NULLed. */
-void nodefree(node *np)
+/* By AIS. This relies on free'd pointers being NULLed. The annotations
+   are basically trying to describe how the function operates. */
+void nodefree(/*@keep@*/ /*@null@*/ node *np)
 {
   if(!np) return;
+  /*@-mustfreeonly@*/
   if(np->opcode==SLAT) return; /* mustn't be freed yet */
+  /*@=mustfreeonly@*/
+  /*@-keeptrans@*/
   nodefree(np->lval);
   nodefree(np->rval);
   free(np);
+  /*@=keeptrans@*/
 }
 
 /* By AIS. This checks W534. */
@@ -399,6 +418,7 @@ static void checkforintercaloperators(node *np)
   { /* This only comes up in binary. */
   case AND: case OR: case XOR: case MINGLE: case SELECT:
     optuple->warn018 = 1;
+    break;
   default:
     checkforintercaloperators(np->lval);
     checkforintercaloperators(np->rval);
@@ -421,10 +441,12 @@ void checknodeactbits(node *np)
   switch (np->opcode)
   {
   case MINGLE:
+    /*@-nullderef@*/ /* mingle has two nonnull arguments */
     if(np->lval->optdata & 0xffff0000LU) optuple->warn276 = 1;
     if(np->rval->optdata & 0xffff0000LU) optuple->warn276 = 1;
-    np->optdata = mingle(np->lval->optdata & 0xffff,
-			 np->rval->optdata & 0xffff);
+    np->optdata = ick_mingle((unsigned)(np->lval->optdata & 0xffff),
+			     (unsigned)(np->rval->optdata & 0xffff));
+    /*@=nullderef@*/
     /* The bitmask is needed because the output of ~ might always be 16-bit
        at runtime, but appear 32-bit at compile-time. But this is somewhat
        suspicious, so we can at least give a warning (W276) if -l is used. */
@@ -434,18 +456,26 @@ void checknodeactbits(node *np)
     /* The result could be the selected optdata, or have a 1 anywhere to the
        right of a 1 in the resulting selection if there are 0s in rval where
        there could have been 1s */
-    np->optdata = iselect(np->lval->optdata, np->rval->optdata);
+    /*@-nullderef@*/
+    np->optdata = ick_iselect((unsigned)np->lval->optdata, (unsigned)np->rval->optdata);
+    /*@=nullderef@*/
     temp=16;
     while(temp--) np->optdata|=(np->optdata>>1); /* fill in gaps in optdata */
     break;
 
   case AND:
-    np->optdata = (np->width==16?and16:and32)(np->rval->optdata);
+    if(np->width==16)
+      np->optdata = ick_and16((unsigned)np->rval->optdata);
+    else
+      np->optdata = ick_and32((unsigned)np->rval->optdata);
     break;
 
   case OR:
   case XOR:
-    np->optdata = (np->width==16?or16:or32)(np->rval->optdata);
+    if(np->width==16)
+      np->optdata = ick_or16((unsigned)np->rval->optdata);
+    else
+      np->optdata = ick_or32((unsigned)np->rval->optdata);
     /* This is or in both cases. */
     break;
 
@@ -455,8 +485,10 @@ void checknodeactbits(node *np)
   case WHIRL3:
   case WHIRL4:
   case WHIRL5: /* We must be in binary to reach this point, so: */
-    lose(E997, emitlineno, (char*) NULL);
+    ick_lose(IE997, emitlineno, (char*) NULL);
+    /*@-unreachable@*/
     break;
+    /*@=unreachable@*/
 
   case MESH:
   case MESH32:
@@ -464,27 +496,31 @@ void checknodeactbits(node *np)
 				   can be nonzero! */
     break;
 
-  case ONESPOT:
-  case TWOSPOT:
-  case TAIL:
-  case HYBRID:
+  case ick_ONESPOT:
+  case ick_TWOSPOT:
+  case ick_TAIL:
+  case ick_HYBRID:
   case SUB:
-    np->optdata = np->width == 16 ? 0xffff : 0xffffffffLU;
+    np->optdata = np->width == 16 ? 0xffffLU : 0xffffffffLU;
     break;
 
     /* cases from here down are generated by optimize_pass1 */
   case C_AND:
+    /*@-nullderef@*/
     np->optdata = np->lval->optdata & np->rval->optdata;
+    /*@=nullderef@*/
     break;
 
   case C_OR:
   case C_XOR:
+    /*@-nullderef@*/
     np->optdata = np->lval->optdata | np->rval->optdata;
+    /*@=nullderef@*/
     /* bitwise-or is correct in both cases */
     break;
 
   case C_NOT:
-    np->optdata = np->width == 16 ? 0xffff : 0xffffffffLU;
+    np->optdata = np->width == 16 ? 0xffffLU : 0xffffffffLU;
     break;	
 
   case C_A:
@@ -502,41 +538,50 @@ void checknodeactbits(node *np)
     break;
 
   case C_RSHIFTBY:
+    /*@-nullderef@*/
     if(np->rval->opcode == MESH || np->rval->opcode == MESH32)
       np->optdata = np->lval->optdata >> np->rval->constant;
-    else np->optdata = (np->width == 16 ? 0xffff : 0xffffffffLU);
+    else np->optdata = (np->width == 16 ? 0xffffLU : 0xffffffffLU);
+    /*@=nullderef@*/
     /* Play safe if the RHS isn't a constant */
     break;
 
   case C_LSHIFTBY:
+    /*@-nullderef@*/
     if(np->rval->opcode == MESH || np->rval->opcode == MESH32)
       np->optdata = np->lval->optdata << np->rval->constant;
-    else np->optdata = (np->width == 16 ? 0xffff : 0xffffffffLU);
+    else np->optdata = (np->width == 16 ? 0xffffLU : 0xffffffffLU);
+    /*@=nullderef@*/
     /* Play safe if the RHS isn't a constant */
     break;
 
   case C_PLUS:
     /* A bit could be set if it's set in either of the numbers, or if it's set
        by a carry; so OR together the two numbers and their sum. */
+    /*@-nullderef@*/
     np->optdata = np->lval->optdata | np->rval->optdata |
       (np->lval->optdata + np->rval->optdata);
+    /*@=nullderef@*/
     break;
 
   case C_MINUS:
   case C_DIVIDEBY:
     /* The optimizer shouldn't be able to generate negative answers or
        divisions by 0, so just fill in all bits from lval rightwards */
+    /*@-nullderef@*/
     np->optdata = np->lval->optdata;
     np->optdata |= np->optdata >> 1;
     np->optdata |= np->optdata >> 2;
     np->optdata |= np->optdata >> 4;
     np->optdata |= np->optdata >> 8;
     np->optdata |= np->optdata >> 16;
+    /*@=nullderef@*/
     break;
 
   case C_MODULUS:
     /* The answer must be smaller than both inputs, but we can't tell anything
        else */
+    /*@-nullderef@*/
     np->optdata = np->lval->optdata;
     if(np->rval->optdata < np->optdata) np->optdata = np->rval->optdata;
     np->optdata |= np->optdata >> 1;
@@ -544,28 +589,36 @@ void checknodeactbits(node *np)
     np->optdata |= np->optdata >> 4;
     np->optdata |= np->optdata >> 8;
     np->optdata |= np->optdata >> 16;
+    /*@=nullderef@*/
     break;
 
   case C_TIMES:
     /* Convolve one set of active bits with the other, ORadding the results */
     np->optdata=0;
     temp=32;
+    /*@-nullderef@*/ /*@-shiftnegative@*/
     while(temp--)
       if(np->lval->optdata & (1LU << temp))
 	np->optdata = np->optdata | (np->rval->optdata << temp) |
 	  ((np->rval->optdata << temp) + np->optdata);
+    /*@=nullderef@*/ /*@=shiftnegative@*/
+    break;
 
   case GETS:
     /* Of course, this doesn't return a value. So this uses the default
        code just below it, which is why it doesn't end in break;. This
        has its own case so that W276 can be given on an assignment. */
+    /*@-nullderef@*/
     if(np->lval->optdata == 0xffff &&
        np->rval->optdata & 0xffff0000lu) optuple->warn276 = 1;
-    /* no break;! */
+    /*@=nullderef@*/
+    /*@fallthrough@*/
 
   default:
+    /*@-nullderef@*/
     if(np->opcode == BY && !np->lval->optdata) optuple->warn239 = 1;
-    np->optdata = (np->width == 16 ? 0xffff : 0xffffffffLU);
+    /*@=nullderef@*/
+    np->optdata = (np->width == 16 ? 0xffffLU : 0xffffffffLU);
     /* Some values of opcode are used as placeholders, to save more than 1
        piece of information in a node. The optdata for these is probably
        irrelevant, but just in case, we mark all possible bits as active. */

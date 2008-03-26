@@ -1,8 +1,8 @@
 \input texinfo @c -*- texinfo -*-
 @c %**start of header
 @setfilename ick.info
-@set VERSION 0.27
-@set VERSIONDASH 0-27
+@set VERSION 0.28
+@set VERSIONDASH 0-28
 @settitle C-INTERCAL @value{VERSION} Revamped Instruction Manual
 @paragraphindent 0
 @documentlanguage en
@@ -164,6 +164,7 @@ Basic @ical{} features
 * Multithreading and Backtracking:: Running @ical{} programs in parallel
 * Operand Overloading::             Where one expression stands for another
 * PIC-INTERCAL::                    @ical{} on embedded systems
+* External Calls::                  Linking @ical{} with other languages
 * Differences to Other Compilers::  @cic{} vs. @clcic{}
 
 Appendices and indices
@@ -588,7 +589,7 @@ You can make a `live' CD or USB-stick version of @cic{} using similar
 methods; configure (if possible) and compile it, but instead of
 installing it, copy the entire @file{ick-@value{VERSION}} directory to the
 CD or USB stick.  @ical{} can then be run from there by explicitly giving
-a pathname to @file{bin/ick} or @file{bin/ick.exe}
+a pathname to @file{bin/ick} or @file{bin/ick.exe}.
 
 @node Uninstalling
 @section Uninstalling
@@ -1599,6 +1600,17 @@ cope.  This error is unlikely to ever happen; if it does, try reducing
 the number of variables you use by combining some into arrays.  This is
 a compile-time error.
 
+@ieanchor E345
+@cindex out of memory
+@quotation
+THAT'S TOO COMPLEX FOR ME TO GRASP
+@end quotation
+
+This is another compile-time error that's unlikely to ever happen;
+this one signifies the compiler itself running out of memory trying to
+compile your program.  The only solutions to this are to simplify your
+program, or to make more memory available to the compiler.
+
 @ieanchor E404
 @cindex @code{GO BACK}, no choicepoint
 @cindex @code{GO AHEAD}, no choicepoint
@@ -1722,7 +1734,7 @@ The compiler encountered error E621 (@pxref{E621}).  This happens at
 runtime when the program requests that no entries are removed from the
 @code{NEXT} stack (which is possible), but that the last entry removed
 should be jumped to (which given the circumstances isn't, because no
-entries were removed.)
+entries were removed).
 
 @ieanchor E632
 @quotation
@@ -1771,7 +1783,11 @@ COMPILER HAS INDIGESTION
 
 There isn't a limit on the length of an input program other than your
 computer's memory; if your computer does run out of memory during
-compilation, it causes this error.
+compilation, it causes this error.  This error can also be caused if
+too many input files are specified on the command line; if you suspect
+this is the problem, split the compilation into separate compilations
+if you can, or otherwise you may be able to concatenate together your
+input files into larger but fewer files.
 
 @ieanchor E774
 @cindex random bug, error message
@@ -2635,7 +2651,7 @@ is, @code{.1~.2~.3} is equivalent to @code{.1~'.2~.3'}.  @cic{} versions
 0.26 and later also right-associate binary operators so as to produce
 the same results as @clcic{} rules in this situation, but as nobody has
 yet tried to work out what the other implications of @clcic{} rules are
-they are not emulated in @cic{}, except possibly by chance
+they are not emulated in @cic{}, except possibly by chance.
 
 @ianchor Prefix and infix unary operators
 @cindex unary operator, prefix
@@ -2725,7 +2741,7 @@ of currency (change, quid, and zlotnik if Latin-1 is used as the
 input, and euro if Latin-9 is used as the input) are accepted; from
 version 0.20 onwards, in addition to the Latin-1 characters, all the
 currency symbols in Unicode are accepted if UTF-8 is used as the input
-format.  @cic{} has always used the change character (either the
+format.  @clcic{} has always used the change character (either the
 Latin-1 version or the version that contains a backspace) for mingle.
 In this manual, mingle will be represented as @code{$}, but it's
 important to bear in mind that this character is not the most portable
@@ -2773,27 +2789,28 @@ unlike mingle, every known implementation of @ical{} ever has used the
 sqiggle character (@code{~}) as the representation of the select
 operator, meaning that writing it portably is easy.
 
-The select operator takes two arguments, which can be of either datatype
-(that is, 16- or 32-bit).  It returns a value made by selecting certain
-bits of its first operand indicated by the second operand, and
-right-justifying them.  What it does is ignores all the bits of the
-first operand where the second operand has a 0 as the corresponding bit,
-that is, deletes them from a copy of the operand's value; the bits that
-are left are squashed together towards the least-significant end of the
-number, and the result is filled with 0s to make it up to 16 or 32
-bits.  (In @icst{} the minimum multiple of 16 bits possible that the
-result fits into is chosen, although if :1 has the value 131061 (in hex,
-1FFFF) the expression @code{#21~:1} produces a 32-bit result because 17
-bits were selected, even though many of the leading bits were zeros; in
-@cic{} the data type of the result is the same as of the right operand
-of the select, so that it can be determined at run time, and so using a
-unary binary logic operator on the result of select when the right
-operand has a 32-bit type is nonportable and not recommended.)  As an
-example, @code{#21~:1} produces 21 as its result if :1 has the value
-131061, 10 as its result if :1 has the value 30 (1E in hex; the
-least significant bit of 21 is removed because it corresponds to a 0 in
-:1), and 7 as its result if :1 has the value 21 (because three bits in
-21 are set, and those three bits from 21 are therefore selected by 21).
+The select operator takes two arguments, which can be of either
+datatype (that is, 16- or 32-bit).  It returns a value made by
+selecting certain bits of its first operand indicated by the second
+operand, and right-justifying them.  What it does is that it ignores
+all the bits of the first operand where the second operand has a 0 as
+the corresponding bit, that is, deletes them from a copy of the
+operand's value; the bits that are left are squashed together towards
+the least-significant end of the number, and the result is filled with
+0s to make it up to 16 or 32 bits.  (In @icst{} the minimum multiple
+of 16 bits possible that the result fits into is chosen, although if
+:1 has the value 131061 (in hex, 1FFFF) the expression @code{#21~:1}
+produces a 32-bit result because 17 bits were selected, even though
+many of the leading bits were zeros; in @cic{} the data type of the
+result is the same as of the right operand of the select, so that it
+can be determined at run time, and so using a unary binary logic
+operator on the result of select when the right operand has a 32-bit
+type is nonportable and not recommended.)  As an example,
+@code{#21~:1} produces 21 as its result if :1 has the value 131061, 10
+as its result if :1 has the value 30 (1E in hex; the least significant
+bit of 21 is removed because it corresponds to a 0 in :1), and 7 as
+its result if :1 has the value 21 (because three bits in 21 are set,
+and those three bits from 21 are therefore selected by 21).
 
 Select is used for right-shifts, to select every second bit from a
 number (either to produce what will eventually become an argument to
@@ -4400,6 +4417,165 @@ voltage rail.  There is no way to input without output, or vice versa,
 but it's trivial to just send the same output again (which has no
 effect, because the voltage on sending pins is maintained at the same
 level until it is changed), or to ignore the input received.
+
+@node External Calls
+@chapter External Calls
+@cindex external calls
+@cindex other languages
+@cindex foreign functions
+@cindex calls, external
+
+@cic{} (from version 0.28 onwards) has a feature allowing @ical{} and
+non-@ical{} code to be mixed.  This is achieved by causing the
+non-@ical{} programs to participate in the @ical{} line-numbering
+model.
+
+To create a combined program containing @ical{} and non-@ical{} code,
+use @command{ick} as the compiler as normal, but specify both the
+@ical{} and non-@ical{} source files on the command line.
+@command{ick} will invoke other compilers as necessary, possibly after
+modifying the source files accordingly.  At present, external calls
+are only supported to and from C.
+
+In each case, it will be the @ical{} program that is invoked first.
+(This means that it is impossible to link together more than one
+@ical{} program, but you probably don't want to, because concatenating
+the programs is likely to have a similar effect.)  You can get the
+@ical{} program to @code{NEXT} to the non-@ical{} program immediately,
+or the non-@ical{} program to @code{COME FROM} or @code{NEXT FROM} the
+@ical{} program immediately, to obtain the effect of running the
+non-@ical{} program first.
+
+Note that external calls are incompatible with PIC-INTERCAL and with
+multithreading.
+
+@menu
+* External Calls to C::      How to put @ical{} calls in C.
+@end menu
+
+@node External Calls to C
+@section External Calls to C
+@cindex C
+@cindex other languages, C
+@cindex external calls, to C
+
+Linking C and @ical{} programs is acheived by placing various
+constructs into the C programs that are equivalent to various @ical{}
+constructs.  It is possible to simulate a line with a label and a
+dummy command (which serves as a @code{COME FROM} suckpoint and
+@code{NEXT} target), @code{NEXT}, @code{RESUME}, and @code{FORGET},
+and @code{COME FROM} and @code{NEXT FROM}.  Onespot and twospot
+variables are accessible from inside the C program, where they can be
+read and written; however, the @ical{} program cannot access any
+variables inside the C program that weren't part of the @ical{}
+program originally.
+
+To prevent various logical impossibilities, there are restrictions on
+where these can be used and what preparation is needed before they are
+used.  Also, the semantics are not always exactly what you might
+expect for technical reasons.
+
+It should be observed that the @ical{} link intrudes on the user
+namespace.  To prevent possible namespace clashes, no identifiers
+starting with @code{ick_} or @code{ICK_} should be used anywhere in
+the linked C program for any reason, except where specified in this
+manual.
+
+@table @code
+
+@item #include <ick_ec.h>
+@cindex ick_ec.h
+The header file @file{ick_ec.h} must be included using the
+preprocessor in any file which uses any of the @ical{} external call
+functions, variables, or macros.  (Note that this file may not
+necessarily exist, or exist in the usual place; @command{ick} will
+deal with making sure the correct header file is included.)
+
+@item ICK_EC_FUNC_START
+@itemx ICK_EC_FUNC_END
+@findex ICK_EC_FUNC_START
+@findex ICK_EC_FUNC_END
+Many of the @ical{} interface macros (@code{ick_linelabel},
+@code{ick_comefrom}, and @code{ick_nextfrom}) make it possible to
+jump from an @ical{} program to a C program.  Because C doesn't allow
+jumping into the middle of a function, there has to be some way to
+create a block of code which @emph{can} be jumped into. This is what
+these two macros achieve.
+
+This declaration and definition:
+
+@example
+ICK_EC_FUNC_START(identifier)
+@{
+  /* code goes here */
+@}
+ICK_EC_FUNC_END
+@end example
+
+is equivalent to this:
+
+@example
+void identifier(void)
+@{
+  /* code goes here */
+@}
+@end example
+
+except that it is possible to jump from an @ical{} program into the
+declared and defined program.  (If you need to write a prototype for
+the function early, @code{void identifier(void);} is perfectly
+acceptable, but an early prototype is not required unless you call the
+function from earlier within the C code.)  Of course, you can
+substitute any identifier that's legal as a function name for
+@code{identifier} (as long as it doesn't start with @code{ick_} or
+@code{ICK_}).  The resulting function is a function (for instance, you
+can take its address or call it in the usual ways); the only
+differences are that it can be jumped into from @ical{} code and that
+it is constrained to take no arguments and return no data.  (It can
+still access global and @ical{} variables.)  If the function is jumped
+into from @ical{} code, but then control flow reaches the end of the
+function, a @code{RESUME #1} is automatically done to give the program
+some way to continue.  (There will be the usual error message if the
+@code{NEXT} stack happens to be empty at the time.)
+
+@item ick_linelabel
+@findex ick_linelabel
+@cindex line labels, C
+
+A line label is something that can be @code{NEXT}ed to and @code{COME
+FROM}.  Unlike an @ical{} line label, it does not label a statement,
+and therefore attempts to @code{ABSTAIN} or @code{REINSTATE} it may be
+errors, or may be ignored (it's unspecified which, which means that
+either may happen for any or no reason, but exactly one will happen in
+any given case, although the choice might not be consistent).
+
+The macro @code{ick_linelabel(expression);} may appear anywhere a
+compound statement would normally be able to appear.  (That is, it
+looks like a function call being used as a standalone expression, but
+in fact the places where it can appear are more limited.)  In contrast
+to ordinary line labels, an expression can be used rather than just a
+constant; however, the behaviour is undefined if the expression has
+side-effects.  Upon encountering the line label, any @code{COME FROM}s
+or @code{NEXT FROM}s aiming at the line label (including
+@code{ick_comefrom}s and @code{ick_nextfrom}s) will steal control from
+the program; @code{RESUM}ing after a @code{NEXT FROM} will work, but
+suffers from the same caveats as setjmp/longjmp do (any auto variables
+that change their value between the @code{NEXT FROM} and @code{RESUME}
+will have their value clobbered (i.e. their value is no longer
+reliable and should not be accessed)).  Note that the @ical{}
+variables are immune to this problem.
+
+It is possible to @code{NEXT} or @code{ick_donext} to a
+@code{ick_linelabel}, which has the same effect as saving the
+@code{NEXT} stack, calling the function containing the
+@code{ick_linelabel} and then immediately doing a C @code{goto} to an
+imaginary label preceding it.  Due to this possibility, an
+@code{ick_linelabel} is only allowed within a function defined with
+@code{ICK_EC_FUNC_START}.
+
+
+
+@end table
 
 @node Differences to Other Compilers
 @chapter Differences to Other Compilers
