@@ -38,22 +38,27 @@ LICENSE TERMS
 
    To prevent this process running the program out of stack space (which would
    happen with a naive implementation if there were many COME FROMs from
-   inside the C program back to inside the C program), ick_checksuckpoint will
-   longjmp back to a previous incarnation of itself if doing so eliminates no
-   NEXT stack entries. This trick doesn't work with FORGET, though; instead
-   the stray C stack entries are eliminated at the next RESUME past them;
-   also, all but one of the entries can be eliminated at each line label if
-   there are more than one of them.
+   inside the C program back to inside the C program), all transitions but
+   NEXTs are done indirectly, by jumping back inside a relevant invocation of
+   ick_dogoto and changing its targets. (So effectively, to GOTO a particular
+   destination, you go back in time to the last time you NEXTed - or to
+   implement a FORGET, the last-but-n-time you NEXTed - and redo it with a
+   different target.)
 */
+
+#include <stdint.h>
 
 #define ICK_EC_FUNC_START(id)			  \
 ICK_EC_PP_0(id)  	  		          \
 void id(void)					  \
 {						  \
-  void* ick_local_rv = 0;			  \
+  void* ick_local_createdata =			  \
+    ick_global_createdata;			  \
   int ick_local_checkmode = ick_global_checkmode; \
-  jmp_buf ick_local_jmpbuf;			  \
-  setjmp(ick_local_jmpbuf);			  \
+  if(ick_global_checkmode==6)			  \
+  {						  \
+    goto ick_l6_ICK_EC_PP_6;			  \
+  }						  \
   if(ick_global_checkmode==2)			  \
   {						  \
     goto ick_l2_ICK_EC_PP_2;			  \
@@ -63,31 +68,68 @@ void id(void)					  \
   {						  \
     goto ick_l1_ICK_EC_PP_1;			  \
   }						  \
-  else
+  ick_local_checkmode=ick_global_checkmode=0;
 
 #define ick_linelabel(expr) ick_labeledblock(expr,0)
 
 #define ick_labeledblock(expr,block)			    \
   do {							    \
-    if(ick_forgetamount > 1)				    \
-    {							    \
-      ick_global_stackcleanup=1;			    \
-      ick_donext(expr,-1,1);				    \
-    }							    \
     if(0)						    \
     {							    \
     ick_l2_ICK_EC_PP_2: ;				    \
       if(ick_global_linelabel != (expr) || (expr) > 65535)  \
 	goto ick_l2_ICK_EC_PP_2;			    \
       ick_global_checkmode = 0;				    \
-      if(ick_global_stackcleanup)			    \
-	ick_forget(1);					    \
-      ick_global_stackcleanup = 0;			    \
     }							    \
     block ;						    \
     ick_checksuckpoint(expr);				    \
   }							    \
   while(0)
+
+#define ick_linelabelnosp(expr)				    \
+  do {							    \
+    if(0)						    \
+    {							    \
+    ick_l2_ICK_EC_PP_2: ;				    \
+      if(ick_global_linelabel != (expr) || (expr) > 65535)  \
+	goto ick_l2_ICK_EC_PP_2;			    \
+      ick_global_checkmode = 0;				    \
+    }							    \
+  }							    \
+  while(0)
+
+#define ick_linelabelnosp(expr)				    \
+  do {							    \
+    if(0)						    \
+    {							    \
+    ick_l2_ICK_EC_PP_2: ;				    \
+      if(ick_global_linelabel != (expr) || (expr) > 65535)  \
+	goto ick_l2_ICK_EC_PP_2;			    \
+      ick_global_checkmode = 0;				    \
+    }							    \
+  }							    \
+  while(0)
+
+#define ick_forget(amount)			\
+  do {						\
+    ick_scheduleforget(amount);			\
+    ick_dogoto(ICK_EC_PP_3,-1,0);		\
+    ick_lose(IE778, -1, (char*) NULL);		\
+    return;					\
+  ick_l2_ICK_EC_PP_2: ;				\
+    if(ick_global_linelabel != ICK_EC_PP_3)	\
+      goto ick_l2_ICK_EC_PP_2;			\
+    ick_global_checkmode = 0;			\
+  } while(0)
+
+
+#define ick_startup(block)			\
+  if(0)						\
+  {						\
+  ick_l6_ICK_EC_PP_6:				\
+    block ;					\
+    goto ick_l6_ICK_EC_PP_6;			\
+  }
 
 #define ick_comefrom(expr)					 \
   if(0)								 \
@@ -95,9 +137,29 @@ void id(void)					  \
   ick_l1_ICK_EC_PP_1: ;						 \
     if(ick_global_linelabel == (expr) && (expr) <= 65535)	 \
     {								 \
-      if(ick_global_goto) ick_multicome0(-1,ick_local_jmpbuf);	 \
+      if(ick_global_goto) ick_lose(ICK_IE555, -1, (char*)0);	 \
       ick_global_goto = ICK_EC_PP_3;				 \
     }								 \
+    goto ick_l1_ICK_EC_PP_1;					 \
+  ick_l2_ICK_EC_PP_2: ;						 \
+    if(ick_global_linelabel != ICK_EC_PP_3)			 \
+      goto ick_l2_ICK_EC_PP_2;					 \
+    ick_global_checkmode = 0;					 \
+  }
+
+#define ick_comefromif(expr,condition) \
+  ick_docomefromif(expr,-1,condition)
+
+#define ick_docomefromif(expr,lbl,condition)	                 \
+  if(0)								 \
+  {								 \
+  ick_l1_ICK_EC_PP_1: ;						 \
+    if(ick_global_linelabel == (expr) && (expr) <= 65535)	 \
+      if(condition)						 \
+      {								 \
+	if(ick_global_goto) ick_lose(ICK_IE555, lbl, (char*)0);	 \
+	ick_global_goto = ICK_EC_PP_3;				 \
+      }								 \
     goto ick_l1_ICK_EC_PP_1;					 \
   ick_l2_ICK_EC_PP_2: ;						 \
     if(ick_global_linelabel != ICK_EC_PP_3)			 \
@@ -111,7 +173,7 @@ void id(void)					  \
   ick_l1_ICK_EC_PP_1: ;						 \
     if(ick_global_linelabel == (expr) && (expr) <= 65535)	 \
     {								 \
-      if(ick_global_goto) ick_multicome0(-1,ick_local_jmpbuf);	 \
+      if(ick_global_goto) ick_lose(ICK_IE555, -1, (char*)0);	 \
       ick_global_goto = ICK_EC_PP_3;				 \
       ick_global_checkmode = 3;					 \
     }								 \
@@ -122,33 +184,108 @@ void id(void)					  \
     ick_global_checkmode = 0;					 \
   }
 
+#define ick_nextfromif(expr,condition) \
+  ick_docomefromif(expr,-1,condition)
+
+#define ick_donextfromif(expr,lbl,condition)	                 \
+  if(0)								 \
+  {								 \
+  ick_l1_ICK_EC_PP_1: ;						 \
+    if(ick_global_linelabel == (expr) && (expr) <= 65535)	 \
+      if(condition)						 \
+      {								 \
+	if(ick_global_goto) ick_lose(ICK_IE555, lbl, (char*)0);	 \
+	ick_global_goto = ICK_EC_PP_3;				 \
+	ick_global_checkmode = 3;				 \
+      }								 \
+    goto ick_l1_ICK_EC_PP_1;					 \
+  ick_l2_ICK_EC_PP_2: ;						 \
+    if(ick_global_linelabel != ICK_EC_PP_3)			 \
+      goto ick_l2_ICK_EC_PP_2;					 \
+    ick_global_checkmode = 0;					 \
+  }
+
+
 #define ICK_EC_FUNC_END				\
   if(ick_local_checkmode) ick_resume(1);	\
 ick_l1_ICK_EC_PP_1: ;				\
+ick_l6_ICK_EC_PP_6: ;				\
 ick_l2_ICK_EC_PP_2: return;			\
 }
 
 #define ick_next(label) do{			\
     if((label)<=65535)				\
-      ick_donext((label),-1,0);			\
+      ick_dogoto((label),-1,1);			\
+  } while(0)
+
+#define ick_goto(label) do{			\
+    if((label)<=65535)				\
+      ick_dogoto((label),-1,0);			\
   } while(0)
 
 #define ick_resume(amount) ick_doresume((amount),-1)
 
 #define ick_return_or_resume() do{		\
-    ick_global_checkmode=5;			\
+    if(ick_local_checkmode) ick_doresume(1,-1); \
     return;					\
   } while(0)
 
-/*@maynotreturn@*/ void ick_donext(unsigned long, int, int);
-void ick_forget(unsigned short amount);
-/*@noreturn@*/ void ick_doresume(unsigned short amount, int emitlineno);
-/*@maynortreturn@*/ void ick_checksuckpoint(unsigned long linelabel);
+/*@maynotreturn@*/ void ick_dogoto(unsigned long, int, int);
+void ick_scheduleforget(unsigned short);
+/*@noreturn@*/ void ick_doresume(unsigned short, int);
+/*@maynotreturn@*/ void ick_checksuckpoint(unsigned long);
+void ick_runstartups(void);
 
 void ick_allecfuncs(void); /* in generated program */
 
 extern int ick_global_checkmode;
-extern int ick_global_stackcleanup;
 extern unsigned long ick_global_linelabel;
 extern unsigned long ick_global_goto;
-extern int ick_forgetamount;
+extern void* ick_global_createdata;
+
+/* Variables. */
+typedef struct ick_ec_var_tag
+{
+  int ick_ec_vartype;
+  int ick_ec_extername;
+  int ick_ec_intername;
+} ick_ec_var;
+
+extern ick_ec_var ick_ec_vars[];
+
+#define ICK_EC_VARS_END 5
+
+uint16_t ick_getonespot(unsigned short);
+void ick_setonespot(unsigned short, uint16_t);
+uint32_t ick_gettwospot(unsigned short);
+void ick_settwospot(unsigned short, uint32_t);
+
+void ick_create(char*, unsigned long);
+
+/* For accessing the arguments to an ick_created command */
+int ick_c_i_width(int);
+int ick_c_i_isarray(int);
+unsigned short ick_c_i_varnumber(int);
+uint32_t ick_c_i_value(int);
+/* These require -a to work */
+uint32_t ick_c_i_getvalue(int);
+void ick_c_i_setvalue(int, uint32_t);
+
+#define ick_c_width(a) ick_c_i_width((ick_global_createdata=ick_local_createdata,(a)))
+#define ick_c_isarray(a) ick_c_i_isarray((ick_global_createdata=ick_local_createdata,(a)))
+#define ick_c_varnumber(a) ick_c_i_varnumber((ick_global_createdata=ick_local_createdata,(a)))
+#define ick_c_value(a) ick_c_i_value((ick_global_createdata=ick_local_createdata,(a)))
+#define ick_c_getvalue(a) ick_c_i_getvalue((ick_global_createdata=ick_local_createdata,(a)))
+#define ick_c_setvalue(a,n) ick_c_i_setvalue((ick_global_createdata=ick_local_createdata,(a)),(n))
+
+/* Fragments of ick_lose.h, that don't impinge on unmangled namespace. */
+#define ICK_IE555 "555 FLOW DIAGRAM IS EXCESSIVELY CONNECTED\n\
+	ON THE WAY TO %d\n"
+#define ICK_IE778 "778 UNEXPLAINED COMPILER BUG\n\
+	ON THE WAY TO %d\n"
+
+extern void /*@noreturn@*/ ick_lose(char *m, int n, /*@null@*/ char *s)
+#ifdef __GNUC__
+  __attribute__ ((noreturn))
+#endif
+;

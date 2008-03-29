@@ -164,6 +164,7 @@ Basic @ical{} features
 * Multithreading and Backtracking:: Running @ical{} programs in parallel
 * Operand Overloading::             Where one expression stands for another
 * PIC-INTERCAL::                    @ical{} on embedded systems
+* CREATE::                          Creating new syntax at runtime
 * External Calls::                  Linking @ical{} with other languages
 * Differences to Other Compilers::  @cic{} vs. @clcic{}
 
@@ -853,7 +854,22 @@ This option makes it possible to link non-@ical{} programs with
 @ical{} programs; instead of giving @ical{} programs only on the
 command line, give one @ical{} program, followed by any number of
 programs in other languages that have been written to be able to link
-to @ical{} programs. For more information, @xref{External Calls}.
+to @ical{} programs.  It also allows expansion libraries to be
+specified on the command line, after the @ical{} program (expansion
+libraries are given with no extension). For more information,
+@xref{External Calls}.
+
+@ianchorc -E
+@opindex -E
+@cindex system library, disabling
+This option causes the system library to never be linked; this option
+is only useful if your program references a line number in the range
+1000 to 1999, contains no line numbers in that range, and yet still
+doesn't want the system library to be linked in; therefore, it is
+mostly useful with @option{-e} when adding in a custom replacement
+system library written in a non-@ical{} language, especially the
+expansion library @option{syslibc} (a system library replacement
+written in C).
 
 @ianchor -t
 @opindex -t
@@ -863,6 +879,16 @@ This option tells the compiler to treat the source code as @icst{}; as a
 result, any language constructs that are used but weren't available in
 1972 will trigger error E111 (@pxref{E111}).
 
+@ianchor -a
+@opindex -a
+@cindex CREATE, enabling
+This option allows the CREATE statement to be used.  Note that enabling
+it carries a run-time penalty, as it means that operand overloading
+code has to be generated for every variable in the program. (This
+option is not necessarily needed for the external call version of
+CREATE to work, but the external call version has fewer features
+without it.)
+
 @ianchor -v
 @opindex -v
 @cindex constants, assigning to
@@ -870,12 +896,14 @@ result, any language constructs that are used but weren't available in
 It is possible to write @ical{} code sufficiently tortuous that it ends
 up assigning to a constant.  Generally speaking, this isn't what you
 wanted to do, so the compiler will kindly cause an error (E277;
-@pxref{E277}) that stops the insanity at that point, but at the cost of
-a significant amount of performance you can give this option to tell the
+@pxref{E277}) that stops the insanity at that point, but at the cost of a
+significant amount of performance you can give this option to tell the
 compiler to simply change the constant and keep on going anyway.  (Note
 that unlike @clcic{}, this only changes uses of the constant preceded by
 @code{#} in your program, not things like line numbers; you want
-@uref{http://esolangs.org/wiki/Forte,Forte} for that.)
+@uref{http://esolangs.org/wiki/Forte,Forte} for that.)  This option also
+allows you to write arbitary expressions on the left of an assignment
+statement if you wish.
 
 @ianchorc -C
 @opindex -C
@@ -1018,6 +1046,18 @@ typing in commands to step through the program! The profiler will, in
 fact, identify all the timings that particular commands in the program
 take; so @code{WRITE IN} instructions will often show up as taking a
 long time due to their need to wait for input.
+
+@ianchor -w
+@opindex -w
+@cindex +printflow, enabling
+@cindex printflow, enabling
+
+This option causes the produced program to support the
+@option{printflow} option fully; when this option is not given,
+@option{printflow} will in most cases have partial or no support
+(except in multithreaded programs, where this option is redundant),
+because not all the code needed for it will be included in the program
+to save space.
 
 @ianchor -u
 @opindex -u
@@ -1229,6 +1269,18 @@ should rarely have to use this mode.
 
 This option does not actually appear to do anything.
 
+@ianchorpm instapipe
+@opindex +instapipe
+@opindex -instapipe
+@cindex output, flushing
+@cindex flushing
+
+This option causes standard output to be flushed whenever any characters
+are output when the @samp{+} version is used, rather than on each newline
+(the default @samp{-} version).  It is most useful for more responsive
+pipes when outputting binary data, and also useful for debugging very
+slow programs.
+
 @ianchorpm printflow
 @opindex +printflow
 @opindex -printflow
@@ -1240,14 +1292,18 @@ This option does not actually appear to do anything.
 
 The usual debugging methods don't work with multithreaded or
 backtracking programs.  This option exists to give at least a slim
-chance of working out what is going on with them.  It causes the program
-to print the line number of the command it thinks it may be executing
-next (i.e.@: the line number that would be printed if that line had an
-error) immediately after executing each command, and also an internal
-identifier for the thread that that command was in.  It also prints a
-trace of what parts of the multithreader are being activated; so for
-instance, it will tell you when a thread is being forked into multiple
-threads or when a choicepoint has been deleted.
+chance of working out what is going on with them.  It causes the
+program to print the line number of the command it thinks it may be
+executing next (i.e.@: the line number that would be printed if that
+line had an error) immediately after executing each command, and also
+an internal identifier for the thread that that command was in.  It
+also prints a trace of what parts of the multithreader are being
+activated; so for instance, it will tell you when a thread is being
+forked into multiple threads or when a choicepoint has been deleted.
+Note that the @option{-w} option (@pxref{-w}) must be given to gain
+full support for flow printing in non-multithreaded non-backtracking
+programs, because otherwise the required code to print this
+information will not be generated.
 
 @ianchorpm mystery
 @opindex +mystery
@@ -1344,14 +1400,14 @@ is one of the mechanisms available for writing comments.)  The text of
 the error message is simply the statement that couldn't be decoded.
 
 @ieanchor E017
-@cindex syntax error, serious
+@cindex constant, twospot
+@cindex overflow, in constant
 @quotation
 DO YOU EXPECT ME TO FIGURE THIS OUT?
 @end quotation
 
-It sometimes happens that a syntax error manages to get the parser so
-confused that it can't figure out what to do next; that causes this
-error, which happens at compile time.
+This error occurs when there is an attempt to use a constant with a
+value outside the onespot range; it's a compile-time error.
 
 @ieanchor E079
 @cindex politesse
@@ -3091,6 +3147,11 @@ you are planning to use this, note that a bug in older versions of
 @cic{} means that assignments to arrays are not affected by this
 gerund before version 0.27.
 
+@clcic{} from 1.-94.-4 onwards, and @cic{} from 0.26 onwards, allow
+arbitrary expressions on the left hand side of an assignment (@cic{}
+only if the @code{-v} option is used); for more information on how
+such `reverse assignments' work, see @ref{Operand Overloading}.
+
 @node NEXT FORGET and RESUME
 @section NEXT, FORGET and RESUME
 @findex NEXT
@@ -3810,6 +3871,13 @@ divided by #12
 @tab 2, 3, 4, 5, 6, 7
 @end multitable
 
+If you happen to be using base 2, and are either using the external
+call system (@pxref{External Calls}) or are willing to use it, it is
+possible to use a version of the system library written in C for
+speed, rather than the default version (which is written in @ical{}).
+To do this, use the command line options @option{-eE} (before the
+@ical{} file), and @option{syslibc} (at the end of the command line).
+
 @ifset notsplit
 @partheading{PART III: @ical{} DIALECTS AND EXTENSIONS}
 @end ifset
@@ -4427,6 +4495,94 @@ but it's trivial to just send the same output again (which has no
 effect, because the voltage on sending pins is maintained at the same
 level until it is changed), or to ignore the input received.
 
+@node CREATE
+@chapter CREATE
+@findex CREATE
+@cindex creating syntax
+@cindex syntax, creating
+
+@portability{no, version 0.28+, see text, no}
+
+The @code{CREATE} command allows the creation of new syntax at
+runtime.  @clcic{} has had such a command since 1.-94.-8, but its
+syntax is completely different and incompatible with the @cic{}
+version, and so is not documented here (see the @clcic{} documentation
+for more details).  The @cic{} version is only defined if the
+@code{-a} option is used on the command line (and a runtime error E000
+otherwise), because it forces the operand overloading code to be
+introduced and so slows down every variable access in the program.
+
+The syntax of the @code{CREATE} command is to write @code{CREATE},
+then a line label, then anything.  OK, well not quite anything; you're
+restricted to syntax that is supported by the `just-in-case' compiler
+that runs on comments at compile time just in case they gain a meaning
+later (see below).  The anything provides an example statement to
+@code{CREATE}; statements which look the same (but may differ in
+details) are created. Typical syntax for a @code{CREATE} statement
+would therefore look something like this:
+
+@example
+	DO CREATE (5) SWITCH .1 WITH .2
+@end example
+
+Here, a new @code{SWITCH WITH} statement (there is no such statement
+in @ical{} normally) is being created.  This command makes it possible
+to do this:
+
+@example
+        DO SWITCH .3 WITH .4
+@end example
+
+Normally that line would be an error (E000) due to being unrecognised,
+but having been @code{CREATE}d, it's now a real statement.  (The
+gerund to affect created statements is @code{COMMENT}, just like
+before they were created; the gerund to affect @code{CREATE} itself is
+@code{CREATION} (@code{CREATING} is also allowed, but not as
+elegant).)  When the created statement is encountered, it @code{NEXT}s
+to line (5), the line number specified in the @code{CREATE} statement.
+In order for the code there to be able to affect the variables
+mentioned in the statement, the variables @code{:1601} (for the first
+variable or expression mentioned), @code{:1602} (for the second
+variable or expression mentioned), and so on, are @code{STASH}ed and
+then overloaded to the respective expressions or variables mentioned
+in the created command; so @code{:1601} has been overloaded to mean
+@code{.3} and @code{:1602} has been overloaded to mean @code{.4} at
+this point.  Then, the code at (5) runs; if it returns via a
+@code{RESUME #1}, @code{:1601} and @code{:1602} will be
+@code{RETRIEVE}d automatically and the program will continue from
+after the created statement.  (If you do not resume to that point, say
+if you're creating a flow control statement, you'll have to deal with
+the stashes for the 1600-range variables yourself.)
+
+So what syntax is available in created statements@?  All the capital
+letters except @samp{V} (which is an operator in @ical{}) are
+available and can be used freely and as many times as desired; they
+match themselves literally.  Whitespace is allowed, but is ignored
+(both in the @code{CREATE} template statement, and in the code being
+created; so @code{DO SW ITCH :8 WITH :50} will also have been
+created).  Then, there are three groups of matchable data: scalar
+variables (onespot or twospot variables, as used in the examples
+above) match other scalar variables, array elements (like @code{,4 SUB
+'.5~.6'}) match other array elements, and other expressions match
+other other expressions.  Two matchable data may not appear
+consecutively in a created command, but must be separated by at least
+one capital letter (to prevent array-subscript-related ambiguities;
+remember that the just-in-case compiler has to compile these
+statements at compile time without knowing what they are).  The actual
+expressions used in the @code{CREATE} statement don't matter; they're
+just examples for the runtime to match against.
+
+Some other points: a newer @code{CREATE} statement supercedes an older
+@code{CREATE} statement if they give equivalent templates, multiple
+@code{CREATE} statements may aim at the same line (this is the
+recommended technique for creating a statement that can handle
+expressions even if they're array elements or variables; you do this
+by specifying multiple templates in multiple @code{CREATE}
+statements), and strange things happen if a twospot variable in the
+1600-range is used as an argument to a created statement itself
+(because of the stash/retrieve, such a variable can usually be read,
+but may not always be able to be written without the data being lost).
+
 @node External Calls
 @chapter External Calls
 @cindex external calls
@@ -4434,10 +4590,12 @@ level until it is changed), or to ignore the input received.
 @cindex foreign functions
 @cindex calls, external
 
-@cic{} (from version 0.28 onwards) has a feature allowing @ical{} and
-non-@ical{} code to be mixed.  This is achieved by causing the
-non-@ical{} programs to participate in the @ical{} line-numbering
-model.
+@portability{no, version 0.28+, no, no}
+
+@cic{} has a feature allowing @ical{} and non-@ical{} code to be
+mixed.  This is achieved by causing the non-@ical{} programs to
+participate in the @ical{} line-numbering model.  The same feature
+allows expansion libraries to be linked into the code.
 
 To create a combined program containing @ical{} and non-@ical{} code,
 use @command{ick} as the compiler as normal, but specify both the
@@ -4456,10 +4614,14 @@ or the non-@ical{} program to @code{COME FROM} or @code{NEXT FROM} the
 non-@ical{} program first.
 
 Note that external calls are incompatible with PIC-INTERCAL and with
-multithreading.
+multithreading; note also that you must use @command{gcc} as your
+compiler, and @acronym{GNU} cpp and ld, for them to work in the
+current version of @cic{}.
 
 @menu
 * External Calls to C::      How to put @ical{} calls in C.
+* Using External Calls::     What happens when you use -e.
+* Expansion Libraries::      Expanding the compiler's capabilities.
 @end menu
 
 @node External Calls to C
@@ -4490,6 +4652,29 @@ starting with @code{ick_} or @code{ICK_} should be used anywhere in
 the linked C program for any reason, except where specified in this
 manual.
 
+@menu
+* External C Call Infrastructure:: Enabling a C program for external calls
+* ick_startup::                    Doing things at startup
+* ick_linelabel::                  Labelling lines...
+* ick_labeledblock::               ...and labelling blocks
+* ick_comefrom and ick_nextfrom::  Stealing control from elsewhere
+* ick_next::                       The INTERCAL answer to subroutine calls
+* ick_resume::                     Going back to before a NEXT
+* ick_forget::                     Discarding NEXT stack entries
+* ick_get/setone/twospot::         Accessing INTERCAL variables from C
+* ick_create::                     CREATE statements via external calls
+* External Calls and auto::        Considerations for auto variables
+@end menu
+
+@node External C Call Infrastructure
+@subsection External C Call Infrastructure
+@cindex C, external call infrastructure
+@cindex external calls, C infrastructure
+
+For a C program to be connected to an @ical{} program, it needs to be
+marked with the correct header file, and needs to have functions marked
+for communication with the @ical{} program.
+
 @table @code
 
 @item #include <ick_ec.h>
@@ -4498,7 +4683,13 @@ The header file @file{ick_ec.h} must be included using the
 preprocessor in any file which uses any of the @ical{} external call
 functions, variables, or macros.  (Note that this file may not
 necessarily exist, or exist in the usual place; @command{ick} will
-deal with making sure the correct header file is included.)
+deal with making sure the correct header file is included.)  This will
+include @file{stdint.h} (a standard C header file, which must exist on
+your system), so that you can access @ical{} variables (the @ical{}
+types onespot, twospot, tail, hybrid correspond to the C types
+uint16_t, uint32_t, uint16_t*, uint32_t* respectively); also, it will
+provide the prototypes for all the functions below on this page and
+definitions for all the macros below on this page.
 
 @item ICK_EC_FUNC_START
 @itemx ICK_EC_FUNC_END
@@ -4549,7 +4740,32 @@ by some means at that point, but may fail.  If a function is unsure
 whether it gained control from C or from INTERCAL code, it may use
 @code{ick_return_or_resume} (described below).
 
-@item ick_linelabel
+Because you are not allowed to declare two C functions with the same
+name (even in different modules), all functions declared with
+@code{ICK_EC_FUNC_START} must have unique names across the entire
+compilation.
+
+@end table
+
+@node ick_startup
+@subsection ick_startup
+@findex ick_startup
+@cindex startup code, C
+
+It is sometimes necessary for a C program to do its own initialisation
+before the INTERCAL program starts running.  To do so, it can use the
+@code{ick_startup} macro inside a function declared with
+@code{ICK_EC_FUNC_START}; the syntax is @code{ick_startup(block)},
+where the argument is an expression, statement, or compound statement
+to run.  The argument itself must not contain any ick_-prefixed macros
+or functions, may have side effects, and must fit the C preprocessor's
+idea of what a macro argument should look like (it's more used to
+parsing expressions than blocks; the general rule is to avoid commas
+except when they're directly or indirectly inside parentheses or
+strings).
+
+@node ick_linelabel
+@subsection ick_linelabel
 @findex ick_linelabel
 @cindex line labels, C
 
@@ -4585,7 +4801,8 @@ imaginary label preceding it.  Due to this possibility, an
 @code{ick_linelabel} is only allowed within a function defined with
 @code{ICK_EC_FUNC_START}.
 
-@item ick_labeledblock
+@node ick_labeledblock
+@subsection ick_labeledblock
 @findex ick_labeledblock
 @cindex labeled blocks
 @cindex blocks, labeled
@@ -4611,8 +4828,8 @@ computed line labels are allowed, but the expression that computes
 them must not have side effects, and it is only allowed within a
 function defined with @code{ICK_EC_FUNC_START}).
 
-@item ick_comefrom
-@itemx ick_nextfrom
+@node ick_comefrom and ick_nextfrom
+@subsection ick_comefrom and ick_nextfrom
 @findex ick_comefrom
 @findex ick_nextfrom
 @cindex COME FROM, in C
@@ -4641,92 +4858,437 @@ will do nothing if the expression evaluates to a value larger than
 65535).  In keeping with the best C traditions, these caveats are not
 checked, but instead result in undefined behaviour if breached.
 
-@item ick_next
+@findex ick_comefromif
+@findex ick_nextfromif
+There are also versions @code{ick_comefromif} and @code{ick_nextfromif},
+which take a second parameter, which is a condition that specifies
+whether control is actually stolen from the target.  The condition may
+have side effects, and is only run when the line numbers match; it should
+return 0 or NULL to leave control flow alone, or nonzero to steal
+control, and should be either an integral type or a pointer type.
+Although side effects are allowed, the condition must not look at or
+alter @code{auto} or @code{register} variables in the enclosing function,
+not even if they are also marked @code{volatile}.  (Global and
+@code{static} variables are fine, though.)
+
+@node ick_next
+@subsection ick_next
 @findex ick_next
 @cindex NEXT, in C
 
 @code{ick_next} is a macro that acts like the @ical{} statement
-@code{NEXT}.  Contrary to the other @ical{}-like macros, it can be
-used in any function regardless of whether it was defined with
-@code{ICK_EC_FUNC_START}; however, it must still be used as a
-statement by itself, and a call to it looks like
-@code{ick_next(expression);}.  The expression is the label to
-@code{NEXT} to, and works under the same rules as the expressions for
-@code{ick_comefrom}; it need not be constant (unlike in @cic{}!), but
-must not have side effects, must not be negative, must fit into the
-range of an unsigned long, and is ignored if it is over 65535.  If
-there happen to be multiple labels with the correct value at the time,
-the compiler will @code{NEXT} to one of them.
+@code{NEXT}.  Contrary to the other @ical{}-like macros, it can be used
+in any function regardless of whether it was defined with
+@code{ICK_EC_FUNC_START}; however, it must still be used as a statement
+by itself, and a call to it looks like @code{ick_next(expression);}.  The
+expression is the label to @code{NEXT} to, and works under the same rules
+as the expressions for @code{ick_comefrom}; it need not be constant
+(unlike in @cic{}!), but must not have side effects, must not be
+negative, must fit into the range of an unsigned long, and is ignored if
+it is over 65535.  If there happen to be multiple labels with the correct
+value at the time, the compiler will @code{NEXT} to one of them.  Bear in
+mind that there is a limit of 80 entries to the @code{NEXT} stack, and
+that this limit is enforced.
 
 If the resulting @code{NEXT} stack entry is @code{RESUME}d to, the
-program will continue after the @code{ick_next} as if via
-@code{setjmp}, with all the usual restrictions that that entails; if
-the resulting @code{NEXT} stack entry is forgotten, then the
-@code{ick_next} call will never return.
+program will continue after the @code{ick_next} as if via @code{setjmp},
+with all the usual restrictions that that entails; if the resulting
+@code{NEXT} stack entry is forgotten, then the @code{ick_next} call will
+never return.  (Notice the 'as if via setjmp' condition allows you to
+preserve the vales of @code{auto} and @code{alloca}-allocated storage as
+long as its value has not changed since the @code{ick_next} was called,
+which is a significantly more lenient condition than that normally
+imposed on such variables (@pxref{External Calls and auto}).
 
-@item ick_resume
+@node ick_resume
+@subsection ick_resume
 @findex ick_resume
 @cindex RESUME, in C
 
-@code{ick_resume} is a macro, but there are few restrictions on its
-use; it is permitted to use it inside an expression (but it returns
-void, making this not particularly useful), and acts like a function
-which takes an unsigned short argument, returns void, and has a
-prototype (but you cannot take its address; if you need to be able to
-do that, write a wrapper function for it).  It can be used within any
-function regardless of how it was declared, and never returns;
-instead, it pops the specified number of @code{NEXT} stack entries and
-resumes execution at the last one popped, just as the @ical{}
-statement does.  This causes the same errors as the @ical{} statement
-if the amount of entries popped is zero or larger than the @code{NEXT}
-stack.
+@code{ick_resume} is a macro, but there are few restrictions on its use;
+it is permitted to use it inside an expression (but it returns void,
+making this not particularly useful), and acts like a function which
+takes an unsigned short argument, returns void, and has a prototype (but
+you cannot take its address; if you need to be able to do that, write a
+wrapper function for it).  It can be used within any function regardless
+of how it was declared, and never returns; instead, it pops the specified
+number of @code{NEXT} stack entries and resumes execution at the last one
+popped, just as the @ical{} statement does.  This causes the same errors
+as the @ical{} statement if the amount of entries popped is zero or
+larger than the @code{NEXT} stack.
 
-@item ick_return_or_resume
 @findex ick_return_or_resume
+There is also a macro @code{ick_return_or_resume();}; it can only be used
+inside a function defined with @code{ICK_EC_FUNC_START}, and is
+equivalent to @code{return;} if the function was called from C, or
+@code{ick_resume(1);} if the function was called from @ical{}.  It's
+therefore a safe way to return from such a C function if you don't know
+how control reached it in the first place.
 
-This macro must be called as @code{ick_return_or_resume();}; it can
-only be used inside a function defined with @code{ICK_EC_FUNC_START},
-and is equivalent to @code{return;} if the function was called from C,
-or @code{ick_resume(1);} if the function was called from @ical{}.
-It's therefore a safe way to return from such a C function if you
-don't know how control reached it in the first place.
-
-@item ick_forget
+@node ick_forget
+@subsection ick_forget
 @findex ick_forget
 @cindex FORGET, in C
 
-This is actually a function (prototype @code{void ick_forget(unsigned
-short)}), that serves the purpose of removing items from the
-@code{NEXT} stack.  More so than other @ical{} flow control
-statements, though, this one has several technical issues.  As it is a
-function, it can be called from anywhere (and it's even possible to
-take its address), and it always removes the stated number of items
-from the @code{NEXT} stack (or as many as possible if that number is
-more than the number of items on the @code{NEXT} stack), but it is
-incapable of deallocating the corresponding entries on C's call
-stack.  To avoid causing a memory leak, therefore, it is neccessary to
-make sure that the C call stack entries are deallocated, which will
-happen in the following situations:
+The @code{ick_forget} macro removes @code{NEXT} stack entries, and the
+corresponding C stack entries. It must be called as a statement by
+itself, and its invocation looks like this: @code{ick_forget(expr);},
+where the expression is the number of @code{NEXT} stack entries to forget
+(all of them will be forgotten if the number is higher than the number of
+entries).  The expression will be casted to an @code{unsigned short}.
 
-@itemize
-@item
-when a @code{NEXT} stack entry below the forgotten @code{NEXT} stack
-entries is @code{RESUME}d to (note that @code{RESUMING} to a low
-@code{NEXT} stack entry is not a problem), all those forgotten entries
-will have their memory deallocated, and
-@item
-whenever a line label is encountered, all but one of the @code{NEXT}
-stack entries that were forgotten before the most recent @code{NEXT}
-or @code{NEXT FROM} will have their memory deallocated.  (This second
-situation is not particularly useful, as it cannot prevent the C stack
-entries leaking out of control, but it can help to some extent.)
-@end itemize
+@code{ick_forget} can only be used inside a function declared with
+@code{ICK_EC_FUNC_START}.  As it is removing stack entries both in
+@ical{} and in C, it will clobber the value of all @code{auto} variables
+created since the highest remaining @code{NEXT} stack entry came into
+being (or since the start of the program, if the @code{NEXT} stack is
+emptied by the command) and also deallocate all @code{alloca} storage
+allocated since then.  It also causes the return address of the current
+function to become undefined, so that function must not return; control
+may leave it via @code{RESUME}, or via @code{COME FROM}, or via
+@code{NEXT} or @code{NEXT FROM} followed by the relevant @code{NEXT}
+stack entry being forgotten (the function is still 'running' but
+suspended while the @code{NEXT} stack entry still exists).  (Note that
+these restrictions are stronger than those on @code{RESUME}; this is
+because @code{RESUME} preserves most of the stack, but @code{FORGET}
+destroys parts of the stack and therefore cannot avoid destroying the
+data stored there.  It could be much worse; a previous (never released)
+version of the code didn't remove those parts of the stack in many
+circumstances, leading to a stack leak that caused programs to segfault
+after a while.)
 
-Even worse, even @code{FORGET}s in an @ical{} program have the same
-problem if it is linked to a C program (due to their need to be able
-to handle @code{NEXT} stack entries in a general manner), so the moral
-of the story is: @code{FORGET} is evil. Use @code{COME FROM} instead.
-@end table
+@node ick_get/setone/twospot
+@subsection ick_get/setone/twospot
+@findex ick_getonespot
+@findex ick_setonespot
+@findex ick_gettwospot
+@findex ick_settwospot
+@cindex variables, from C
+
+This class of four functions make it possible to get and set @ical{}
+scalar variables from C code.  Their prototypes are as follows:
+
+@example
+uint16_t ick_getonespot(unsigned short varnumber);
+void ick_setonespot(unsigned short varnumber, uint16_t newvalue);
+uint32_t ick_gettwospot(unsigned short varnumber);
+void ick_settwospot(unsigned short varnumber, uint32_t newvalue);
+@end example
+
+The program will error out with a fatal error (@pxref{E200}) if the
+variable you request is mentioned nowhere in the @ical{} program; if
+you attempt to set an @code{IGNORE}d variable, the attempt will
+silently fail (just as if you assigned to it in an @ical{} program).
+The get functions are safe to use in a computed line label, so you can
+use them to produce computed line labels that depend on @ical{}
+variables.  (@code{uint16_t} and @code{uint32_t} are standard C data
+types; if your system doesn't provide them, get better system header
+files.)
+
+If you care about speed, note that .1 is the fastest variable of all
+to access, and otherwise variables first mentioned near the top of the
+@ical{} program will be faster to access than variables mentioned
+lower down.
+
+@node ick_create
+@subsection ick_create
+@cindex CREATE, in C
+@cindex C, CREATE
+
+The @code{ick_create} function (prototype: @code{void
+ick_create(char*, unsigned long)}) allows the external calls system to
+be used to create new @ical{} syntax; to do this, you give a
+`signature' representing the syntax you want to define and a line
+number to the function (which are its two arguments, respectively).
+The signature defines the syntax that you are defining; whenever that
+syntax is encountered within the @ical{} program, it will @code{NEXT}
+to the line number you specify, which can do various clever things and
+then @code{RESUME} back to the @ical{} program (or if you're defining
+a flow-control operation, you might want to @code{FORGET} or even
+leave the @code{NEXT} stack entry there and do other things).  This
+allows the external calls system to define whole new @ical{} commands,
+with the same power as any other programming language.
+
+There are various restrictions on what syntax you can @code{CREATE}
+with this method, which are best explained by an explanation of the
+relevant @cic{} compiler internals.  When an @ical{} program is
+compiled by @cic{}, any unrecognised statements it comes across are
+compiled by a `just-in-case' compiler that attempts to compile them
+anyway with no knowledge of their syntax, just in case the syntax
+becomes defined later.  (E000 (@pxref{E000}) will be thrown when such
+statements are encountered at runtime, unless the syntax has been
+@code{CREATE}d since to give a statement a meaning.)  For the
+just-in-case compiler to run, the resulting statement must be
+completely unrecognised; this means that it may contain no keywords
+(not even a sequence of letters that forms a keyword, such as
+@code{FROM} or @code{DO}), it must consist only of variable names,
+expressions, and capital letters other than @samp{V} (because @samp{V}
+is a unary operator, so otherwise there would be ambiguity), and in
+which any two variable names or expressions are separated by at least
+one capital letter.  The compiler will produce a `signature' for the
+unknown command that can be defined.
+
+A signature consists of a sequence of characters (and is represented
+as a null-terminated string; the runtime makes a shallow copy of the
+string and keeps it until the end of the program, so arrangements must
+be made to ensure that the storage in which the string is allocated
+stays around that long, but this opens up interesting possibilities in
+which the signature that was actually @code{CREATE}d can be modified
+retroactively); whitespace is not allowed in a signature.  Capital
+letters can be used (apart from @samp{V}), and match the same capital
+letters literally in the @ical{} syntax being created; also available
+are the special characters @samp{.,;~}, which match respectively a
+scalar variable (a onespot or twospot variable such as @code{:1}), an
+array variable (such as @code{;2}), an array element (such as @code{,3
+SUB #4 #5}), and an expression that isn't a variable name and isn't an
+array element (such as @code{.4$.5}).  If you want to be able to match
+other things (say, to be able to match all expressions), you will need
+to submit multiple signatures using multiple calls to
+@code{ick_create}; maybe you could write a library to do that
+automatically.
+
+The routine that is @code{NEXT}ed to will presumably want to be able
+to see what in the @ical{} program was matched by the signature, so a
+range of function-like macros is provided to access that.  They must
+be run from within the invocation of the function which was
+@code{NEXT}ed into by the created syntax (@pxref{External Calls and
+auto} for when a function invocation ends, which could be sooner than
+you think when the @cic{} external calls system is used), and are
+undefined behaviour when that invocation did not gain control from a
+@code{CREATE}d statement.  Here are their effective prototypes:
+
+@example
+int ick_c_width(int);
+int ick_c_isarray(int);
+unsigned short ick_c_varnumber(int);
+uint32_t ick_c_value(int);
+/* These require -a to work */
+uint32_t ick_c_getvalue(int);
+void ick_c_setvalue(int, uint32_t);
+@end example
+
+The first argument to all these macros is the position of the match in
+the signature (0 for the first non-capital-letter match in the
+signature, 1 for the second, and so on until no more items are left in
+the signature to match); specifying a position that isn't in the
+signature is undefined behaviour.
+
+@code{ick_c_width} returns the data type, as a width in bits, of the
+expression (or the width in bits of an element of the passed in
+array), and @code{ick_c_isarray} returns 1 if the argument was an
+array variable or 0 if it was an expression (array elements and scalar
+variables are expressions).  @code{ick_c_varnumber} returns the
+variable's number (for instance 123 for @code{.123}), or 0 if the
+corresponding argument was not a variable; in the cases where the
+argument was a variable, these three functions together provide enough
+information to figure out which variable (which is useful if you're
+writing an extension which takes a variable name as an argument).
+
+@code{ick_c_value} returns the value of the corresponding expression
+at the time the @code{CREATE}d command was called;
+@code{ick_c_getvalue} is almost equivalent, but only works if the
+@option{-a} option (@pxref{-a}) was used during compilation, and
+returns the value of the corresponding expression now.  (The uint32_t
+return type is large enough to hold either a onespot or twospot value,
+and will be zero-extended if the corresponding expression had onespot
+type.)  @code{ick_c_setvalue} also depends on @option{-a}, and will
+assign to the corresponding expression (be careful not to provide a
+value that is too large for it!@:).  In the case that the corresponding
+expression is not a variable, this will attempt to perform a reverse
+assignment to the expression, and can produce ordinary @ical{} errors
+if it fails.  It is not possible to redimension an array this way, as
+this is assignment, not a calculate operation.
+
+@node External Calls and auto
+@subsection External Calls and auto
+@cindex auto
+@cindex alloca
+@cindex external calls, and auto
+@cindex C, auto/alloca
+
+Because the external calls system merges the @ical{} @code{NEXT} stack
+with the C return value and data storage stack (note for pedants: the C
+standards nowhere mandate the existence of such a stack, or even mention
+one, but the restrictions stated in them imply that implementations have
+to act as if such a stack existed, because of the way the scoping rules
+and recursion work), the external calls system therefore has severe
+effects on data that happens to be stored there.  (In @ical{} terms,
+imagine what would happen if data could be stored on the @code{NEXT}
+stack; if C used the more sensible system of having a @code{STASH} for
+each variable, these problems would never occur in the first place,
+instead causing an entirely differnet set of problems.)  Similar
+considerations apply to the common nonstandard C extension @code{alloca},
+which dynamically alters the size of the stack; also, in what goes below,
+@code{register} variables should be considered to be @code{auto}, because
+the compiler may choose to allocate them on the stack.  Theoretical
+considerations would lead one to conclude that variable-length arrays
+should obey most of the same restrictions; in practice, though, it's
+unwise to attempt to mix those with @ical{} code at all, except by
+separating them into separate functions which aren't flagged with
+@code{ICK_EC_FUNC_START} and use no @code{ick_}-prefixed identifiers,
+even indirectly.  (They may cause a compile to fail completely because
+they don't mix well with @code{goto}.)
+
+In the description below, @ical{} commands should be taken to include the
+equivalent C macros.
+
+@code{NEXT}/@code{NEXT FROM} paired with @code{RESUME} have the least
+effect, and the most obvious effect, on @code{auto} variables in the
+function that was @code{NEXT}ed from, which is the same effect that the
+standard C function @code{longjmp} has.  That is, @code{alloca} storage
+stays intact, and @code{auto} variables have their values `clobbered'
+(that is, their value is no longer reliable and should not be used) if
+they changed since the corresponding @code{NEXT} and are not marked as
+@code{volatile}.  (This is a very easy restriction to get around, because
+changing the values of such variables is quite difficult without using
+statically-allocated pointers to point to them (a dubious practice in any
+case), and @code{volatile} is trivial to add to the declaration.)
+
+@code{COME FROM} has more restrictions; it deallocates all @code{alloca}
+storage in the function that was @code{COME FROM}, and functions that
+called it or that called functions that called it, etc.@:, using C calls
+(as opposed to @code{NEXT}), and those invocations of the functions will
+cease to exist (thus destroying any @code{auto} variables in them), even
+in the case of @code{COMING FROM} a function into the same function.
+@code{auto} variables in the function that is come into will start
+uninitialised, even if initialisers are given in their declaration, and
+it will be a `new' invocation of that function.  (It is quite possible
+that the uninitialised values in the @code{auto} variables will happen by
+chance to have the values they had in some previous invocation of the
+function, though, because they are likely to be stored in much the same
+region of memory; but it is highly unwise to rely on this.)  Note that
+@code{volatile} will not help here.  Observant or source-code-reading
+readers may note that there is a mention of an @code{ick_goto} in the
+source code to @cic{}; this is undocumented and this manual does not
+officially claim that such a macro exists (after all, if it did, what in
+@ical{} could it possibly correspond to?), but if such a macro does exist
+it obeys the same restrictions as @code{COME FROM}.
+
+@code{FORGET} is the worst of all in terms of preserving data on the
+stack; it deallocates @code{alloca} data and clobbers or deletes
+@code{auto} variables in all function invocations that have come into
+existence since the @code{NEXT} that created topmost remaining
+@code{NEXT} stack entry was called, or since the start of the program if
+the @code{NEXT} stack is emptied, and the current function will continue
+in a new invocation.  @code{volatile} is useless in preventing this,
+because the relevant parts of the stack where the data were stored are
+deleted by the command (that's what @code{FORGET} does, remove stack).
+If any of these data are required, they have to be backed up into static
+storage (variables declared with @code{static} or global variables), or
+into heap storage (as in with @code{malloc}), or other types of storage
+(such as temporary files) which are not on the stack.  (Incidentally,
+suddenly deleting parts of the stack is excellent at confusing C
+debuggers; but even @code{RESUME} and @code{COME FROM} tend to be
+sufficient to confuse such debuggers.  More worrying is probably the fact
+that the C standard provides a portable method for deleting the stack
+like that, and in fact the external calls runtime library is written in
+standard freestanding-legal C89 (with the exception of
+@option{+printflow} debug output which requires a hosted implementation),
+meaning that in theory it would be possible to split it out to create an
+implementation of a C-plus-COME-FROM-and-NEXT language, and doing so
+would not be particularly difficult.)
+
+Note that @ical{} variables are not stored on the C stack, nor are any of
+the metadata surrounding them, and so are not affected unduly by control
+flow operations.
+
+@node Using External Calls
+@section Using External Calls
+@cindex using external calls
+@cindex external calls, using
+
+Whatever language your source files are written in, when @option{-e}
+is used (@pxref{-e}), the compiler will go through much the same
+steps.
+
+First, the @ical{} program specified is compiled into a C program that
+uses the @ical{} external call conventions for its control flow
+operations.  The resulting @samp{.c} file will be left behind in the
+same directory (even if @option{-g} isn't used); if you look at it,
+you'll see the @code{#include <ick_ec.h>} line, and the other
+hallmarks of an external call program (for instance, @ical{}
+@code{NEXT}s will translate into slightly modified @code{ick_next}s;
+the modification is simply to allow the correct line number to be
+displayed in case of error).
+
+After that, the resulting files are preprocessed twice.  First, the C
+preprocessor is run on the files; then, a special @cic{}
+`preprocessor' is run on the files.  (`Preprocessor' is a bit of a
+misnomer here, as it's near the end of the compilation process;
+`postprocessor' would likely be more accurate, or maybe
+`interprocessor'.)  Its job is to fix line labels between the gotos
+that are used to implement jumping into the middle of a C function, to
+assign unique numbers to things that need them, and to keep track of
+which functions need to be checked for line labels and for @code{COME
+FROM}s and @code{NEXT FROM}s.  The resulting file will have the
+extension @samp{.cio}; it is almost human-readable, especially if you
+run it through a C code indenter, and consists of C code (or code in
+whatever language is being linked to the @ical{} code, but so far only
+C is accepted) and instructions to @command{gcc}.  The @samp{.cio}
+file will be left behind for you to look at, if you like.
+
+Once the @samp{.cio} files have been produced, @command{gcc} is used
+to compile all the @samp{.cio} files and link them together into an
+executable; the executable will have the same name as the @ical{}
+source, minus any extension (and on DJGPP, assuming that its version
+of @command{gcc} could handle the resulting command line (not
+necessarily guaranteed), a @samp{.exe} extension is added), and will
+consist of all the C files linked together with the @ical{}.  Any
+functions named @code{main} in the C files will be deleted; likewise,
+if there is a name clash between any two functions, the one in the
+file named earlier on the command line will be used.  There is
+presumably some use for this feature, although I haven't figured out
+what it is yet.
+
+Extending this to other compiled languages is mostly a problem of
+determining how they fit into the @ical{} control structure, which is
+not a trivial task, and of figuring out how to link them to C code,
+which in some cases is trivial (especially if the language is one that
+@command{gcc} can compile!) and in other cases is very difficult.  If
+anyone has any ideas of new languages that could be added to the
+external calls system, feel free to contact the current @cic{}
+maintainer with suggestions or patches.
+
+@node Expansion Libraries
+@section Expansion Libraries
+@cindex expansion libraries
+@cindex libraries
+
+The @cic{} distribution comes with libraries that can be used to
+extend its capabilities; they are implemented using the external call
+mechanism, and are in effect standard files to include using that
+mechanism.  To use an expansion library, give the @option{-e} option
+to @command{ick} (note that this means you cannot use them with the
+debugger or profiler, nor with multithreaded or backtracking
+programs), and specify the expansion library's name at the end of the
+command line (or to be precise, anywhere after the initial @ical{}
+file).  The libraries themselves are written in C and have a @samp{.c}
+extension, and are human-readable; @cic{} will look for them in the
+same place as it looks for the system library (including in the
+current directory, so you can test your own expansion libraries
+without having to install them).
+
+Expansion libraries are available from @cic{} version 0.28; @clcic{}
+has a similar concept (that of `preloads'), but implemented a
+completely different way.
+
+@subheading syslibc
+@findex syslibc
+
+@option{syslibc} is an implementation of the base-2 @ical{} system
+library in C (@pxref{System Library}); using it in programs running in
+other bases is accepted by the compiler, but likely to produce
+unpredictable results.  When using this expansion library, you also
+need to give the @option{-E} option (@pxref{-E+,,-E}) so that the main
+system library is not included, or it will be used in preference to
+the expansion library.  All documented features of the @ical{} base-2
+system library are implemented, but most undocumented features are
+not, so @ical{} programs which relied on them (dubious behaviour in
+any case) will not work with @option{syslibc}.  The main reason to use
+this library is to increase the speed of an @ical{} program; however,
+note that the speed gains in arithmetic will be accompanied by the
+performance penalty of using the external calls infrastructure, unless
+you were already using it.
 
 @node Differences to Other Compilers
 @chapter Differences to Other Compilers
@@ -4735,6 +5297,7 @@ of the story is: @code{FORGET} is evil. Use @code{COME FROM} instead.
 The @cic{} compiler exists in a world of several other compilers.
 
 @subheading Differences to the Princeton compiler
+@cindex Princeton compiler
 The Princeton compiler was the first @ical{} compiler available, and
 compiled @icst{}.  Using @command{convickt} (@pxref{convickt}) to
 translate its programs from the original EBCDIC to Latin-1 or
@@ -4752,6 +5315,7 @@ basically backward-compatible anyway this mostly serves to check newer
 programs for compatibility with older compilers.
 
 @subheading Differences to the Atari compiler
+@cindex Atari compiler
 The Atari compiler was another implementation of @icst{}, which was
 basically identical to the Princeton compiler apart from its use of
 ASCII and Atari syntax.  Everything said under the previous section
@@ -4760,6 +5324,7 @@ applies, except that as it uses the same syntax as @cic{} anyway
 to use @command{convickt}.
 
 @subheading Differences to @jic{}
+@cindex J-INTERCAL
 The @jic{} compiler is an implementation of @ical{} written in Java
 that compiles @ical{} into Java (and so has a similar relationship
 with Java to that of the @cic{} compiler (which is written in C and
@@ -4771,6 +5336,7 @@ also an Atari syntax compiler), except in nonportable cases such as
 @code{IGNORE}/@code{RETRIEVE} interaction.
 
 @subheading Differences to @clcic{}
+@cindex CLC-INTERCAL
 The @clcic{} compiler is the most modern @ical{} compiler apart from
 @cic{} (both compilers are maintained and updated every now and then
 as of the time of writing, so which is more modern is normally a

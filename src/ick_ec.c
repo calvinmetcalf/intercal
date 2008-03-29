@@ -24,15 +24,15 @@ LICENSE TERMS
 
 /* Implement the INTERCAL flow control operators in C, except for ABSTAIN
    and REINSTATE. Worryingly, this is freestanding-legal and needs no C
-   headers other than setjmp.h. */
+   headers other than setjmp.h and stdint.h. (The printfs are just for
+   +printflow debug output and don't effect the code flow.) */
 
+#define ICK_EC 1
 #include "ick_lose.h"
 #include "abcess.h" /* must come before ick_ec.h */
 #include "ick_ec.h"
 #include <setjmp.h>
-
-static jmp_buf lastcspjb[ick_MAXNEXT];
-static int lastcspjbvalid[ick_MAXNEXT]={0};
+#include <stdint.h>
 
 /* Checkmode values, for reference:
  * 0: not using checkmode
@@ -41,58 +41,60 @@ static int lastcspjbvalid[ick_MAXNEXT]={0};
  * 3: NEXT FROM found
  * 4: no suitable target found
  * 5: do a resume(1) if this reaches ick_allecfuncs
+ * 6: starting up, run your init code
  */
 int ick_global_checkmode = 0;
-int ick_global_stackcleanup = 0;
 /* ick_global_linelabel's marked as volatile to avoid problems with
    optimisation of assignments to it near setjmps. */
 unsigned long ick_global_linelabel;
-int ick_forgetamount = 0;
+static int ick_forgetamount = 0;
 unsigned long ick_global_goto;
+void* ick_global_createdata;
 
-/* Clean cspjb data. */
-static void cleancspjb(void)
-{
-  int i=ick_MAXNEXT;
-  while(i-->ick_nextindex) lastcspjbvalid[i]=0;
-}
-
-/* Do a NEXT. */
-/*@maynotreturn@*/ void ick_donext(unsigned long linelabel,
-				   int emitlineno,
-				   int willforget)
+/* Do a NEXT or goto. Gotos don't work with an empty NEXT stack, but that's
+   trivial to correct by doing a NEXT at the start of the program. */
+/*@maynotreturn@*/ void ick_dogoto(unsigned long linelabel,
+				   int emitlineno, int isnext)
 {
   /* OK, so auto is never necessary, but the point here is that this is being
      stored on the stack deliberately so that it can be recalled if this
      procedure is longjmped to. */
   auto volatile int nextlevel = ick_nextindex;
-  if(ick_printflow&&linelabel<=65535) printf("[next:%lu]",linelabel);
+  if(ick_printflow&&linelabel<=65535&&isnext)
+    printf("[next:%lu]",linelabel);
   ick_global_checkmode = 2; /* look for linelabels */
   ick_global_linelabel = linelabel;
   /* If there was a FORGET earlier, implement it now, by removing the relevant
      NEXT stack entries. Unfortunately, we can't remove them from the main C
-     stack if we care about the return address of this NEXT. */
-  if(ick_forgetamount)
+     stack if we care about the return address of this NEXT. If this is a GOTO
+     rather than a NEXT, it's safe to go back to the top NEXT on the NEXT stack
+     and redo it with a different target (because the return address will still
+     be correct), and all FORGETs work using an implied GOTO. (COME FROMs work
+     by telling the suckpoint to GOTO them.) */
+  if(!isnext)
   {
-    if(ick_printflow) printf("[doforget:%d]",ick_forgetamount);
-    nextlevel = ick_nextindex -= ick_forgetamount;
+    if(ick_printflow&&ick_forgetamount)
+      printf("[forget:%d]",ick_forgetamount);
+    else if(ick_printflow&&linelabel<=65535)
+      printf("[goto:%lu]",linelabel);
+    nextlevel = ick_nextindex -= ick_forgetamount + 1;
     ick_forgetamount = 0;
     if(ick_nextindex < 0) ick_nextindex = 0;
-    if(willforget) longjmp(ick_next_jmpbufs[ick_nextindex],2);
+    longjmp(ick_next_jmpbufs[ick_nextindex],2);
   }
-  /* longjmp return codes: 1 = resume, 2 = clean up stack */
+  else if(ick_nextindex==81)
+    ick_lose(IE123, emitlineno, (char*)NULL);
+  /* longjmp return codes: 1 = resume, 2 = redo to a different target */
   if(setjmp(ick_next_jmpbufs[ick_nextindex])==1)
   {
     /* Returning from the next. Clean up the next stack, just in
        case the callee didn't. */
     ick_nextindex = nextlevel;
-    cleancspjb();
     ick_global_checkmode=0;
     return;
   }
   ick_nextindex = nextlevel; /* in case we were longjmped to */
-  cleancspjb();
-  ick_next[ick_nextindex++] = 0;
+  ++ick_nextindex;
   ick_allecfuncs();
   /* If the checkmode is 4, we didn't find a target. */
   if(ick_global_checkmode == 4)
@@ -101,28 +103,33 @@ static void cleancspjb(void)
   ick_doresume(1,emitlineno);
 }
 
-/* Schedule a FORGET. This doesn't alter the NEXT stack immediately;
-   instead, the next RESUME or NEXT takes it into account. */
-void ick_forget(unsigned short amount)
+/* Schedule a FORGET. The actual FORGET is performed at the next GOTO,
+   which should happen immediately. */
+void ick_scheduleforget(unsigned short amount)
 {
-  if(ick_printflow) printf("[forget:%hu]",amount);
   ick_forgetamount += amount;
-  if(ick_forgetamount > ick_nextindex)
-    ick_forgetamount = ick_nextindex;
+  if(ick_forgetamount >= ick_nextindex)
+    ick_forgetamount = ick_nextindex-1;
 }
 
 /* Resume to a previous NEXT stack entry. */
 /*@noreturn@*/ void ick_doresume(unsigned short amount, int emitlineno)
 {
   if(ick_printflow) printf("[resume:%hu]",amount);
-  if(ick_printflow&&ick_forgetamount) printf("[doforget:%d]",ick_forgetamount);
+  if(ick_forgetamount) ick_lose(IE778, emitlineno, (char *)NULL);
   if(!amount) ick_lose(IE621, emitlineno, (char *)NULL);
-  amount += ick_forgetamount;
-  ick_forgetamount = 0;
   ick_nextindex -= amount;
-  if(ick_nextindex < 0)
+  if(ick_nextindex < 1) /* the very first NEXT can't be RESUMEd to */
     ick_lose(IE632, emitlineno, (char *)NULL);
   longjmp(ick_next_jmpbufs[ick_nextindex],1);
+}
+
+/* Run any ick_startup blocks. */
+void ick_runstartups(void)
+{
+  ick_global_checkmode = 6;
+  ick_allecfuncs();
+  ick_global_checkmode = 0;
 }
 
 /* Check to see if anything tries to steal control from a suckpoint.
@@ -139,24 +146,116 @@ void ick_forget(unsigned short amount)
   ick_global_linelabel=linelabel;
   ick_allecfuncs();
   if(!ick_global_goto) {ick_global_checkmode=0; return;}
-  /* Cut out bits of stack that we'll never need. */
-  if(lastcspjbvalid[ick_nextindex]) longjmp(lastcspjb[ick_nextindex],1);
-  setjmp(lastcspjb[ick_nextindex]);
-  lastcspjbvalid[ick_nextindex]=1;
   /* If this was a COME FROM, goto it. */
   if(ick_global_checkmode == 1)
   {
     if(ick_printflow) printf("[comefrom:%lu]",ick_global_linelabel);
-    ick_global_checkmode = 2;
-    ick_global_linelabel = ick_global_goto;
-    ick_allecfuncs();
+    ick_dogoto(ick_global_goto,-1,0); /* GOTO */
   }
   else if(ick_global_checkmode == 3)
   {
     if(ick_printflow) printf("[nextfrom:%lu]",ick_global_linelabel);
-    ick_donext(ick_global_goto,-1,0);
+    ick_dogoto(ick_global_goto,-1,1); /* NEXT */
     return; /* we were RESUMEd to */
   }
   /* This line should be unreachable. */
   ick_lose(IE778, -1, (char *)NULL);
+}
+
+uint16_t ick_getonespot(unsigned short extername)
+{
+  int i=-1;
+  while(++i,1)
+  {
+    if(ick_ec_vars[i].ick_ec_vartype==ICK_EC_VARS_END) break;
+    if(ick_ec_vars[i].ick_ec_vartype==ick_ONESPOT)
+      if(ick_ec_vars[i].ick_ec_extername==extername)
+	return ick_onespots[ick_ec_vars[i].ick_ec_intername];
+  }
+  ick_lose(IE200,-1,(char*)NULL);
+}
+
+void ick_setonespot(unsigned short extername, uint16_t value)
+{
+  int i=-1;
+  while(++i,1)
+  {
+    if(ick_ec_vars[i].ick_ec_vartype==ICK_EC_VARS_END) break;
+    if(ick_ec_vars[i].ick_ec_vartype==ick_ONESPOT)
+      if(ick_ec_vars[i].ick_ec_extername==extername)
+      {
+	if(ick_oneforget[ick_ec_vars[i].ick_ec_intername]) return;
+	ick_onespots[ick_ec_vars[i].ick_ec_intername]=value;
+	return;
+      }
+  }
+  ick_lose(IE200,-1,(char*)NULL);
+}
+
+uint32_t ick_gettwospot(unsigned short extername)
+{
+  int i=-1;
+  while(++i,1)
+  {
+    if(ick_ec_vars[i].ick_ec_vartype==ICK_EC_VARS_END) break;
+    if(ick_ec_vars[i].ick_ec_vartype==ick_TWOSPOT)
+      if(ick_ec_vars[i].ick_ec_extername==extername)
+	return ick_twospots[ick_ec_vars[i].ick_ec_intername];
+  }
+  ick_lose(IE200,-1,(char*)NULL);
+}
+
+void ick_settwospot(unsigned short extername, uint32_t value)
+{
+  int i=-1;
+  while(++i,1)
+  {
+    if(ick_ec_vars[i].ick_ec_vartype==ICK_EC_VARS_END) break;
+    if(ick_ec_vars[i].ick_ec_vartype==ick_TWOSPOT)
+      if(ick_ec_vars[i].ick_ec_extername==extername)
+      {
+	if(ick_twoforget[ick_ec_vars[i].ick_ec_intername]) return;
+	ick_twospots[ick_ec_vars[i].ick_ec_intername]=value;
+	return;
+      }
+  }
+  ick_lose(IE200,-1,(char*)NULL);
+}
+
+/* Register a CREATE target. This is just a wrapper for
+   ick_registercreation that gets around scoping problems. */
+void ick_create(char* sig, unsigned long target)
+{
+  ick_registercreation(sig, target);
+}
+
+/* Accessor and mutator functions for CREATE data */
+int ick_c_i_width(int argpos)
+{
+  return ((ick_createdata*)ick_global_createdata)[argpos].width;
+}
+int ick_c_i_isarray(int argpos)
+{
+  return ((ick_createdata*)ick_global_createdata)[argpos].isarray;
+}
+unsigned short ick_c_i_varnumber(int argpos)
+{
+  return ((ick_createdata*)ick_global_createdata)[argpos].varnumber;
+}
+uint32_t ick_c_i_value(int argpos)
+{
+  return (uint32_t)(((ick_createdata*)ick_global_createdata)[argpos].value);
+}
+uint32_t ick_c_i_getvalue(int argpos)
+{
+  if(!(((ick_createdata*)ick_global_createdata)[argpos].accessors.get))
+    return ick_c_i_value(argpos);
+  return ((ick_createdata*)ick_global_createdata)[argpos].accessors.
+    get(ick_c_i_value(argpos));
+}
+void ick_c_i_setvalue(int argpos, uint32_t newval)
+{
+  if(((ick_createdata*)ick_global_createdata)[argpos].accessors.set)
+    ((ick_createdata*)ick_global_createdata)[argpos].accessors.
+      set(newval,NULL);
 }

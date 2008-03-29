@@ -43,7 +43,7 @@ typedef int ick_bool;
  * Maximum supported statement types; should be equal to (FROM - GETS + 1)
  * AIS: Changed this when I added new statements.
  */
-#define MAXTYPES	30
+#define MAXTYPES	31
 
 /* AIS: Maximum supported spark/ears nesting, divided by 32. The value given
    allows for 256 nested spark/ears groupings, which should be enough. */
@@ -58,7 +58,7 @@ typedef struct node_t
     unsigned long       optdata;        /* AIS: Temp used by the optimizer */
     int			width;		/* is this 32-bit data? */
     struct node_t	*lval, *rval;	/* attached expression nodes */
-    struct node_t       *nextslat;      /* AIS: The ick_next node with a slat */
+    struct node_t       *nextslat;      /* AIS: The next node with a slat */
 } node;
 
 typedef struct tuple_t
@@ -71,9 +71,9 @@ typedef struct tuple_t
     ick_bool                maybe;          /* AIS: Where MAYBE details go when
 					   exechance has been parsed */
     ick_bool                abstainable;    /* AIS: Is it possible for this line to
-					   be ick_abstained from? */
+					   be abstained from? */
     ick_bool                initabstain;    /* AIS: Is this line initially
-					   ick_abstained from? */
+					   abstained from? */
     ick_bool                nextable;       /* AIS: Can this line be a NEXT
 					   target? */
     ick_bool                optversion;     /* AIS: Use an optimized version? (Only
@@ -164,6 +164,7 @@ extern int nextfromsused;  /* is NEXT FROM used? */
 extern int gerucomesused;  /* is COME FROM gerund used? */
 extern int opoverused;     /* is operand overloading used? */
 extern int useickec;       /* are external calls used? */
+extern int createsused;    /* are CREATEs used? */
 /*@null@*/ extern node* firstslat;    /* the ick_first node with a slat */
 /*@null@*/ extern node* prevslat;     /* the last node so far with a slat */
 extern int multithread;    /* is the program multithreaded? */

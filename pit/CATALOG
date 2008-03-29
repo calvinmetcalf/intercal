@@ -128,12 +128,18 @@ by Alex Smith
   tests/whileadd.i    Adds two input numbers with a single WHILE statement
   tests/ignorret.i    Testing interactions of IGNORE and RETRIEVE
   tests/ignorret.doc  What ignorret does on several compilers
+  tests/normaldist.i  Checking the standard deviation of (1910)
+  tests/testcreate.i  A test for the CREATE statement
+  lib/syslibc.c	      The INTERCAL base 2 syslib, optimised version in C
   sort.i              An insertion-sort program testing computed ABSTAIN
 
 by Malcom Ryan
   tests/testonce.i    A single-threaded program testing ONCE and AGAIN
   pass.i              A multithread program illustrating communications
 	              between threads
+
+by Jeffrey Lee
+  interfunge.i        A Befunge-93 interpreter written in INTERCAL
 
 The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
 limits.{i,3i}, testops.{3i,5i}, testsplat.i, were all written by Louis

@@ -6,35 +6,38 @@ Patches, suggestions and bugs found by Joris Huizer
 
 1.  Fixed a typo in the [noopxor] optimiser idiom.
 
-2.  Fixed a typo that caused the flow optimiser to optimise some errors into
+2.  Added a [redundantdoublenot] optimiser idiom (a generalisation of Joris'
+    suggestion of and code for [triplenot]).
+
+3.  Fixed a typo that caused the flow optimiser to optimise some errors into
     non-erroring code.
 
-3.  Fixed the [lshift16] optimiser idiom; previously it was giving incorrect
+4.  Fixed the [lshift16] optimiser idiom; previously it was giving incorrect
     values in some cases where the bits being selected from the original
     number weren't contiguous.
 
-4.  There is now no longer a segfault when the unusual option combination -f
+5.  There is now no longer a segfault when the unusual option combination -f
     (without specifying -O) is used.
 
-5.  It is again possible to recompile more than one source file at a time.
+6.  It is again possible to recompile more than one source file at a time.
 
-6.  The flow optimiser now recognises that comments can be reinstated in
+7.  The flow optimiser now recognises that comments can be reinstated in
     programs where they can be reinstated.
 
 Changes by Alex Smith
 
-7.  Fixed some typos in the documentation.
+8.  Fixed some typos in the documentation.
 
-8.  Applying an infix unary operator to a constant (as in &#26) now returns
+9.  Applying an infix unary operator to a constant (as in &#26) now returns
     the correct value; previously it returned the unary operator applied to a
     sequence number that was 0 for the first unique constant that was the
     argument of a unary operator, 1 for the second unique constant, and so
     on. (This was a bug in the parser.)
 
-9.  Added doc/THEORY.txt back in. (It seems that it went missing some time
+10. Added doc/THEORY.txt back in. (It seems that it went missing some time
     between 1.26 and 0.27.) Updated it to describe the current compiler.
 
-10. Turned off optimsation of the optimiser, and also placed a 128MB limit on
+11. Turned off optimsation of the optimiser, and also placed a 128MB limit on
     the data segment and virtual memory it was allowed to use. This is to
     prevent Linux thrashing and/or invoking the dreaded oom-killer when
     recompiling idiotism.c. (This happened only rarely, but it happened to me
@@ -44,7 +47,7 @@ Changes by Alex Smith
     a bonus, the build process is now considerably faster, because the
     optimisation of the optimiser was the slowest step of the process.
 
-11. Internally, all symbols that are visible globally are now name-mangled (by
+12. Internally, all symbols that are visible globally are now name-mangled (by
     using the prefix ick_). This allows other files to be linked with files
     compiled from INTERCAL without namespace collisions. This does not include
     symbols that are only useful in multithreading (as INTERCAL's
@@ -54,7 +57,7 @@ Changes by Alex Smith
     hopefully should never be linked to another program that isn't
     specifically designed to be linked to it).
 
-12. Thoroughly delinted the code, using Splint; the code is now annotated to
+13. Thoroughly delinted the code, using Splint; the code is now annotated to
     show Splint what is being done where (and all the non-obvious annotations
     are explained so that humans can figure out what is going on as well);
     over 800 warnings have been fixed, including some which identified bugs in
@@ -62,14 +65,84 @@ Changes by Alex Smith
     unusually long strings, and some of which were buffer overflows). All
     comments from /*@ to @*/ are mine, and are annotations for Splint.
 
-13. Implemented external calls, which allow multiple INTERCAL programs to be
+14. Implemented external calls, which allow multiple INTERCAL programs to be
     linked to each other, and/or to C programs, via the -e option and NEXT /
     COME FROM / NEXT FROM / FORGET / RESUME statements. See the manual for
-    more details.
+    more details. (Note that external calls require you to use gcc, GNU cpp,
+    and GNU ld, because they rely on features of those programs to work.)
+
+15. Two other new compiler options have been added: -E (don't link system
+    library), and -w (enable +printflow debugging even for non-multithread
+    programs). +printflow has been enhanced to show what's going on in
+    externally-called programs to some extent, too.
+
+16. Added a version of the INTERCAL system library written in C, as
+    pit/lib/syslibc.c. A new compiler feature allows the inclusion of such
+    expansion libraries via the command line; to include this library, you
+    would write the command line as ick -eE yourprogram.i syslibc (possibly
+    adding other options than -eE). The main advantage of the C-based system
+    library is speed; also, note that an implemented-in-a-faster-language-
+    than-INTERCAL system library existed in the Princeton compiler (which is
+    possibly how the INTERCAL version managed to stay buggy for decades
+    without anyone noticing), so this is another case of catching up with
+    historically available features. (The feature is also somewhat reminicent
+    of CLC-INTERCAL's 'preloads', but is implemented differently, and is
+    useful for different things, as it doesn't affect the compiler.)
+    Expansion libraries are included via -e, like non-INTERCAL programs are,
+    but are distinguished by not having an extension.
+
+17. The handling of syntax errors has been improved; many lines that
+    previously caused E017 at compile time are now correctly interpreted as
+    run-time errors. The only way to cause E017 nowadays is to write a
+    constant out of the onespot range, and the manual description of the error
+    has been changed accordingly. (Note that I caused several regressions
+    while implementing this; I hope they're all fixed now, but there may be
+    some left. Please report any remaining parsing problems caused by this;
+    they mostly manifest as either the line after a comment being corrupted or
+    ignored, or as the line before a comment being taken to be part of the
+    comment.)
+
+18. A new 'just-in-case' compilation method is used for syntax errors. If a
+    syntax error is encountered at compile-time, and contains just capital
+    letters with no other meaning (i.e. they don't form keywords and none of
+    them is the letter V), variables, and expressions, and there are no two
+    consecutive expressions or variables involved (i.e. they are separated by
+    keywords), the compiler will compile it anyway, just in case it happens to
+    gain a meaning later (see the next changelog entry). This is sort of the
+    converse of the way CLC-INTERCAL goes about compiling things that don't
+    have a meaning yet (it uses a 'just-too-late' compiler which waits for the
+    offending statement to error out, then recompiles it to see if it's gained
+    a meaning in the meantime), and this difference in handling typifies the
+    difference between the compilers quite well.
+
+19. Implemented the CREATE statement, because I could (see point 18). This
+    allows new syntax to be created at runtime. CLC-INTERCAL also has a CREATE
+    statement, but its syntax is totally different (it specifies the bytecode
+    for the command, whereas C-INTERCAL's CREATE statement allows you to
+    specify what the new command does in INTERCAL itself.)  A function call
+    ick_create is also available; it's usable from externally-called programs
+    and from expansion libraries, and means that INTERCAL commands can now be
+    defined to do things which were previously well out of INTERCAL's
+    reach. This makes expansion libraries act even more like CLC-INTERCAL
+    preloads.
+
+20. Fixed a strange bug in yuk when the basename of the INTERCAL program was
+    the same as that of a shell builtin or command on the user's path.
+
+21. Programs accept a new option +instapipe that causes output to be output
+    immediately, even if not followed by a newline, by flushing the output
+    after every character. This is most useful with binary output into pipes,
+    and occasionally useful for getting the output to very slow programs
+    faster.
+
+22. Fixed an error in an optimiser idiom that could optimise erroring code
+    involving mingles into non-erroring code (which is of course incorrect);
+    also edited unlambda.i in the pit, which was taking advantage of this
+    error (and erroring out if optimisation was turned off).
 
 Changes from elsewhere
 
-14. Added yet another nontrivial INTERCAL program to the pit; interfunge.i
+23. Added yet another nontrivial INTERCAL program to the pit; interfunge.i
     (written by Jeffrey Lee) is a Befunge-93 interpreter written in INTERCAL.
     (It appears to conform to the standard (I actually ran it against a
     testsuite, and it passed); its only pecularities, apart from the language

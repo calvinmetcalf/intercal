@@ -464,6 +464,7 @@ static void clcbinout(unsigned int type, ick_array* a)
   while(i--) if(tempcp[i] == '\0') tempcp[i]='\x1a';
   if(!ick_cesspoolout) ick_cesspoolout=stdout;
   fprintf(ick_cesspoolout,"%s\n",tempcp);
+  fflush(ick_cesspoolout);
   free(tempcp);
   free(buf);
 }
@@ -490,7 +491,8 @@ void ick_binin(unsigned int type, ick_array *a, ick_bool forget)
   if(ick_clcsem) {clcbinin(type, a, forget); return;} /* AIS */
 
   for (i = 0 ; i < a->dims[0] ; i++) {
-    v = ((c=fgetc(ick_cesspoolin)) == EOF) ? 256 : (c - lastin) % 256;
+    v = ((c=fgetc(ick_cesspoolin)) == EOF) ? 256 :
+      ((unsigned)c - lastin) % 256;
     lastin = c;
     if (!forget) {
       if (type == ick_TAIL)
@@ -524,7 +526,7 @@ void ick_binout(unsigned int type, ick_array *a)
     c = (c & 0x33) << 2 | (c & 0xcc) >> 2;
     c = (c & 0x55) << 1 | (c & 0xaa) >> 1;
     (void) fputc((int)c,ick_cesspoolout);
-    if (c == 10 /* \n in INTERCAL */)
+    if (c == 10 /* \n in INTERCAL */ || /* AIS */ ick_instapipe)
       (void) fflush(ick_cesspoolout);
   }
 }
@@ -857,6 +859,76 @@ int ick_multicome0(int errlineno, jmp_buf pc)
   /*@-unreachable@*/
   return 0;
   /*@=unreachable@*/
+}
+
+/**********************************************************************
+ *
+ * AIS: The next two functions are mine, and handle CREATE statements.
+ *
+ **********************************************************************/
+
+struct ick_jictype
+{
+  /*@observer@*/ char* sig; /* a shallow copy of a constant string */
+  unsigned long target;
+  /*@null@*/ /*@only@*/ struct ick_jictype* next;
+};
+
+/*@null@*/ /*@only@*/ static struct ick_jictype* jiclist = NULL;
+
+/* Return a jic entry that matches the requested signature exactly,
+   creating one if there isn't one yet. */
+static struct ick_jictype* jicextract(/*@observer@*/ char* sig)
+{
+  struct ick_jictype* jicptr = jiclist;
+  while(jicptr)
+  {
+    if(strcmp(jicptr->sig,sig)==0) return jicptr;
+    if(jicptr->next != NULL) jicptr = jicptr->next;
+    else break;
+  }
+  if(!jicptr)
+  {
+    jiclist=malloc(sizeof *jiclist);
+    jicptr=jiclist;
+  }
+  else
+  {
+    jicptr->next=malloc(sizeof *jiclist);
+    jicptr=jicptr->next;
+  }
+  jicptr->next = NULL;
+  jicptr->sig = sig;
+  jicptr->target = 0;
+  return jicptr;
+}
+
+void ick_registercreation(char* sig, unsigned long target)
+{
+  jicextract(sig)->target=target;
+}
+
+unsigned long ick_jicmatch(char* sig)
+{
+  return jicextract(sig)->target;
+}
+
+/* AIS: Used by the JIC code to error out when attempting to access an array */
+ick_type32 ick_ieg277(ick_type32 ignored)
+{
+  /*@-noeffect@*/
+  (void) ignored;
+  /*@=noeffect@*/
+  ick_lose(IE277, ick_lineno, (char*) NULL);
+}
+
+void ick_ies277(ick_type32 ignored, void(*ignored2)())
+{
+  /*@-noeffect@*/
+  (void) ignored;
+  (void) ignored2;
+  /*@=noeffect@*/
+  ick_lose(IE277, ick_lineno, (char*) NULL);
 }
 
 /* cesspool.c ends here */

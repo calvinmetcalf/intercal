@@ -30,7 +30,7 @@ int ick_lineno;
 
 jmp_buf ick_cjb;
 int ick_ccfc;
-unsigned ick_skipto=0;
+long ick_skipto=0;
 $O
 char* ick_globalargv0;
 int ick_oldabstain;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
     ick_next = calloc(80, sizeof *ick_next);
 #ifdef ICK_EC
-    ick_next_jmpbufs = malloc(80 * sizeof *ick_next_jmpbufs);
+    ick_next_jmpbufs = malloc(81 * sizeof *ick_next_jmpbufs);
 #endif
 $N
     ick_globalargv0=argv[0];
@@ -74,14 +74,16 @@ $N
 
     $F
 
-      /* degenerated code */
 #ifdef ICK_EC
-    ick_main();
+    ick_runstartups();
+    ick_next(0);
 }
 
 ICK_EC_FUNC_START(ick_main)
 {
+  ick_linelabelnosp(0);
 #endif
+      /* degenerated code */
  ick_restart:
  top:
     switch(ick_skipto)

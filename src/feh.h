@@ -32,4 +32,6 @@ extern char **enablers; /* AIS: so that there can be an element before the
 			   -1, just to cause a bit more confusion) */
 extern assoc vartypes[];
 
+extern int useprintflow; /* AIS */
+
 /* feh.h ends here */

@@ -305,7 +305,7 @@ void typecast(node *np)
     else if (np->opcode == SELECT)
 	np->width = np->rval->width;	/* n-bit select has an n-bit result */
     else if (np->opcode == SUB)
-	np->width = np->lval->width;	/* type of the ick_array */
+	np->width = np->lval->width;	/* type of the array */
     else if (np->opcode == SLAT || np->opcode == BACKSLAT)
       np->width = np->lval->width; /* AIS: \ and / return their left arg */
     /*@=nullderef@*/
@@ -369,6 +369,9 @@ void codecheck(void)
 	      if(notpast1900) coopt = 0;
 	    }
 
+	    if (tp->u.target > 65535 && !tp->preproc) /* AIS */
+	      ick_lose(IE197, tp - tuples + 1, (char*) NULL);
+
 	    for (up = tuples; up < tuples + ick_lineno; up++)
 		if (tp->u.target == up->label)
 		{
@@ -380,12 +383,16 @@ void codecheck(void)
 	    {
 	      /* AIS: Added the pickcompile check. Syslib has to be optimized
 		 for PICs, so syslib.i isn't imported and so none of the lables
-		 in it will appear in the program. */
-		if (tp->type == NEXT &&
+		 in it will appear in the program. Also added the useickec
+		 check, as that's another legitimate way for a NEXT to target
+		 a nonexistent line label */
+		if (tp->type == NEXT && !useickec &&
 		    (!pickcompile||tp->u.target<1000||tp->u.target>1999))
 		    ick_lose(IE129, tp - tuples + 1, (char *)NULL);
 		else if (tp->type == NEXT) /* AIS */
 		{tp->nexttarget=0; continue;}
+		else if (useickec) /* AIS */
+		  continue;
 		/* AIS: NEXTFROMLABEL's basically identical to COME_FROM */
 		else if (tp->type == COME_FROM || tp->type == NEXTFROMLABEL)
 		    ick_lose(IE444, tp - tuples + 1, (char *)NULL);
@@ -477,6 +484,7 @@ char *enablersm1[MAXTYPES+1] =
     "PREPROC", /* AIS: Nonexistent statement */
     "WHILE", /* AIS: statement WHILE statement */
     "TRY_AGAIN", /* AIS: Added TRY AGAIN */
+    "CREATE", /* AIS */
     "FROM", /* AIS: ABSTAIN expr FROM LABEL */
 };
 char** enablers = enablersm1+1;
@@ -509,6 +517,16 @@ assoc varstores[] =
     { 0,	(char *)NULL }
 };
 
+/* AIS: A demangled version */
+static assoc varstoresdem[] =
+{
+    { ick_ONESPOT,	"onespots" },
+    { ick_TWOSPOT,	"twospots" },
+    { ick_TAIL,	"tails" },
+    { ick_HYBRID,	"hybrids" },
+    { 0,	(char *)NULL }
+};
+
 static assoc typedefs[] =
 {
     { ick_ONESPOT,	"ick_type16" },
@@ -535,7 +553,8 @@ static assoc typedefs[] =
    explain ('e') command works. It's also included in the degenerated C
    code when the option -c is used, so the person looking at the code can
    debug both the INTERCAL and ick itself more effectively, and used by
-   -h to produce its optimizer-debug output. */
+   -h to produce its optimizer-debug output, and used to produce the variable
+   numbers used in ick_createdata. */
 
 unsigned long varextern(unsigned long intern, int vartype)
 {
@@ -1498,6 +1517,103 @@ void prexpr(node *np, FILE *fp, int freenode)
 }
 /*@=temptrans@*/ /*@=onlytrans@*/ /*@=compdestroy@*/ /*@=branchstate@*/
 
+/* By AIS: Helper function for prunknown */
+static int prunknownstr(node *np, FILE* fp)
+{
+  int i;
+  switch(np->opcode)
+  {
+  case INTERSECTION:
+    i=prunknownstr(np->lval, fp);
+    i+=prunknownstr(np->rval, fp);
+    return i;
+  case US_ID: (void) fputc((char)np->constant, fp); return 0;
+  case US_ELEM: (void) fputc(';', fp); return 1;
+  case US_SCALAR: (void) fputc('.', fp); return 1;
+  case US_ARRVAR: (void) fputc(',', fp); return 1;
+  case US_EXPR: (void) fputc('~', fp); return 1;
+  default: ick_lose(IE778, emitlineno, (char*) NULL);
+  }
+  /*@-unreachable@*/ return 0; /*@=unreachable@*/
+}
+
+/* By AIS: Helper function for prunknown */
+static void prunknowncreatedata(node *np, FILE* fp)
+{
+  unsigned long ve;
+  switch(np->opcode)
+  {
+  case INTERSECTION:
+    prunknowncreatedata(np->lval, fp);
+    prunknowncreatedata(np->rval, fp);
+    return;
+  case US_ID: return; /* nothing to do */
+  case US_SCALAR:
+    ve=varextern(np->rval->constant,np->rval->opcode);
+    fprintf(fp,"\t\t{%d,0,%lu,",np->rval->width,ve);
+    break;
+  case US_ARRVAR: /* an array doesn't itself have a value */
+    ve=varextern(np->rval->constant,np->rval->opcode);
+    fprintf(fp,"\t\t{%d,1,%lu,{ick_ieg277,ick_ies277},0},\n",np->rval->width,ve);
+    return;
+  case US_ELEM: /* these two cases are actually treated the same way, */
+  case US_EXPR: /* because expressions can be assigned to */
+    fprintf(fp,"\t\t{%d,0,0,",np->rval->width);
+    break;
+  default: ick_lose(IE778, emitlineno, (char*) NULL);
+  }
+  if(createsused)
+    fprintf(fp,"{ick_og%lx,ick_os%lx},",(unsigned long)np,(unsigned long)np);
+  else
+    fprintf(fp,"{0,0},");
+  prexpr(np->rval,fp,0);
+  fprintf(fp,"},\n");
+}
+
+/* This function by AIS. Print a check to see if a just-in-case compiled
+   statement actually has a meaning yet, or if we should error. */
+static void prunknown(node *np, FILE* fp)
+{
+  static long negcounter=-65538;
+  int i,j;
+  fprintf(fp,"\tif((ick_skipto=ick_jicmatch(\"");
+  i=prunknownstr(np, fp);
+  fprintf(fp, "\")))\n\t{\n\t    ick_createdata icd[]={\n");
+  prunknowncreatedata(np, fp);
+  fprintf(fp, "\t    };\n");
+  if(createsused)
+  {
+    j=i;
+    while(j--)
+      (void) fprintf(fp, "\t\t""ICKSTASH(ick_TWOSPOT, %lu, "
+		     "ick_twospots, ick_oo_twospots);\n"
+		     "\t\t""ick_oo_twospots[%lu]=icd[%d].accessors;\n",
+		     intern(ick_TWOSPOT,1601+j),
+		     intern(ick_TWOSPOT,1601+j),j);
+  }
+  if(useickec)
+  {
+    fprintf(fp,"\t\t""ick_global_createdata=icd;\n");
+    fprintf(fp,"\t\t""ick_dogoto(ick_skipto,ick_lineno,1);\n");
+  }
+  else
+  {
+    fprintf(fp,"\t\t""ick_pushnext(%ld); ick_skipto=-ick_skipto; goto top; "
+	    "case %ld:;\n",negcounter,negcounter);
+    negcounter--;
+  }
+  if(createsused)
+  {
+    j=i;
+    while(j--)
+      (void) fprintf(fp, "\t\t""ICKRETRIEVE(ick_twospots, %lu, "
+		     "ick_TWOSPOT, ick_twoforget, ick_oo_twospots);\n",
+		     intern(ick_TWOSPOT,1601+j));
+
+  }
+  fprintf(fp, "\t} else\n");
+}
+
 /*@dependent@*/ static char *nice_text(char *texts[], int lines)
 {
 #define MAXNICEBUF	512
@@ -1617,10 +1733,10 @@ void emit(tuple *tn, FILE *fp)
     if (tn->label)
     {
       if(!useickec) /* AIS */
-	(void) fprintf(fp, "L%u:", tn->label);
+	(void) fprintf(fp, "case -%u: ; L%u:\n", tn->label, tn->label);
       else
 	/* AIS: start one of ick_ec's labeled blocks. */
-	(void) fprintf(fp, "ick_labeledblock(%uU,({",tn->label);
+	(void) fprintf(fp, "ick_labeledblock(%uU,{",tn->label);
     }
     if (yydebug || compile_only)
     {
@@ -1904,7 +2020,7 @@ void emit(tuple *tn, FILE *fp)
       /* AIS: if using ickec, use its features for the next */
       if(useickec)
       {
-	(void) fprintf(fp,"\t""ick_donext(%uU,ick_lineno,0);\n",tn->u.target);
+	(void) fprintf(fp,"\t""ick_dogoto(%uU,ick_lineno,1);\n",tn->u.target);
 	break;
       }
       /* Start of AIS optimization */
@@ -1976,10 +2092,10 @@ void emit(tuple *tn, FILE *fp)
 			   nameof(np->opcode, varstores),
 			   /* AIS */(opoverused&&(np->opcode==ick_ONESPOT||
 						  np->opcode==ick_TWOSPOT)?
-			   "oo_":"0"),
+			   "ick_oo_":"0"),
 			   /* AIS */(opoverused&&(np->opcode==ick_ONESPOT||
 						  np->opcode==ick_TWOSPOT)?
-			   nameof(np->opcode, varstores):"0"));
+			   nameof(np->opcode, varstoresdem):"0"));
 	break;
 
     case RETRIEVE:
@@ -1990,10 +2106,10 @@ void emit(tuple *tn, FILE *fp)
 			   nameof(np->opcode, forgetbits),
 			   /* AIS */(opoverused&&(np->opcode==ick_ONESPOT||
 						  np->opcode==ick_TWOSPOT)?
-			   "oo_":"0"),
+			   "ick_oo_":"0"),
 			   /* AIS */(opoverused&&(np->opcode==ick_ONESPOT||
 						  np->opcode==ick_TWOSPOT)?
-			   nameof(np->opcode, varstores):"0"));
+			   nameof(np->opcode, varstoresdem):"0"));
 
 	break;
 
@@ -2146,7 +2262,7 @@ void emit(tuple *tn, FILE *fp)
 			     "\t""    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
 	    }
 	    (void) fprintf(fp,
-			   "\t""\tabstained[i] += j;\n");
+			   "\t""\tick_abstained[i] += j;\n");
 	}
 	break;
 
@@ -2161,22 +2277,26 @@ void emit(tuple *tn, FILE *fp)
       {
 	if(tn->type == COMPUCOME)
 	{
-	  fprintf(fp,"\t""ick_comefrom(");
+	  fprintf(fp,"\t""ick_docomefromif(");
 	  prexpr(tn->u.node, fp, 1);
-	  fprintf(fp,");\n");
+	  fprintf(fp,",ick_lineno,({int i=0;");
+	  emit_guard(tn,fp); /* re-emit the guard */
+	  fprintf(fp,"i=1;};i;}));\n");
 	  break;
 	}
 	else if(tn->type == NEXTFROMEXPR)
 	{
-	  fprintf(fp,"\t""ick_nextfrom(");
+	  fprintf(fp,"\t""ick_donextfromif(");
 	  prexpr(tn->u.node, fp, 1);
-	  fprintf(fp,");\n");
+	  fprintf(fp,",ick_lineno,({int i=0;");
+	  emit_guard(tn,fp); /* re-emit the guard */
+	  fprintf(fp,"i=1;};i;}));\n");
 	  break;
 	}
       }
       fprintf(fp,"\t""%s;} else goto CCF%d;\n",
-	      multithread?"NEXTTHREAD":
-	      "if(ick_printflow) printf(\"[%d]\",ick_lineno)",
+	      multithread?"NEXTTHREAD":useprintflow?
+	      "if(ick_printflow) printf(\"[%d]\",ick_lineno)":"",
 	      compucomecount);
       break;
 
@@ -2327,6 +2447,19 @@ void emit(tuple *tn, FILE *fp)
       (void) fprintf(fp,"(TRISB<<24) | (TRISA<<16) | (PORTB<<8) | PORTA;\n");
       break;
 
+    case CREATE: /* By AIS */
+      if(createsused == 0) goto splatme;
+      (void) fprintf(fp,"\t""ick_registercreation(\"");
+      prunknownstr(tn->u.node, fp);
+      (void) fprintf(fp,"\",%uU);\n",tn->u.target);
+      break;
+
+    case UNKNOWN: /* By AIS */
+      /* We generate a check to see if the unknown statement has gained a
+	 meaning since it was compiled, or otherwise continue to the splattered
+	 case. Not for PIC-INTERCAL, though. */
+      if(!pickcompile) prunknown(tn->u.node, fp);
+      /*@fallthrough@*/
     case SPLATTERED:
       /* AIS: The code previously here could access unallocated memory due to
 	 a bug if the comment was a COME FROM target. The problem is that
@@ -2334,6 +2467,7 @@ void emit(tuple *tn, FILE *fp)
 	 this one, but not always, and in this case the line after this one is
 	 always what we want, so I copied the relevant part of the emitlineno
 	 logic here to fix the bug. */
+    splatme:
       if (tn < tuples + ick_lineno - 1)
 	dim = tn[1].ick_lineno - tn->ick_lineno;
       else
@@ -2354,14 +2488,26 @@ void emit(tuple *tn, FILE *fp)
       if(useickec) /* AIS */
       {
 	if(tn->type == COME_FROM)
-	  fprintf(fp, "\t""ick_comefrom(%u);\n", tn->u.target);
-	else
-	  fprintf(fp, "\t""ick_nextfrom(%u);\n", tn->u.target);
-	break;
+	{
+	  fprintf(fp,"\t""ick_docomefromif(%uU,ick_lineno,({int i=0;",
+		  tn->u.target);
+	  emit_guard(tn,fp); /* re-emit the guard */
+	  fprintf(fp,"i=1;};i;}));\n");
+	  break;
+	}
+	else /* (tn->type == NEXTFROMLABEL) */
+	{
+	  fprintf(fp,"\t""ick_donextfromif(%uU,ick_lineno,({int i=0;",
+		  tn->u.target);
+	  emit_guard(tn,fp); /* re-emit the guard */
+	  fprintf(fp,"i=1;};i;}));\n");
+	  break;
+	}
       }
 	(void) fprintf(fp, "if(0) {C%ld: %s;%s}\n", (long)(tn-tuples+1),
 		       tn->type==NEXTFROMLABEL ? "ick_pushnext(truelineno+1)":"",
-		       multithread?" NEXTTHREAD;":" if(ick_printflow) printf(\"[%d]\",ick_lineno);");
+		       multithread?" NEXTTHREAD;":!useprintflow?""
+		       :" if(ick_printflow) printf(\"[%d]\",ick_lineno);");
 	/* AIS: Changed so all COME_FROMs have unique labels even if two
 	   of them aim at the same line, and added the NEXT FROM case (which
 	   involves hiding COME FROM labels in an unreachable if()). */
@@ -2424,7 +2570,7 @@ void emit(tuple *tn, FILE *fp)
     /* AIS: The ickec version is very simple! We just finish the labeled
        block started at the start of the command. */
     if(tn->label && useickec)
-      (void) fprintf(fp, "}));\n");
+      (void) fprintf(fp, "});\n");
 
     /* AIS: We need to keep track of how many COME FROMs are aiming here
        at runtime, if we don't have the very simple situation of no
@@ -2511,11 +2657,11 @@ void emit(tuple *tn, FILE *fp)
     /* AIS: Now we've finished the statement, let's switch to the next
        thread in a multithread program. */
     if(multithread) (void) fputs("    NEXTTHREAD;\n", fp);
-    else
+    else if(useprintflow)
       (void) fputs("    if(ick_printflow) printf(\"[%d]\",ick_lineno);\n",fp);
 }
 
-/* AIS: Generate prototypes for slat expressions */
+/* AIS: Generate prototypes for slat expressions, args to UNKNOWN */
 void emitslatproto(FILE* fp)
 {
   node* np=firstslat;
@@ -2528,7 +2674,7 @@ void emitslatproto(FILE* fp)
   }
 }
 
-/* AIS: Generate bodies for slat expressions */
+/* AIS: Generate bodies for slat expressions, args to UNKNOWN */
 void emitslat(FILE* fp)
 {
   node* np=firstslat;

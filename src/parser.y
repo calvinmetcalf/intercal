@@ -51,8 +51,11 @@ static int thisline;	/* line number of beginning of current statement */
 
 extern int mark112;    /* AIS: Mark the tuple for W112 when it's created. */
 static int lineuid=65537; /* AIS: a line number not used anywhere else */
+static int cacsofar=0; /* AIS: Number of args in a CREATE statement */
 
-static tuple *splat(void);
+static tuple *splat(int);
+
+static tuple *prevtuple = NULL;
 
 #define GETLINENO					\
     {if (stbeginline < 0) thisline = -stbeginline;	\
@@ -92,10 +95,10 @@ static tuple *splat(void);
  * AIS: Note that although GETS is the lowest statement type (with index 0
  *	in feh2.c), UNKNOWN (i.e. a line that causes error 000) is an even
  *	lower statement type, with index -1. perpet.c uses indexes 1 higher.
- * AIS: Added FROM, MANYFROM, TRY_AGAIN, COMPUCOME, GERUCOME, WHILE, and
- *	three NEXT FROM cases. Also added PREPROC; this is for when the parser
- *      acts like a preprocessor, translating an INTERCAL statement into a
- *      sequence of INTERCAL statements with the same net effect.
+ * AIS: Added FROM, MANYFROM, TRY_AGAIN, COMPUCOME, GERUCOME, WHILE, three
+ *	NEXT FROM cases, and CREATE. Also added PREPROC; this is for when the
+ *      parser acts like a preprocessor, translating an INTERCAL statement into
+ *      a sequence of INTERCAL statements with the same net effect.
  * AIS: COME_FROM now merged with the label following it,
  *      to distinguish it from COMPUCOME, in the lexer. This changes
  *      the parser somewhat.
@@ -106,7 +109,9 @@ static tuple *splat(void);
 %token DISABLE ENABLE MANYFROM GIVE_UP READ_OUT WRITE_IN /* AIS: */PIN
 %token <numval> COME_FROM NEXTFROMLABEL
 %token NEXTFROMEXPR NEXTFROMGERUND COMPUCOME GERUCOME
-%token PREPROC WHILE TRY_AGAIN FROM
+%token PREPROC WHILE TRY_AGAIN
+%token <numval> CREATE
+%token FROM
 
 /* AIS: ONCE and AGAIN added, for multithread support; also, NOSPOT added,
    so that I can reserve _ for future use (it's nowhere in the grammar yet) */
@@ -134,11 +139,18 @@ static tuple *splat(void);
 %token AND OR XOR FIN WHIRL WHIRL2 WHIRL3 WHIRL4 WHIRL5
 %token REV_AND REV_OR REV_XOR REV_FIN
 %token REV_WHIRL REV_WHIRL2 REV_WHIRL3 REV_WHIRL4 REV_WHIRL5
+/* (AIS) Tokens for just-in-case compilation; UNKNOWNID is returned by the
+   lexer for unknown 'identifiers'. And yes, it does contain a number. */
+%token <numval> UNKNOWNID
+/* (AIS) Five possibilities for an unknown statement chain: identifiers,
+   scalars, arrays, array elements, and other expressions. */
+%token US_ID US_SCALAR US_ARRVAR US_ELEM US_EXPR
 
 %type <node> expr limexpr varlist variable constant lvalue inlist outlist
 %type <node> subscr byexpr scalar scalar2s ick_array initem outitem sublist
 %type <node> unambig limunambig subscr1 sublist1 oparray osubscr osubscr1
-%type <node> notanlvalue nlunambig lunambig
+%type <node> notanlvalue nlunambig lunambig unknownstatement unknownatom
+%type <node> unknownsin unknownaid
 %type <tuple> preproc perform mtperform
 %type <numval> please preftype
 
@@ -175,19 +187,28 @@ command	:    please mtperform
 	|    LABEL please OHOHSEVEN mtperform
 		{checklabel($1); $4->label = $1; $4->exechance = $2 * $3;}
 	|    error
-		{ick_lose(IE017, iyylineno, (char *)NULL);}
+                {/* AIS: catch errors which occur after the end of a statement
+		    (highly likely when comments are being written, as the
+		    start of them will be parsed as an UNKNOWN) */
+		  yyerrok; yyclearin; cacsofar=0;
+		  if(prevtuple) {prevtuple->type=SPLATTERED; splat(0);}
+		  else splat(1); /* this is the first statement */
+		}
 	;
 /*
  * AIS: added for the ONCE/AGAIN qualifiers. It copies a pointer to the tuple,
  * so command will set the values in the original tuple via the copy.
+ * I also added prevtuple so that after-command splattering works.
  */
 
 mtperform :  preproc
-		{$1->onceagainflag = onceagain_NORMAL; $$ = $1;}
+		{$1->onceagainflag = onceagain_NORMAL; prevtuple = $$ = $1;}
 	  |  preproc ONCE
-		{NEWFANGLED {$1->onceagainflag = onceagain_ONCE; $$ = $1;}}
+		{NEWFANGLED {$1->onceagainflag = onceagain_ONCE;
+			     prevtuple = $$ = $1;}}
 	  |  preproc AGAIN
-		{NEWFANGLED {$1->onceagainflag = onceagain_AGAIN; $$ = $1;}}
+		{NEWFANGLED {$1->onceagainflag = onceagain_AGAIN;
+			     prevtuple = $$ = $1;}}
 
 /* AIS: Either we do a simple 'perform', or preprocessing is needed.
         I wrote all of this. The way the preprocessor works is to add a whole
@@ -254,7 +275,7 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
 	|    notanlvalue GETS expr %prec LOWPREC
 	  {/* AIS: This is for variableconstants, and an error otherwise.*/
 	   if(variableconstants) ACTION($$, GETS, cons(GETS,$1,$3))
-	   else {yyclearin; $$=splat();}}
+	     else {yyerrok; yyclearin; $$=splat(1);}}
 	|    LABEL NEXT		{TARGET($$, NEXT,      $1);}
 	|    FORGET expr	{ACTION($$, FORGET,    $2);}
 	|    RESUME expr	{ACTION($$, RESUME,    $2);}
@@ -290,9 +311,55 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
                                  nextfromsused=1;}
 	|    NEXTFROMEXPR expr	{NEWFANGLED {ACTION($$,NEXTFROMEXPR,$2);
 				 compucomesused=1; nextfromsused=1;}}
-	|    BADCHAR		{yyclearin; $$ = splat();}
-	|    error		{yyclearin; $$ = splat();}
+/* AIS: CREATE takes an 'unknown statement' as a template */
+        |    CREATE unknownstatement {NEWFANGLED{ACTARGET($$,CREATE,$2,$1); cacsofar=0;}}
+/* AIS: Just-in-case compilation of unknown statements */
+        |    unknownstatement   {NEWFANGLED {ACTION($$,UNKNOWN,$1); cacsofar=0;}}
+/* AIS: Added the yyerrok */
+	|    BADCHAR		{yyclearin; yyerrok; $$ = splat(1); cacsofar=0;}
+        |    error		{yyclearin; yyerrok; $$ = splat(1); cacsofar=0;}
 	;
+
+/* AIS: Unknown statements. The rule here is that we can't have two non-ID
+   unknowns in a row, but two IDs in a row are acceptable. */
+unknownstatement : unknownatom {$$ = $1; intern(ick_TWOSPOT,cacsofar+++1601);}
+		 | unknownsin unknownatom {$$=cons(INTERSECTION,$1,$2);
+		   	      		   intern(ick_TWOSPOT,cacsofar+++1601);}
+                 | unknownsin {$$ = $1;}
+		 ;
+
+unknownsin	 : unknownaid {$$ = $1;}
+		 | unknownstatement unknownaid {$$=cons(INTERSECTION,$1,$2);}
+
+/* Each of the possible unknown atoms, apart from arrays and IDs, generates
+   operand overloading info if CREATEs or external calls are used, so that
+   the implied overloading of a CREATE will work. */
+unknownatom      : subscr	{$$=cons(US_ELEM,0,$1);
+                                   if(createsused){
+                                     opoverused=1; if(!firstslat)
+				       firstslat=$$; else
+				       prevslat->nextslat=$$;
+				     prevslat=$$;
+				     $$->nextslat=0;}}
+		 | scalar    	{$$=cons(US_SCALAR,0,$1);
+                                   if(createsused){
+                                     opoverused=1; if(!firstslat)
+				       firstslat=$$; else
+				       prevslat->nextslat=$$;
+				     prevslat=$$;
+				     $$->nextslat=0;}}
+		 | notanlvalue 	{$$=cons(US_EXPR,0,$1);
+                                   if(createsused){
+                                     opoverused=1; if(!firstslat)
+				       firstslat=$$; else
+				       prevslat->nextslat=$$;
+				     prevslat=$$;
+				     $$->nextslat=0;}}
+		 | ick_array	{$$=cons(US_ARRVAR,0,$1);}
+		 ;
+
+unknownaid  	 : UNKNOWNID    {$$=newnode(); $$->opcode=US_ID; $$->constant=$1;}
+		 ;
 
 /* gerund lists are used by ABSTAIN and REINSTATE */
 gerunds	:   GERUND
@@ -550,7 +617,7 @@ eitherears  : OPENEARS ;
 
 %%
 
-static tuple *splat(void)
+static tuple *splat(int gentuple)
 /* try to recover from an invalid statement. */
 {
     tuple *sp;
@@ -563,8 +630,17 @@ static tuple *splat(void)
      * which we can do with a tricky flag on the lexer (re_send_token).
      */
 
+    if(re_send_token == ick_TRUE) /* By AIS */
+    {
+      /* We're still cleaning up from the previous error. */
+      return prevtuple;
+    }
+
     /*	fprintf(stderr,"attempting to splat at line %d....\n",iyylineno); */
-    for(i = 0,re_send_token = ick_FALSE;;i++) {
+    /* AIS: Set the flag to true the first time round, false for subsequent
+       iterations. That way, if the error was triggered on a DO or label,
+       we use that token as the start of the next statement. */
+    for(i = 0,re_send_token = ick_TRUE;;i++,re_send_token = ick_FALSE) {
 	tok = lexer();
 	if (!tok)
 	{
@@ -584,7 +660,8 @@ static tuple *splat(void)
      */
 
     /* generate a placeholder tuple for the text line */
-    TARGET(sp, SPLATTERED, 0);
+    if(gentuple /* AIS */) {TARGET(sp, SPLATTERED, 0); prevtuple=sp;}
+    else sp=NULL;
 
     return(sp);
 }

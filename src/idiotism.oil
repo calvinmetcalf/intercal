@@ -1,7 +1,7 @@
-; 
-; NAME 
+;
+; NAME
 ;     idiotism.oil -- optimizer idioms for C-INTERCAL
-; 
+;
 ; LICENSE TERMS
 ;     Copyright (C) 2007 Alex Smith
 ;
@@ -34,21 +34,21 @@
 
 ; Constant folding
 [minglefold]
-(#{1}1$#{1}2)->(#{ick_mingle(x1,x2)}0)
+(#{1}1$#{1}2)->(#{mingle(x1,x2)}0)
 [selectfold]
-(#{1}1~#{1}2)->(#{ick_iselect(x1,x2)}0)
+(#{1}1~#{1}2)->(#{iselect(x1,x2)}0)
 [and32fold]
-(&32 #{1}1)->(#{ick_and32(x1)}0)
+(&32 #{1}1)->(#{and32(x1)}0)
 [or32fold]
-(V32 #{1}1)->(#{ick_or32(x1)}0)
+(V32 #{1}1)->(#{or32(x1)}0)
 [xor32fold]
-(?32 #{1}1)->(#{ick_xor32(x1)}0)
-[and15fold]
-(&16 #{1}1)->(#{ick_and16(x1)}0)
-[or14fold]
-(V16 #{1}1)->(#{ick_or16(x1)}0)
-[xor14fold]
-(?16 #{1}1)->(#{ick_xor16(x1)}0)
+(?32 #{1}1)->(#{xor32(x1)}0)
+[and16fold]
+(&16 #{1}1)->(#{and16(x1)}0)
+[or16fold]
+(V16 #{1}1)->(#{or16(x1)}0)
+[xor16fold]
+(?16 #{1}1)->(#{xor16(x1)}0)
 ; C operations can, and should, be folded too
 [cfold]
 (#{1}1 & #{1}2)->(#{x1 & x2}0)
@@ -70,70 +70,70 @@
 ; Binary bitwise optimizations
 [cbinand]
 ((&32(_{!(c&4294901760LU)}1$_{!(c&4294901760LU)}2))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
-)->((_1 & _2) & #{ick_iselect(x3,1431655765LU)}0)
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
+)->((_1 & _2) & #{iselect(x3,1431655765LU)}0)
 [cbinor]
 ((V32(_{!(c&4294901760LU)}1$_{!(c&4294901760LU)}2))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
-)->((_1 | _2) & #{ick_iselect(x3,1431655765LU)}0)
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
+)->((_1 | _2) & #{iselect(x3,1431655765LU)}0)
 [cbinxor]
 ((?32(_{!(c&4294901760LU)}1$_{!(c&4294901760LU)}2))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
-)->((_1 ^ _2) & #{ick_iselect(x3,1431655765LU)}0)
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
+)->((_1 ^ _2) & #{iselect(x3,1431655765LU)}0)
 ; Sometimes, an expanded output is wanted, optimizations happen in the wrong
 ; order, and we end up with & rather than ~ on the previous idiom. Correct
 ; such situations now.
 [cbinandnoselect]
 ((&32(_{!(c&4294901760LU)}1$_{!(c&4294901760LU)}2))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
-)->(#0 $ ((_1 & _2) & #{ick_iselect(x3,1431655765LU)}0))
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
+)->(#0 $ ((_1 & _2) & #{iselect(x3,1431655765LU)}0))
 [cbinornoselect]
 ((V32(_{!(c&4294901760LU)}1$_{!(c&4294901760LU)}2))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
-)->(#0 $ ((_1 | _2) & #{ick_iselect(x3,1431655765LU)}0))
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
+)->(#0 $ ((_1 | _2) & #{iselect(x3,1431655765LU)}0))
 [cbinxornoselect]
 ((?32(_{!(c&4294901760LU)}1$_{!(c&4294901760LU)}2))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
-)->(#0 $ ((_1 ^ _2) & #{ick_iselect(x3,1431655765LU)}0))
-; Sometimes, there isn't even a ick_mingle...
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
+)->(#0 $ ((_1 ^ _2) & #{iselect(x3,1431655765LU)}0))
+; Sometimes, there isn't even a mingle...
 [cbinandnomingle]
 ((&32(_{!(c&2863311530LU)}1|_{!(c&1431655765LU)}2))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) & _1) ~ _3)
 ((&32(_{!(c&1431655765LU)}2|_{!(c&2863311530LU)}1))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) & _1) ~ _3)
 ((&32(_{!(c&2863311530LU)}1|_{!(c&1431655765LU)}2))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) & _1) & _3)
 ((&32(_{!(c&1431655765LU)}2|_{!(c&2863311530LU)}1))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) & _1) & _3)
 [cbinornomingle]
 ((V32(_{!(c&2863311530LU)}1|_{!(c&1431655765LU)}2))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) | _1) ~ _3)
 ((V32(_{!(c&1431655765LU)}2|_{!(c&2863311530LU)}1))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) | _1) ~ _3)
 ((V32(_{!(c&2863311530LU)}1|_{!(c&1431655765LU)}2))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) | _1) & _3)
 ((V32(_{!(c&1431655765LU)}2|_{!(c&2863311530LU)}1))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) | _1) & _3)
 [cbinxornomingle]
 ((?32(_{!(c&2863311530LU)}1|_{!(c&1431655765LU)}2))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) ^ _1) ~ _3)
 ((?32(_{!(c&1431655765LU)}2|_{!(c&2863311530LU)}1))~
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) ^ _1) ~ _3)
 ((?32(_{!(c&2863311530LU)}1|_{!(c&1431655765LU)}2))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) ^ _1) & _3)
 ((?32(_{!(c&1431655765LU)}2|_{!(c&2863311530LU)}1))&
- #{!(x&2863311530LU)&&ick_iselect(x,1431655765LU)==ick_xselx(ick_iselect(x,1431655765LU))}3
+ #{!(x&2863311530LU)&&iselect(x,1431655765LU)==xselx(iselect(x,1431655765LU))}3
 )->(((_2 >> #1) ^ _1) & _3)
 
 ; Bitwise complements. (The INTERCAL which ultimately leads to cases 3 and 4
@@ -151,10 +151,10 @@
 
 ; Selecting the rightmost bits of a number
 [xselpow2m1]
-(_1 ~ #{x==ick_xselx(x)}2)->(_1 & _2)
+(_1 ~ #{x==xselx(x)}2)->(_1 & _2)
 ; Selecting one bit from a number
 [xselpow2]
-(_1 ~ #{ick_xselx(x)==1}2)->(!(!(_1 & _2)))
+(_1 ~ #{xselx(x)==1}2)->(!(!(_1 & _2)))
 ; Selecting a number against itself and then selecting 1 from that
 [xselxsel1]
 ((_1~_1)~#1)->(!(!_1))
@@ -164,12 +164,12 @@
 (_{c==1}2&(_1~_1))->(_1 && _2)
 ; Selecting a number from a constant that's just below a power of 2
 [pow2m1selx]
-((#{x==ick_xselx(x)}1 ~ _2) ~ #1)->(!(!(_1 & _2)))
+((#{x==xselx(x)}1 ~ _2) ~ #1)->(!(!(_1 & _2)))
 ; Boolean-negating a select
 [notselect]
 (!(_1~_2))->(!(_1&_2))
 
-; Sometimes select and ick_mingle cancel each other out
+; Sometimes select and mingle cancel each other out
 [selectmingle1]
 ((_1~#2863311530)$_2)->((_1&#2863311530)|(#0$_2))
 [selectmingle2]
@@ -188,7 +188,7 @@
 ; Rightshift some of the bits
 [rshift]
 <#1-#31
-(_1~#{ick_xselx(x)<<r==x&&x}2)->((_1&_2)>>#{r}0)
+(_1~#{xselx(x)<<r==x&&x}2)->((_1&_2)>>#{r}0)
 >
 ; General 16-bit leftshifts
 ;
@@ -207,16 +207,16 @@
 <#0-#14
 ((_{c<=65535&&!(c&((1LU<<r)-1LU))}1$
   #{!(x&(4294967294LU<<r))}2)~#{!(x&(1431655765LU<<(r*2+2)))}3)
-->((((_1>>#{r}0)~#{ick_iselect(x3>>(r*2+1),1431655765LU)}0)
-    <<#{ick_setbitcount(x3&((2LU<<(r*2))-1))}0)|#{ick_iselect(ick_mingle(0,x2),x3)}0)
+->((((_1>>#{r}0)~#{iselect(x3>>(r*2+1),1431655765LU)}0)
+    <<#{setbitcount(x3&((2LU<<(r*2))-1))}0)|#{iselect(mingle(0,x2),x3)}0)
 (((_{c<=65535&&!(c&((1LU<<r)-1LU))}1|#{x<=65535&&!(c&~((1LU<<r)-1LU))}4)$
   #{!(x&(4294967294LU<<r))}2)~#{!(x&(1431655765LU<<(r*2+2)))}3)
-->((((_1>>#{r}0)~#{ick_iselect(x3>>(r*2+1),1431655765LU)}0)
-    <<#{ick_setbitcount(x3&((2LU<<(r*2))-1))}0)|#{ick_iselect(ick_mingle(x4,x2),x3)}0)
+->((((_1>>#{r}0)~#{iselect(x3>>(r*2+1),1431655765LU)}0)
+    <<#{setbitcount(x3&((2LU<<(r*2))-1))}0)|#{iselect(mingle(x4,x2),x3)}0)
 (((#{x<=65535&&!(c&~((1LU<<r)-1LU))}4|_{c<=65535&&!(c&((1LU<<r)-1LU))}1)$
   #{!(x&(4294967294LU<<r))}2)~#{!(x&(1431655765LU<<(r*2+2)))}3)
-->((((_1>>#{r}0)~#{ick_iselect(x3>>(r*2+1),1431655765LU)}0)
-    <<#{ick_setbitcount(x3&((2LU<<(r*2))-1))}0)|#{ick_iselect(ick_mingle(x4,x2),x3)}0)
+->((((_1>>#{r}0)~#{iselect(x3>>(r*2+1),1431655765LU)}0)
+    <<#{setbitcount(x3&((2LU<<(r*2))-1))}0)|#{iselect(mingle(x4,x2),x3)}0)
 >
 ; 32-bit leftshift by 1; there are 8 ways to write this.
 [lshift32by1]
@@ -260,8 +260,8 @@
 
 ; INTERCAL logical values are 1 and 2.
 [xorto1or2]
-((?32(_1$#1))&#3)->((_1&#1)+#1)
-((?32(_1$#2))&#3)->(#2-(_1&#1))
+((?32(_{!(c&4294901760LU)}1$#1))&#3)->((_1&#1)+#1)
+((?32(_{!(c&4294901760LU)}1$#2))&#3)->(#2-(_1&#1))
 
 ; Removing, combining and weakening unneeded C_ANDs
 [unneededand]
@@ -461,7 +461,7 @@
 ; A right-shift idiom in syslib that was written in an unneccessarily complex
 ; way, by doing the bits separately the same way as left-shifts have to be done
 ; (of course, select can right-shift by any difference without much trouble);
-; the ick_next idiom is a helper for that. Previous code produced a warning when
+; the next idiom is a helper for that. Previous code produced a warning when
 ; this idiom was used, but the optimizer has now been enhanced to the extent
 ; that it can deal with it without much special-casing, and therefore there's
 ; no way now to tell that that case is being used, so the warning has been
@@ -520,3 +520,7 @@
 ((!(_{c==1}1))+#1)->(#2-_1)
 [nullmingle]
 (#0$_{c==1}1)->(_1)
+; Thanks to Joris Huizer for suggesting the idea behind the next one;
+; this is a more general idiom than the suggested [triplenot].
+[redundantdoublenot]
+(!(!(_{c==1}1)))->(_1)

@@ -41,11 +41,11 @@
 /* An expression involves an unidentified variable. */
 #define IE200 "200 NOTHING VENTURED, NOTHING GAINED\n\
 	ON THE WAY TO %d\n"
-/* An attempt has been made to give an ick_array a dimension of zero. */
+/* An attempt has been made to give an array a dimension of zero. */
 #define IE240 "240 ERROR HANDLER PRINTED SNIDE REMARK\n\
 	ON THE WAY TO %d\n"
 /* Invalid dimensioning information was supplied
- * in defining or using an ick_array. */
+ * in defining or using an array. */
 #define IE241 "241 VARIABLES MAY NOT BE STORED IN WEST HYPERSPACE\n\
 	ON THE WAY TO %d\n"
 /* A 32-bit value has been assigned to a 16-bit variable. */
@@ -89,7 +89,7 @@
 /* Cannot find the magically included system library */
 #define IE127 "127 SAYING 'ABRACADABRA' WITHOUT A MAGIC WAND WON'T DO YOU ANY GOOD\n\
         ON THE WAY TO THE CLOSET\n"
-/* Out of ick_stash space */
+/* Out of stash space */
 #define IE222 "222 BUMMER, DUDE!\n\
 	ON THE WAY TO %d\n"
 /* (AIS) Out of memory during I/O */
@@ -221,7 +221,7 @@
 /* (AIS) A line will inevitably cause an expression-reversal failure. */
 #define W278 "278 FROM A CONTRADICTION, ANYTHING FOLLOWS\n\
         ON THE WAY TO A HUGE DISASTER\n"
-	
+
 /* (AIS) The two following warnings are both compile-time traps for
    near-certain runtime errors. As such, they have similar numbers
    and similar messages. In fact, they're a shameless ripoff of the
@@ -237,7 +237,11 @@
 
 extern int ick_lineno;
 
-extern void /*@noreturn@*/ ick_lose(char *m, int n, /*@null@*/ char *s);
+extern void /*@noreturn@*/ ick_lose(char *m, int n, /*@null@*/ char *s)
+#ifdef __GNUC__
+  __attribute__ ((noreturn))
+#endif
+;
 
 extern void ick_lwarn(char *m, int n, /*@null@*/ char *s);
 

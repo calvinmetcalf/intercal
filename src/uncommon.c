@@ -97,9 +97,9 @@ int ick_printfopens=0;
 
 /* AIS: The same, looking for an executable */
 /*@observer@*/ /*@null@*/ char* ick_findandtestopen(/*@observer@*/ char* file,
-						     /*@observer@*/ char* guessdir,
-						     /*@observer@*/ char* mode,
-						     /*@observer@*/ char* argv0)
+						    /*@observer@*/ char* guessdir,
+						    /*@observer@*/ char* mode,
+						    /*@observer@*/ char* argv0)
 {
   static char buf2[BUFSIZ];
   /*@observer@*/ static char *fileiter;

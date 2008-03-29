@@ -33,6 +33,7 @@ LICENSE TERMS
 int ick_traditional = 0;
 /*@=redef@*/
 int ick_wimp_mode = 0;
+int ick_instapipe = 0; /* AIS */
 int ick_printflow = 0; /* AIS */
 int ick_mystery = 0; /* AIS */
 
@@ -47,6 +48,7 @@ ick_parseargs(int argc, char **argv)
 	"help",
 	"wimpmode",
 	"traditional",
+	"instapipe", /* AIS */
 	"printflow", /* AIS */
 	"mystery", /* AIS */
       };
@@ -54,6 +56,7 @@ ick_parseargs(int argc, char **argv)
 	&helpflag,
 	&ick_wimp_mode,
 	&ick_traditional,
+	&ick_instapipe, /* AIS */
 	&ick_printflow, /* AIS */
 	&ick_mystery, /* AIS */
       };

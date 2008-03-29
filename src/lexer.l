@@ -223,6 +223,7 @@ int getc(FILE *fp)
 
 W	[\ \t\n]*
 D	[0-9][\ \t\n0-9]*
+I       [A-Z]
 
 %%
 
@@ -389,7 +390,7 @@ DEINDERE{W}A{W}\({W}{D}\) |
 NEXT{W}FROM{W}\({W}{D}\) {/* AIS */ yylval.numval = myatoi(yytext);
 			  return(NEXTFROMLABEL);}
 DEINDERE{W}A    |
-NEXT{W}FROM     {/* AIS: 'ick_next' is not a verb, so the Latin is invented */
+NEXT{W}FROM     {/* AIS: 'next' is not a verb, so the Latin is invented */
                  return(NEXTFROMEXPR);}
 DEINDENDUM	|
 NEXTING{W}FROM	{/* AIS */ yylval.numval = NEXTFROMLABEL; return(GERUND);}
@@ -404,8 +405,8 @@ DEINDE		|
 NEXT		{stbeginline = 0; return(NEXT);}
 PROXIMANDUM	|
 NEXTING		{yylval.numval = NEXT; return(GERUND);}
-FROM            |
-A               {return(FROM);}
+FROM            {return(FROM); /* AIS: Latin is 'A', which confuses the rest
+                                  of the parser */}
 CONCEDERE	|
 DESPERARE	|
 GIVE{W}UP	{return(GIVE_UP);}
@@ -426,10 +427,16 @@ GOING{W}AHEAD   {yylval.numval = GO_AHEAD; return(GERUND);
 		    there are no Latin gerunds around here. Besides, the Latin
 		    'gerunds' look somewhat like gerundives to me, but that's
 		    purely based on memory so I may be wrong. */}
+CREATE{W}\({W}{D}\)          |
+CONFICE{W}\({W}{D}\)         {yylval.numval = myatoi(yytext); return(CREATE);}
+CREATING        |
+CREATION        |
+CONFICENDUM     {yylval.numval = CREATE; return(GERUND);}
 
 \+		{return(INTERSECTION);}
 
 {W}     	;
+{I}             {/* AIS */ yylval.numval = *yytext; return(UNKNOWNID);}
 .		{yylval.numval = yytext[0]; /* AIS: The line below for debug */
  if(yydebug) fprintf(stdout, "yylex: bad char %#x\n",(unsigned char)yytext[0]);
                  return(BADCHAR);}

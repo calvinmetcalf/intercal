@@ -97,6 +97,7 @@ extern int ick_mystery;
 
 /* AIS: More command-line options */
 extern int ick_wimp_mode;
+extern int ick_instapipe;
 
 /* AIS: Handle multiple COME FROMs aiming at the same line */
 extern int ick_multicome0(int errlineno, jmp_buf pc);
@@ -116,9 +117,27 @@ extern void ick_retrieve(void *to, unsigned int type, unsigned int index,
 			 ick_bool forget, ick_overop* oo);
 extern unsigned int ick_roll(unsigned int n);
 
+/* AIS: Lose with IE277 */
+extern ick_type32 ick_ieg277(ick_type32);
+extern void ick_ies277(ick_type32, void(*)());
+
 /* defined in arrgghh.c */
 extern void ick_parseargs(int argc, char **argv);
 extern int ick_printflow;
+
+/* AIS: For the CREATE statement */
+typedef struct ick_tag_createdata ick_createdata;
+struct ick_tag_createdata
+{
+  int width;           /* 16 or 32 (maybe 0 will be allowed at some point) */
+  int isarray;         /* this and the previous determine what vartype it is */
+  unsigned short varnumber;
+                       /* 0 if not a variable, the var's number if it is */
+  ick_overop accessors;/* how to get and set this lvalue, or {0,0} */
+  unsigned long value; /* current value of the var or expression */
+};
+extern void ick_registercreation(char*,unsigned long);
+extern unsigned long ick_jicmatch(char*);
 
 /* AIS: Multithreading types and defines */
 #if MULTITHREAD != 0
@@ -143,7 +162,7 @@ typedef struct tag_ickthread ickthread;
 		   mechanism works.) This only applies to ickthreads that are
 		   acting as choicepoints, not those acting as threads. */
   int ick_ccfc;  /* number of comefroms currently active */
-  unsigned ick_skipto; /* compucome line number */
+  long ick_skipto; /* compucome line number */
   jmp_buf ick_cjb; /* keeps track of compucomes */
   /*@partial@*/ /*@dependent@*/ ickthread* dsi; /* which thread's varforget and sb to use */
   /*@null@*/ /*@dependent@*/ ickthread* usesthis; /* for garbage collection purposes */
@@ -176,7 +195,7 @@ extern int hybridcount;
 extern int ick_oldabstain;
 extern int gonebackto;
 extern int ick_ccfc;
-extern unsigned ick_skipto;
+extern long ick_skipto;
 extern jmp_buf btjb;
 extern jmp_buf ick_cjb;
 
@@ -185,8 +204,8 @@ extern jmp_buf ick_cjb;
 #define MULTICOME ick_multicome0
 #endif /* MULTITHREAD */
 
-/* AIS: Used by the debugger, multithread code */
-#if (MULTITHREAD != 0) || (YUKDEBUG != 0)
+/* AIS: Used by the debugger, multithread code, external calls */
+#if (MULTITHREAD != 0) || (YUKDEBUG != 0) || defined(ICK_EC)
 extern ick_type16* ick_onespots;
 extern ick_bool* ick_oneforget;
 extern ick_type32* ick_twospots;
