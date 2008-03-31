@@ -39,6 +39,9 @@
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
+/* Define if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
 /* Define to the number of bytes in a long long, or 0 if not available. */
 #define SIZEOF_LONG_LONG_INT 0
 

@@ -46,7 +46,12 @@ LICENSE TERMS
    different target.)
 */
 
+#if ICK_HAVE_STDINT_H+1 == 2
 #include <stdint.h>
+#else
+typedef unsigned long uint32_t;
+typedef unsigned short uint16_t;
+#endif
 
 #define ICK_EC_FUNC_START(id)			  \
 ICK_EC_PP_0(id)  	  		          \

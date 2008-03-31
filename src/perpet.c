@@ -1612,9 +1612,14 @@ int main(int argc, char *argv[])
 #else
 		    (void) sprintf(buf2,
 #endif
-				   "%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT
-				   "%s -Wl,-z,muldefs -x c %s", compiler, libdir,
-				   path, path, argv[oldoptind], cdebug?" -g":"", tempfn);
+#define XSTR(x) #x
+#define IHSH XSTR(ICK_HAVE_STDINT_H)
+"%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT "%s "
+#ifndef __DJGPP__
+"-Wl,-z,muldefs "
+#endif
+"-DICK_HAVE_STDINT_H=%s -x c %s", compiler, libdir,
+path, path, argv[oldoptind], cdebug?" -g":"", IHSH, tempfn);
 #if 0
       ); /* for Emacs' autoindenter */
 #endif

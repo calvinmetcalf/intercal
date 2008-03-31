@@ -28,16 +28,16 @@ bison -ooil.c oil.y
 
 # If you don't care about being able to debug ick, use
 # CFLAGS=-s -O2 -DICKNOSEARCH -W -Wall
-CFLAGS='-gstabs+ -O2 -DICKNOSEARCH -W -Wall'
+CFLAGS='-gstabs+ -O2 -DICKNOSEARCH -W -Wall -DICK_HAVE_STDINT_H='
 
 echo Compiling...
 gcc ${CFLAGS} -o oil.exe oil.c
 oil.exe < idiotism.oil > idiotism.c
 gcc ${CFLAGS} -o bin2c.exe bin2c.c
-bin2c.exe clc_cset_atari < atari.bin > cset-a.c
-bin2c.exe clc_cset_baudot < baudot.bin > cset-b.c
-bin2c.exe clc_cset_ebcdic < ebcdic.bin > cset-e.c
-bin2c.exe clc_cset_latin1 < latin1.bin > cset-l.c
+bin2c.exe ick_clc_cset_atari < atari.bin > cset-a.c
+bin2c.exe ick_clc_cset_baudot < baudot.bin > cset-b.c
+bin2c.exe ick_clc_cset_ebcdic < ebcdic.bin > cset-e.c
+bin2c.exe ick_clc_cset_latin1 < latin1.bin > cset-l.c
 gcc -c ${CFLAGS} idiotism.c
 gcc -c ${CFLAGS} parser.c
 gcc -c ${CFLAGS} lexer.c
@@ -49,8 +49,9 @@ gcc -c ${CFLAGS} numerals.c
 gcc -c ${CFLAGS} unravel.c
 gcc -c ${CFLAGS} fiddle.c
 gcc -c ${CFLAGS} arrgghh.c
-gcc -c ${CFLAGS} lose.c
+gcc -c ${CFLAGS} ick_lose.c
 gcc -c ${CFLAGS} uncommon.c
+gcc -c ${CFLAGS} ick_ec.c
 gcc -c ${CFLAGS} yuk.c
 gcc -c ${CFLAGS} convickt.c
 gcc -c ${CFLAGS} clc-cset.c
@@ -58,13 +59,15 @@ gcc -c ${CFLAGS} cset-a.c
 gcc -c ${CFLAGS} cset-b.c
 gcc -c ${CFLAGS} cset-e.c
 gcc -c ${CFLAGS} cset-l.c
-ar cr libick.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o clc-cset.o cset-?.o uncommon.o
+ar cr libick.a cesspool.o numerals.o fiddle.o arrgghh.o ick_lose.o clc-cset.o cset-?.o uncommon.o
 ranlib libick.a
-ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o lose.o unravel.o clc-cset.o cset-?.o uncommon.o
+ar cr libickmt.a cesspool.o numerals.o fiddle.o arrgghh.o ick_lose.o unravel.o clc-cset.o cset-?.o uncommon.o
 ranlib libickmt.a
+ar cr libickec.a cesspool.o numerals.o fiddle.o arrgghh.o ick_lose.o ick_ec.o clc-cset.o cset-?.o uncommon.o
+ranlib libickec.a
 ar cr libyuk.a yuk.o uncommon.o
 ranlib libyuk.a
-gcc ${CFLAGS} -oick.exe parser.o lexer.o perpet.o feh2.o idiotism.o dekludge.o lose.o fiddle.o uncommon.o
+gcc ${CFLAGS} -oick.exe parser.o lexer.o perpet.o feh2.o idiotism.o dekludge.o ick_lose.o fiddle.o uncommon.o
 gcc ${CFLAGS} -oconvickt.exe convickt.o clc-cset.o uncommon.o
 cp ick.exe ../bin
 cp convickt.exe ../bin
@@ -74,10 +77,13 @@ cp src/ick-wrap.c lib
 cp src/pickwrap.c lib
 cp pit/lib/syslib.i lib
 cp pit/lib/syslib.?i lib
+cp pit/explib/syslibc.c lib
+cp pit/explib/compunex.c lib
 cp COPYING.txt lib
 cp src/fiddle.h include
+cp src/ick_ec.h include
 cp src/abcess.h include
-cp src/lose.h include
+cp src/ick_lose.h include
 cp src/yuk.h include
 cp src/*.bin include
 echo Compilation complete unless there were errors.

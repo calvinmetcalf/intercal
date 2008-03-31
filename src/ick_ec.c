@@ -32,7 +32,6 @@ LICENSE TERMS
 #include "abcess.h" /* must come before ick_ec.h */
 #include "ick_ec.h"
 #include <setjmp.h>
-#include <stdint.h>
 
 /* Checkmode values, for reference:
  * 0: not using checkmode

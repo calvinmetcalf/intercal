@@ -42,6 +42,7 @@ ick.txt
 intercal.mm
 Makefile
 READ.ME
+THEORY.txt
 tidy.cfg
 
 ./etc:
@@ -62,7 +63,10 @@ bubble.i
 CATALOG
 change.doc
 change.i
+continuation.doc
+continuation.i
 delta.fft
+explib
 fft.doc
 fft.i
 flonck.doc
@@ -77,6 +81,7 @@ iching2.i
 iching.doc
 ins.doc
 ins.i
+interfunge.i
 lib
 life2.doc
 life2.i
@@ -109,6 +114,11 @@ unlambda.doc
 unlambda.i
 yapp.doc
 yapp.i
+
+./pit/explib:
+compunex.c
+syslibc.c
+syslibc.doc
 
 ./pit/lib:
 1910.doc
@@ -145,6 +155,7 @@ iogerunds.i
 knuth.i
 limits.3i
 limits.i
+normaldist.i
 onceagain.i
 permute.doc
 permute.i
@@ -156,6 +167,7 @@ test1.i
 test2.i
 testarray.i
 testcf.i
+testcreate.i
 testi18n.i
 testlib2.i
 testonce.i
@@ -184,14 +196,17 @@ feh2.c
 feh.h
 fiddle.c
 fiddle.h
+ick_ec.c
+ick_ec.h
 ick.h
+ick_lose.c
+ick_lose.h
 ick-wrap.c
 idiotism.oil
 latin1.bin
 lexer.l
-lose.c
-lose.h
 numerals.c
+oil.h
 oil.y
 parser.y
 perpet.c

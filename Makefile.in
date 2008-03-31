@@ -35,7 +35,7 @@ infodirfile = @INFODIRFILE@
 DESTDIR=
 
 CC = @CC@
-CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKDATADIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DICKLIBDIR=\"$(libdir)\" -DYYDEBUG -O2 -W -Wall -I./src -I./temp
+CFLAGS = @CFLAGS@ -DICKINCLUDEDIR=\"$(incdir)\" -DICKDATADIR=\"$(datadir)\" -DICKBINDIR=\"$(bindir)\" -DICKLIBDIR=\"$(libdir)\" -DYYDEBUG -DICK_HAVE_STDINT_H=@HAVE_STDINT_H@ -O2 -W -Wall -I./src -I./temp
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXFLAGS=
@@ -160,7 +160,7 @@ temp/idiotism.c: src/idiotism.oil temp/oil@EXEEXT@
 # rapid swaps to disk in an attempt to get more memory) that can also make a
 # system unusable, steps to avoid this are necessary.
 temp/idiotism.@OBJEXT@: temp/idiotism.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
-	bash -c 'ulimit -Sv 131072 && ulimit -Sd 131072 && $(CC) $(CFLAGS) -c -o temp/idiotism.@OBJEXT@ -O0 temp/idiotism.c'
+	bash -c 'ulimit -Sv 131072; ulimit -Sd 131072; $(CC) $(CFLAGS) -c -o temp/idiotism.@OBJEXT@ -O0 temp/idiotism.c'
 temp/dekludge.@OBJEXT@: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/dekludge.@OBJEXT@ src/dekludge.c
 temp/perpet.@OBJEXT@: src/perpet.c temp/parser.h src/ick.h src/ick_lose.h src/sizes.h src/uncommon.h temp/config.h
