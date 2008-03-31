@@ -5,7 +5,7 @@ INTERCAL external call code. It only attempts to emulate the base 2
 algorithms, but in a base 2 program it should be a valid drop-in
 replacement for the real system library.  (Don't forget to use the -eE
 options when linking this to an INTERCAL program; -e to allow C
-programs to be linked in, and -E to supress the 'real' syslib.)
+programs to be linked in, and -E to suppress the 'real' syslib.)
 
 The library is designed foremost to ensure that all errors are checked
 (as they would be in the INTERCAL, although you get the error messages

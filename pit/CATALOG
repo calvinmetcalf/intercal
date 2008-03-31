@@ -130,7 +130,8 @@ by Alex Smith
   tests/ignorret.doc  What ignorret does on several compilers
   tests/normaldist.i  Checking the standard deviation of (1910)
   tests/testcreate.i  A test for the CREATE statement
-  lib/syslibc.c	      The INTERCAL base 2 syslib, optimised version in C
+  explib/syslibc.c    The INTERCAL base 2 syslib, optimised version in C
+  explib/compunex.c   An example flow-control routine (computed NEXT)
   sort.i              An insertion-sort program testing computed ABSTAIN
 
 by Malcom Ryan

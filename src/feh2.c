@@ -1681,7 +1681,7 @@ static void emit_guard(tuple *tn, FILE *fp)
     if (tn->exechance < 100)
 	(void) fprintf(fp, "ick_roll(%d) && ", tn->exechance);
     if ((tn->type != NEXT && tn->type != GO_BACK && tn->type != COME_FROM
-	 && /* AIS */ tn->type != NEXTFROMLABEL)
+	 && /* AIS */ tn->type != NEXTFROMLABEL && tn->type != UNKNOWN)
 	|| tn->onceagainflag == onceagain_NORMAL)
       (void) fprintf(fp, "!ICKABSTAINED(%d))%s {\n", (int)(tn - tuples),
 		     /* AIS */ tn->maybe?")":"");
@@ -1762,9 +1762,14 @@ void emit(tuple *tn, FILE *fp)
 		emitlineno = up->ick_lineno;
 		break;
 	    }
-    } else if (tn->ncomefrom)
-      emitlineno = comefromsearch(tn,1); /* AIS: For multithreading.
-					    Return the 1st if we're forking. */
+    }
+    else if (tn->ncomefrom)
+    {
+       /* AIS: For multithreading. Return the 1st if we're forking. */
+      emitlineno = comefromsearch(tn,1);
+      if(emitlineno != -1)
+	emitlineno = tuples[emitlineno-1].ick_lineno;
+    }
     else if (tn < tuples + ick_lineno - 1)
 	emitlineno = tn[1].ick_lineno;
     else
@@ -1809,8 +1814,9 @@ void emit(tuple *tn, FILE *fp)
        the command has finished, and some, like NEXT, need it before the
        command has started. At the moment, only NEXT and GO_BACK have a
        ONCE/AGAIN before it, rather than after (because neither of them
-       continue in the normal fashion). */
-    if ((tn->type == NEXT || tn->type == GO_BACK) &&
+       continue in the normal fashion). UNKNOWN is also handled this way,
+       because CREATEd statements can be NEXT-like but not COME FROM-like. */
+    if ((tn->type == NEXT || tn->type == GO_BACK || tn->type == UNKNOWN) &&
 	tn->onceagainflag != onceagain_NORMAL)
     {
       /* ONCE/AGAIN has already been swapped by perpet.c in the case
@@ -2551,8 +2557,8 @@ void emit(tuple *tn, FILE *fp)
        COME FROM is also excluded because it acts at the suckpoint, not
        at the place it's written in the program. */
     if (tn->onceagainflag != onceagain_NORMAL &&
-	(tn->type != NEXT && tn->type != GO_BACK &&
-	 (tn->type != COME_FROM || useickec) && tn->type != NEXTFROMLABEL))
+	tn->type != NEXT && tn->type != GO_BACK && tn->type != UNKNOWN &&
+	((tn->type != COME_FROM && tn->type != NEXTFROMLABEL) || useickec))
     {
       /* See my comments against the NEXT code for more information.
 	 This code is placed here so COME FROM ... ONCE constructs work
@@ -2606,7 +2612,7 @@ void emit(tuple *tn, FILE *fp)
 		(int)(cf - tuples),
 		cf->onceagainflag==onceagain_ONCE ? "ick_oldabstain ? ick_oldabstain : 1"
 		: "0");
-      }      
+      }
       emit_guard(cf, fp);
       if(multithread || compucomesused)
 	(void) fprintf(fp,

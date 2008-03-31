@@ -1636,6 +1636,13 @@ legal if you specifically specified that it was legal by using the
 (including a situation in which operand overloading causes a reverse
 assignment to happen), this error happens at runtime.
 
+This error can also come up when a scalar variable is overloaded to an
+array (which doesn't make sense, but could happen if someone exploited
+bugs in the CREATE statement (@pxref{CREATE})), and an attempt is made
+to read or assign to that variable.  (Subscripting a scalar variable
+is a syntax error, so there is no use for doing such an overload
+anyway.)
+
 @ieanchor E281
 @cindex spark, nesting limit
 @cindex ears, nesting limit
@@ -2822,7 +2829,7 @@ time, so has to guess a 32-bit result for a select with a 32-bit type as
 its right operand even when the result might actually turn out to be of
 a 16-bit type, and so this behaviour prevents an error when a select
 operation returns a value with a 16-bit data type and is used as an
-argument to amingle.)  The result is a 32-bit value (that is, it is of a
+argument to a mingle.)  The result is a 32-bit value (that is, it is of a
 32-bit data type, even if its value fits into the onespot range), which
 consists of bits alternated from the two arguments; to be precise, its
 most significant bit is the most significant bit of its first argument,
@@ -4171,7 +4178,7 @@ created by @code{COME FROM}; ordinary threads share only
 share variables and stashes.  (They still have separate instruction
 pointers, separate instruction pointer stacks, such as the NEXT stack,
 and separate choicepoint lists.  Overloading information is shared,
-though.  Being woven is a relationship between two or more threads,
+though.)  Being woven is a relationship between two or more threads,
 rather than an attribute of a thread, although a thread can be
 referred to as being unwoven if it is not woven to any other thread.
 
@@ -4222,7 +4229,7 @@ case you're wondering: dormant threads are always unwoven.)
 To create a choicepoint, the statement identifier @code{MAYBE} is
 used, rather than the more usual @code{DO} or @code{PLEASE}.
 (Combination statement identifiers are still allowed, but must be in
-the order @code{MAYBE DO PLEASE NOT} with optionally some parts
+the order @code{MAYBE PLEASE DO NOT} with optionally some parts
 omitted, or different versions of @code{NOT} used, or both.) Here's an
 example:
 
@@ -4471,7 +4478,7 @@ DO PIN :2
 @end example
 
 The twospot variable is conceptually divided into 4 blocks of 8 bits.
-The highet two blocks control the directions of the pins in
+The highest two blocks control the directions of the pins in
 @code{PORTB} (most significant block) and @code{PORTA} (second most
 significant block); a 1 on any bit means that the corresponding I/O
 pin should be set to send data, and a 0 means that it should be set to
@@ -4557,7 +4564,9 @@ the stashes for the 1600-range variables yourself.)
 So what syntax is available in created statements@?  All the capital
 letters except @samp{V} (which is an operator in @ical{}) are
 available and can be used freely and as many times as desired; they
-match themselves literally.  Whitespace is allowed, but is ignored
+match themselves literally.  However, they are not allowed to spell an
+@ical{} keyword at any point (so watch out for @code{DO} and
+@code{FROM}, for instance).  Whitespace is allowed, but is ignored
 (both in the @code{CREATE} template statement, and in the code being
 created; so @code{DO SW ITCH :8 WITH :50} will also have been
 created).  Then, there are three groups of matchable data: scalar
@@ -4914,7 +4923,7 @@ wrapper function for it).  It can be used within any function regardless
 of how it was declared, and never returns; instead, it pops the specified
 number of @code{NEXT} stack entries and resumes execution at the last one
 popped, just as the @ical{} statement does.  This causes the same errors
-as the @ical{} statement if the amount of entries popped is zero or
+as the @ical{} statement if the number of entries popped is zero or
 larger than the @code{NEXT} stack.
 
 @findex ick_return_or_resume
@@ -5004,10 +5013,16 @@ The signature defines the syntax that you are defining; whenever that
 syntax is encountered within the @ical{} program, it will @code{NEXT}
 to the line number you specify, which can do various clever things and
 then @code{RESUME} back to the @ical{} program (or if you're defining
-a flow-control operation, you might want to @code{FORGET} or even
-leave the @code{NEXT} stack entry there and do other things).  This
-allows the external calls system to define whole new @ical{} commands,
-with the same power as any other programming language.
+a flow-control operation, you might want to leave the @code{NEXT}
+stack entry there and do other things).  However, note that the
+overloading of @code{:1601}, etc.@:, will still take place as in the
+@ical{} version of @code{CREATE} if the @option{-a} option is used
+(@pxref{-a}), so care is needed when writing flow control statements
+that they work both with and without the option and don't cause
+@code{STASH} leaks (which means no @code{FORGET}ting the relevant
+@code{NEXT} stack entry, and no looking at 1600-range variables).
+This allows the external calls system to define whole new @ical{}
+commands, with the same power as any other programming language.
 
 There are various restrictions on what syntax you can @code{CREATE}
 with this method, which are best explained by an explanation of the
@@ -5274,6 +5289,8 @@ completely different way.
 
 @subheading syslibc
 @findex syslibc
+@cindex system library, in C
+@cindex C, system library
 
 @option{syslibc} is an implementation of the base-2 @ical{} system
 library in C (@pxref{System Library}); using it in programs running in
@@ -5289,6 +5306,25 @@ this library is to increase the speed of an @ical{} program; however,
 note that the speed gains in arithmetic will be accompanied by the
 performance penalty of using the external calls infrastructure, unless
 you were already using it.
+
+@subheading compunex
+@findex compunex
+@cindex computed NEXT
+@cindex NEXT, computed
+
+As an example of using @code{ick_create}, a very simple expansion
+library is provided to enable a computed NEXT capability, by defining
+a new command @code{COMPUNEX}.  It is used as @code{DO .1 COMPUNEX}
+(allowing any expression in place of the .1), and is similar to an
+ordinary @code{NEXT}, but has two limitations: it takes up two
+@code{NEXT} stack entries, and the top one should not be
+@code{RESUMEd} past or forgotten (thus it isn't a particularly useful
+command, except maybe to produce the equivalent of something like
+function pointers).  By the way, note that @cic{} avoids computed
+@code{NEXT} mainstream for much the same way that @clcic{} avoids
+@code{NEXT} altogether; it makes things too easy.  This example is
+provided mostly just to demonstrate the syntax, and the care that
+needs to be taken with implementing flow control operators.
 
 @node Differences to Other Compilers
 @chapter Differences to Other Compilers
@@ -6372,7 +6408,9 @@ copyright conditions as the original @ical{} source.  (Note that the
 libraries @file{libick.a} and @file{libickmt.a} are GPL, though, so
 you cannot redistribute an executable produced by @command{ick} or by
 linking a C file to either of those libraries unless the original
-@ical{} source was GPL.)  Also, this manual, and the files that are
+@ical{} source was GPL.)  For similar reasons, the expansion library
+@file{syslibc.c} (currently the only one in the distribution) is
+explicitly public domain.  Also, this manual, and the files that are
 the source code for creating it, are licensed under the GNU Free
 Documentation License rather than the GPL, and the licenses themselves
 (@file{fdl-1-2.txi} and @file{COPYING.txt}) are licensed under a

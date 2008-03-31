@@ -56,7 +56,7 @@ SOURCES = $(CSOURCES) $(ISOURCES) $(YSOURCES) $(HEADERS) $(BUILD) $(MISC) $(DOCS
 
 all: bin/ick bin/convickt lib/libick.a lib/libickmt.a lib/libyuk.a lib/libickec.a ial
 
-ial: include/ick_ec.h include/fiddle.h include/abcess.h include/ick_lose.h include/yuk.h include/syslib.i include/syslib.3i include/syslib.4i include/syslib.5i include/syslib.6i include/syslib.7i lib/ick-wrap.c lib/pickwrap.c lib/coopt.sh lib/COPYING.txt lib/syslibc.c include/atari.bin include/baudot.bin include/ebcdic.bin include/latin1.bin
+ial: include/ick_ec.h include/fiddle.h include/abcess.h include/ick_lose.h include/yuk.h include/syslib.i include/syslib.3i include/syslib.4i include/syslib.5i include/syslib.6i include/syslib.7i lib/ick-wrap.c lib/pickwrap.c lib/coopt.sh lib/COPYING.txt lib/syslibc.c lib/compunex.c include/atari.bin include/baudot.bin include/ebcdic.bin include/latin1.bin
 
 include/ick_ec.h: src/ick_ec.h
 	-cp src/ick_ec.h include/ick_ec.h
@@ -94,8 +94,10 @@ lib/coopt.sh:temp/coopt.sh
 lib/COPYING.txt:COPYING.txt
 	-cp COPYING.txt lib/COPYING.txt
 
-lib/syslibc.c:pit/lib/syslibc.c
-	-cp pit/lib/syslibc.c lib/syslibc.c
+lib/syslibc.c:pit/explib/syslibc.c
+	-cp pit/explib/syslibc.c lib/syslibc.c
+lib/compunex.c:pit/explib/compunex.c
+	-cp pit/explib/compunex.c lib/compunex.c
 
 include/atari.bin:src/atari.bin
 	-cp src/atari.bin include/atari.bin

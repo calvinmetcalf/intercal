@@ -117,6 +117,10 @@ extern void ick_retrieve(void *to, unsigned int type, unsigned int index,
 			 ick_bool forget, ick_overop* oo);
 extern unsigned int ick_roll(unsigned int n);
 
+/* AIS: Lose with IE277 */
+extern ick_type32 ick_ieg277(ick_type32);
+extern void ick_ies277(ick_type32, void(*)());
+
 /* defined in arrgghh.c */
 extern void ick_parseargs(int argc, char **argv);
 extern int ick_printflow;

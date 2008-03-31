@@ -140,9 +140,12 @@ Changes by Alex Smith
     also edited unlambda.i in the pit, which was taking advantage of this
     error (and erroring out if optimisation was turned off).
 
+23. Fixed a bug with the ON THE WAY TO line number displayed when COME FROMs
+    are involved that I accidentally introduced in 0.25.
+
 Changes from elsewhere
 
-23. Added yet another nontrivial INTERCAL program to the pit; interfunge.i
+24. Added yet another nontrivial INTERCAL program to the pit; interfunge.i
     (written by Jeffrey Lee) is a Befunge-93 interpreter written in INTERCAL.
     (It appears to conform to the standard (I actually ran it against a
     testsuite, and it passed); its only pecularities, apart from the language

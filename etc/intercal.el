@@ -94,6 +94,7 @@
   (define-abbrev intercal-mode-abbrev-table "wh"  "" 'intercal-wh-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "goa" "" 'intercal-goa-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "gob" "" 'intercal-gob-abbrev) ;AIS
+  (define-abbrev intercal-mode-abbrev-table "cr"  "" 'intercal-cr-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "ma"  "MAYBE" nil) ;AIS
   (define-abbrev intercal-mode-abbrev-table "tr"  "" 'intercal-tr-abbrev) ;AIS
   (define-abbrev intercal-mode-abbrev-table "cal" "" 'intercal-cal-abbrev) ;AIS
@@ -125,6 +126,7 @@
 (make-intercal-abbrev intercal-wh-abbrev "WHILING" "WHILE") ;AIS
 (make-intercal-abbrev intercal-goa-abbrev "GOING AHEAD" "GO AHEAD") ;AIS
 (make-intercal-abbrev intercal-gob-abbrev "GOING BACK" "GO BACK") ;AIS
+(make-intercal-abbrev intercal-cr-abbrev "CREATION" "CREATE") ;AIS
 
 (defun intercal-do-abbrev ()
   "Emit a DO (usually).  Occasionally, emit PLEASE DO."
@@ -192,7 +194,7 @@ res  RESUME	ret  RETRIEVE	st   STASH
 wr   WRITE IN	pl   PLEASE     tr   TRY AGAIN
 on   ONCE       ag   AGAIN      ma   MAYBE
 goa  GO AHEAD   gob  GO BACK    do   DO, or sometimes PLEASE DO
-cal  CALCULATING (gerund only)  wh   WHILE
+cal  CALCULATE  cr   CREATE     wh   WHILE
 
 Carriage return takes you to the first tab stop (code indent level).
 Certain other single keys are bound to things which may or may not be useful.
