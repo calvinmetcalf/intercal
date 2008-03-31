@@ -35,7 +35,8 @@ ignorance status is stashed along with the variable itself; so the
 value of 1 is read from the variable's stash, but doing so also
 removes the read-only status of the variable. This means that the
 third assignment to the variable works, unlike in the other two
-cases.
+cases. (Note that CLC-INTERCAL will act like C-INTERCAL on the
+ignorret test when running in C-INTERCAL compatibility mode.)
 
 The upshot of all this is: don't RETRIEVE a read-only variable if you
 want your program to be portable!

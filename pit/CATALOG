@@ -133,6 +133,8 @@ by Alex Smith
   explib/syslibc.c    The INTERCAL base 2 syslib, optimised version in C
   explib/compunex.c   An example flow-control routine (computed NEXT)
   sort.i              An insertion-sort program testing computed ABSTAIN
+  continuation.i      A continuation library and example program
+  continuation.doc    About usage and internals of the continuation library
 
 by Malcom Ryan
   tests/testonce.i    A single-threaded program testing ONCE and AGAIN

@@ -402,12 +402,10 @@ autoconf (config.sh is produced by the Linux version, configdj.sh by
 the DJGPP version); its autoconf source code is available in the file
 @file{config.in}.)  The second command actually compiles the source
 code to produce binaries; this takes the longest of any of the steps.
-You will see all the commands that it's running as it runs them.  (The
-most time-consuming one is the compilation of @file{idiotism.c}, by
-the way; be prepared for this to take longer than the other
-compilations.)  The third command will copy the files it's compiled to
-appropriate shared locations on your system so that anyone on the
-system can just use @command{ick}.
+You will see all the commands that it's running as it runs them.  The
+third command will copy the files it's compiled to appropriate shared
+locations on your system so that anyone on the system can just use
+@command{ick}.
 
 There may be various factors that prevent this simple installation
 method working.  On a system not based on UNIX or Linux, you may find
@@ -425,7 +423,7 @@ theory it should be possible to adapt it to work with other compilers)
 and the associated software needed to compile C files to object files
 and executables, combine object files into libraries, etc.
 
-Another possiblity that might stop this process working is if your
+Another possibility that might stop this process working is if your
 version of the relevant software is incompatible with the GNU versions
 that were used for testing.  For instance, I have come across
 proprietary versions of @command{lex} that need directives in the source
@@ -606,12 +604,12 @@ you cannot install two versions of @cic{} at once (but see @ref{Not
 Installing} for information on how you can use @cic{} without installing
 it).
 
-If you installed @cic{} using @command{make install}, you can uninstall
-it by using @command{make uninstall} from the installation directory,
-assuming that it still exists.  If you can't use that method for some
-reason, you can uninstall it by deleting the files @file{ick.exe} where
-your computer installs binaries, @file{libick.a}, @file{libickmt.a},
-@file{libyuk.a}, @file{COPYING.txt}, and @file{coopt.sh} where your
+If you installed @cic{} using @command{make install}, you can
+uninstall it by using @command{make uninstall} from the installation
+directory, assuming that it still exists.  If you can't use that
+method for some reason, you can uninstall it by deleting the files
+@file{ick.exe} where your computer installs binaries, @file{libick.a},
+@file{libickmt.a}, @file{libickec.a}, and @file{libyuk.a} where your
 computer installs libraries, and the subdirectories
 @file{ick-@value{VERSION}} in the places where your computer installs
 data files and include files, and their contents.
@@ -882,12 +880,12 @@ result, any language constructs that are used but weren't available in
 @ianchor -a
 @opindex -a
 @cindex CREATE, enabling
-This option allows the CREATE statement to be used.  Note that enabling
-it carries a run-time penalty, as it means that operand overloading
-code has to be generated for every variable in the program. (This
-option is not necessarily needed for the external call version of
-CREATE to work, but the external call version has fewer features
-without it.)
+This option allows the CREATE statement (@pxref{CREATE}) to be used.
+Note that enabling it carries a run-time penalty, as it means that
+operand overloading code has to be generated for every variable in the
+program. (This option is not necessarily needed for the external call
+version of CREATE to work, but the external call version has fewer
+features without it.)
 
 @ianchor -v
 @opindex -v
@@ -982,7 +980,7 @@ following options are used to debug the whole system on various levels.
 If you think that something has gone wrong with the parser, or you want
 to see how your program is being parsed, you can give this option on the
 command line.  All the debug output produced by the parser and lexical
-analyser will be output on standard error.
+analyser will be output.
 
 @ianchor -g
 @opindex -g
@@ -1481,11 +1479,15 @@ PROGRAM HAS GOTTEN LOST
 @end quotation
 
 This error happens at compile time when the compiler can't figure out
-where a @command{NEXT} command is actually aiming (normally due to a
-typo in either the line label given or the line label on the line aimed
+where a @code{NEXT} command is actually aiming (normally due to a typo
+in either the line label given or the line label on the line aimed
 for).  The logic behind this error means that the next line to be
-executed is unknown (after all, that's the whole point of the error) and
-is therefore not given.
+executed is unknown (after all, that's the whole point of the error)
+and is therefore not given.  The @option{-e} command-line option
+(@pxref{-e}) makes this error into a run-time error, because it allows
+@code{NEXT} commands to dynamically change targets at runtime, as well
+as line labaels to dynamically change values, and thus the error is
+impossible to detect at compile time.
 
 @ieanchor E139
 @cindex @code{ABSTAIN}, nonexistent target
@@ -1518,7 +1520,8 @@ SO@!  65535 LABELS AREN'T ENOUGH FOR YOU?
 @end quotation
 
 Legal values for line labels are 1 to 65535 (with values from 1000 to
-1999 reserved if you want to use the system library).  This error comes
+1999 reserved if you want to use the system library, and 1600 to 1699
+reserved if you're using other expansion libraries).  This error comes
 up if you use nonpositive or twospot values for a line label.
 
 @ieanchor E200
@@ -2875,7 +2878,7 @@ of 16 bits possible that the result fits into is chosen, although if
 produces a 32-bit result because 17 bits were selected, even though
 many of the leading bits were zeros; in @cic{} the data type of the
 result is the same as of the right operand of the select, so that it
-can be determined at run time, and so using a unary binary logic
+can be determined at compile time, and so using a unary binary logic
 operator on the result of select when the right operand has a 32-bit
 type is nonportable and not recommended.)  As an example,
 @code{#21~:1} produces 21 as its result if :1 has the value 131061, 10
@@ -3063,12 +3066,12 @@ program.
 One of the more commonly-used commands in @ical{} is the syntax error.
 A properly-written syntax error looks nothing like any known @ical{}
 command; a syntax error that looks vaguely like a command but isn't
-may confuse @cic{}, and possibly other compilers, into bailing out at
-compile time in some situations (this is known as a `serious syntax
-error'), and so is not portable.  For other syntax errors, though, the
-semantics are easily explained: there is a run-time error whenever the
-syntax error is actually executed, and the line containing the syntax
-error is used as the error message.
+may confuse @cic{} before version 0.28, and possibly other compilers,
+into bailing out at compile time in some situations (this is known as
+a `serious syntax error'), and so is not portable.  For other syntax
+errors, though, the semantics are easily explained: there is a
+run-time error whenever the syntax error is actually executed, and the
+line containing the syntax error is used as the error message.
 
 One purpose of this is to allow your programs to produce their own
 custom errors at run time; however, it's very important to make sure
@@ -3200,12 +3203,16 @@ DO RESUME .5
 The @code{NEXT} command takes a line label as its argument (unlike
 most other @ical{} commands, it comes after its argument rather than
 before); both @code{FORGET} and @code{RESUME} take expressions.
-(@cic{} from version 0.05 onwards also allows an expression in
+(@clcic{} from version 0.05 onwards also allows an expression in
 @code{NEXT}, rather than a label, to give a computed @code{NEXT}, but
 this behaviour was not implemented in other compilers, and is
 deprecated in @clcic{} along with noncomputed @code{NEXT}; if computed
 @code{NEXT} is ever implemented in @cic{}, it will likely likewise be
-deprecated upon introduction).  Running a @code{NEXT} causes the
+deprecated upon introduction).  (Update: it was implemented in @cic{}
+version 0.28, but only as part of the external calls system, so it
+cannot be used in ordinary programs; a sample expansion library gives
+in-program access to a limited form of computed @code{NEXT}, but
+should probably not be used.)  Running a @code{NEXT} causes the
 program control to transfer to the command whose line label is
 referenced, and also saves the location in the program immediately
 after the @code{NEXT} command on the top of the NEXT stack.
@@ -3266,10 +3273,15 @@ statement.
 
 It is not entirely clear how @code{RETRIEVE} interacts with
 @code{IGNORE} in historical @icst{} compilers; the three modern
-@ical{} compilers all use different rules for the interaction:
+@ical{} compilers all use different rules for the interaction (and the
+@cic{} maintainers recommend that if anyone decides to write their own
+compiler, they choose yet another different rule so that looking at
+the interaction (the so-called `ignorret test') can be used as a
+method of determining which compiler is running):
 
 @cindex @code{IGNORE}/@code{RETRIEVE} interaction
 @cindex @code{RETRIEVE}/@code{IGNORE} interaction
+@cindex ignorret test
 @itemize
 @item
 @cic{} treats a retrieval just like an assignment.  That is, a
@@ -3426,18 +3438,17 @@ DO ABSTAIN #1 FROM (1000)
 DO ABSTAIN .2 FROM WRITING IN
 @end example
 
-Unlike non-computed @code{ABSTAIN}, this form (available from @cic{}
-version 0.25 onwards) allows a command to be abstained from even if
-it's already been abstained from; so if the first example command is
-run and line (1000) is already abstained, it becomes
-`double-abstained'.  The number of times the statement is abstained
-from is equal to the number of times it was already abstained from,
-plus the expression (whereas with non-computed abstain, it ends up
-abstained once if it wasn't abstained at all, and otherwise stays at
-the same abstention status).  Reinstating a statement always
-de-abstains it exactly once; so double-abstaining from a statement,
-for instance, means it needs to be reinstated twice before it will
-actually execute.
+Unlike non-computed @code{ABSTAIN}, this form allows a command to be
+abstained from even if it's already been abstained from; so if the
+first example command is run and line (1000) is already abstained, it
+becomes `double-abstained'.  The number of times the statement is
+abstained from is equal to the number of times it was already
+abstained from, plus the expression (whereas with non-computed
+abstain, it ends up abstained once if it wasn't abstained at all, and
+otherwise stays at the same abstention status).  Reinstating a
+statement always de-abstains it exactly once; so double-abstaining
+from a statement, for instance, means it needs to be reinstated twice
+before it will actually execute.
 
 There are many uses for @code{ABSTAIN} (both the computed and
 non-computed versions) and @code{REINSTATE}, especially when
@@ -3521,13 +3532,13 @@ with each digit written out as a word; so to input the number 12345, a
 user would have to type @code{ONE TWO THREE FOUR FIVE} as input (if
 they were using English, the most portable choice of language).  In
 @icst{} only English is accepted as a language, but other compilers
-accept other languages in addition.  @cic{} from version
-0.10 onwards accepts English, Sanskrit, Basque, Tagalog, Classical
-Nahuatl, Georgian, and Kwakiutl; also Volap@"uk from version 0.11
-onwards, and Latin from version 0.20 onwards.  @jic{} accepts the same
-languages, except with Esperanto instead of Latin; from version 0.05
-of @clcic{} onwards, the same list of languages as @cic{} is supported
-(apart from Latin, which was added in version 1.-94.-8).
+accept other languages in addition.  @cic{} from version 0.10 onwards
+accepts English, Sanskrit, Basque, Tagalog, Classical Nahuatl,
+Georgian, and Kwakiutl; also Volap@"uk from version 0.11 onwards, and
+Latin from version 0.20 onwards.  @jic{} accepts the same languages,
+except with Esperanto instead of Latin; from version 0.05 of @clcic{}
+onwards, the same list of languages as @cic{} is supported (apart from
+Latin, which was added in version 1.-94.-8), plus Scottish Gaelic.
 
 The format that output can be read in is a modified form of Roman
 numerals, known as `butchered' Roman numerals.  @icst{}, @cic{} and
@@ -3607,7 +3618,7 @@ Baudot-based text I/O (which is also implemented from @cic{} version
 
 Baudot text-based I/O is specified by using a tail array as an
 argument to @code{WRITE IN} or @code{READ OUT}.  (A tail array can
-also be used to specift @cic{}-style Turing Tape I/O.  In order to
+also be used to specify @cic{}-style Turing Tape I/O.  In order to
 determine which is used: both @cic{} and @clcic{} use their own sort
 of I/O unless a command-line argument instructs them to use the
 other.)  In the case of @code{WRITE IN}, one line of input is
@@ -3869,6 +3880,7 @@ stored in .1
 @item (1720) @tab
 :2 <- :1 times the least significant digit of .1, overflow captured in
 .2
+@tab 5, 7
 @item (1900) @tab
 .1 <- uniform random number from #0 to #65535
 @tab 2, 3, 4, 5, 6, 7
@@ -3991,8 +4003,8 @@ in binary, even though the program uses a different base.)
 
 The multithreading and backtracking extensions to @ical{} were
 originally invented by Malcom Ryan, who implemented @code{COME
-FROM}-based multithreading as a modified version of @cic{}, but did
-not implement backtracking, known as Threaded @ical{}.  (The same
+FROM}-based multithreading as a modified version of @cic{}, known as
+Threaded @ical{}, but did not implement backtracking.  (The same
 functionality is implemented in @cic{} today, but with different code.
 Most likely, this means that the original code was better.)  He also
 invented the original version of Backtracking @ical{}, but did not
@@ -4697,8 +4709,8 @@ include @file{stdint.h} (a standard C header file, which must exist on
 your system), so that you can access @ical{} variables (the @ical{}
 types onespot, twospot, tail, hybrid correspond to the C types
 uint16_t, uint32_t, uint16_t*, uint32_t* respectively); also, it will
-provide the prototypes for all the functions below on this page and
-definitions for all the macros below on this page.
+provide the prototypes for all the functions and definitions for all
+the macros needed to use the external calls system with C.
 
 @item ICK_EC_FUNC_START
 @itemx ICK_EC_FUNC_END
@@ -5182,7 +5194,7 @@ it obeys the same restrictions as @code{COME FROM}.
 @code{FORGET} is the worst of all in terms of preserving data on the
 stack; it deallocates @code{alloca} data and clobbers or deletes
 @code{auto} variables in all function invocations that have come into
-existence since the @code{NEXT} that created topmost remaining
+existence since the @code{NEXT} that created the topmost remaining
 @code{NEXT} stack entry was called, or since the start of the program if
 the @code{NEXT} stack is emptied, and the current function will continue
 in a new invocation.  @code{volatile} is useless in preventing this,
@@ -5282,6 +5294,16 @@ extension, and are human-readable; @cic{} will look for them in the
 same place as it looks for the system library (including in the
 current directory, so you can test your own expansion libraries
 without having to install them).
+
+Expansion libraries use C identifiers which start with the string
+@samp{ick_my_} (this is not used by the compiler, and is explicitly
+not affected by the prohibition on identifiers starting @samp{ick_}
+when writing an expansion library), and use line labels in the range
+(1600) to (1699).  (Most programs will be avoiding this range anyway,
+because it's inside the (1000) to (1999) range reserved for the system
+library, but the system library doesn't use it, in much the same way
+that the identifiers used are inside the range reserved for the
+compiler, but the compiler doesn't use them.)
 
 Expansion libraries are available from @cic{} version 0.28; @clcic{}
 has a similar concept (that of `preloads'), but implemented a
