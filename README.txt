@@ -93,7 +93,7 @@ etc/ctrlmfix.sh         --/
 config.sh               -- GNU Autoconf script that generates a makefile
                            from Makefile.in
 ickspec.in              -- Input to config.sh
-config.in               -- Source from which config.sh was generated
+config.ac               -- Source from which config.sh was generated
 configh.in              -- Source from which temp/config.h is generated
 Makefile.in             -- makefile input for the INTERCAL compiler
 
@@ -112,10 +112,14 @@ plain text version at doc/ick.txt. (You can build a variety of other formats as
 well, such as HTML and PDF, using the Makefile in the doc directory.) After
 C-INTERCAL is installed, the manual is also available with just `info ick' for
 information about running ick, the compiler, or `info C-INTERCAL' for the
-available information about ick and C-INTERCAL.
+available information about ick and C-INTERCAL.  (If you installed C-INTERCAL
+in a directory that did not contain the main Info documentation tree, instead
+`info ick' will do what `info C-INTERCAL' should do, and `info C-INTERCAL'
+will not work at all.)
 
-You want a man page?  Man pages are for wimps.  To compile an INTERCAL program
-`foo.i' to executable code, just do
+You want a man page? Man pages are for wimps. (However, Debian wrote one
+anyway, and it's available in the distribution as ick.1.) To compile an
+INTERCAL program `foo.i' to executable code, just do
 
         ick foo.i
 
@@ -187,7 +191,11 @@ language: alt.lang.intercal.
 The configure script in this distribution is called 'config.sh', to be kind to
 people trying to build under DOS, and also just because we like being
 different. (You can build and install C-INTERCAL using the familiar routine of
-config.sh, then make, then make install.)
+config.sh, then make, then make install.) C-INTERCAL should run fine without
+being installed, as long as you give a full absolute or relative pathname to
+its executable, and don't move things from the directories they were compiled
+into. The compilation must happen in-place; several empty directories are
+distributed with C-INTERCAL specifically for being compiled into.
 
 I have come across lexes whose default limits for various things aren't high
 enough to handle INTERCAL's various lexing conundrums. In this case, pay
@@ -204,7 +212,8 @@ of gcc, flex, and bison, C-INTERCAL should build with no warnings (except some
 from rm saying it can't find files, which is not a problem; if installing for
 a second or subsequent time, you may also get a harmless warning from mkdir
 explaining that the directory it's trying to make already exists, and you can
-ignore that too).
+ignore that too; also, it's been known for gcc to warn about things that bison
+or flex generated and so aren't our fault).
 
 If you get an error about 'gettimeofday()', or if you have a more accurate
 timing function available, there's a whole section about profiling in yuk.h
@@ -224,14 +233,14 @@ This distribution needs prebuilding; you can use the makeick.bat or makeick.sh
 file provided to compile the program if you can't compile using the usual
 POSIX methods via configure and make. (Unlike some previous releases of
 C-INTERCAL, the configure/make process can work under DJGPP; invoke the
-configure script as 'sh configdj.sh' (without the sparks), and run make as
+configure script as 'sh config.sh' (without the sparks), and run make as
 normal. However, this requires that you've installed quite a few utilities in
 addition to just gcc, including at least bash, perl, sed, tr and make, but
 possibly other things I missed.) Once the implementation has been built, you
 can install it by adding the \bin subdirectory to your PATH environment
 variable (at either end), or by using 'make install' (again without the
 sparks) if you got config.sh and make to work (which will copy the INTERCAL
-compiler into your main DJGPP installation direcrtories). The temporary output
+compiler into your main DJGPP installation directories). The temporary output
 from bison and flex is included in the distribution (for those people who
 don't have bison and flex, makeick will give error messages, but succeed
 anyway using the prebuilt versions). The districk.bat file will remove all

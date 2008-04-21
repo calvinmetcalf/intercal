@@ -119,7 +119,36 @@ yptimer yuktimes()
   times(&tp);
   return tp.tms_utime + tp.tms_stime;
 }
-#endif /* YPTIMERTYPE 4 */
+#elif YPTIMERTYPE == 5
+static yptimer yukclock_gettime()
+{
+  static struct timespec ts;
+  yptimer temp;
+  /* We've checked that this function is available; -lrt will be linked in. */
+  /*@-unrecog@*/
+#if defined(_POSIX_CPUTIME) && _POSIX_CPUTIME > 0
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
+#else
+# if defined(_POSIX_THREAD_CPUTIME) && _POSIX_THREAD_CPUTIME > 0
+  clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
+# else
+#  if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_MONOTONIC_CLOCK > 0
+  clock_gettime(CLOCK_MONOTONIC,&ts);
+#  else
+#   ifndef CLOCK_REALTIME
+#    error clock_gettime is defined, but no clocks seem to be; try changing YPTIMERTYPE in src/yuk.h
+#   endif
+  clock_gettime(CLOCK_REALTIME,&ts);
+#  endif
+# endif
+#endif
+  /*@=unrecog@*/
+  temp=(yptimer)ts.tv_nsec +
+    (yptimer)ts.tv_sec * (yptimer)1000000LU;
+  /* using wraparound as with gettimeofday */
+  return temp;
+}
+#endif /* YPTIMERTYPE */
 
 void yukterm(void)
 {

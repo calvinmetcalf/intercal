@@ -485,6 +485,7 @@ char *enablersm1[MAXTYPES+1] =
     "WHILE", /* AIS: statement WHILE statement */
     "TRY_AGAIN", /* AIS: Added TRY AGAIN */
     "CREATE", /* AIS */
+    "COMPUCREATE", /* AIS */
     "FROM", /* AIS: ABSTAIN expr FROM LABEL */
 };
 char** enablers = enablersm1+1;
@@ -2328,6 +2329,9 @@ void emit(tuple *tn, FILE *fp)
 	  fprintf(fp,"\t""if(ick_oo_onespots) free(ick_oo_onespots);\n");
 	  fprintf(fp,"\t""if(ick_oo_twospots) free(ick_oo_twospots);\n");
 	}
+	fprintf(fp,"\t""if(ick_next) free(ick_next);\n");
+	if(useickec)
+	  fprintf(fp,"\t""if(ick_next_jumpbufs) free(ick_next_jumpbufs);\n");
       }
       (void) fprintf(fp, "\t""exit(0);\n");
       break;
@@ -2458,6 +2462,16 @@ void emit(tuple *tn, FILE *fp)
       (void) fprintf(fp,"\t""ick_registercreation(\"");
       prunknownstr(tn->u.node, fp);
       (void) fprintf(fp,"\",%uU);\n",tn->u.target);
+      break;
+
+    case COMPUCREATE: /* By AIS */
+      if(createsused == 0) goto splatme;
+      (void) fprintf(fp,"\t""ick_registercreation(\"");
+      prunknownstr(tn->u.node->rval, fp);
+      (void) fprintf(fp,"\",");
+      prexpr(tn->u.node->lval, fp, 1);
+      (void) fprintf(fp,");\n");
+      free(tn->u.node); /* don't free the rval */
       break;
 
     case UNKNOWN: /* By AIS */

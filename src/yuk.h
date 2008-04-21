@@ -33,7 +33,7 @@ extern int yukloop;
 #undef YPTIMERTYPE
 /* 0 to use clock(), 1 to use gettimeofday() and long,
    2 to use gettimeofday() and long long, 3 to use gethrtime()
-   4 to use times() */
+   4 to use times(), 5 to use clock_gettime */
 /* Note: On many systems, 0's resolution is too low to produce any output
 	 1 and 2 produce the same output; use 2 if your system can handle
 	 long long because the overflow is dealt with more simply.
@@ -50,15 +50,19 @@ extern int yukloop;
 # ifdef HAVE_GETHRTIME
 #  define YPTIMERTYPE 3
 # else
-#  ifdef HAVE_GETTIMEOFDAY
-/* Allow for an erroneous blank value for SIZEOF_LONG_LONG_INT. */
-#   if SIZEOF_LONG_LONG_INT + 0 > 0
-#    define YPTIMERTYPE 2
-#   else
-#    define YPTIMERTYPE 1
-#   endif
+#  if defined(HAVE_CLOCK_GETTIME) && SIZEOF_LONG_LONG_INT + 0 > 0
+#   define YPTIMERTYPE 5
 #  else
-#   define YPTIMERTYPE 0
+#   ifdef HAVE_GETTIMEOFDAY
+/* Allow for an erroneous blank value for SIZEOF_LONG_LONG_INT. */
+#    if SIZEOF_LONG_LONG_INT + 0 > 0
+#     define YPTIMERTYPE 2
+#    else
+#     define YPTIMERTYPE 1
+#    endif
+#   else
+#    define YPTIMERTYPE 0
+#   endif
 #  endif
 # endif
 #endif
@@ -107,6 +111,15 @@ typedef unsigned long ypcounter;
 #define YPTIMERSCALE CLK_TCK
 #define YPGETTIME yuktimes()
 typedef unsigned long yptimer;
+typedef unsigned long ypcounter;
+
+#elif YPTIMERTYPE == 5
+#define YPTIMERTFORMAT "llu"
+#define YPCOUNTERTFORMAT "lu"
+#define YPTIMERTFORMATD "9" YPTIMERTFORMAT
+#define YPTIMERSCALE 1000000000LLU
+#define YPGETTIME yukclock_gettime()
+typedef unsigned long long yptimer;
 typedef unsigned long ypcounter;
 
 #else

@@ -429,6 +429,8 @@ GOING{W}AHEAD   {yylval.numval = GO_AHEAD; return(GERUND);
 		    purely based on memory so I may be wrong. */}
 CREATE{W}\({W}{D}\)          |
 CONFICE{W}\({W}{D}\)         {yylval.numval = myatoi(yytext); return(CREATE);}
+CREATE          |
+CONFICE         {return(COMPUCREATE);}
 CREATING        |
 CREATION        |
 CONFICENDUM     {yylval.numval = CREATE; return(GERUND);}

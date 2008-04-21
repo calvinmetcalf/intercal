@@ -1,10 +1,5 @@
 /* ick.h -- compilation types for intercal parser */
 
-/* AIS: Changes for DJGPP */
-#ifdef __DJGPP__
-#define _POSIX_SOURCE
-#endif
-
 #ifdef ICKNOSEARCH
 #define ICKINCLUDEDIR "."
 #define ICKLIBDIR "."
@@ -43,7 +38,7 @@ typedef int ick_bool;
  * Maximum supported statement types; should be equal to (FROM - GETS + 1)
  * AIS: Changed this when I added new statements.
  */
-#define MAXTYPES	31
+#define MAXTYPES	32
 
 /* AIS: Maximum supported spark/ears nesting, divided by 32. The value given
    allows for 256 nested spark/ears groupings, which should be enough. */

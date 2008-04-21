@@ -192,7 +192,7 @@ static RETSIGTYPE abend(int signim)
 static void print_usage(char *prog, char *options)
 {
   fprintf(stderr,"Usage: %s [-%s] <file> [<file> ...]\n",prog,options);
-  fprintf(stderr,"\t-b\t:reduce the probability of IE774 to zero\n");
+  fprintf(stderr,"\t-b\t:reduce the probability of E774 to zero\n");
   fprintf(stderr,"\t-c\t:compile INTERCAL to C, but don't compile C\n");
   fprintf(stderr,"\t-d\t:print yacc debugging information (implies -c)\n");
   fprintf(stderr,"\t-e\t:link together INTERCAL and C files as one program\n");
@@ -811,7 +811,11 @@ int main(int argc, char *argv[])
 #else
 		      EXEEXT " -lick%s%s",compiler,
 #endif
+#ifdef HAVE_CLOCK_GETTIME /* implies -lrt is available */
+		      buf, yukdebug||yukprofile?" -lyuk -lrt ":" ",
+#else
 		      buf, yukdebug||yukprofile?" -lyuk ":" ",
+#endif
 		      includedir, path, path, libdir, path, path,
 		      coopt?'3':'2', /* AIS: If coopting, optimize as much as possible */
 		      argv[optind], multithread?"mt":"", cdebug?" -g":"");

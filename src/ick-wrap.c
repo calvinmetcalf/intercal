@@ -86,11 +86,13 @@ ICK_EC_FUNC_START(ick_main)
       /* degenerated code */
  ick_restart:
  top:
-    switch(ick_skipto)
+    switch((int)ick_skipto)
     {
     case 0:
       $G
-	}
+    default:
+      ick_lose(IE129, 0, (char *)0);
+    }
 
 #ifdef YUK
     if(yukloop) goto ick_restart;

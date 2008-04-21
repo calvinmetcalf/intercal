@@ -111,7 +111,7 @@ static tuple *prevtuple = NULL;
 %token NEXTFROMEXPR NEXTFROMGERUND COMPUCOME GERUCOME
 %token PREPROC WHILE TRY_AGAIN
 %token <numval> CREATE
-%token FROM
+%token COMPUCREATE FROM
 
 /* AIS: ONCE and AGAIN added, for multithread support; also, NOSPOT added,
    so that I can reserve _ for future use (it's nowhere in the grammar yet) */
@@ -150,7 +150,7 @@ static tuple *prevtuple = NULL;
 %type <node> subscr byexpr scalar scalar2s ick_array initem outitem sublist
 %type <node> unambig limunambig subscr1 sublist1 oparray osubscr osubscr1
 %type <node> notanlvalue nlunambig lunambig unknownstatement unknownatom
-%type <node> unknownsin unknownaid
+%type <node> unknownsin unknownsif unknownaid
 %type <tuple> preproc perform mtperform
 %type <numval> please preftype
 
@@ -313,6 +313,8 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
 				 compucomesused=1; nextfromsused=1;}}
 /* AIS: CREATE takes an 'unknown statement' as a template */
         |    CREATE unknownstatement {NEWFANGLED{ACTARGET($$,CREATE,$2,$1); cacsofar=0;}}
+        |    COMPUCREATE expr unknownsif {NEWFANGLED{ACTION($$,COMPUCREATE,
+					  cons(INTERSECTION,$2,$3)); cacsofar=0;}}
 /* AIS: Just-in-case compilation of unknown statements */
         |    unknownstatement   {NEWFANGLED {ACTION($$,UNKNOWN,$1); cacsofar=0;}}
 /* AIS: Added the yyerrok */
@@ -327,6 +329,9 @@ unknownstatement : unknownatom {$$ = $1; intern(ick_TWOSPOT,cacsofar+++1601);}
 		   	      		   intern(ick_TWOSPOT,cacsofar+++1601);}
                  | unknownsin {$$ = $1;}
 		 ;
+
+unknownsif       : unknownaid {$$ = $1;}
+                 | unknownaid unknownstatement {$$=cons(INTERSECTION,$1,$2);}
 
 unknownsin	 : unknownaid {$$ = $1;}
 		 | unknownstatement unknownaid {$$=cons(INTERSECTION,$1,$2);}

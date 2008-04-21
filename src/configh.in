@@ -15,6 +15,9 @@
 /* Define if you have the gethrtime function.  */
 #undef HAVE_GETHRTIME
 
+/* Define if you have the clock_gettime function.  */
+#undef HAVE_CLOCK_GETTIME
+
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
@@ -41,6 +44,9 @@
 
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
 
 /* Define to the number of bytes in a long long, or 0 if not available. */
 #define SIZEOF_LONG_LONG_INT 0

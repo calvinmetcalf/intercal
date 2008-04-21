@@ -102,7 +102,7 @@ extern int ick_instapipe;
 /* AIS: Handle multiple COME FROMs aiming at the same line */
 extern int ick_multicome0(int errlineno, jmp_buf pc);
 
-#ifdef _POSIX_SOURCE
+#ifdef HAVE_STDARG_H
 /*@dependent@*/ extern void *ick_aref(unsigned int type, ...);
 extern void ick_resize(unsigned int type, ...);
 #else

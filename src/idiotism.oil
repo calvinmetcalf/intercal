@@ -488,6 +488,11 @@
 (_1|_1)->(_1)
 [xoritself]
 (_1^_1)->(#0)
+; The following four idioms by JH
+((_1^_2)^_1) -> (_2)
+((_2^_1)^_1) -> (_2)
+(_1^(_1^_2)) -> (_2)
+(_1^(_2^_1)) -> (_2)
 
 ; Equality and inequality
 [xortoequal]

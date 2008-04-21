@@ -60,9 +60,9 @@ int main(int argc, char** argv)
   int padding=-1;
   ick_globalargv0=argv[0];
   srand((unsigned)time(NULL));
-  if(argc!=3&&argc!=4)
+  if(argc<3||argc>5)
   {
-    fprintf(stderr,"Usage: convickt informat outformat [padding]\n");
+    fprintf(stderr,"Usage: convickt informat outformat [padding [arrayname]]\n");
     fprintf(stderr,"Available formats are:\n");
     fprintf(stderr,"\tPrinceton: latin1, baudot, ebcdic\n");
     fprintf(stderr,"\tAtari: atari (7-bit ASCII)\n");
@@ -73,12 +73,16 @@ int main(int argc, char** argv)
     fprintf(stderr,"\trandom: pad with random data\n");
     fprintf(stderr,"Padding only has an effect on character sets with less\n");
     fprintf(stderr,"than 8 bits used per bytes; default is 'printable'.\n");
+    fprintf(stderr,"If arrayname is given, which must be a legal name for\n");
+    fprintf(stderr,"a tail array, the output will instead be a portable\n");
+    fprintf(stderr,"INTERCAL program that stores the required byte pattern\n");
+    fprintf(stderr,"in that array.\n");
     return 0;
   }
-  if(argc==4&&!strcmp(argv[3],"printable")) padding=1;
-  if(argc==4&&!strcmp(argv[3],"zero")) padding=0;
-  if(argc==4&&!strcmp(argv[3],"random")) padding=2;
-  if(argc==4&&padding==-1)
+  if(argc>=4&&!strcmp(argv[3],"printable")) padding=1;
+  if(argc>=4&&!strcmp(argv[3],"zero")) padding=0;
+  if(argc>=4&&!strcmp(argv[3],"random")) padding=2;
+  if(argc>=4&&padding==-1)
   {
     fprintf(stderr,"Error: padding value not recognized.\n");
     return 1;
@@ -116,7 +120,18 @@ int main(int argc, char** argv)
     return 0;
   }
   ti=ick_clc_cset_convert(in,out,argv[1],argv[2],padding,allocsize*6+6,stderr);
-  if(ti>=0) (void) fwrite(out,1,(size_t)ti,stdout);
+  if(ti>=0&&argc<5) (void) fwrite(out,1,(size_t)ti,stdout);
+  else if(ti>=0&&argc==5)
+  {
+    int pleasedelay=2;
+    printf("\tDO %s <- #%d\n",argv[4],ti);
+    while(ti--)
+    {
+      printf("\t");
+      if(!--pleasedelay) {printf("PLEASE "); pleasedelay=4;}
+      printf("DO %s SUB #%d <- #%d\n",argv[4],ti+1,(int)(out[ti]));
+    }
+  }
   free(in);
   free(out);
   return ti<0;

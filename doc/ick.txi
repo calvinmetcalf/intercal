@@ -1,8 +1,8 @@
 \input texinfo @c -*- texinfo -*-
 @c %**start of header
 @setfilename ick.info
-@set VERSION 0.28
-@set VERSIONDASH 0-28
+@set VERSION 1.29
+@set VERSIONDASH 1-29
 @settitle C-INTERCAL @value{VERSION} Revamped Instruction Manual
 @paragraphindent 0
 @documentlanguage en
@@ -362,7 +362,6 @@ ick-@value{VERSION}}).
 @cindex installation, simple
 @cindex simple installation
 @findex config.sh
-@findex configdj.sh
 @findex make
 @findex make install
 @cindex compiling, @command{ick} itself
@@ -376,8 +375,7 @@ use the following routine:
 @enumerate
 
 @item
-Configure @cic{}, by typing @command{sh config.sh} (or @command{sh
-configdj.sh} if you're using DJGPP)
+Configure @cic{}, by typing @command{sh config.sh}
 
 @item
 Compile the source code, with the command @command{make}
@@ -393,19 +391,17 @@ install}.)
 
 On all systems, it's worth just trying this to see if it works.  This
 requires a lot of software on your computer to work, but all of it is
-standard on Linux and UNIX systems.  The first command is a
-shell-script which will analyse your system and set settings
-accordingly; it will explain what it's doing and what settings it
-detected, and create several files in the installation directory to
-record its results.  (This is a configure script produced by the GNU
-autoconf (config.sh is produced by the Linux version, configdj.sh by
-the DJGPP version); its autoconf source code is available in the file
-@file{config.in}.)  The second command actually compiles the source
-code to produce binaries; this takes the longest of any of the steps.
-You will see all the commands that it's running as it runs them.  The
-third command will copy the files it's compiled to appropriate shared
-locations on your system so that anyone on the system can just use
-@command{ick}.
+standard on Linux and UNIX systems.  The first command is a shell-script
+which will analyse your system and set settings accordingly; it will
+explain what it's doing and what settings it detected, and create several
+files in the installation directory to record its results.  (This is a
+configure script produced by the GNU autoconf (config.sh); its autoconf
+source code is available in the file @file{config.ac}.)  The second
+command actually compiles the source code to produce binaries; this takes
+the longest of any of the steps.  You will see all the commands that it's
+running as it runs them.  The third command will copy the files it's
+compiled to appropriate shared locations on your system so that anyone on
+the system can just use @command{ick}.
 
 There may be various factors that prevent this simple installation
 method working.  On a system not based on UNIX or Linux, you may find
@@ -711,13 +707,13 @@ Looking at the @uref{news:alt.lang.intercal,,alt.lang.intercal}
 newsgroup will normally let you know what version is most recent.
 
 @item
-Increment the version number; if you add any new features, increment
-the major version number (after the decimal point) and drop the minor
-version number (before the decimal point) to 0, and otherwise
-increment the minor version number.  You have to update the version
-number in the following files: @file{config.in}, @file{config.sh},
-@file{configdj.sh}, and @file{doc/ick.txi}.  You also have to rename
-the installation directory to reflect the new version number.
+Increment the version number; if you add any new features, increment the
+major version number (after the decimal point) and drop the minor version
+number (before the decimal point) to 0, and otherwise increment the minor
+version number.  You have to update the version number in the following
+files: @file{config.in}, @file{config.sh}, and @file{doc/ick.txi}.  You
+also have to rename the installation directory to reflect the new version
+number.
 
 @item
 Add an entry to the @file{NEWS.txt} file explaining what's new in the
@@ -4541,7 +4537,17 @@ details) are created. Typical syntax for a @code{CREATE} statement
 would therefore look something like this:
 
 @example
-	DO CREATE (5) SWITCH .1 WITH .2
+DO CREATE (5) SWITCH .1 WITH .2
+@end example
+
+There is also computed @code{CREATE}, working identically to ordinary
+@code{CREATE} except that the line number is taken from an expression
+and the created command must start with a letter (to avoid an
+ambiguity if the expression giving the line label happens to be an
+array reference), with a syntax like this:
+
+@example
+DO CREATE .5 SWITCH .1 WITH .2
 @end example
 
 Here, a new @code{SWITCH WITH} statement (there is no such statement
@@ -4549,7 +4555,7 @@ in @ical{} normally) is being created.  This command makes it possible
 to do this:
 
 @example
-        DO SWITCH .3 WITH .4
+DO SWITCH .3 WITH .4
 @end example
 
 Normally that line would be an error (E000) due to being unrecognised,
@@ -5347,6 +5353,22 @@ function pointers).  By the way, note that @cic{} avoids computed
 @code{NEXT} altogether; it makes things too easy.  This example is
 provided mostly just to demonstrate the syntax, and the care that
 needs to be taken with implementing flow control operators.
+
+@samp{compunex} is double-deprecated; an alternative is the following
+sequence of commands involving computed @command{CREATE}:
+
+@example
+DO CREATE .1 ABC
+DO ABC
+@end example
+
+This sequence emulates all features of @code{NEXT} (although it has
+different gerunds and is two statements, not one), making it much more
+useful for simulating computed @code{NEXT} than @code{COMPUNEX}
+is. (There's no need to avoid forgetting the return value; although
+this skips the @code{CREATE} cleanup, none is required because the
+created statement @code{ABC} (any other statement would do just as
+well) takes no arguments.)
 
 @node Differences to Other Compilers
 @chapter Differences to Other Compilers

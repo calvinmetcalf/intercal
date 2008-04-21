@@ -29,12 +29,8 @@ LICENSE TERMS
 #include <limits.h>
 #include <assert.h>
 
-/* AIS: Make this work with DJGPP's stdarg.h */
-#ifdef __DJGPP__
-#define _POSIX_SOURCE
-#endif
-
-#ifdef _POSIX_SOURCE
+#include "config.h"
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -565,19 +561,19 @@ unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
 /**********************************************************************
  *
  * The following functions implement the INTERCAL ick_array model
- * If _POSIX_SOURCE is defined, stdarg is used, otherwise varargs.
+ * If HAVE_STDARG_H is defined, stdarg is used, otherwise varargs.
  *
  *********************************************************************/
 
 
-#ifdef _POSIX_SOURCE
+#ifdef HAVE_STDARG_H
 /*@dependent@*/ void *ick_aref(unsigned int type, ...)
 #else
 /*@dependent@*/ void *ick_aref(va_alist) va_dcl
 #endif
 /* return a pointer to the ick_array location specified by args */
 {
-#ifndef _POSIX_SOURCE
+#ifndef HAVE_STDARG_H
   unsigned int type;
 #endif
   ick_array *a;
@@ -586,7 +582,7 @@ unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
   size_t address = 0;
   unsigned int i;
 
-#ifdef _POSIX_SOURCE
+#ifdef HAVE_STDARG_H
   va_start(ap, type);
 #else
   va_start(ap);
@@ -612,14 +608,14 @@ unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
     return (void*)&(a->data.hybrid[address]);
 }
 
-#ifdef _POSIX_SOURCE
+#ifdef HAVE_STDARG_H
 void ick_resize(unsigned int type, ...)
 #else
 void ick_resize(va_alist) va_dcl
 #endif
 /* ick_resize an ick_array to the given shape */
 {
-#ifndef _POSIX_SOURCE
+#ifndef HAVE_STDARG_H
   unsigned int type;
 #endif
   ick_array *a;
@@ -629,7 +625,7 @@ void ick_resize(va_alist) va_dcl
   va_list ap;
   int prod = 1;
 
-#ifdef _POSIX_SOURCE
+#ifdef HAVE_STDARG_H
  va_start(ap, type);
 #else
   va_start(ap);
