@@ -1,0 +1,164 @@
+.TH ICK 1
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+.\"
+.\" Modified by Alex Smith under the terms of the GPL.
+.SH NAME
+ick \- INTERCAL compiler
+.SH SYNOPSIS
+.B ick
+.I "[options] file..."
+.PP
+.B ick
+.I "-e [options] intercal-file [non-intercal-file...] [library...]"
+.SH "DESCRIPTION"
+This manual page documents briefly the
+.BR ick
+command.
+This manual page was originally written for the Debian GNU/Linux
+distribution (but may be used by others), because the original program
+did not have a manual page, and was then added back to the main
+distribution.
+Fuller documentation is available via the command
+.B info ick
+(for the
+.B ick
+command itself; even fuller documentation is available via
+.B info C-INTERCAL
+(which contains the documentation for both the compiler and the
+INTERCAL language)).
+.\"Comment this back in on Debian:
+.\"There is also other documentation in
+.\".B /usr/share/doc/intercal
+.\"and
+.\".B /usr/share/doc/intercal/examples
+.\"as one would expect on a Debian system.
+.PP
+.B ick
+takes INTERCAL programs and generates code from them (by running gcc).
+.PP
+Note that the base in which a program is written is deduced from its
+extension; INTERCAL programs in base 2 must have the extension .i,
+INTERCAL programs in bases from 3 to 7 must have an extension from .3i
+to .7i respectively.
+.PP
+No options take arguments; multiple options can be given separately or
+combined in the usual way (even -e).
+The order in which options is given is irrelevant unless they
+conflict, in which case the options that are given last on the command
+line take precedence.
+.SH OPTIONS
+.TP
+.B \-c
+Compile INTERCAL to C, but don't compile the resulting C.
+.TP
+.B \-d
+Print yacc debugging information (implies -c).
+.TP
+.B \-t
+Requires strict INTERCAL-72 compliance (rejecting COME FROM, the extensions
+for bases other than two, and other features not found in INTERCAL-72).
+.TP
+.B \-b
+Disables the INTERCAL-72 random-bug feature.
+.TP
+.B \-O
+Attempt to optimize expressions in the generated code.
+.TP
+.B \-C
+Clockface output (using IIII rather than IV in Roman numerals).
+.TP
+.B \-f
+Optimize control flow in generated code (prevents -yp).
+.TP
+.B \-F
+Optimize everything in generated code for
+speed, regardless of how slow the compiler becomes or how
+large the object file becomes. Implies -fO, prevents -cdeghpyH.
+.TP
+.B \-h
+Print optimizer debugging information (implies -cO).
+.TP
+.B \-H
+Print verbose optimizer debugging information (implies -cO).
+.TP
+.B \-hH
+Print optimizer debugging information in a different form (implies
+-cO).
+.TP
+.B \-w
+Enable the +printflow option in output programs even if they are not
+multithreaded.
+.TP
+.B \-y
+Run the yuk debugger on the code (prevents -fme).
+.TP
+.B \-p
+Run the yuk profiler on the code (prevents -fme).
+.TP
+.B \-m
+Allow multithreading and backtracking (prevents -ype, implies -w).
+.TP
+.B \-e
+Link one INTERCAL file to non-INTERCAL files or to expansion libraries.
+Doing this changes the syntax of the command line; the first file
+given must be the INTERCAL source file, then this can be followed by
+any number of files in other languages to link via the external calls
+system (currently only C programs are allowed), and then any number of
+expansion libraries.
+The non-INTERCAL files will be processed to link them to the INTERCAL
+files, and then compiled with gcc and linked to the main INTERCAL
+program.
+.TP
+.B \-E
+Do not link the system library, even if the code suggests that it is
+needed (prevents -P).
+.TP
+.B \-a
+Allow the use of the CREATE statement (prevents -P).
+.TP
+.B \-v
+Allow anything on the left of an assignment, and turn off the
+protection that constants otherwise have against being assigned to
+(prevents -fFOP).
+.TP
+.B \-P
+Compile PIC-INTERCAL rather than INTERCAL (prevents -amFvxeE, implies -cfO).
+.TP
+.B \-o
+Output to stdout rather than .c (implies -c).
+.TP
+.B \-X
+Interpret ambiguous syntax such as ? and @ with Princeton meanings (as
+used by CLC-INTERCAL), rather than with the default Atari meanings.
+.TP
+.B \-x
+Use CLC-INTERCAL rules for text I/O and for abstaining from a GIVE UP
+by label (prevents -P).
+.TP
+.B \-u
+Print a message whenever the compiler tries to open a file.
+.TP
+.B \-U
+Dump core on E778 as well as printing an error.
+.TP
+.B \-g
+Leave the generated C in place, and make the output executable
+debuggable.
+.TP
+.B \-l
+Attempt to report likely bugs and nonportabilities (implies -O).
+.SH "SEE ALSO"
+The newsgroup
+.B alt.lang.intercal
+is where INTERCAL compilers are announced, and INTERCAL itself is
+discussed; the website
+.B http://intercal.freeshell.org
+is where the most recent versions of C-INTERCAL (and also
+CLC-INTERCAL) are currently hosted.
+.
+.SH AUTHOR
+.B ick
+was originally written by Eric S. Raymond.
+This manual page was originally written by Mark W. Eichin
+<eichin@kitten.gen.ma.us>, for the Debian GNU/Linux system.

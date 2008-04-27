@@ -1,0 +1,88 @@
+.TH CONVICKT 1
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+.\"
+.\" Created by Alex Smith; licensed under GNU GPL v2 or later.
+.SH NAME
+convickt \- convert INTERCAL files between formats
+.SH SYNOPSIS
+.B convickt
+.I "incharset outcharset [paddingrule [arrayname]]"
+.SH "DESCRIPTION"
+This manual page describes the
+.BR convickt
+command.
+Fuller documentation is available via the command
+.B info convickt
+.
+.PP
+.B convickt
+converts INTERCAL programs from one character set to another; it takes
+input from standard input and sends its output to standard output.
+.SH OPTIONS
+For
+.I incharset
+and
+.I outcharset
+.TP
+.B atari
+Interpret the input as being ASCII-7 Atari syntax INTERCAL, as is used
+by the Atari INTERCAL-72 compiler, J-INTERCAL, and C-INTERCAL default
+syntax, or output in that syntax.
+.TP
+.B baudot
+Interpret the input as being in CLC-INTERCAL's extended Baudot
+syntax, or output in that syntax.
+.TP
+.B ebcdic
+Interpret the input as being in the CLC-INTERCAL dialect of EBCDIC, or
+output in that syntax.
+.TP
+.B latin1
+Interpret the input as being Latin-1 Princeton syntax INTERCAL, as is
+used by default by CLC-INTERCAL and also readable by C-INTERCAL with
+the
+.B \-X
+switch, or output in that syntax.
+.PP
+For
+.I paddingrule
+.TP
+.B zero
+Pad the irrelevant bits in ASCII-7 and Baudot output with zeros.
+.TP
+.B printable
+Set the values of the irrelevant bits in ASCII-7 and Baudot output to
+try to cause the output to stay within character range 32-126. This
+option is the default. (Note that
+.I paddingrule
+is irrelevant for 8-bit character sets like Latin-1 and EBCDIC).
+.TP
+.B random
+Pad the irrelevant bits in ASCII-7 and Baudot output with random data,
+except that outputing an all-bits-zero octet is avoided.
+.SH CAVEATS
+Not all conversions are possible, due to the character sets having
+different characters available. In most cases, an unconvertible or
+invalid character will be converted to a 0 (padded appropriately); the
+exception is that if a tab cannot be converted, it will instead be
+converted to a single space (so that INTERCAL programs still run if
+converted to Baudot). Using
+.B atari
+as an input or output character set will literally convert characters
+which differ between Atari and Princeton syntax without checking to
+see whether they are being used as operators or not.
+.PP
+If
+.I arrayname
+is given, then instead of outputting the converted text literally, it
+will be output as portable (that is, legal in INTERCAL-72, C-INTERCAL,
+J-INTERCAL and CLC-INTERCAL) INTERCAL that dimensions the tail array
+given as
+.I arrayname
+and assigns each byte of the output to an element of that array; this
+is mostly useful for producing Baudot text for CLC-INTERCAL-style
+array IO.
+.SH AUTHOR
+.B convickt
+and this manual page were written by Alex Smith.
