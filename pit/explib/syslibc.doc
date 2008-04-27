@@ -1,0 +1,29 @@
+Alex Smith, 26 March 2008
+
+syslibc.c is an example of a C program designed to be used with the
+INTERCAL external call code. It only attempts to emulate the base 2
+algorithms, but in a base 2 program it should be a valid drop-in
+replacement for the real system library.  (Don't forget to use the -eE
+options when linking this to an INTERCAL program; -e to allow C
+programs to be linked in, and -E to suppress the 'real' syslib.)
+
+The library is designed foremost to ensure that all errors are checked
+(as they would be in the INTERCAL, although you get the error messages
+produced by C code), and secondarily for speed (it is substantially
+faster than the INTERCAL version of the system library, but that isn't
+particularly surprising).
+
+Note that some INTERCAL programs rely on undocumented features of the
+system library; I have implemented the commonly-used (1001), but some
+of the example programs (for instance primes.i) NEXT to other
+undocumented internal lines of syslib.i, and such programs will error
+out on the C version of the syslib.
+
+There are some situations in which the C program will cause errors,
+but the INTERCAL version wouldn't; remember that any attempt to alter
+or view an INTERCAL variable from C code causes an error if that
+variable doesn't exist in the INTERCAL program. Therefore, in order to
+use a particular routine, you should mention all the variables that
+are its inputs and outputs somewhere in your INTERCAL program; in
+particular, if you're using overflow-checked routines, make sure you
+mention .4 at least once in your program.

@@ -1,0 +1,53 @@
+Although the non-binary libraries syslib.[3-7]i are meant to be
+treated as workalikes with the original system library, it should be
+noted that several of them contain some new routines. These are used
+internally by the standard routines, and are there to provide methods
+for doing a few things that are taken for granted in base 2. While
+they were not intended to be used by other programs, there is nothing
+stopping them from being so used.
+
+The even bases have routines to double and halve values, and use a
+third variable as a carry/borrow flag. Since halving in odd bases
+produces infinite fractions, bases 5 and 7 instead use a single-digit
+multiplication routine. (Base 3 multiplication is still simple enough
+to be handled without a separate support routine.)
+
+syslib.4i
+---------
+(1200) .2 <- .1 times two
+       .3 <- #0 if no overflow, otherwise .3 contains the quart that
+       was "shifted" off the left end
+(1210) .2 <- .1 divided by two
+       .3 <- #0 if .1 is even, otherwise .3 contains #2
+(1700) :2 <- :1 times two
+       .1 <- #0 if no overflow, otherwise .1 contains the quart that
+       was "shifted" off the left end
+(1710) :2 <- :1 divided by two
+       .1 <- #0 if .1 is even, otherwise .1 contains #2
+
+syslib.5i
+---------
+(1720) :2 <- :1 times the least significant quint of .1 (the remaining
+       quints of .1 are ignored)
+       .2 <- #0 if no overflow, otherwise .2 contains the quint that
+       was "shifted" off the left end
+
+syslib.6i
+---------
+(1200) .2 <- .1 times two
+       .3 <- #0 if no overflow, otherwise .3 contains the sext that
+       was "shifted" off the left end
+(1210) .2 <- .1 divided by two
+       .3 <- #0 if .1 is even, otherwise .3 contains #3
+(1700) :2 <- :1 times two
+       .1 <- #0 if no overflow, otherwise .1 contains the sext that
+       was "shifted" off the left end
+(1710) :2 <- :1 divided by two
+       .1 <- #0 if .1 is even, otherwise .1 contains #3
+
+syslib.7i
+---------
+(1720) :2 <- :1 times the least significant sept of .1 (the remaining
+       septs of .1 are ignored)
+       .2 <- #0 if no overflow, otherwise .2 contains the sept that
+       was "shifted" off the left end

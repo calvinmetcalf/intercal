@@ -1,0 +1,197 @@
+(10)	DO	NOTHING
+
+	PLEASE NOTE: Process 1 reads from stdin & copies to the channel
+
+	PLEASE	COME FROM (10)
+	PLEASE	COME FROM (20)
+(20)	PLEASE	(100) NEXT
+
+	PLEASE NOTE: Process 2 reads from the channel & copies to stdout
+
+	PLEASE	COME FROM (10)
+	PLEASE	COME FROM (30)
+(30)	PLEASE	(200) NEXT
+
+(100)	PLEASE NOTE: Write a message to the message box.
+
+	DO	STASH .1 + .2
+	DO	(101) NEXT
+	PLEASE	COME FROM (104)
+(101)	DO 	FORGET #1
+	DO	.2 <- #1
+(102)	DO	.2 <- #2 ONCE
+(103)	DO	(104) NEXT
+(104)	DO	(105) NEXT
+(105)	DO	RESUME .2
+
+	PLEASE	COME FROM (103)
+
+	DO      WRITE IN .1
+
+	PLEASE NOTE: If .1 is zero, kill both threads
+	DO	.2 <- '?"'#0$.1'~'#0$.1'"$#1'~#3
+(1)	DO	(2) NEXT
+(2)	DO	(105) NEXT
+
+	PLEASE	COME FROM (1)
+
+	DO      .2 <- '?"'&.1$#1'~'#0$#1'"$#1'~#3
+	DO	(106) NEXT
+	DO	REINSTATE (210)
+	DO	(107) NEXT
+(106)	DO	(105) NEXT
+	DO	ABSTAIN FROM (210)
+
+(107)	DO      .2 <- '?"'&.1$#2'~'#0$#2'"$#1'~#3
+	DO	(108) NEXT
+	DO	REINSTATE (211)
+	DO	(109) NEXT
+(108)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (211)
+
+(109)	DO      .2 <- '?"'&.1$#4'~'#0$#4'"$#1'~#3
+     	DO	(110) NEXT
+	DO	REINSTATE (212)
+	DO	(111) NEXT
+(110)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (212)
+
+(111)	DO      .2 <- '?"'&.1$#8'~'#0$#8'"$#1'~#3
+     	DO	(112) NEXT
+	DO	REINSTATE (213)
+	DO	(113) NEXT
+(112)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (213)
+
+(113)	DO      .2 <- '?"'&.1$#16'~'#0$#16'"$#1'~#3
+     	DO	(114) NEXT
+	DO	REINSTATE (214)
+	DO	(115) NEXT
+(114)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (214)
+
+(115)	DO      .2 <- '?"'&.1$#32'~'#0$#32'"$#1'~#3
+     	DO	(116) NEXT
+	DO	REINSTATE (215)
+	DO	(117) NEXT
+(116)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (215)
+
+(117)	DO      .2 <- '?"'&.1$#64'~'#0$#64'"$#1'~#3
+     	DO	(118) NEXT
+	DO	REINSTATE (216)
+	DO	(119) NEXT
+(118)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (216)
+
+(119)	DO      .2 <- '?"'&.1$#128'~'#0$#128'"$#1'~#3
+     	DO	(120) NEXT
+	DO	REINSTATE (217)
+	DO	(121) NEXT
+(120)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (217)
+
+(121)	DO      .2 <- '?"'&.1$#256'~'#0$#256'"$#1'~#3
+     	DO	(122) NEXT
+	DO	REINSTATE (218)
+	DO	(123) NEXT
+(122)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (218)
+
+(123)	DO      .2 <- '?"'&.1$#512'~'#0$#512'"$#1'~#3
+     	DO	(124) NEXT
+	DO	REINSTATE (219)
+	DO	(125) NEXT
+(124)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (219)
+
+(125)	DO      .2 <- '?"'&.1$#1024'~'#0$#1024'"$#1'~#3
+     	DO	(126) NEXT
+	DO	REINSTATE (220)
+	DO	(127) NEXT
+(126)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (220)
+
+(127)	DO      .2 <- '?"'&.1$#2048'~'#0$#2048'"$#1'~#3
+     	DO	(128) NEXT
+	DO	REINSTATE (221)
+	DO	(129) NEXT
+(128)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (221)
+
+(129)	DO      .2 <- '?"'&.1$#4096'~'#0$#4096'"$#1'~#3
+     	DO	(130) NEXT
+	DO	REINSTATE (222)
+	DO	(131) NEXT
+(130)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (222)
+
+(131)	DO      .2 <- '?"'&.1$#8192'~'#0$#8192'"$#1'~#3
+     	DO	(132) NEXT
+	DO	REINSTATE (223)
+	DO	(133) NEXT
+(132)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (223)
+
+(133)	DO      .2 <- '?"'&.1$#16384'~'#0$#16384'"$#1'~#3
+     	DO	(134) NEXT
+	DO	REINSTATE (224)
+	DO	(135) NEXT
+(134)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (224)
+
+(135)	DO      .2 <- '?"'&.1$#32768'~'#0$#32768'"$#1'~#3
+     	DO	(136) NEXT
+	DO	REINSTATE (225)
+	DO	(137) NEXT
+(136)	DO	(105) NEXT
+	PLEASE	ABSTAIN FROM (225)
+
+(137)	DO	REINSTATE (202)
+	DO	RETRIEVE .1 + .2
+	PLEASE	RESUME #17
+
+(200)	PLEASE NOTE: Read from a message box
+
+	DO	STASH .1 + .2
+
+	DO	(201) NEXT
+	PLEASE	COME FROM (204)
+(201)	DO 	FORGET #1
+	DO	.2 <- #1
+(202)	DO NOT	.2 <- #2 AGAIN
+(203)	DO 	(204) NEXT
+(204)	DO	(205) NEXT
+(205)	DO	RESUME .2
+
+	PLEASE	COME FROM (203)
+
+	DO	.1 <- #0
+(210)	DO 	.1 <- 'V.1$#1'~'#0$#65535'
+(211)	DO 	.1 <- 'V.1$#2'~'#0$#65535'
+(212)	DO 	.1 <- 'V.1$#4'~'#0$#65535'
+(213)	DO 	.1 <- 'V.1$#8'~'#0$#65535'
+(214)	DO 	.1 <- 'V.1$#16'~'#0$#65535'
+(215)	DO 	.1 <- 'V.1$#32'~'#0$#65535'
+(216)	DO 	.1 <- 'V.1$#64'~'#0$#65535'
+(217)	DO 	.1 <- 'V.1$#128'~'#0$#65535'
+(218)	DO 	.1 <- 'V.1$#256'~'#0$#65535'
+(219)	DO 	.1 <- 'V.1$#512'~'#0$#65535'
+(220)	DO 	.1 <- 'V.1$#1024'~'#0$#65535'
+(221)	DO 	.1 <- 'V.1$#2048'~'#0$#65535'
+(222)	DO 	.1 <- 'V.1$#4096'~'#0$#65535'
+(223)	DO 	.1 <- 'V.1$#8192'~'#0$#65535'
+(224)	DO 	.1 <- 'V.1$#16384'~'#0$#65535'
+(225)	DO 	.1 <- 'V.1$#32768'~'#0$#65535'
+
+	DO	READ OUT .1
+	DO	RETRIEVE .1 + .2
+	DO	REINSTATE (102)
+	PLEASE	RESUME #1
+
+PLEASE NOTE: Giving up
+
+	PLEASE	COME FROM (2)
+	DO	REINSTATE (3)
+(3)	DO NOT	COME FROM (202)
+	PLEASE	GIVE UP	
