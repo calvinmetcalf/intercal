@@ -302,7 +302,7 @@ clean:
 	mv config.h coopt.sh temp
 
 distr:
-	-rm -f temp/*.@OBJEXT@ temp/parser.h temp/oil@EXEEXT@
+	-rm -f temp/*.@OBJEXT@ temp/oil@EXEEXT@
 	-rm -f temp/idiotism.c temp/bin2c@EXEEXT@ temp/cset-?.c
 	-rm -f bin/* lib/* include/*
 
