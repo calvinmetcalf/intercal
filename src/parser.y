@@ -560,10 +560,10 @@ lunambig:   constant	{$$ = $1;}
 		      /* enforce the 16-bit constant constraint */
 		      if ((unsigned int)$3 > ick_Max_small)
 			ick_lose(IE017, iyylineno, (char *)NULL);
-		      if(variableconstants) /* AIS */
-			$$->rval->constant = intern(MESH, $2);
+		      if(variableconstants) /* AIS, patched by JH */
+			$$->rval->constant = intern(MESH, $3);
 		      else
-			$$->rval->constant = $2;
+			$$->rval->constant = $3;
 		    }
 		    else {
 		      $$->rval->constant = intern($1, $3);
