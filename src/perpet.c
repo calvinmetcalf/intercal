@@ -817,7 +817,8 @@ int main(int argc, char *argv[])
 		      buf, yukdebug||yukprofile?" -lyuk ":" ",
 #endif
 		      includedir, path, path, libdir, path, path,
-		      coopt?'3':'2', /* AIS: If coopting, optimize as much as possible */
+		      cdebug?'0':coopt?'3':'2', /* AIS: If coopting, optimize as much as possible
+                                                    JH: [d]on't optimise when compiling with debugger support */
 		      argv[optind], multithread?"mt":"", cdebug?" -g":"");
       /* AIS: Possibly link in the debugger yuk and/or libickmt.a here. */
       /* AIS: Added -g support. */
