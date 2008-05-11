@@ -1,6 +1,8 @@
 dnl -*- autoconf -*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT
+dnl Yes, that is a valid email address. If your mailer doesn't support nested
+dnl comments, then get a better mailer.
+AC_INIT([C-INTERCAL],[1.29],[[ais523(524\)x\((525)y)@bham.ac.uk]])
 AC_CONFIG_SRCDIR([src/abcess.h])
 AC_CONFIG_HEADER(temp/config.h:src/configh.in)
 
@@ -69,12 +71,17 @@ dnl This Autoconf input is compatible with pre-C99 Autoconf, so to
 dnl check for long long AC_CHECK_SIZEOF is used to test for a nonzero result,
 dnl likewise for _Bool.
 AC_C_CONST
+AC_C_VOLATILE
 AC_CHECK_SIZEOF(long long int,0)
 AC_CHECK_SIZEOF(_Bool,0)
 AC_HEADER_TIME
 AC_EXEEXT
 AC_OBJEXT
 AC_SYS_INTERPRETER
+AC_TYPE_SIGNAL
+AC_TYPE_SIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
 
 AC_MSG_CHECKING(whether yyrestart() is needed)
 # Write a lex program that will cause an error if yyrestart exists.
@@ -92,7 +99,6 @@ fi
 AC_DEFINE_UNQUOTED(EXEEXT,"$EXEEXT")
 
 dnl Checks for library functions.
-AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul snprintf asprintf)
 ICK_SAVECFLAGS=$CFLAGS
 CFLAGS="$CFLAGS -lrt"
@@ -105,3 +111,23 @@ AC_CONFIG_FILES([Makefile temp/coopt.sh:src/cooptsh.in])
 AC_OUTPUT
 dnl After the output, chmod coopt.sh to be executable.
 chmod a+x temp/coopt.sh
+
+dnl Use prebuilt files if necessary. This is done after config.h is generated,
+dnl so the touched timestamps fool make in the correct manner.
+# Use the prebuilt files if necessary, otherwise delete them.
+if test ! -n "$LEX"; then
+  touch temp/lexer.c
+  AC_WARN([No version of lex was found, using prebuilt lexer.c.])
+  AC_WARN([The lexer will not respond to changes in src/lexer.l unless you])
+  AC_WARN([install a version of lex and reconfigure.])
+else
+  rm -f temp/lexer.c
+fi
+if test ! -n "$YACC"; then
+  touch temp/oil.c temp/parser.c temp/parser.h
+  AC_WARN([No version of yacc was found, using prebuilt oil.c and parser.c.])
+  AC_WARN([The parsers will not respond to changes in source files unless you])
+  AC_WARN([install a version of yacc and reconfigure.])
+else
+  rm -f temp/oil.c temp/parser.c temp/parser.h
+fi
