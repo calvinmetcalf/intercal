@@ -1,6 +1,34 @@
-/* Name mangling for compiled OIL programs.
+/* Header file for compiled OIL programs
+   Does name mangling, defines macros
    Copyright (C) Alex Smith 2008
    See oil.y for copyright conditions. */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
+#include "sizes.h"
+#include "ick.h"
+#include "parser.h"
+#include "fiddle.h"
+#include "ick_lose.h"
+#include "feh.h"
+
+#define OPTING(x) \
+  if(optdebug == 2)			  \
+  {					  \
+    explexpr(optdebugnode,stderr);	  \
+    putc('\n',stderr);			  \
+  }					  \
+  if(optdebug == 3)			  \
+  {					  \
+    prexpr(optdebugnode,stderr,0);	  \
+    putc('\n',stderr);			  \
+  }					  \
+  if(optdebug) fprintf(stderr,"[%s]",#x); \
+  if(optdebug >= 2) putc('\n',stderr);	  \
+  opted = 1;
+#define MAYBENEWNODE(n) if(!(n)) (n)=newnode();
 
 #define Base ick_Base
 #define Large_digits ick_Large_digits

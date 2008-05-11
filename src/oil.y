@@ -1,7 +1,7 @@
 /*****************************************************************************
 
-NAME 
-    oil.y -- compiler for Optimiser Idiom Language files
+NAME
+    oil.y -- compiler for Optimizer Idiom Language files
 
 LICENSE TERMS
     Copyright (C) 2007 Alex Smith
@@ -56,7 +56,7 @@ char* strdup(char* s)
 
 /*
 #define YYDEBUG 1
-int yydebug=1; 
+int yydebug=1;
 */
 
 /* Each semantic value represents either a constraint on a node that needs to
@@ -94,23 +94,26 @@ struct ickstype
 #define YYSTYPE YYSTYPE
 
 #define MAXOPTNAMELEN 64
- char optname[MAXOPTNAMELEN]="undefined";
+char optname[MAXOPTNAMELEN]="undefined";
 
- typedef struct ickstype *YYSTYPE;
+typedef struct ickstype *YYSTYPE;
 
- void treedepthup(YYSTYPE, mybool);
- void treefree(YYSTYPE);
- void gennodepath(unsigned, unsigned long);
- mybool treeshapecond(YYSTYPE, mybool);
- YYSTYPE treenscheck(YYSTYPE, YYSTYPE, int);
- void treecxcond(YYSTYPE);
- void treerepcount(YYSTYPE, int*);
- void treerepgen(YYSTYPE, YYSTYPE*, int*);
+void splitend();
+void splitstart();
 
- int countgetchar(void);
- int countungetc(int, FILE*);
- int cgccol;
- int cgcrow;
+void treedepthup(YYSTYPE, mybool);
+void treefree(YYSTYPE);
+void gennodepath(unsigned, unsigned long);
+mybool treeshapecond(YYSTYPE, mybool);
+YYSTYPE treenscheck(YYSTYPE, YYSTYPE, int);
+void treecxcond(YYSTYPE);
+void treerepcount(YYSTYPE, int*);
+void treerepgen(YYSTYPE, YYSTYPE*, int*);
+
+int countgetchar(void);
+int countungetc(int, FILE*);
+int cgccol;
+int cgcrow;
 
 /* #defines for chaining together template expressions; here, s is the type
    of expression (e.g. select, bitwise and, unary and) that's chaining the
@@ -151,8 +154,14 @@ struct ickstype
                         } while(0)
 
 /* Error handling and lexing */
- int yylex(void);
- int yyerror(char const *);
+int yylex(void);
+int yyerror(char const *);
+
+/* Split the output file */
+#define SPLITMAX 20
+int splitcount=SPLITMAX;
+int filenumber=0;
+mybool inloop=0;
 %}
 
 /* Various conditions can come out from the lexer. The most common is a char,
@@ -181,7 +190,7 @@ struct ickstype
 
    The other things that can come out from the lexer are sparks, ears, and
    parentheses (any mix, we're not fussy). */
-   
+
 %token LEXERLEAF
 
 %%
@@ -192,6 +201,15 @@ optimization: template '-' '>' replacement
 {
   static YYSTYPE tempmem[10];
   static int replcount[10];
+  /* Handle splitting the file. */
+  if(splitcount) splitcount--;
+  if(!splitcount && !inloop)
+  {
+    splitcount=SPLITMAX;
+    splitend();
+    ++filenumber;
+    splitstart();
+  }
   /* This is where we actually generate the optimizer code. */
   /* Tree-shape and is-constant conditions */
   printf("  checknodeactbits(np);\n");
@@ -232,7 +250,7 @@ optimization: template '-' '>' replacement
   treerepgen($4,tempmem,replcount);
   printf("    nodefree(np->lval); nodefree(np->rval);\n");
   printf("    tempw=np->width; *np=*tp; np->width=tempw; free(tp);\n");
-  printf("  } while(0);\n\n");  
+  printf("  } while(0);\n\n");
   /* Free the template and replacement now they're finished being used. */
   treefree($1);
   treefree($4);
@@ -247,8 +265,9 @@ optimization: template '-' '>' replacement
   }
   printf("  r=%luLU; while(r<=%luLU) {\n",$2->c,$4->c);
   free($2); free($4);
+  inloop=1;
 }
-|      '>' {printf("  r++;\n  }\n");};
+|      '>' {printf("  r++;\n  }\n"); inloop=0;};
 
 template: expr3 ;
 
@@ -689,41 +708,30 @@ int countungetc(int c, FILE* f)
   return c;
 }
 
-int main(void)
+void splitstart()
 {
-  int e;
-  /* Technically speaking, this string exceeds the longest permitted string
-     that can be written as a constant string. Compilers are unlikely to care,
-     though; if yours does, just break this into separate printfs. */
-  printf("%s",
-         "/* machine-generated code; modify the corresponding .oil file\n"
-         "   and recompile, not this one, to change this file */\n\n"
-	 "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n"
-	 "#include <signal.h>\n#include \"oil.h\"\n"
-         "#include \"sizes.h\"\n#include \"ick.h\"\n#include \"parser.h\"\n"
-	 "#include \"fiddle.h\"\n#include \"ick_lose.h\"\n#include \"feh.h\"\n\n"
-         "#define OPTING(x) if(optdebug == 2) {\\\n"
-         "                     explexpr(optdebugnode,stderr);\\\n"
-         "                    putc('\\n',stderr); } \\\n"
-         "                  if(optdebug == 3) {\\\n"
-         "                    prexpr(optdebugnode,stderr,0);\\\n"
-         "                    putc('\\n',stderr); } \\\n"
-         "                  if(optdebug) fprintf(stderr,\"[%s]\",#x);\\\n"
-         "                  if(optdebug >= 2) putc('\\n',stderr);\\\n"
-         "                  opted = 1;\n\n"
-	 "#define MAYBENEWNODE(n) if(!(n)) (n)=newnode();\n\n"
-         "int optimize_pass1(node *np)\n{\n  int opted=0;\n"
-         "  unsigned long c,c1,c2,c3,c4,c5,c6,c7,c8,c9;\n"
-         "  unsigned long x,x1,x2,x3,x4,x5,x6,x7,x8,x9,r;\n"
+  static char fname[]="oilout00.c";
+  if(filenumber>255)
+  {
+    filenumber=255;
+    fprintf(stdout,"Input file too long.\n");
+  }
+  sprintf(fname,"oilout%02x.c",filenumber);
+  freopen(fname,"w",stdout);
+  puts("/* Automatically generated output, edit source and recompile to "
+       "change */");
+  printf("#include \"oil.h\"\n"
+	 "int optimize_pass1_%x(node *np)\n"
+	 "{"
+	 "  int opted=0;\n"
+	 "  unsigned long c,c1,c2,c3,c4,c5,c6,c7,c8,c9;\n"
+	 "  unsigned long x,x1,x2,x3,x4,x5,x6,x7,x8,x9,r;\n"
 	 "  int tempw;\n"
-         "  node *tp;\n"
-         "  if(!np) return 0;\n"
-         "  if(np->lval) opted|=optimize_pass1(np->lval);\n"
-	 "  if(np->rval) opted|=optimize_pass1(np->rval);\n");
-  cgccol=0;
-  cgcrow=1;
-  e=yyparse();
-  while(tfi--) free(tofree[tfi]);
+	 "  node *tp;\n", filenumber);
+}
+
+void splitend()
+{
   /* Disabling warnings about unused variables. gcc will optimize this right
      out, and in any case the raise(SIGSEGV) will be unreachable (but will
      cause a pretty recognizable error because it'll be caught by the handler
@@ -734,5 +742,38 @@ int main(void)
 	 "  if(c+c1+c2+c3+c4+c5+c6+c7+c8+c9+r+\n"
 	 "     x+x1+x2+x3+x4+x5+x6+x7+x8+x9) raise(SIGSEGV);\n");
   printf("  return opted;\n}\n");
+  fclose(stdout);
+}
+
+int main(void)
+{
+  int e,i;
+  /*
+    "  if(!np) return 0;\n"
+    "  if(np->lval) opted|=optimize_pass1(np->lval);\n"
+    "  if(np->rval) opted|=optimize_pass1(np->rval);\n"
+  */
+  splitstart();
+  cgccol=0;
+  cgcrow=1;
+  e=yyparse();
+  while(tfi--) free(tofree[tfi]);
+  splitend();
+  freopen("oilout-m.c","w",stdout);
+  puts("/* Automatically generated output, edit source and recompile to "
+       "change */");
+  puts("#include \"ick.h\"");
+  i=filenumber+1;
+  while(i--) printf("extern int optimize_pass1_%x(node*);\n",i);
+  puts("int optimize_pass1(node* np)\n"
+       "{\n"
+       "  int opted=0;\n"
+       "  if(!np) return 0;\n"
+       "  if(np->lval) opted|=optimize_pass1(np->lval);\n"
+       "  if(np->rval) opted|=optimize_pass1(np->rval);");
+  i=filenumber+1;
+  while(i--) printf("  opted|=optimize_pass1_%x(np);\n",i);
+  puts("  return opted;\n"
+       "}");
   return e;
 }
