@@ -85,7 +85,7 @@ int variableconstants;  /* AIS: Allow anything on the left of an assignment. */
 int createsused=0;      /* AIS: Allow the use of CREATE. */
 int useickec;           /* AIS: Link together INTERCAL and C. */
 static int nosyslib=0;  /* AIS: Don't link syslib under any circumstances. */
-static int cdebug;      /* AIS: Pass -g to our C compiler, and leave C code. */
+int cdebug;      /* AIS: Pass -g to our C compiler, and leave C code. */
 int optdebug;           /* AIS: Debug the optimizer. Value is 0, 1, 2, or 3. */
 int flowoptimize;       /* AIS: Do flow optimizations (in INTERCAL!). */
 int coopt;              /* AIS: The constant-output optimization. This should

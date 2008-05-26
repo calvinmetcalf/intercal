@@ -1727,9 +1727,10 @@ void emit(tuple *tn, FILE *fp)
     int	dim;
     int generatecfjump=0; /* AIS */
     static int pasttryagain=0; /* AIS */
+    extern int cdebug;
 
     /* grind out label and source dump */
-    if (yydebug || compile_only)
+    if (yydebug || cdebug || compile_only)
 	(void) fprintf(fp, "    /* line %03d */\n", tn->ick_lineno);
     if (tn->label)
     {
@@ -1739,7 +1740,7 @@ void emit(tuple *tn, FILE *fp)
 	/* AIS: start one of ick_ec's labeled blocks. */
 	(void) fprintf(fp, "ick_labeledblock(%uU,{",tn->label);
     }
-    if (yydebug || compile_only)
+    if (yydebug || cdebug || compile_only)
     {
       (void) fprintf(fp, "\t""/* %s */", textlines[tn->ick_lineno]);
       /* AIS: grind out an expression explanation */
