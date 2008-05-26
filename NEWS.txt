@@ -58,7 +58,7 @@ Changes by Joris Huizer
     solve this issue earlier was itself buggy).
 
 11. The -g option now causes optimisation of the output compiled C to be
-    turned off.
+    turned off, and adds comments to the output file the same way -c does.
 
 Bugs reported by the Debian autobuilders and Joey Hess
 
