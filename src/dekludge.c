@@ -76,7 +76,10 @@ ick_bool nodessame(node* n1, node* n2)
 {
   if(!n1) return !n2;
   if(!n2) return 0;
-  if(n1->opcode!=n2->opcode) return 0;
+  if(n1->opcode!=n2->opcode)
+    return (((n1->opcode == MESH && n2->opcode == MESH32) ||
+        (n1->opcode == MESH32 && n2->opcode == MESH)) &&
+        n1->constant == n2->constant);
   if(!nodessame(n1->lval,n2->lval)) return 0;
   if(!nodessame(n1->rval,n2->rval)) return 0;
   switch(n1->opcode)

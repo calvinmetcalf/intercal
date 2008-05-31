@@ -60,9 +60,15 @@ Changes by Joris Huizer
 11. The -g option now causes optimisation of the output compiled C to be
     turned off, and adds comments to the output file the same way -c does.
 
+12. Added new optimiser idioms [cxorand16] and [cxorand32] for situations
+    where AND and XOR together are used to simulate AND and bitwise-not;
+    also generalised the idiom-matching code to compare 16-bit and 32-bit
+    constants as equal if they have the same value, and fixed some typos in
+    the current 16-bit complement idioms.
+
 Bugs reported by the Debian autobuilders and Joey Hess
 
-12. The build of the optimiser idioms is now split over many files, to reduce
+13. The build of the optimiser idioms is now split over many files, to reduce
     the memory usage of gcc when it tries to compile the giant output C file.
     This was a problem on ia64. (The ulimit method of preventing thrashing has
     been removed, as this method works better; likewise, the optimiser
@@ -70,21 +76,21 @@ Bugs reported by the Debian autobuilders and Joey Hess
 
 Changes by Alex Smith
 
-13. convickt can now produce its output as INTERCAL initialisation of a tail
+14. convickt can now produce its output as INTERCAL initialisation of a tail
     array. (This doesn't auto-offset between the different characters; it is
     therefore mostly useful for producing Baudot arrays for CLC-INTERCAL-style
     IO.)
 
-14. The function clock_gettime is now supported by the yuk profiler as an
+15. The function clock_gettime is now supported by the yuk profiler as an
     alternative method of getting a high-resolution clock for profiling (it
     is available on at least Linux).
 
-15. Upgraded the autoconfiguration to a substantially newer version of
+16. Upgraded the autoconfiguration to a substantially newer version of
     autoconf. Hopefully the same script works on all operating systems now,
     because I've removed the one that configures for DOS (which was previously
     separate).
 
-16. Added support for computed CREATE (the computation is done at create-time,
+17. Added support for computed CREATE (the computation is done at create-time,
     rather than when the unknown statement is encountered); partly because
     this was rather easy, but mostly because it can be used to simulate a
     computed NEXT, thus making the example expansion library compunex (which I
@@ -96,10 +102,10 @@ Changes by Alex Smith
     features of NEXT, anyway, rather than the small subset COMPUNEX could
     manage.)
 
-17. Plugged a couple of small memory leaks; however, there are still several
+18. Plugged a couple of small memory leaks; however, there are still several
     much bigger memory leaks that could do with being fixed.
 
-18. About the version number: this release is mostly bugfixing, but does add a
+19. About the version number: this release is mostly bugfixing, but does add a
     few new features, so I wasn't sure whether to increment the major or the
     minor version number. In the end, I used the old INTERCAL maxim 'when in
     doubt, do both'.
