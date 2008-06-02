@@ -1,6 +1,6 @@
 			NEW IN THIS RELEASE
 
-  Release 1.29 (by Alex Smith)
+  Release 0.29 (by Alex Smith)
 
 Bugs found by the people on irc.freenode.org/esoteric (thanks for testing!)
 

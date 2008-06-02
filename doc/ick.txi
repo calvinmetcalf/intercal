@@ -1,8 +1,8 @@
 \input texinfo @c -*- texinfo -*-
 @c %**start of header
 @setfilename ick.info
-@set VERSION 1.29
-@set VERSIONDASH 1-29
+@set VERSION 0.29
+@set VERSIONDASH 0-29
 @settitle C-INTERCAL @value{VERSION} Revamped Instruction Manual
 @paragraphindent 0
 @documentlanguage en
