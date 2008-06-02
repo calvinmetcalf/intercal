@@ -60,8 +60,9 @@ Changes by Joris Huizer
 11. The -g option now causes optimisation of the output compiled C to be
     turned off, and adds comments to the output file the same way -c does.
 
-12. Added new optimiser idioms [cxorand16] and [cxorand32] for situations
-    where AND and XOR together are used to simulate AND and bitwise-not;
+
+12. Added more optimiser idioms: [cxorand16], [cxorand32], [cfoldintoorinand],
+    [or16and], [xor16and], [lshift32half], [rshiftoutofneg], [andoutofneg];
     also generalised the idiom-matching code to compare 16-bit and 32-bit
     constants as equal if they have the same value, and fixed some typos in
     the current 16-bit complement idioms.
