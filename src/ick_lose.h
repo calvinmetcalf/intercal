@@ -121,7 +121,8 @@
 /* More than one COME FROM references the same label. */
 #define IE555 "555 FLOW DIAGRAM IS EXCESSIVELY CONNECTED\n\
 	ON THE WAY TO %d\n"
-/* Too many source lines, or too many input files. */
+/* Too many source lines, or too many input files, or source line is
+   too long. */
 #define IE666 "666 COMPILER HAS INDIGESTION\n\
 	ON THE WAY TO %d\n"
 /* No such source file. */

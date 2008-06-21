@@ -113,6 +113,11 @@ int getc(FILE *fp)
     static ick_bool bangflag = ick_FALSE;
     static ick_bool backflag = ick_FALSE;
 
+    static ick_bool eolflag = ick_FALSE;
+
+    if ((size_t)(lineptr - linebuf) > sizeof linebuf)
+      ick_lose(IE666, iyylineno, (char *)NULL);
+
     if (bangflag)
     {
 	bangflag = ick_FALSE;
@@ -133,74 +138,66 @@ int getc(FILE *fp)
 
       c_char=0; /* AIS */
       (void)fread(&c_char,1,1,fp);
-      /* AIS: ignore the ick_first \r in a row to deal with DOS newlines. The
+      /* AIS: ignore the first \r in a row to deal with DOS newlines. The
 	 second in a row is definitely an error, though, and will be caught
 	 later on. */
       if(c_char=='\r') (void)fread(&c_char,1,1,fp);
       c = c_char;
-      /*if(!c) c=' '; AIS */
+
       if(feof(fp)) c=EOF;
+      if(!eolflag && c == EOF) c = '\n';
 
-	/*fprintf(stderr,"getc input a character: %c\n",c);*/
+      /*fprintf(stderr,"getc input a character: %c\n",c);*/
 
-	if (feof(yyin))
-	{
-	    *lineptr = '\0';
-	    return(EOF);
-	}
-#ifdef BACKSLASH_CONTINUATION
-	else if (c == '\\')
-	{
-	    do {
-		c = fgetc(fp);
-		if( c == '\n' ) iyylineno++;
-	    } while
-		(c != '\\' && isspace(c));
-	}
-#endif	/* BACKSLASH_CONTINUATION */
-	if (c == '!')
-	{
-	    *lineptr++ = '!';
-	    bangflag = ick_TRUE;
-	    return(c = '\'');
-	}
-	else if (c == '\b')	/* convert ctrl-H (backspace) to
+      if (feof(yyin))
+      {
+	*lineptr = '\0';
+	if(eolflag) return(EOF);
+	if(c=='\0' || c==EOF) c='\n';
+      }
+
+      eolflag = ick_FALSE;
+
+      if (c == '!')
+      {
+	*lineptr++ = '!';
+	bangflag = ick_TRUE;
+	return(c = '\'');
+      }
+      else if (c == '\b')	/* convert ctrl-H (backspace) to
 				   two chars "^" and "H" so lex can take it */
+      {
+	*lineptr++ = '\b';
+	backflag = ick_TRUE;
+	return(c = '^');
+      }
+      else if (c == '\n')
+      {
+	*lineptr = '\0';
+	lineptr = linebuf;
+	if (iyylineno >= textlinecount)
 	{
-	    *lineptr++ = '\b';
-	    backflag = ick_TRUE;
-	    return(c = '^');
+	  textlinecount += ALLOC_CHUNK;
+	  if (textlines)
+	    textlines = realloc(textlines,
+				textlinecount * sizeof(char*));
+	  else
+	    textlines = malloc(textlinecount * sizeof(char*));
+	  if (!textlines)
+	    ick_lose(IE666, iyylineno, (char *)NULL);
 	}
-	else if (c == '\n')
-	{
-	    *lineptr = '\0';
-	    lineptr = linebuf;
-	    if (iyylineno >= textlinecount)
-	    {
-		textlinecount += ALLOC_CHUNK;
-		if (textlines)
-		    textlines = realloc(textlines,
-					textlinecount * sizeof(char*));
-		else
-		    textlines = malloc(textlinecount * sizeof(char*));
-		if (!textlines)
-		    ick_lose(IE666, iyylineno, (char *)NULL);
-	    }
-	    textlines[iyylineno] = malloc(1 + strlen(linebuf));
-	    if (!textlines[iyylineno])
-		ick_lose(IE666, iyylineno, (char *)NULL);
-	    strcpy(textlines[iyylineno], linebuf);
-	    iyylineno++;
-	    return('\n');
-	}
-	else
-	{
-#ifdef ACCEPT_LOWERCASE
-	    if (islower(c))
-		c = toupper(c);
-#endif /* ACCEPT_LOWERCASE */
-	    return(*lineptr++ = c);
-	}
+	textlines[iyylineno] = malloc(1 + strlen(linebuf));
+	if (!textlines[iyylineno])
+	  ick_lose(IE666, iyylineno, (char *)NULL);
+	strcpy(textlines[iyylineno], linebuf);
+	iyylineno++;
+	eolflag=ick_TRUE;
+	return('\n');
+      }
+      else
+      {
+	return(*lineptr++ = c);
+      }
     }
 }
 

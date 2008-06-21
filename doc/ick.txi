@@ -1848,6 +1848,8 @@ instead.  This error may also be a clue that you are trying to compile a
 
 @ieanchor E666
 @cindex out of memory, during compile
+@cindex too many input files
+@cindex line too long
 @quotation
 COMPILER HAS INDIGESTION
 @end quotation
@@ -1858,7 +1860,9 @@ compilation, it causes this error.  This error can also be caused if
 too many input files are specified on the command line; if you suspect
 this is the problem, split the compilation into separate compilations
 if you can, or otherwise you may be able to concatenate together your
-input files into larger but fewer files.
+input files into larger but fewer files.  Yet another potential cause
+of this error is if a line in an input program is too long; sensible
+line-wrapping techniques are encouraged.
 
 @ieanchor E774
 @cindex random bug, error message
