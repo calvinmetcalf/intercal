@@ -524,12 +524,12 @@ void checknodeactbits(node *np)
 
   case C_NOT:
     np->optdata = np->width == 16 ? 0xffffLU : 0xffffffffLU;
-    break;	
+    break;
 
   case C_A:
     np->optdata = 0xffffffffLU;
     break;
-    
+
   case C_NOTEQUAL:
   case C_ISEQUAL:
   case C_LOGICALNOT:
@@ -617,6 +617,7 @@ void checknodeactbits(node *np)
     /*@=nullderef@*/
     /*@fallthrough@*/
 
+  case UNKNOWNOP:
   default:
     /*@-nullderef@*/
     if(np->opcode == BY && !np->lval->optdata) optuple->warn239 = 1;

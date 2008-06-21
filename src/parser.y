@@ -116,11 +116,11 @@ static tuple *prevtuple = NULL;
 /* AIS: ONCE and AGAIN added, for multithread support; also, NOSPOT added,
    so that I can reserve _ for future use (it's nowhere in the grammar yet) */
 %token MAYBE DO PLEASE NOT ONCE AGAIN MESH NOSPOT ick_ONESPOT ick_TWOSPOT ick_TAIL ick_HYBRID
-%token MINGLE SELECT /* AIS: SPARK EARS */ SUB BY BADCHAR
+%token MINGLE SELECT UNKNOWNOP /* AIS: SPARK EARS */ SUB BY
 /* AIS: For operand overloading */
 %token SLAT BACKSLAT
 
-%token <numval> NUMBER UNARY OHOHSEVEN GERUND LABEL
+%token <numval> NUMBER UNARY OHOHSEVEN GERUND LABEL BADCHAR
 %token <node> INTERSECTION
 
 /*
@@ -150,7 +150,7 @@ static tuple *prevtuple = NULL;
 %type <node> subscr byexpr scalar scalar2s ick_array initem outitem sublist
 %type <node> unambig limunambig subscr1 sublist1 oparray osubscr osubscr1
 %type <node> notanlvalue nlunambig lunambig unknownstatement unknownatom
-%type <node> unknownsin unknownsif unknownaid
+%type <node> unknownsin unknownsif unknownaid unop
 %type <tuple> preproc perform mtperform
 %type <numval> please preftype
 
@@ -501,12 +501,19 @@ osubscr1:   oparray SUB sublist1
 		{$$ = $1; $$->rval = cons(SUB, $$->rval, $3);}
 	;
 
+/* AIS: Unknown operators */
+unop    :   BADCHAR                     {$$ = newnode(); $$->opcode = BADCHAR;
+	    				 $$->constant = $1;}
+	;
+
 /* here goes the general expression syntax */
 expr	:   unambig			{$$ = $1;}
 /* AIS: CLC-INTERCAL allows right-association of SELECT and MINGLE.
    (Strangely, that simplifies this section somewhat.) */
 	|   unambig SELECT expr		{$$ = cons(SELECT, $1, $3);}
 	|   unambig MINGLE expr		{$$ = cons(MINGLE, $1, $3);}
+        |   unambig unop expr           {$$ = cons(UNKNOWNOP, $2,
+	                                 cons(INTERSECTION, $1, $3));}
 /* AIS: Operand overloading */
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
@@ -522,6 +529,8 @@ notanlvalue:nlunambig			{$$ = $1;}
 	|   osubscr			{$$ = $1;}
 	|   unambig SELECT expr		{$$ = cons(SELECT, $1, $3);}
 	|   unambig MINGLE expr		{$$ = cons(MINGLE, $1, $3);}
+        |   unambig unop expr           {$$ = cons(UNKNOWNOP, $2,
+	                                 cons(INTERSECTION, $1, $3));}
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
 					 firstslat=$$; else
@@ -533,6 +542,8 @@ notanlvalue:nlunambig			{$$ = $1;}
 limexpr :   limunambig			{$$ = $1;}
 	|   limunambig SELECT expr	{$$ = cons(SELECT, $1, $3);}
 	|   limunambig MINGLE expr	{$$ = cons(MINGLE, $1, $3);}
+        |   limunambig unop expr        {$$ = cons(UNKNOWNOP, $2,
+	                                 cons(INTERSECTION, $1, $3));}
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
 					 firstslat=$$; else

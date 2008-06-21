@@ -304,6 +304,10 @@ void typecast(node *np)
 	np->width = np->rval->width;
     else if (np->opcode == SELECT)
 	np->width = np->rval->width;	/* n-bit select has an n-bit result */
+    else if (np->opcode == UNKNOWNOP || np->opcode == INTERSECTION) /* AIS */
+        np->width = (np->rval->width == 16 ? np->lval->width : 32);
+    else if (np->opcode == BADCHAR) /* AIS */
+        np->width = 16;
     else if (np->opcode == SUB)
 	np->width = np->lval->width;	/* type of the array */
     else if (np->opcode == SLAT || np->opcode == BACKSLAT)
@@ -618,6 +622,19 @@ void explexpr(node* np, FILE* fp)
     explexpr(np->lval, fp);
     (void) fprintf(fp, " ~ ");
     explexpr(np->rval, fp);
+    (void) fprintf(fp, ")");
+    break;
+
+  case UNKNOWNOP:
+    (void) fprintf(fp, "(");
+    explexpr(np->rval->lval, fp);
+    if(np->lval->constant < 256)
+      (void) fprintf(fp, " %c ", (char)np->lval->constant);
+    else
+      (void) fprintf(fp, " %c^H%c ",
+		     (char)(np->lval->constant / 256),
+		     (char)(np->lval->constant % 256));
+    explexpr(np->rval->rval, fp);
     (void) fprintf(fp, ")");
     break;
 
@@ -1035,6 +1052,11 @@ static void revprexpr(node *np, FILE *fp, node *target)
     free(temp);
     break;
 
+  case UNKNOWNOP: /* don't be silly */
+    fprintf(fp, "  ick_lose(IE277, ick_lineno, (char*) NULL);\n");
+    ick_lwarn(W278, emitlineno, (char*) NULL);
+    break;
+
   case BACKSLAT:
     /* Unimplemented. This isn't even in the parser yet, so it's a
        ick_mystery how we got here. */
@@ -1129,7 +1151,7 @@ static void revprexpr(node *np, FILE *fp, node *target)
     else if(!pickcompile)
     {
       node* sp;
-      
+
       if (np->opcode != SUB) {
 	sp = np;
 	(void) fprintf(fp,"  (void) ick_assign((char*)&");
@@ -1216,6 +1238,10 @@ void prexpr(node *np, FILE *fp, int freenode)
 	prexpr(np->rval, fp, freenode);
 	(void) fprintf(fp, ")");
 	break;
+
+    case UNKNOWNOP: /* AIS //tk */
+      (void) fprintf(fp, "0");
+      break;
 
     case BACKSLAT: /* AIS */
       /* Unimplemented. This isn't even in the parser yet, so it's a

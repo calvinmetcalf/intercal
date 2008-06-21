@@ -436,6 +436,10 @@ CONFICENDUM     {yylval.numval = CREATE; return(GERUND);}
 
 {W}     	;
 {I}             {/* AIS */ yylval.numval = *yytext; return(UNKNOWNID);}
+.\^H.           {/* AIS */ yylval.numval = yytext[0]*256 + yytext[3];
+		 if(yytext[0] > yytext[3])
+		   yylval.numval = yytext[0] + yytext[3]*256;
+                 return(BADCHAR);}
 .		{yylval.numval = yytext[0]; /* AIS: The line below for debug */
  if(yydebug) fprintf(stdout, "yylex: bad char %#x\n",(unsigned char)yytext[0]);
                  return(BADCHAR);}
