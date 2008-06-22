@@ -1554,6 +1554,14 @@ static int prunknownstr(node *np, FILE* fp)
     i=prunknownstr(np->lval, fp);
     i+=prunknownstr(np->rval, fp);
     return i;
+  case BADCHAR:
+    if (np->constant > 256)
+      (void) fprintf(fp, "o%c%c",
+		     (char)(np->constant / 256),
+		     (char)(np->constant % 256));
+    else
+      (void) fprintf(fp, "u%c", (char)np->constant);
+    return 2;
   case US_ID: (void) fputc((char)np->constant, fp); return 0;
   case US_ELEM: (void) fputc(';', fp); return 1;
   case US_SCALAR: (void) fputc('.', fp); return 1;

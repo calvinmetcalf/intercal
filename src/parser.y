@@ -97,11 +97,11 @@ static tuple *prevtuple = NULL;
  *	lower statement type, with index -1. perpet.c uses indexes 1 higher.
  * AIS: Added FROM, MANYFROM, TRY_AGAIN, COMPUCOME, GERUCOME, WHILE, three
  *	NEXT FROM cases, and CREATE. Also added PREPROC; this is for when the
- *      parser acts like a preprocessor, translating an INTERCAL statement into
- *      a sequence of INTERCAL statements with the same net effect.
+ *	parser acts like a preprocessor, translating an INTERCAL statement into
+ *	a sequence of INTERCAL statements with the same net effect.
  * AIS: COME_FROM now merged with the label following it,
- *      to distinguish it from COMPUCOME, in the lexer. This changes
- *      the parser somewhat.
+ *	to distinguish it from COMPUCOME, in the lexer. This changes
+ *	the parser somewhat.
  */
 %token UNKNOWN /* AIS: This is so comments can be REINSTATED */
 %token GETS RESIZE NEXT GO_AHEAD GO_BACK FORGET RESUME STASH RETRIEVE IGNORE
@@ -187,7 +187,7 @@ command	:    please mtperform
 	|    LABEL please OHOHSEVEN mtperform
 		{checklabel($1); $4->label = $1; $4->exechance = $2 * $3;}
 	|    error
-                {/* AIS: catch errors which occur after the end of a statement
+		{/* AIS: catch errors which occur after the end of a statement
 		    (highly likely when comments are being written, as the
 		    start of them will be parsed as an UNKNOWN) */
 		  yyerrok; yyclearin; cacsofar=0;
@@ -211,34 +211,34 @@ mtperform :  preproc
 			     prevtuple = $$ = $1;}}
 
 /* AIS: Either we do a simple 'perform', or preprocessing is needed.
-        I wrote all of this. The way the preprocessor works is to add a whole
-        load of new tuples. The tuples are written in the correct order,
-        except for where one of the commands referenced in the preproc is
-        needed; then one command from near the start is written, and swapped
-        into place using tupleswap. ppinit must also be called giving the
-        number of tuples at the end, to sort out each of the tuples. Note
-        that preprocs can't be nested (so no DO a WHILE b WHILE c), and that
-        lineuid can be used to create unreplicable numbers. preproc must also
-        be set by hand on all commands that you want to be immune to ABSTAIN,
+	I wrote all of this. The way the preprocessor works is to add a whole
+	load of new tuples. The tuples are written in the correct order,
+	except for where one of the commands referenced in the preproc is
+	needed; then one command from near the start is written, and swapped
+	into place using tupleswap. ppinit must also be called giving the
+	number of tuples at the end, to sort out each of the tuples. Note
+	that preprocs can't be nested (so no DO a WHILE b WHILE c), and that
+	lineuid can be used to create unreplicable numbers. preproc must also
+	be set by hand on all commands that you want to be immune to ABSTAIN,
 	etc., from outside the preproc, and $$ is set to the command that
 	gets the line number and can be NEXTED to and from. */
 
 preproc : perform {$$ = $1;} /* the simple case */
-        | perform WHILE perform
+	| perform WHILE perform
 {
   if(!multithread) ick_lose(IE405, iyylineno, (char*)NULL);
   NEWFANGLED{
-  /*    (x)  DO a WHILE b
+  /*	(x)  DO a WHILE b
     is equivalent to
     #11 (l0) DO REINSTATE (l3) <weave on>
     #10 (l1) DO COME FROM (l2) AGAIN
-     #9      DO b
-     #8      DO COME FROM (l0)
-     #7      DO NOTHING
-     #6      DO NOTHING
+     #9	     DO b
+     #8	     DO COME FROM (l0)
+     #7	     DO NOTHING
+     #6	     DO NOTHING
      #5 (l2) DO NOTHING
-     #4      DO GIVE UP
-     #3      DO COME FROM (l0)
+     #4	     DO GIVE UP
+     #3	     DO COME FROM (l0)
      #2 (x)  DO a
      #1 (l3) DON'T ABSTAIN FROM (l1) AGAIN <weave off> */
   tuple* temptuple;
@@ -305,33 +305,39 @@ perform :    lvalue GETS expr	{ACTION($$, GETS,      cons(GETS,$1,$3));}
 				 compucomesused=1;}}
 /* AIS: NEXT FROM works along the same lines as COME FROM */
 	|    NEXTFROMLABEL	{NEWFANGLED {TARGET($$,NEXTFROMLABEL,$1);}
-	                         nextfromsused=1;}
+				 nextfromsused=1;}
 	|    NEXTFROMEXPR gerunds{NEWFANGLED{ACTION($$,NEXTFROMGERUND,rlist);
 				 compucomesused=1; gerucomesused=1;}
-                                 nextfromsused=1;}
+				 nextfromsused=1;}
 	|    NEXTFROMEXPR expr	{NEWFANGLED {ACTION($$,NEXTFROMEXPR,$2);
 				 compucomesused=1; nextfromsused=1;}}
 /* AIS: CREATE takes an 'unknown statement' as a template */
-        |    CREATE unknownstatement {NEWFANGLED{ACTARGET($$,CREATE,$2,$1); cacsofar=0;}}
-        |    COMPUCREATE expr unknownsif {NEWFANGLED{ACTION($$,COMPUCREATE,
-					  cons(INTERSECTION,$2,$3)); cacsofar=0;}}
+	|    CREATE unknownstatement {NEWFANGLED{ACTARGET($$,CREATE,$2,$1); cacsofar=0;}}
+	|    COMPUCREATE expr unknownsif {NEWFANGLED{ACTION($$,COMPUCREATE,
+					     cons(INTERSECTION,$2,$3)); cacsofar=0;}}
+/* AIS: or an unknown expression */
+	|    CREATE unop        {NEWFANGLED{ACTARGET($$,CREATE,$2,$1);
+                                 cacsofar=0;}}
+	|    COMPUCREATE unambig unop
+				{NEWFANGLED{ACTION($$,COMPUCREATE,
+				 cons(INTERSECTION,$2,$3)); cacsofar=0;}}
 /* AIS: Just-in-case compilation of unknown statements */
-        |    unknownstatement   {NEWFANGLED {ACTION($$,UNKNOWN,$1); cacsofar=0;}}
+	|    unknownstatement	{NEWFANGLED {ACTION($$,UNKNOWN,$1); cacsofar=0;}}
 /* AIS: Added the yyerrok */
 	|    BADCHAR		{yyclearin; yyerrok; $$ = splat(1); cacsofar=0;}
-        |    error		{yyclearin; yyerrok; $$ = splat(1); cacsofar=0;}
+	|    error		{yyclearin; yyerrok; $$ = splat(1); cacsofar=0;}
 	;
 
 /* AIS: Unknown statements. The rule here is that we can't have two non-ID
    unknowns in a row, but two IDs in a row are acceptable. */
 unknownstatement : unknownatom {$$ = $1; intern(ick_TWOSPOT,cacsofar+++1601);}
 		 | unknownsin unknownatom {$$=cons(INTERSECTION,$1,$2);
-		   	      		   intern(ick_TWOSPOT,cacsofar+++1601);}
-                 | unknownsin {$$ = $1;}
+					   intern(ick_TWOSPOT,cacsofar+++1601);}
+		 | unknownsin {$$ = $1;}
 		 ;
 
-unknownsif       : unknownaid {$$ = $1;}
-                 | unknownaid unknownstatement {$$=cons(INTERSECTION,$1,$2);}
+unknownsif	 : unknownaid {$$ = $1;}
+		 | unknownaid unknownstatement {$$=cons(INTERSECTION,$1,$2);}
 
 unknownsin	 : unknownaid {$$ = $1;}
 		 | unknownstatement unknownaid {$$=cons(INTERSECTION,$1,$2);}
@@ -339,23 +345,23 @@ unknownsin	 : unknownaid {$$ = $1;}
 /* Each of the possible unknown atoms, apart from arrays and IDs, generates
    operand overloading info if CREATEs or external calls are used, so that
    the implied overloading of a CREATE will work. */
-unknownatom      : subscr	{$$=cons(US_ELEM,0,$1);
-                                   if(createsused){
-                                     opoverused=1; if(!firstslat)
+unknownatom	 : subscr	{$$=cons(US_ELEM,0,$1);
+				   if(createsused){
+				     opoverused=1; if(!firstslat)
 				       firstslat=$$; else
 				       prevslat->nextslat=$$;
 				     prevslat=$$;
 				     $$->nextslat=0;}}
-		 | scalar    	{$$=cons(US_SCALAR,0,$1);
-                                   if(createsused){
-                                     opoverused=1; if(!firstslat)
+		 | scalar	{$$=cons(US_SCALAR,0,$1);
+				   if(createsused){
+				     opoverused=1; if(!firstslat)
 				       firstslat=$$; else
 				       prevslat->nextslat=$$;
 				     prevslat=$$;
 				     $$->nextslat=0;}}
-		 | notanlvalue 	{$$=cons(US_EXPR,0,$1);
-                                   if(createsused){
-                                     opoverused=1; if(!firstslat)
+		 | notanlvalue	{$$=cons(US_EXPR,0,$1);
+				   if(createsused){
+				     opoverused=1; if(!firstslat)
 				       firstslat=$$; else
 				       prevslat->nextslat=$$;
 				     prevslat=$$;
@@ -363,7 +369,7 @@ unknownatom      : subscr	{$$=cons(US_ELEM,0,$1);
 		 | ick_array	{$$=cons(US_ARRVAR,0,$1);}
 		 ;
 
-unknownaid  	 : UNKNOWNID    {$$=newnode(); $$->opcode=US_ID; $$->constant=$1;}
+unknownaid	 : UNKNOWNID	{$$=newnode(); $$->opcode=US_ID; $$->constant=$1;}
 		 ;
 
 /* gerund lists are used by ABSTAIN and REINSTATE */
@@ -502,8 +508,8 @@ osubscr1:   oparray SUB sublist1
 	;
 
 /* AIS: Unknown operators */
-unop    :   BADCHAR                     {$$ = newnode(); $$->opcode = BADCHAR;
-	    				 $$->constant = $1;}
+unop	:   BADCHAR			{$$ = newnode(); $$->opcode = BADCHAR;
+					 $$->constant = $1;}
 	;
 
 /* here goes the general expression syntax */
@@ -512,8 +518,8 @@ expr	:   unambig			{$$ = $1;}
    (Strangely, that simplifies this section somewhat.) */
 	|   unambig SELECT expr		{$$ = cons(SELECT, $1, $3);}
 	|   unambig MINGLE expr		{$$ = cons(MINGLE, $1, $3);}
-        |   unambig unop expr           {$$ = cons(UNKNOWNOP, $2,
-	                                 cons(INTERSECTION, $1, $3));}
+	|   unambig unop expr		{$$ = cons(UNKNOWNOP, $2,
+					 cons(INTERSECTION, $1, $3));}
 /* AIS: Operand overloading */
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
@@ -529,8 +535,8 @@ notanlvalue:nlunambig			{$$ = $1;}
 	|   osubscr			{$$ = $1;}
 	|   unambig SELECT expr		{$$ = cons(SELECT, $1, $3);}
 	|   unambig MINGLE expr		{$$ = cons(MINGLE, $1, $3);}
-        |   unambig unop expr           {$$ = cons(UNKNOWNOP, $2,
-	                                 cons(INTERSECTION, $1, $3));}
+	|   unambig unop expr		{$$ = cons(UNKNOWNOP, $2,
+					 cons(INTERSECTION, $1, $3));}
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
 					 firstslat=$$; else
@@ -542,8 +548,8 @@ notanlvalue:nlunambig			{$$ = $1;}
 limexpr :   limunambig			{$$ = $1;}
 	|   limunambig SELECT expr	{$$ = cons(SELECT, $1, $3);}
 	|   limunambig MINGLE expr	{$$ = cons(MINGLE, $1, $3);}
-        |   limunambig unop expr        {$$ = cons(UNKNOWNOP, $2,
-	                                 cons(INTERSECTION, $1, $3));}
+	|   limunambig unop expr	{$$ = cons(UNKNOWNOP, $2,
+					 cons(INTERSECTION, $1, $3));}
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
 					 firstslat=$$; else
