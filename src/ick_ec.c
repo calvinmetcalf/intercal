@@ -50,6 +50,15 @@ static int ick_forgetamount = 0;
 unsigned long ick_global_goto;
 void* ick_global_createdata;
 
+/* Do a CREATEd operator check and call. */
+/*@maynotreturn@*/ uint32_t ick_dounop(char* unopstr,
+				       uint32_t arg1,
+				       uint32_t arg2,
+				       int emitlineno,
+			/*@observer@*/ char* errstr)
+{
+}
+
 /* Do a NEXT or goto. Gotos don't work with an empty NEXT stack, but that's
    trivial to correct by doing a NEXT at the start of the program. */
 /*@maynotreturn@*/ void ick_dogoto(unsigned long linelabel,

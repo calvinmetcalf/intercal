@@ -1211,6 +1211,10 @@ static void revprexpr(node *np, FILE *fp, node *target)
 }
 /*@=temptrans@*/ /*@=kepttrans@*/ /*@=compdestroy@*/ /*@=branchstate@*/
 
+/*@observer@*/ static char* E000string; /* AIS */
+
+static int prunknownstr(node*, FILE*); /* AIS */
+
 /* AIS: Destaticed */
 /* Splint doesn't understand the concept of a function which might or might
    not free its argument. That's a pity, because its checking would come in
@@ -1239,8 +1243,25 @@ void prexpr(node *np, FILE *fp, int freenode)
 	(void) fprintf(fp, ")");
 	break;
 
-    case UNKNOWNOP: /* AIS //tk */
-      (void) fprintf(fp, "0");
+    case UNKNOWNOP: /* AIS */
+      if(!useickec || !createsused)
+      {
+	/* CREATEd operators require -ea */
+	(void) fprintf(fp, "(ick_lose(IE000, ick_lineno, \"%s\"),0)",
+		       E000string);
+	break;
+      }
+      /* We need to do the same as UNKNOWN statements, but as an expression.
+	 This is achieved with the helper function ick_dounop in ick_ec.c. */
+      (void) fprintf(fp, "ick_dounop(\"");
+      prunknownstr(np->lval, fp);
+      if(freenode) free(np->lval);
+      (void) fprintf(fp, "\", ");
+      prexpr(np->rval->lval, fp, freenode);
+      (void) fprintf(fp, ", ");
+      prexpr(np->rval->rval, fp, freenode);
+      (void) fprintf(fp, ", lineno, \"%s\")", E000string);
+      if(freenode) free(np->rval);
       break;
 
     case BACKSLAT: /* AIS */
@@ -1556,11 +1577,11 @@ static int prunknownstr(node *np, FILE* fp)
     return i;
   case BADCHAR:
     if (np->constant > 256)
-      (void) fprintf(fp, "o%c%c",
-		     (char)(np->constant / 256),
-		     (char)(np->constant % 256));
+      (void) fprintf(fp, "o%xx%x",
+		     (int)(np->constant / 256),
+		     (int)(np->constant % 256));
     else
-      (void) fprintf(fp, "u%c", (char)np->constant);
+      (void) fprintf(fp, "u%x", (int)np->constant);
     return 2;
   case US_ID: (void) fputc((char)np->constant, fp); return 0;
   case US_ELEM: (void) fputc(';', fp); return 1;
@@ -1810,8 +1831,18 @@ void emit(tuple *tn, FILE *fp)
 	emitlineno = tn[1].ick_lineno;
     else
 	emitlineno = iyylineno;
-    if(!pickcompile) /* AIS: PICs can't report errors, so don't bother with ick_lineno */
+    if(!pickcompile) /* AIS: PICs can't report errors,
+			so don't bother with ick_lineno */
       (void) fprintf(fp, "    ick_lineno = %d;\n", emitlineno);
+
+    /* AIS: figure out which line we're on, so E000 can be done correctly */
+    if (tn < tuples + ick_lineno - 1)
+      dim = tn[1].ick_lineno - tn->ick_lineno;
+    else
+      dim = iyylineno - tn->ick_lineno;
+    if (tn->sharedline)
+      ++dim;
+    E000string=nice_text(textlines + tn->ick_lineno, dim);
 
     /* AIS: set weaving status if necessary */
     if(tn->setweave)
