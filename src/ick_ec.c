@@ -69,6 +69,7 @@ extern ick_overop* ick_oo_twospots;
 			/*@observer@*/ char* errstr)
 {
   int st;
+  uint32_t rv;
   st = ick_jicmatch(unopstr);
   if(st)
   {
@@ -83,6 +84,7 @@ extern ick_overop* ick_oo_twospots;
     ick_oo_twospots[vi3]=icd[2].accessors;
     ick_global_createdata=icd;
     ick_dogoto(st, emitlineno, 1);
+    rv = og3(ick_twospots[vi3]);
     ick_retrieve(ick_twospots+vi1, ick_TWOSPOT, vi1,
 		 ick_twoforget[vi1], ick_oo_twospots);
     ick_retrieve(ick_twospots+vi2, ick_TWOSPOT, vi2,
@@ -92,7 +94,7 @@ extern ick_overop* ick_oo_twospots;
   }
   else
     ick_lose(IE000, emitlineno, errstr);
-  return og3(ick_twospots[vi3]);
+  return rv;
 }
 
 /* Do a NEXT or goto. Gotos don't work with an empty NEXT stack, but that's

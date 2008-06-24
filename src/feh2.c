@@ -296,7 +296,8 @@ void typecast(node *np)
     if (np->opcode == MESH || np->opcode == ick_ONESPOT || np->opcode == ick_TAIL)
 	np->width = 16;
     else if (np->opcode == ick_TWOSPOT || np->opcode == ick_HYBRID
-		|| np->opcode == MINGLE || np->opcode == MESH32)
+	     || np->opcode == MINGLE || np->opcode == MESH32
+	     || np->opcode == UNKNOWNOP /* AIS */)
 	np->width = 32;
     else if (np->opcode == AND || np->opcode == OR || np->opcode == XOR ||
 	     np->opcode == FIN ||
@@ -304,7 +305,7 @@ void typecast(node *np)
 	np->width = np->rval->width;
     else if (np->opcode == SELECT)
 	np->width = np->rval->width;	/* n-bit select has an n-bit result */
-    else if (np->opcode == UNKNOWNOP || np->opcode == INTERSECTION) /* AIS */
+    else if (np->opcode == INTERSECTION) /* AIS */
         np->width = (np->rval ?
 		     np->lval ? np->rval->width == 16 ? np->lval->width : 32 :
 		     np->rval->width : np->lval ? np->lval->width : 32);

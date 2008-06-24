@@ -524,7 +524,7 @@ expr	:   unambig			{$$ = $1;}
 					  if(!firstslat) firstslat=$1;
                                           else prevslat->nextslat=$1;
 				     	  $1->nextslat=$3; prevslat=$3;
-					  $3->nextslat=0;
+					  $3->nextslat=0; opoverused=1;
   					  intern(ick_TWOSPOT, 1601);
 					  intern(ick_TWOSPOT, 1602);
 					  intern(ick_TWOSPOT, 1603);}}
@@ -549,7 +549,7 @@ notanlvalue:nlunambig			{$$ = $1;}
 					  if(!firstslat) firstslat=$1;
                                           else prevslat->nextslat=$1;
 				     	  $1->nextslat=$3; prevslat=$3;
-					  $3->nextslat=0;
+					  $3->nextslat=0; opoverused=1;
   					  intern(ick_TWOSPOT, 1601);
 					  intern(ick_TWOSPOT, 1602);
 					  intern(ick_TWOSPOT, 1603);}}
@@ -570,7 +570,7 @@ limexpr :   limunambig			{$$ = $1;}
 					  if(!firstslat) firstslat=$1;
                                           else prevslat->nextslat=$1;
 				     	  $1->nextslat=$3; prevslat=$3;
-					  $3->nextslat=0;
+					  $3->nextslat=0; opoverused=1;
   					  intern(ick_TWOSPOT, 1601);
 					  intern(ick_TWOSPOT, 1602);
 					  intern(ick_TWOSPOT, 1603);}}
