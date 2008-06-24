@@ -147,7 +147,7 @@ temp/oilout-m.c: src/idiotism.oil temp/oil@EXEEXT@
 	bash -c 'cd temp && rm -f oilout*.c && ./oil@EXEEXT@ < ../src/idiotism.oil && cd ..'
 temp/oilout-m.@OBJEXT@: temp/oilout-m.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
 	-rm -f temp/oilout*.@OBJEXT@
-	$(CC) $(CFLAGS) -c temp/oilout*.c
+	bash -c 'for f in temp/oilout*.c ; do echo Compiling $$f... ; $(CC) $(CFLAGS) -c $$f; done'
 	-mv oilout*.@OBJEXT@ temp
 temp/dekludge.@OBJEXT@: src/dekludge.c src/feh.h temp/parser.h src/ick.h src/fiddle.h src/ick_lose.h src/sizes.h temp/config.h
 	$(CC) $(CFLAGS) -c -o temp/dekludge.@OBJEXT@ src/dekludge.c
