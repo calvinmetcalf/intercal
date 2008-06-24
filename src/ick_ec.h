@@ -240,7 +240,15 @@ void ick_scheduleforget(unsigned short);
 /*@noreturn@*/ void ick_doresume(unsigned short, int);
 /*@maynotreturn@*/ void ick_checksuckpoint(unsigned long);
 void ick_runstartups(void);
-/*@maynotreturn@*/ uint32_t ick_dounop(char*, uint32_t, uint32_t, int, char*);
+/*@maynotreturn@*/ uint32_t ick_dounop(char*, uint32_t, uint32_t, int,
+				       unsigned long, unsigned long, unsigned long,
+				       ick_type32(*)(ick_type32),
+				       ick_type32(*)(ick_type32),
+				       ick_type32(*)(ick_type32),
+				       void(*)(ick_type32, void(*)()),
+				       void(*)(ick_type32, void(*)()),
+				       void(*)(ick_type32, void(*)()),
+				       char*);
 
 void ick_allecfuncs(void); /* in generated program */
 

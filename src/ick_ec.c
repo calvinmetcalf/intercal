@@ -50,13 +50,49 @@ static int ick_forgetamount = 0;
 unsigned long ick_global_goto;
 void* ick_global_createdata;
 
+extern ick_overop* ick_oo_twospots;
+
 /* Do a CREATEd operator check and call. */
 /*@maynotreturn@*/ uint32_t ick_dounop(char* unopstr,
 				       uint32_t arg1,
 				       uint32_t arg2,
 				       int emitlineno,
+				       unsigned long vi1,
+				       unsigned long vi2,
+				       unsigned long vi3,
+				       ick_type32 (*og1)(ick_type32),
+				       ick_type32 (*og2)(ick_type32),
+				       ick_type32 (*og3)(ick_type32),
+				       void (*os1)(ick_type32, void(*)()),
+				       void (*os2)(ick_type32, void(*)()),
+				       void (*os3)(ick_type32, void(*)()),
 			/*@observer@*/ char* errstr)
 {
+  int st;
+  st = ick_jicmatch(unopstr);
+  if(st)
+  {
+    ick_createdata icd[3]={{16,0,1601,{og1,os1},arg1},
+			   {16,0,1602,{og2,os2},arg2},
+			   {16,0,1603,{og3,os3},0}};
+    ick_stash(ick_TWOSPOT, vi1, ick_twospots+vi1, ick_oo_twospots);
+    ick_stash(ick_TWOSPOT, vi2, ick_twospots+vi2, ick_oo_twospots);
+    ick_stash(ick_TWOSPOT, vi3, ick_twospots+vi3, ick_oo_twospots);
+    ick_oo_twospots[vi1]=icd[0].accessors;
+    ick_oo_twospots[vi2]=icd[1].accessors;
+    ick_oo_twospots[vi3]=icd[2].accessors;
+    ick_global_createdata=icd;
+    ick_dogoto(st, emitlineno, 1);
+    ick_retrieve(ick_twospots+vi1, ick_TWOSPOT, vi1,
+		 ick_twoforget[vi1], ick_oo_twospots);
+    ick_retrieve(ick_twospots+vi2, ick_TWOSPOT, vi2,
+		 ick_twoforget[vi2], ick_oo_twospots);
+    ick_retrieve(ick_twospots+vi3, ick_TWOSPOT, vi3,
+		 ick_twoforget[vi3], ick_oo_twospots);
+  }
+  else
+    ick_lose(IE000, emitlineno, errstr);
+  return og3(ick_twospots[vi3]);
 }
 
 /* Do a NEXT or goto. Gotos don't work with an empty NEXT stack, but that's

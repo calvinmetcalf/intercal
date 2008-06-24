@@ -348,24 +348,24 @@ unknownsin	 : unknownaid {$$ = $1;}
 unknownatom	 : subscr	{$$=cons(US_ELEM,0,$1);
 				   if(createsused){
 				     opoverused=1; if(!firstslat)
-				       firstslat=$$; else
-				       prevslat->nextslat=$$;
-				     prevslat=$$;
-				     $$->nextslat=0;}}
+				       firstslat=$1; else
+				       prevslat->nextslat=$1;
+				     prevslat=$1;
+				     $1->nextslat=0;}}
 		 | scalar	{$$=cons(US_SCALAR,0,$1);
 				   if(createsused){
 				     opoverused=1; if(!firstslat)
-				       firstslat=$$; else
-				       prevslat->nextslat=$$;
-				     prevslat=$$;
-				     $$->nextslat=0;}}
+				       firstslat=$1; else
+				       prevslat->nextslat=$1;
+				     prevslat=$1;
+				     $1->nextslat=0;}}
 		 | notanlvalue	{$$=cons(US_EXPR,0,$1);
 				   if(createsused){
 				     opoverused=1; if(!firstslat)
-				       firstslat=$$; else
-				       prevslat->nextslat=$$;
-				     prevslat=$$;
-				     $$->nextslat=0;}}
+				       firstslat=$1; else
+				       prevslat->nextslat=$1;
+				     prevslat=$1;
+				     $1->nextslat=0;}}
 		 | ick_array	{$$=cons(US_ARRVAR,0,$1);}
 		 ;
 
@@ -519,13 +519,21 @@ expr	:   unambig			{$$ = $1;}
 	|   unambig SELECT expr		{$$ = cons(SELECT, $1, $3);}
 	|   unambig MINGLE expr		{$$ = cons(MINGLE, $1, $3);}
 	|   unambig unop expr		{$$ = cons(UNKNOWNOP, $2,
-					 cons(INTERSECTION, $1, $3));}
+					 cons(INTERSECTION, $1, $3));
+   					 if(useickec && createsused) {
+					  if(!firstslat) firstslat=$1;
+                                          else prevslat->nextslat=$1;
+				     	  $1->nextslat=$3; prevslat=$3;
+					  $3->nextslat=0;
+  					  intern(ick_TWOSPOT, 1601);
+					  intern(ick_TWOSPOT, 1602);
+					  intern(ick_TWOSPOT, 1603);}}
 /* AIS: Operand overloading */
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
-					 firstslat=$$; else
-					 prevslat->nextslat=$$; prevslat=$$;
-					 $$->nextslat=0;}}
+					 firstslat=$3; else
+					 prevslat->nextslat=$3; prevslat=$3;
+					 $3->nextslat=0;}}
 	|   subscr			{$$ = $1;}
 	|   osubscr			{$$ = $1;}
 	;
@@ -536,12 +544,20 @@ notanlvalue:nlunambig			{$$ = $1;}
 	|   unambig SELECT expr		{$$ = cons(SELECT, $1, $3);}
 	|   unambig MINGLE expr		{$$ = cons(MINGLE, $1, $3);}
 	|   unambig unop expr		{$$ = cons(UNKNOWNOP, $2,
-					 cons(INTERSECTION, $1, $3));}
+					 cons(INTERSECTION, $1, $3));
+   					 if(useickec && createsused) {
+					  if(!firstslat) firstslat=$1;
+                                          else prevslat->nextslat=$1;
+				     	  $1->nextslat=$3; prevslat=$3;
+					  $3->nextslat=0;
+  					  intern(ick_TWOSPOT, 1601);
+					  intern(ick_TWOSPOT, 1602);
+					  intern(ick_TWOSPOT, 1603);}}
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
-					 firstslat=$$; else
-					 prevslat->nextslat=$$; prevslat=$$;
-					 $$->nextslat=0;}}
+					 firstslat=$3; else
+					 prevslat->nextslat=$3; prevslat=$3;
+					 $3->nextslat=0;}}
 	;
 
 /* AIS: an expr that doesn't start with a unary operator */
@@ -549,12 +565,20 @@ limexpr :   limunambig			{$$ = $1;}
 	|   limunambig SELECT expr	{$$ = cons(SELECT, $1, $3);}
 	|   limunambig MINGLE expr	{$$ = cons(MINGLE, $1, $3);}
 	|   limunambig unop expr	{$$ = cons(UNKNOWNOP, $2,
-					 cons(INTERSECTION, $1, $3));}
+					 cons(INTERSECTION, $1, $3));
+   					 if(useickec && createsused) {
+					  if(!firstslat) firstslat=$1;
+                                          else prevslat->nextslat=$1;
+				     	  $1->nextslat=$3; prevslat=$3;
+					  $3->nextslat=0;
+  					  intern(ick_TWOSPOT, 1601);
+					  intern(ick_TWOSPOT, 1602);
+					  intern(ick_TWOSPOT, 1603);}}
 	|   scalar SLAT expr		{NEWFANGLED{$$ = cons(SLAT, $1, $3);
 					 opoverused=1; if(!firstslat)
-					 firstslat=$$; else
-					 prevslat->nextslat=$$; prevslat=$$;
-					 $$->nextslat=0;}}
+					 firstslat=$3; else
+					 prevslat->nextslat=$3; prevslat=$3;
+					 $3->nextslat=0;}}
 	|   subscr			{$$ = $1;}
 	|   osubscr			{$$ = $1;}
 	;

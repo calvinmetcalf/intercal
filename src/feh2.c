@@ -305,7 +305,9 @@ void typecast(node *np)
     else if (np->opcode == SELECT)
 	np->width = np->rval->width;	/* n-bit select has an n-bit result */
     else if (np->opcode == UNKNOWNOP || np->opcode == INTERSECTION) /* AIS */
-        np->width = (np->rval->width == 16 ? np->lval->width : 32);
+        np->width = (np->rval ?
+		     np->lval ? np->rval->width == 16 ? np->lval->width : 32 :
+		     np->rval->width : np->lval ? np->lval->width : 32);
     else if (np->opcode == BADCHAR) /* AIS */
         np->width = 16;
     else if (np->opcode == SUB)
@@ -1097,9 +1099,9 @@ static void revprexpr(node *np, FILE *fp, node *target)
        Technically speaking, np->rval could be casted to anything; but
        all implementations I've ever seen cast unique pointers to unique
        numbers, which is good enough for our purposes. */
-    (void) fprintf(fp, ".get=ick_og%lx;\n  ", (unsigned long)np);
+    (void) fprintf(fp, ".get=ick_og%lx;\n  ", (unsigned long)np->rval);
     ooprvar(np->lval, fp, 0);
-    (void) fprintf(fp, ".set=ick_os%lx;\n", (unsigned long)np);
+    (void) fprintf(fp, ".set=ick_os%lx;\n", (unsigned long)np->rval);
     break;
 
   case AND:
@@ -1257,10 +1259,23 @@ void prexpr(node *np, FILE *fp, int freenode)
       prunknownstr(np->lval, fp);
       if(freenode) free(np->lval);
       (void) fprintf(fp, "\", ");
-      prexpr(np->rval->lval, fp, freenode);
+      prexpr(np->rval->lval, fp, 0);
       (void) fprintf(fp, ", ");
-      prexpr(np->rval->rval, fp, freenode);
-      (void) fprintf(fp, ", lineno, \"%s\")", E000string);
+      prexpr(np->rval->rval, fp, 0);
+      (void) fprintf(fp,
+		     ", ick_lineno, %luUL, %luUL, %luUL"
+		     ", ick_og%lx, ick_og%lx, og2spot%lu"
+		     ", ick_os%lx, ick_os%lx, os2spot%lu, \"%s\")",
+		     intern(ick_TWOSPOT, 1601),
+		     intern(ick_TWOSPOT, 1602),
+		     intern(ick_TWOSPOT, 1603),
+		     (unsigned long) np->rval->lval,
+		     (unsigned long) np->rval->rval,
+		     intern(ick_TWOSPOT, 1603),
+		     (unsigned long) np->rval->lval,
+		     (unsigned long) np->rval->rval,
+		     intern(ick_TWOSPOT, 1603),
+		     E000string);
       if(freenode) free(np->rval);
       break;
 
@@ -1279,9 +1294,9 @@ void prexpr(node *np, FILE *fp, int freenode)
 	 Technically speaking, np->rval could be casted to anything; but
 	 all implementations I've ever seen cast unique pointers to unique
 	 numbers, which is good enough for our purposes. */
-      (void) fprintf(fp, ".get=ick_og%lx),(", (unsigned long)np);
+      (void) fprintf(fp, ".get=ick_og%lx),(", (unsigned long)np->rval);
       ooprvar(np->lval, fp, 0);
-      (void) fprintf(fp, ".set=ick_os%lx),(", (unsigned long)np);
+      (void) fprintf(fp, ".set=ick_os%lx),(", (unsigned long)np->rval);
       prvar(np->lval, fp, freenode);
       /* np->rval will be freed later, when its expression is printed */
       (void) fprintf(fp, "))");
@@ -1610,7 +1625,8 @@ static void prunknowncreatedata(node *np, FILE* fp)
     break;
   case US_ARRVAR: /* an array doesn't itself have a value */
     ve=varextern(np->rval->constant,np->rval->opcode);
-    fprintf(fp,"\t\t{%d,1,%lu,{ick_ieg277,ick_ies277},0},\n",np->rval->width,ve);
+    fprintf(fp,"\t\t{%d,1,%lu,{ick_ieg277,ick_ies277},0},\n",
+	    np->rval->width,ve);
     return;
   case US_ELEM: /* these two cases are actually treated the same way, */
   case US_EXPR: /* because expressions can be assigned to */
@@ -1619,7 +1635,8 @@ static void prunknowncreatedata(node *np, FILE* fp)
   default: ick_lose(IE778, emitlineno, (char*) NULL);
   }
   if(createsused)
-    fprintf(fp,"{ick_og%lx,ick_os%lx},",(unsigned long)np,(unsigned long)np);
+    fprintf(fp,"{ick_og%lx,ick_os%lx},",
+	    (unsigned long)np->rval,(unsigned long)np->rval);
   else
     fprintf(fp,"{0,0},");
   prexpr(np->rval,fp,0);
@@ -2397,7 +2414,7 @@ void emit(tuple *tn, FILE *fp)
 	}
 	fprintf(fp,"\t""if(ick_next) free(ick_next);\n");
 	if(useickec)
-	  fprintf(fp,"\t""if(ick_next_jumpbufs) free(ick_next_jumpbufs);\n");
+	  fprintf(fp,"\t""if(ick_next_jmpbufs) free(ick_next_jmpbufs);\n");
       }
       (void) fprintf(fp, "\t""exit(0);\n");
       break;
@@ -2774,12 +2791,12 @@ void emitslat(FILE* fp)
 	    "    f(a,0);\n    return;\n  }\n  l=1;\n",
 	    (unsigned long)np,t);
     temp=cons(C_A, 0, 0);
-    revprexpr(np->rval, fp, temp); /* revprexpr can't free */
+    revprexpr(np, fp, temp); /* revprexpr can't free */
     fprintf(fp,"  l=0;\n}\n");
     fprintf(fp,"%s ick_og%lx(%s t)\n{\n  %s a;\n  static int l=0;\n"
 	    "  if(l) return t;\n  l=1;\n  a=",
 	    t,(unsigned long)np,t,t);
-    prexpr(np->rval, fp, 0);
+    prexpr(np, fp, 0);
     fprintf(fp,";\n  l=0;\n  return a;\n}\n");
     np=np->nextslat;
   }
@@ -2799,8 +2816,7 @@ void emitslat(FILE* fp)
   while(np)
   {
     temp=np->nextslat;
-    nodefree(np->rval);
-    free(np);
+    nodefree(np);
     np=temp;
   }
   /* JH: clear firstslat */

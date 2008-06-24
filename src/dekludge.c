@@ -386,7 +386,8 @@ void nodefree(/*@keep@*/ /*@null@*/ node *np)
 {
   if(!np) return;
   /*@-mustfreeonly@*/
-  if(np->opcode==SLAT) return; /* mustn't be freed yet */
+  if(np->nextslat) return; /* don't free, has oo data */
+  if(np==prevslat) return; /* likewise */
   /*@=mustfreeonly@*/
   /*@-keeptrans@*/
   nodefree(np->lval);

@@ -1011,7 +1011,7 @@ int main(int argc, char *argv[])
 				    "int onespotcount = %d;\n",
 				    nonespots);
 		   }
-		   if(multithread || opoverused) /* AIS */
+		   if(multithread || opoverused || useickec) /* AIS */
 		   {
 		     int temp=nonespots;
 		     (void) fprintf(ofp,
@@ -1045,7 +1045,7 @@ int main(int argc, char *argv[])
 				    "int twospotcount = %d;\n",
 				    ntwospots);
 		   }
-		   if(multithread || opoverused) /* AIS */
+		   if(multithread || opoverused || useickec) /* AIS */
 		   {
 		     int temp=ntwospots;
 		     (void) fprintf(ofp,

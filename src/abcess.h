@@ -214,7 +214,7 @@ extern ick_array* ick_tails;
 extern ick_bool* ick_tailforget;
 extern ick_array* ick_hybrids;
 extern ick_bool* ick_hyforget;
-#if (MULTITHREAD != 0)
+#if (MULTITHREAD != 0) || defined(ICK_EC)
 /*@null@*/ extern ick_overop* ick_oo_onespots;
 /*@null@*/ extern ick_overop* ick_oo_twospots;
 #endif
