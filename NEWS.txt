@@ -106,6 +106,9 @@ Changes by Alex Smith
 18. Plugged a couple of small memory leaks; however, there are still several
     much bigger memory leaks that could do with being fixed.
 
+19. Added support for CREATING operators, with similar syntax to the CREATION
+    of commands.  This requires the -ea options to be set to work properly.
+
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
 Patches, suggestions and bugs found by Joris Huizer

@@ -851,7 +851,9 @@ programs in other languages that have been written to be able to link
 to @ical{} programs.  It also allows expansion libraries to be
 specified on the command line, after the @ical{} program (expansion
 libraries are given with no extension). For more information,
-@xref{External Calls}.
+@xref{External Calls}.  Also, both the @option{-a} and @option{-e}
+options must be set to use CREATEd operators (regardless of whether
+external calls are used or not).
 
 @ianchorc -E
 @opindex -E
@@ -881,7 +883,8 @@ Note that enabling it carries a run-time penalty, as it means that
 operand overloading code has to be generated for every variable in the
 program. (This option is not necessarily needed for the external call
 version of CREATE to work, but the external call version has fewer
-features without it.)
+features without it.)  Note that @option{-e} (@pxref{-e}) also needs
+to be set to be able to CREATE operators.
 
 @ianchor -v
 @opindex -v
