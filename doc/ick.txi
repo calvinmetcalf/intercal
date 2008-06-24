@@ -4603,6 +4603,36 @@ statements at compile time without knowing what they are).  The actual
 expressions used in the @code{CREATE} statement don't matter; they're
 just examples for the runtime to match against.
 
+@cindex CREATE, operators
+It is also possible (from @cic{} version 0.29 onwards) to create new
+operators.  Such operators are always binary operators (that is, they
+take two arguments and parse like mingle or select), and always return
+32-bit results.  There are three types of legal names for such
+operators, all of which are treated equivalently: lowercase letters,
+punctuation marks otherwise unused in @ical{}, and overstrikes
+consisting of a character, a backspace, and another character (apart
+from overstrikes already used for built-in @ical{} operators).  The
+syntax for creating an operator looks like one of these:
+
+@example
+DO CREATE (5) x
+DO CREATE .5 =
+@end example
+
+The arguments to the operator will be overloaded onto :1601 and :1602
+(which are, like with @code{CREATE}d statements, stashed before the
+overloading happens), and the return value is read from :1603 (which
+is stashed, then overloaded to itself).  All these three variables are
+retrieved again after the operator finishes evaluating.
+
+Note that it is a very unwise idea to use a @code{CREATE}d operator in
+the expression for a computed @code{COME FROM} or @code{NEXT FROM},
+because this always leads to an infinite regress; whenever any line
+label is reached (including the line label that the @code{CREATE}
+statement pointed at), the expression needs to be evaluated in order
+to determine whether to @code{COME FROM} that point, which in turn
+involves evaluating lines which have labels.
+
 Some other points: a newer @code{CREATE} statement supercedes an older
 @code{CREATE} statement if they give equivalent templates, multiple
 @code{CREATE} statements may aim at the same line (this is the
@@ -5083,6 +5113,14 @@ other things (say, to be able to match all expressions), you will need
 to submit multiple signatures using multiple calls to
 @code{ick_create}; maybe you could write a library to do that
 automatically.
+
+@code{CREATE}d operators also have signatures, but of quite a
+different form.  The signature for a single-character operator is a
+lowercase u, followed by its character code in hexadecimal (no leading
+zeros, and in lowercase); the signature for an overstrike is a
+lowercase o, followed by the lower relevant character code in
+hexadecimal, followed by a lowercase x, followed by the higher
+relevant character code in hexadecimal.
 
 The routine that is @code{NEXT}ed to will presumably want to be able
 to see what in the @ical{} program was matched by the signature, so a
