@@ -570,11 +570,12 @@ int main(int argc, char *argv[])
       }
       *chp++ = '\0';
 
-      if(useickec && (!strcmp(chp,"c") || !strcmp(chp,"cio"))) /* AIS */
+      if(useickec && (!strcmp(chp,"c") || !strcmp(chp,"cio") ||
+		      !strcmp(chp,"c99"))) /* AIS */
       {
 	if(firstfile != ick_FALSE) /* need exactly 1 INTERCAL file */
 	  ick_lose(IE998, 1, (char *)NULL);
-	break; /* don't process C or cio files further yet */
+	continue; /* don't process C or cio files further yet */
       }
 
       if(useickec && firstfile == ick_FALSE) /* AIS */
@@ -1484,6 +1485,7 @@ int main(int argc, char *argv[])
     char* buf2ptr;
     long remspace;
     char* tempfn="ickectmp.c";
+    int needc99=0;
 #if __DJGPP__
     /* Look for a temp directory, as above. */
     if(isenv("TMP")) tempfn="/dev/env/TMP/ickectmp.c";
@@ -1513,8 +1515,14 @@ int main(int argc, char *argv[])
 #else
       (void) snprintf(buf2, sizeof buf2,
 #endif
-		      "%s -E -I%s -I%s -I%s/../include %s.c > %s.cio",
-		      compiler, includedir, path, path, argv[optind], argv[optind]);
+		      "%s --std=c%d -E -I%s -I%s -I%s/../include "
+		      "-x c %s.c%c%c > %s.cio",
+		      compiler, argv[optind][strlen(argv[optind])+2]=='9'?99:89,
+		      includedir, path, path, argv[optind],
+		      argv[optind][strlen(argv[optind])+2]=='9'?
+		      (needc99=1),'9':' ',
+		      argv[optind][strlen(argv[optind])+2]=='9'?'9':' ',
+		      argv[optind]);
       if(argv[optind][strlen(argv[optind])+2]=='\0' /* it was a .c or .i file */
 	 ||argv[optind][strlen(argv[optind])+3]!='o') /* it was a .2-7i file */
 	(void) system(buf2); /* run the C preprocessor */
@@ -1623,8 +1631,9 @@ int main(int argc, char *argv[])
 #ifndef __DJGPP__
 "-Wl,-z,muldefs "
 #endif
-"-DICK_HAVE_STDINT_H=%s -x c %s", compiler, libdir,
-path, path, argv[oldoptind], cdebug?" -g":"", IHSH, tempfn);
+"-DICK_HAVE_STDINT_H=%s -x c --std=c%d %s", compiler, libdir,
+path, path, argv[oldoptind], cdebug?" -g":"", IHSH,
+needc99?99:89,tempfn);
 #if 0
       ); /* for Emacs' autoindenter */
 #endif
