@@ -59,7 +59,10 @@ LICENSE TERMS
 #define CC "gcc"
 #endif
 
-#define ARGSTRING "abcdefghlmoptuvwxyCEFHOPUX@"
+#define ARGSTRING "abcdefghlmoptuvwxyCEFHOPUYX@"
+
+#define ICK_SYSTEM(x) do{if(showsystem)fprintf(stderr,"%s\n",x); \
+    (void) system(x);}while(0)
 
 #ifdef USE_YYRESTART
 /* function supplied by lex */
@@ -85,6 +88,7 @@ int variableconstants;  /* AIS: Allow anything on the left of an assignment. */
 int createsused=0;      /* AIS: Allow the use of CREATE. */
 int useickec;           /* AIS: Link together INTERCAL and C. */
 static int nosyslib=0;  /* AIS: Don't link syslib under any circumstances. */
+static int showsystem=0;/* AIS: Show the command lines in system() calls */
 int cdebug;      /* AIS: Pass -g to our C compiler, and leave C code. */
 int optdebug;           /* AIS: Debug the optimizer. Value is 0, 1, 2, or 3. */
 int flowoptimize;       /* AIS: Do flow optimizations (in INTERCAL!). */
@@ -249,6 +253,8 @@ static void print_usage(char *prog, char *options)
   fprintf(stderr,"\t-u\t:print a message whenever the compiler tries to "
 	  "open a file\n");
   fprintf(stderr,"\t-U\t:dump core on IE778 after printing an error\n");
+  fprintf(stderr,"\t-Y\t:display the command line used whenever an external\n"
+	  "\t\t program is invoked\n");
   fprintf(stderr,"\t-g\t:compile to both debuggable executable and C\n");
   fprintf(stderr,"\t-l\t:attempt to report likely bugs "
 	  "and nonportabilities (implies -O)\n");
@@ -434,6 +440,10 @@ int main(int argc, char *argv[])
 
     case 'u': /* By AIS */
       ick_printfopens=ick_TRUE;
+      break;
+
+    case 'Y': /* By AIS */
+      showsystem=ick_TRUE;
       break;
 
     case 'P': /* By AIS */
@@ -1389,18 +1399,18 @@ int main(int argc, char *argv[])
       if (!compile_only&&!yukdebug&&!yukprofile&&!useickec)
       {
 	/* AIS: buf2 now assigned elsewhere so $L works */
-	(void) system(buf2);
+	ICK_SYSTEM(buf2);
 	/* AIS: no unlink if cdebug */ if(!cdebug) (void) unlink(buf);
       }
       else if(!compile_only&&!useickec)
       { /* AIS: run, then delete all output but yuk.out */
 	/* Note that the output must be deleted for copyright
 	   reasons (so as not to GPL a non-GPL file automatically) */
-	(void) system(buf2);
+	ICK_SYSTEM(buf2);
 #ifdef HAVE_UNISTD_H
 	(void) dup2(oldstdin,0); /* restore stdin */
 #endif
-	(void) system(yukcmdstr);
+	ICK_SYSTEM(yukcmdstr);
 	(void) unlink(buf);
 	(void) unlink(argv[optind]);
       }
@@ -1428,7 +1438,7 @@ int main(int argc, char *argv[])
 	rsp=ick_debfopen(tempfn+5,"w");
 	fprintf(rsp,"%s\n",buf2);
 	fclose(rsp);
-	system(tempfn);
+	ICK_SYSTEM(tempfn);
 	remove(tempfn+5);
 	if(yukdebug || yukprofile)
 	{
@@ -1440,7 +1450,7 @@ int main(int argc, char *argv[])
 #else
 	  snprintf(buf2,"%s" EXEEXT,argv[optind]);
 #endif
-	  system(yukcmdstr);
+	  ICK_SYSTEM(yukcmdstr);
 	  remove(buf);
 	  remove(buf2);
 	}
@@ -1468,8 +1478,8 @@ int main(int argc, char *argv[])
 	  (void) snprintf(buf2, sizeof buf2,
 			  "sh %s %s", cooptsh, argv[optind]);
 #endif
-	  (void) system(buf2); /* replaces the output executable if
-				  neccesary */
+	  ICK_SYSTEM(buf2); /* replaces the output executable if
+			       neccesary */
 	}
       }
 # endif
@@ -1525,7 +1535,7 @@ int main(int argc, char *argv[])
 		      argv[optind]);
       if(argv[optind][strlen(argv[optind])+2]=='\0' /* it was a .c or .i file */
 	 ||argv[optind][strlen(argv[optind])+3]!='o') /* it was a .2-7i file */
-	(void) system(buf2); /* run the C preprocessor */
+	ICK_SYSTEM(buf2); /* run the C preprocessor */
       buf2ptr = strrchr(buf2,'>'); /* get the .cio's filename */
       cioin=NULL;
       /* Do our preprocessing, by editing the file in place using rb+. */
@@ -1649,7 +1659,7 @@ needc99?99:89,tempfn);
     if(remspace <= 0)
       ick_lose(IE666, -1, (char*)NULL);
     strcat(buf2," -lickec");
-    (void) system(buf2);
+    ICK_SYSTEM(buf2);
     (void) remove(tempfn);
   }
 
