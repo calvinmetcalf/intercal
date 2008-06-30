@@ -1081,6 +1081,16 @@ This is the main debugging option: it loads yuk, an interactive @ical{}
 debugger with ability to step through the program, set breakpoints, view
 and modify variables, etc.  @xref{yuk}.
 
+@ianchorc -Y
+@opindex -Y
+@cindex external calls, debugging
+@cindex command line, showing intermediates
+
+This options causes the command line to be displayed for all calls to
+other programs that @command{ick} makes (mostly to @command{gcc}); it
+is therefore useful for debugging problems with the command lines used
+when using the external calls system (@pxref{External Calls}).
+
 @ianchorc -U
 @opindex -U
 @cindex internal errors, debugging
