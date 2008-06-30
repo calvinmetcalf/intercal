@@ -1625,14 +1625,12 @@ int main(int argc, char *argv[])
 #else
 		    (void) sprintf(buf2,
 #endif
-#define XSTR(x) #x
-#define IHSH XSTR(ICK_HAVE_STDINT_H)
 "%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT "%s "
 #ifndef __DJGPP__
 "-Wl,-z,muldefs "
 #endif
-"-DICK_HAVE_STDINT_H=%s -x c --std=c%d %s", compiler, libdir,
-path, path, argv[oldoptind], cdebug?" -g":"", IHSH,
+"-DICK_HAVE_STDINT_H=%d -lm -x c --std=c%d %s", compiler, libdir,
+path, path, argv[oldoptind], cdebug?" -g":"", ICK_HAVE_STDINT_H+1==2?1:0,
 needc99?99:89,tempfn);
 #if 0
       ); /* for Emacs' autoindenter */

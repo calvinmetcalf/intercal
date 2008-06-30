@@ -17,6 +17,8 @@ typedef int ick_bool;
 #define ICKBOOL_DEFINED
 #endif
 
+#define ICK_ABCESS_H_INCLUDED
+
 #define ick_TRUE	1
 #define ick_FALSE	0
 

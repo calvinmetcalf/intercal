@@ -49,8 +49,13 @@ LICENSE TERMS
 #if ICK_HAVE_STDINT_H+1 == 2
 #include <stdint.h>
 #else
-typedef unsigned long uint32_t;
+typedef unsigned int   uint32_t;
 typedef unsigned short uint16_t;
+#endif
+
+#ifndef ICK_ABCESS_H_INCLUDED
+typedef unsigned short ick_type16;
+typedef unsigned int   ick_type32;
 #endif
 
 #define ICK_EC_FUNC_START(id)			  \
