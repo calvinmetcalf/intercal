@@ -124,7 +124,7 @@ void id(void)					  \
   do {						\
     ick_scheduleforget(amount);			\
     ick_dogoto(ICK_EC_PP_3,-1,0);		\
-    ick_lose(IE778, -1, (char*) NULL);		\
+    ick_lose(ICK_IE778, -1, (char*) NULL);	\
     return;					\
   ick_l2_ICK_EC_PP_2: ;				\
     if(ick_global_linelabel != ICK_EC_PP_3)	\
@@ -137,7 +137,9 @@ void id(void)					  \
   if(0)						\
   {						\
   ick_l6_ICK_EC_PP_6:				\
+    ick_global_checkmode=0;			\
     block ;					\
+    ick_global_checkmode=ick_local_checkmode;	\
     goto ick_l6_ICK_EC_PP_6;			\
   }
 
@@ -195,7 +197,7 @@ void id(void)					  \
   }
 
 #define ick_nextfromif(expr,condition) \
-  ick_docomefromif(expr,-1,condition)
+  ick_donextfromif(expr,-1,condition)
 
 #define ick_donextfromif(expr,lbl,condition)	                 \
   if(0)								 \
