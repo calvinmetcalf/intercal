@@ -121,6 +121,13 @@ Changes by Alex Smith
     locations instead of the current directory.) Other .a files can be linked
     in from the current directory.
 
+21. Fixed the handling of division by zero in the syslibc expansion library.
+    (The Revamped Manual states 'In all cases, division by 0 returns 0'.)
+
+22. Made several changes to the documentation, including fixes for some rather
+    nasty typos (two of the worst were specifying variables as IGNORED by
+    default, and stating that select acts like OR in TriIntercal!).
+
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
 Patches, suggestions and bugs found by Joris Huizer

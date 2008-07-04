@@ -1474,7 +1474,7 @@ SAYING 'ABRACADABRA' WITHOUT A MAGIC WAND WON'T DO YOU ANY GOOD
 @end quotation
 Your program asked to include the system library (by specifying a line
 number from 1000 to 1999 inclusive without including a line with that
-number), but due to installation problems the copmiler couldn't find the
+number), but due to installation problems the compiler couldn't find the
 system library to include.  You could try using the @option{-u}
 (@pxref{-u}) option to see where the compiler's looking; that may give
 you an idea of where you need to copy the system library so that the
@@ -1495,7 +1495,7 @@ executed is unknown (after all, that's the whole point of the error)
 and is therefore not given.  The @option{-e} command-line option
 (@pxref{-e}) makes this error into a run-time error, because it allows
 @code{NEXT} commands to dynamically change targets at runtime, as well
-as line labaels to dynamically change values, and thus the error is
+as line labels to dynamically change values, and thus the error is
 impossible to detect at compile time.
 
 @ieanchor E139
@@ -1518,7 +1518,11 @@ YOU MUST LIKE THIS LABEL A LOT!
 
 At present, it's impossible to have more than one line with the same
 line number.  That would make @code{NEXT} act too much like @code{COME
-FROM} in reverse to be interesting.  This error happens at compile time.
+FROM} in reverse to be interesting.  This error happens at compile
+time.  (For inconsistency, it @i{is} possible to have multiple lines
+with the same number as long as at most one of them is in an @ical{}
+program (the others have to be in programs in other languages included
+via the external calls system).)
 
 @ieanchor E197
 @cindex line label, illegal value
@@ -2122,6 +2126,16 @@ is inevitable, it will cause this warning.  Note that this doesn't
 always cause an error, because the relevant code might never be
 executed.
 
+@ieanchor W450
+@quotation
+THE DOCUMENTOR IS NOT ALWAYS RIGHT
+@end quotation
+
+There is no way to get this warning to come up; it isn't even written
+anywhere in @cic{}'s source code, is not implemented by anything, and
+there are no circumstances in which it is even meant to come up. It is
+therefore not at all obvious why it is documented.
+
 @ieanchor W534
 @cindex unary operators, portability
 @cindex portability, unary operators
@@ -2702,7 +2716,7 @@ next level, just sparks at the next level, and so on; but expressions
 like @code{''#1~#2'~"#3~#4"'~#5} are completely unambiguous, at least to
 the compiler.)
 
-There are, however, some complicated situations involving arrays
+There are, however, some complicated situations involving array
 subscripting where it is necessary to use sparks and ears at alternate
 levels, if you want to write a portable program.  This limitation is in
 @cic{} to simplify the parsing process; @icst{} has the same limitation,
@@ -3339,7 +3353,7 @@ The appropriate gerunds for @code{STASH} and @code{RETRIEVE} are
 @portability{yes, all versions, all versions, all versions}
 
 Variables in @ical{} can be either read-write or read-only.  At the
-start of a program, all variables are read-only, but this status can
+start of a program, all variables are read-write, but this status can
 be changed dynamically during execution of a program using the
 @code{IGNORE} and @code{REMEMBER} statements (whose gerunds are
 @code{IGNORING} and @code{REMEMBERING} respectively).  The syntax is
@@ -3495,7 +3509,7 @@ The syntax of @code{READ OUT} and @code{WRITE IN} is the same in all
 cases: the name of the command followed by an intersection-separated
 list of items; the form of each item, the compiler you are using, and
 its command line arguments together determine what sort of I/O is
-used, which can in be different for different elements in the list.
+used, which can be different for different elements in the list.
 
 @menu
 * INTERCAL-72 I/O::        Spelt-out numbers and Roman numerals
@@ -3622,7 +3636,7 @@ or at some example @cic{} programs that do text-based I/O.)
 @cindex input, CLC-INTERCAL
 @cindex output, CLC-INTERCAL
 
-@portability{no, version 0.27+, all versions, no}
+@portability{no, see text, all versions, no}
 
 There are also two @clcic{}-specific I/O mechanisms.  These are
 Baudot-based text I/O (which is also implemented from @cic{} version
@@ -3795,7 +3809,9 @@ automatically at the end of your program by the compiler whenever your
 program refers to a line from (1000) to (1999) without defining any
 line in that range in the program.  (Although it is not added
 automatically by the compiler in @clcic{}, it is trivial to
-concatenate a copy onto the end of the program.)
+concatenate a copy onto the end of the program; copies of the system
+library are available from many sources on the Internet, including a
+version in the example code that comes with @cic{}.)
 
 The intention of the system library is to provide a range of useful
 capabilities, like multiplication, that can otherwise be hard to write
@@ -3992,7 +4008,7 @@ contains the favoured digit, and they aren't redundant to AND nor OR.
 
 @item
 Select has its semantics modified to deal with more than one nonzero
-digit in the base.  It starts off by doing an OR (in whatever base is
+digit in the base.  It starts off by doing an AND (in whatever base is
 being used) between the two numbers being selected; then the bits of
 the result are sorted by the bits of the right-hand argument to the
 select, with bits corresponding to 0s in the right-hand argument
@@ -4062,7 +4078,7 @@ The original multithreading implementation worked by giving a new
 meaning to what was previously an error condition.  If in a
 multithreaded program (a program is marked as multithreaded using
 options to a compiler) two or more @code{COME FROM}s or @code{NEXT
-FROM}s (or a mixture of the two) attempt to steal control
+FROM}s (or a mixture of the these) attempt to steal control
 simultaneously, the original thread splits into multiple threads, one
 for each of the commands trying to take control, and a different
 command gains control of the program in each case.
@@ -4181,19 +4197,19 @@ forever, or until it @code{GIVE}s @code{UP} or the loop ends due to
 the command ending later in another thread).  A @code{WHILE} command
 itself exists across all threads of a multithreaded program in a way;
 for each left-hand command that ends (in any thread), the next time a
-right-hand command ends it will cause the thread it's looping in to
-end, regardless of whether that thread corresponds to the thread in
-which the left-hand command ended.  (As well as a right-hand command
-ending, there's also the possibility that it never got started; there
-is a delay before the right-hand command runs during which a left-hand
-command ending can prevent the right-hand thread starting in the first
-place; this counts as the same sort of event as terminating a
-right-hand loop, and can substitute for it anywhere a right-hand
-command ending is mentioned.)  There is one exception, in that if two
-or more left-hand commands end in a space of time in which no
-right-hand commands for that @code{WHILE} ends, they together only
-cause one right-hand command to end.  (What, did you expect the
-logical and orthogonal behaviour?)
+right-hand command of the same @code{WHILE} ends it will cause the
+thread it's looping in to end, regardless of whether that thread
+corresponds to the thread in which the left-hand command ended.  (As
+well as a right-hand command ending, there's also the possibility that
+it never got started; there is a delay before the right-hand command
+runs during which a left-hand command ending can prevent the
+right-hand thread starting in the first place; this counts as the same
+sort of event as terminating a right-hand loop, and can substitute for
+it anywhere a right-hand command ending is mentioned.)  There is one
+exception, in that if two or more left-hand commands end in a space of
+time in which no right-hand commands for that @code{WHILE} ends, they
+together only cause one right-hand command to end.  (What, did you
+expect the logical and orthogonal behaviour?)
 
 The two threads produced by a @code{WHILE} (the original thread and a
 new copy of it) have more in common than ordinary @ical{} threads
@@ -4705,16 +4721,18 @@ current version of @cic{}.
 @cindex other languages, C
 @cindex external calls, to C
 
-Linking C and @ical{} programs is acheived by placing various
+@portability{no, version 0.28+, no, no}
+
+Linking C and @ical{} programs is achieved by placing various
 constructs into the C programs that are equivalent to various @ical{}
 constructs.  It is possible to simulate a line with a label and a
 dummy command (which serves as a @code{COME FROM} suckpoint and
-@code{NEXT} target), @code{NEXT}, @code{RESUME}, and @code{FORGET},
-and @code{COME FROM} and @code{NEXT FROM}.  Onespot and twospot
-variables are accessible from inside the C program, where they can be
-read and written; however, the @ical{} program cannot access any
-variables inside the C program that weren't part of the @ical{}
-program originally.
+@code{NEXT} target), a command with a line label, @code{NEXT},
+@code{RESUME}, and @code{FORGET}, and @code{COME FROM} and @code{NEXT
+FROM}.  Onespot and twospot variables are accessible from inside the C
+program, where they can be read and written; however, the @ical{}
+program cannot access any variables inside the C program that weren't
+part of the @ical{} program originally.
 
 To prevent various logical impossibilities, there are restrictions on
 where these can be used and what preparation is needed before they are
@@ -5205,7 +5223,7 @@ effects on data that happens to be stored there.  (In @ical{} terms,
 imagine what would happen if data could be stored on the @code{NEXT}
 stack; if C used the more sensible system of having a @code{STASH} for
 each variable, these problems would never occur in the first place,
-instead causing an entirely differnet set of problems.)  Similar
+instead causing an entirely different set of problems.)  Similar
 considerations apply to the common nonstandard C extension @code{alloca},
 which dynamically alters the size of the stack; also, in what goes below,
 @code{register} variables should be considered to be @code{auto}, because
@@ -5289,6 +5307,8 @@ flow operations.
 @cindex external calls, libraries
 @cindex C99
 @cindex external calls, C99
+
+@portability{no, version 0.29+, no, no}
 
 It is possible to specify other information to the external calls
 system by using the filename list after all the options are given.  To
@@ -5374,6 +5394,8 @@ maintainer with suggestions or patches.
 @cindex expansion libraries
 @cindex libraries
 
+@portability{no, version 0.28+, no, no}
+
 The @cic{} distribution comes with libraries that can be used to
 extend its capabilities; they are implemented using the external call
 mechanism, and are in effect standard files to include using that
@@ -5384,7 +5406,7 @@ programs), and specify the expansion library's name at the end of the
 command line (or to be precise, anywhere after the initial @ical{}
 file).  The libraries themselves are written in C and have a @samp{.c}
 extension, and are human-readable; @cic{} will look for them in the
-same place as it looks for the system library (including in the
+same places as it looks for the system library (including in the
 current directory, so you can test your own expansion libraries
 without having to install them).
 
@@ -6074,7 +6096,7 @@ This accesses a calculation made automatically by the compiled
 be set, and which ones cannot be.  @code{c} by itself refers to the
 operand to which the braced expression is attached; if a number is
 given, it refers to another node (the number is interpreted as a
-reference numer).  The actual value of @code{c} is a 32-bit unsigned
+reference number).  The actual value of @code{c} is a 32-bit unsigned
 integer, each bit of which is true, or 1, if there is any chance that
 the corresponding bit of the operand might be 1, and false, or 0, if
 it's known for certain that the corresponding bit of the operand is 0.
@@ -6088,7 +6110,7 @@ _@{!(c&4294901760LU)@}1
 The constant given here is FFFF0000 when expressed in hexadecimal; the
 point is that the expression matches any operand that is known to have a
 value no greater than 65535.  Unless the operand is the argument to a
-unary AND, this check generally makes more point than explicitly
+unary AND, this check generally makes more sense than explicitly
 specifying @code{.} rather than @code{_}, because it will identify both
 16- and 32-bit values as long as they're small enough to fit into a
 onespot variable.  This code could, for instance, be used to check that
@@ -6187,7 +6209,7 @@ Here's a more complicated example of an optimizer operand:
 @end example
 
 It helps to understand this if you know that 2863311530 in hexadecimal
-is AAAAAAAA and 1431655765 is hexadecimal is 55555555.  (It's worth
+is AAAAAAAA and 1431655765 in hexadecimal is 55555555.  (It's worth
 putting a comment with some frequently-used decimal constants in an
 @acronym{OIL} input file to help explain what these numbers mean and
 make the code more maintainable.)  The operand matches any constant
@@ -6263,7 +6285,10 @@ Insert a constant with the literal value @var{NUMBER} here.
 
 Calculate the value of @var{EXPRESSION} (a C expression, which can
 reference the same variables and functions as a C expression in a
-pattern can); see @ref{C functions in OIL}.
+pattern can; see @ref{C functions in OIL}) and insert a constant with
+the calculated value here.  (That is, a value is calculated at
+optimise-time and the resulting value is therefore constant at
+runtime.)
 
 @end table
 
@@ -6271,7 +6296,7 @@ As an example, here's an idiom that moves C bitwise AND operations
 inside leftshifts.  (This is useful because if the optimizer has
 generated a large sequence of mixed ANDs and bitshifts, moving all the
 ANDs to one end allows them to be clumped together and optimized down to
-one AND.)
+one AND, whilst the shifts can all be combined into one large shift.)
 
 @example
 ((_1 << #@{1@}2) & #@{1@}3)->((_1 & #@{x3>>x2@}0) << _2)
@@ -6539,14 +6564,14 @@ copyright conditions as the original @ical{} source.  (Note that the
 libraries @file{libick.a} and @file{libickmt.a} are GPL, though, so
 you cannot redistribute an executable produced by @command{ick} or by
 linking a C file to either of those libraries unless the original
-@ical{} source was GPL.)  For similar reasons, the expansion library
-@file{syslibc.c} (currently the only one in the distribution) is
-explicitly public domain.  Also, this manual, and the files that are
-the source code for creating it, are licensed under the GNU Free
-Documentation License rather than the GPL, and the licenses themselves
-(@file{fdl-1-2.txi} and @file{COPYING.txt}) are licensed under a
-license that allows verbatim redistribution but not creation of
-derivative works.  All other files, though (including the
+@ical{} source was GPL.)  For similar reasons, the expansion libraries
+@file{syslibc.c} and @file{compunex.c} (currently the only ones in the
+distribution) is explicitly public domain.  Also, this manual, and the
+files that are the source code for creating it, are licensed under the
+GNU Free Documentation License rather than the GPL, and the licenses
+themselves (@file{fdl-1-2.txi} and @file{COPYING.txt}) are licensed
+under a license that allows verbatim redistribution but not creation
+of derivative works.  All other files, though (including the
 @command{man} pages, which are not part of @emph{this} manual), are
 licensed under the GPL.  For the full text of the GPL, see the file
 @file{COPYING.txt} in the distribution.
