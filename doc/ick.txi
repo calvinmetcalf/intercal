@@ -4693,9 +4693,10 @@ compiler, and @acronym{GNU} cpp and ld, for them to work in the
 current version of @cic{}.
 
 @menu
-* External Calls to C::      How to put @ical{} calls in C.
-* Using External Calls::     What happens when you use -e.
-* Expansion Libraries::      Expanding the compiler's capabilities.
+* External Calls to C::          How to put @ical{} calls in C.
+* Miscellaneous External Calls:: Other things you can link in.
+* Using External Calls::         What happens when you use -e.
+* Expansion Libraries::          Expanding the compiler's capabilities.
 @end menu
 
 @node External Calls to C
@@ -5279,6 +5280,37 @@ would not be particularly difficult.)
 Note that @ical{} variables are not stored on the C stack, nor are any of
 the metadata surrounding them, and so are not affected unduly by control
 flow operations.
+
+@node Miscellaneous External Calls
+@section Miscellaneous External Calls
+@cindex external calls, miscellaneous
+@cindex miscellaneous external calls
+@cindex libraries, external calls
+@cindex external calls, libraries
+@cindex C99
+@cindex external calls, C99
+
+It is possible to specify other information to the external calls
+system by using the filename list after all the options are given.  To
+be precise, certain filename patterns are recognised and used to
+change the options that are used to compile the externally-called
+files.
+
+The @samp{.c99} extension is treated identically to @samp{.c}, except
+that it causes the file with that extension to be preprocessed as C99
+(the more modern version of the C standard, the older C89 is more
+common), and that all C files involved will be compiled and linked as
+C99. (This corresponds to @option{-std=c99} in @command{gcc}.)
+
+The @samp{.a} extension indicates that an object-code library should
+be linked in to the final program.  This is most commonly used to link
+in the maths library @file{libm.a} and other such system libraries.
+If the filename is of the form @samp{lib*.a}, then the file will be
+searched for in the standard directories for libraries on your system,
+and also where the @cic{} libraries are stored (which may be the same
+place); otherwise, the current directory will be searched.
+(Specifying @file{libm.a} on the command line corresponds to passing
+@option{-lm} to @command{gcc}.)
 
 @node Using External Calls
 @section Using External Calls
