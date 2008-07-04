@@ -80,16 +80,20 @@ ICK_EC_FUNC_START(ick_my_custom_syslib)
 
   ick_linelabel(1040);
   os2=ick_getonespot(2);
-  if(!os2) errout(1040, "division by zero");
-  ick_setonespot(3,ick_getonespot(1)/os2);
+  if(!os2)
+    ick_setonespot(3,0);
+  else
+    ick_setonespot(3,ick_getonespot(1)/os2);
   ick_resume(1);
   return;
 
   ick_linelabel(1050);
   os1=ick_getonespot(1);
   ts1=ick_gettwospot(1);
-  if(!os1) errout(1050, "division by zero");
-  ts1/=os1;
+  if(!os1)
+    ts1 = 0;
+  else
+    ts1/=os1;
   if(ts1>0xffffLU) errout(1050, "onespot overflow");
   ick_setonespot(2,(uint16_t)ts1);
   ick_resume(1);
@@ -146,8 +150,10 @@ ICK_EC_FUNC_START(ick_my_custom_syslib)
 
   ick_linelabel(1550);
   ts2=ick_gettwospot(2);
-  if(!ts2) errout(1550, "division by zero");
-  ick_settwospot(3,ick_gettwospot(1)/ts2);
+  if(!ts2)
+    ick_settwospot(3,0);
+  else
+    ick_settwospot(3,ick_gettwospot(1)/ts2);
   ick_resume(1);
   return;
 
