@@ -109,6 +109,18 @@ Changes by Alex Smith
 19. Added support for CREATING operators, with similar syntax to the CREATION
     of commands.  This requires the -ea options to be set to work properly.
 
+20. More file extensions are now supported by the external calls system. The
+    .c99 extension indicates a C99 (rather than C89) file; all .c99 files are
+    preprocessed as C99, and if any C99 files are used the final compilation
+    which compiles and links everything will be done as C99 rather than C89
+    (this causes no problems for C-INTERCAL's output which is both legal C89
+    and legal C99). Also, libraries can be linked in; to link in the maths
+    library for instance (i.e. pass -lm to gcc), write libm.a as a filename at
+    the end of the command line. (The file's real name is libm.a; if a
+    filename is in lib*.a format, then ick will look in the normal library
+    locations instead of the current directory.) Other .a files can be linked
+    in from the current directory.
+
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
 Patches, suggestions and bugs found by Joris Huizer

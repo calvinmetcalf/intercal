@@ -278,7 +278,8 @@ int main(int argc, char *argv[])
   /*@-nestedextern@*/
   extern int	optind;		/* set by getopt */
   /*@=nestedextern@*/
-  char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ], path[BUFSIZ];
+  char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ], path[BUFSIZ],
+    libbuf[BUFSIZ];
   tuple	*tp;
   atom	*op;
   int		c, i;
@@ -508,12 +509,14 @@ int main(int argc, char *argv[])
 #endif
 
   oldoptind=optind; /* AIS */
+  *libbuf = 0; /* AIS */
   for (firstfile = ick_TRUE; optind < argc; optind++, firstfile = ick_FALSE)
   {
     /* AIS: Read as binary to pick up Latin-1 and UTF-8 better */
     if (/* AIS */ strrchr(argv[optind],'.') != NULL &&
-      freopen(argv[optind], "rb", stdin) == (FILE *)NULL)
-      ick_lose(IE777, 1, (char *)NULL);
+	freopen(argv[optind], "rb", stdin) == (FILE *)NULL &&
+	/* AIS */ strcmp(strchr(argv[optind],'.')+1,"a"))
+	ick_lose(IE777, 1, (char *)NULL);
     else
     {
       /* strip off the file extension */
@@ -588,6 +591,31 @@ int main(int argc, char *argv[])
 	continue; /* don't process C or cio files further yet */
       }
 
+      if(useickec && !strcmp(chp,"a"))
+      {
+	/* AIS: request for a library. Given a filename of the form
+	   libwhatever.a, it adds  -lwhatever to libbuf (that's with
+	   a preceding space). If the filename doesn't start with lib,
+	   it instead adds a space and the filename to libbuf. */
+	if(argv[optind][0]=='l'&&argv[optind][1]=='i'&&
+	   argv[optind][2]=='b')
+#ifndef HAVE_SNPRINTF
+	  sprintf(libbuf+strlen(libbuf)," -l%s",argv[optind]+3);
+#else
+	  snprintf(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
+		   " -l%s",argv[optind]+3);
+#endif
+	else
+#ifndef HAVE_SNPRINTF
+	  sprintf(libbuf+strlen(libbuf)," %s.a",argv[optind]);
+#else
+	  snprintf(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
+		   " %s.a",argv[optind]);
+#endif
+	*argv[optind]=0;
+	continue;
+      }
+
       if(useickec && firstfile == ick_FALSE) /* AIS */
 	ick_lose(IE998, 1, (char *)NULL);
 
@@ -595,7 +623,7 @@ int main(int argc, char *argv[])
       /* sourcefile has extension .i they will not be reset in the  */
       /* following chunk of code. but i don't want to modify the    */
       /* following chunk of code because i think it is very clever; */
-      /* grabs the base on the ick_first pass, then validates the rest  */
+      /* grabs the base on the first pass, then validates the rest  */
       /* of the extension on the second.                            */
       ick_Base = DEFAULT_BASE;
       ick_Small_digits = DEFAULT_SMALL_DIGITS;
@@ -1639,7 +1667,7 @@ int main(int argc, char *argv[])
 #ifndef __DJGPP__
 "-Wl,-z,muldefs "
 #endif
-"-DICK_HAVE_STDINT_H=%d -lm -x c --std=c%d %s", compiler, libdir,
+"-DICK_HAVE_STDINT_H=%d -x c --std=c%d %s", compiler, libdir,
 path, path, argv[oldoptind], cdebug?" -g":"", ICK_HAVE_STDINT_H+1==2?1:0,
 needc99?99:89,tempfn);
 #if 0
@@ -1648,6 +1676,7 @@ needc99?99:89,tempfn);
     remspace = (long)(sizeof buf2 - strlen(buf2) - 1);
     for(optind=oldoptind; optind < argc; optind++)
     {
+      if(!*(argv[optind])) continue;
       remspace -= strlen(argv[optind]) - 5; /* 5 for <space>.cio */
       if(remspace <= 0)
 	ick_lose(IE666, -1, (char*)NULL);
@@ -1655,6 +1684,10 @@ needc99?99:89,tempfn);
       strcat(buf2,argv[optind]);
       strcat(buf2,".cio");
     }
+    remspace -= strlen(libbuf);
+    if(remspace <= 0)
+      ick_lose(IE666, -1, (char*)NULL);
+    strcat(buf2,libbuf);
     remspace -= strlen(" -lickec");
     if(remspace <= 0)
       ick_lose(IE666, -1, (char*)NULL);
