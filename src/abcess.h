@@ -174,10 +174,10 @@ typedef struct tag_ickthread ickthread;
                                                               thread switching O(1), not O(n), with
                                                               respect to the number of threads */
 extern int weaving; /* whether to weave newly created threads */
-#define NEXTTHREAD if(ick_printflow) printf("[%d:%lx]",ick_lineno,(unsigned long)\
-                                                          ickmt_cur); \
-                                 if(setjmp(ick_cjb) == 0) \
-                                   nextthread(ick_cjb, ick_lineno, 3);
+#define NEXTTHREAD if(ick_printflow) fprintf(stderr,"[%d:%lx]",ick_lineno, \
+					     (unsigned long)ickmt_cur);	\
+  if(setjmp(ick_cjb) == 0)						\
+    nextthread(ick_cjb, ick_lineno, 3);
 
 extern void nextthread(jmp_buf pc, int errlineno, int flags);
 extern void killthread(void);

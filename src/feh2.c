@@ -2387,7 +2387,7 @@ void emit(tuple *tn, FILE *fp)
       }
       fprintf(fp,"\t""%s;} else goto CCF%d;\n",
 	      multithread?"NEXTTHREAD":useprintflow?
-	      "if(ick_printflow) printf(\"[%d]\",ick_lineno)":"",
+	      "if(ick_printflow) fprintf(stderr,\"[%d]\",ick_lineno)":"",
 	      compucomecount);
       break;
 
@@ -2611,7 +2611,8 @@ void emit(tuple *tn, FILE *fp)
 	(void) fprintf(fp, "if(0) {C%ld: %s;%s}\n", (long)(tn-tuples+1),
 		       tn->type==NEXTFROMLABEL ? "ick_pushnext(truelineno+1)":"",
 		       multithread?" NEXTTHREAD;":!useprintflow?""
-		       :" if(ick_printflow) printf(\"[%d]\",ick_lineno);");
+		       :" if(ick_printflow) "
+		       "fprintf(stderr,\"[%d]\",ick_lineno);");
 	/* AIS: Changed so all COME_FROMs have unique labels even if two
 	   of them aim at the same line, and added the NEXT FROM case (which
 	   involves hiding COME FROM labels in an unreachable if()). */
@@ -2762,7 +2763,8 @@ void emit(tuple *tn, FILE *fp)
        thread in a multithread program. */
     if(multithread) (void) fputs("    NEXTTHREAD;\n", fp);
     else if(useprintflow)
-      (void) fputs("    if(ick_printflow) printf(\"[%d]\",ick_lineno);\n",fp);
+      (void) fputs("    if(ick_printflow) fprintf(stderr,"
+		   "\"[%d]\",ick_lineno);\n",fp);
 }
 
 /* AIS: Generate prototypes for slat expressions, args to UNKNOWN */

@@ -114,8 +114,8 @@ int weaving=0; /* Weave newly created threads? */
 /* Printflow debugging output */
 static void fluputs(char* s)
 {
-  printf("%s",s);
-  (void) fflush(stdout);
+  fprintf(stderr,"%s",s);
+  (void) fflush(stderr);
 }
 
 /**********************************************************************

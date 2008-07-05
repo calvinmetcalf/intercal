@@ -107,7 +107,7 @@ extern ick_overop* ick_oo_twospots;
      procedure is longjmped to. */
   auto volatile int nextlevel = ick_nextindex;
   if(ick_printflow&&linelabel<=65535&&isnext)
-    printf("[next:%lu]",linelabel);
+    fprintf(stderr,"[next:%lu]",linelabel);
   ick_global_checkmode = 2; /* look for linelabels */
   ick_global_linelabel = linelabel;
   /* If there was a FORGET earlier, implement it now, by removing the relevant
@@ -120,9 +120,9 @@ extern ick_overop* ick_oo_twospots;
   if(!isnext)
   {
     if(ick_printflow&&ick_forgetamount)
-      printf("[forget:%d]",ick_forgetamount);
+      fprintf(stderr,"[forget:%d]",ick_forgetamount);
     else if(ick_printflow&&linelabel<=65535)
-      printf("[goto:%lu]",linelabel);
+      fprintf(stderr,"[goto:%lu]",linelabel);
     nextlevel = ick_nextindex -= ick_forgetamount + 1;
     ick_forgetamount = 0;
     if(ick_nextindex < 0) ick_nextindex = 0;
@@ -161,7 +161,7 @@ void ick_scheduleforget(unsigned short amount)
 /* Resume to a previous NEXT stack entry. */
 /*@noreturn@*/ void ick_doresume(unsigned short amount, int emitlineno)
 {
-  if(ick_printflow) printf("[resume:%hu]",amount);
+  if(ick_printflow) fprintf(stderr,"[resume:%hu]",amount);
   if(ick_forgetamount) ick_lose(IE778, emitlineno, (char *)NULL);
   if(!amount) ick_lose(IE621, emitlineno, (char *)NULL);
   ick_nextindex -= amount;
@@ -195,12 +195,12 @@ void ick_runstartups(void)
   /* If this was a COME FROM, goto it. */
   if(ick_global_checkmode == 1)
   {
-    if(ick_printflow) printf("[comefrom:%lu]",ick_global_linelabel);
+    if(ick_printflow) fprintf(stderr,"[comefrom:%lu]",ick_global_linelabel);
     ick_dogoto(ick_global_goto,-1,0); /* GOTO */
   }
   else if(ick_global_checkmode == 3)
   {
-    if(ick_printflow) printf("[nextfrom:%lu]",ick_global_linelabel);
+    if(ick_printflow) fprintf(stderr,"[nextfrom:%lu]",ick_global_linelabel);
     ick_dogoto(ick_global_goto,-1,1); /* NEXT */
     return; /* we were RESUMEd to */
   }
