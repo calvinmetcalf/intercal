@@ -108,18 +108,6 @@ void id(void)					  \
   }							    \
   while(0)
 
-#define ick_linelabelnosp(expr)				    \
-  do {							    \
-    if(0)						    \
-    {							    \
-    ick_l2_ICK_EC_PP_2: ;				    \
-      if(ick_global_linelabel != (expr) || (expr) > 65535)  \
-	goto ick_l2_ICK_EC_PP_2;			    \
-      ick_global_checkmode = 0;				    \
-    }							    \
-  }							    \
-  while(0)
-
 #define ick_forget(amount)			\
   do {						\
     ick_scheduleforget(amount);			\

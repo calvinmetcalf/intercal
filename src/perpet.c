@@ -1561,8 +1561,9 @@ int main(int argc, char *argv[])
 		      (needc99=1),'9':' ',
 		      argv[optind][strlen(argv[optind])+2]=='9'?'9':' ',
 		      argv[optind]);
-      if(argv[optind][strlen(argv[optind])+2]=='\0' /* it was a .c or .i file */
-	 ||argv[optind][strlen(argv[optind])+3]!='o') /* it was a .2-7i file */
+      if(*(argv[optind]) && /* there is some file to compile */
+	 (argv[optind][strlen(argv[optind])+2]=='\0' /* a .c or .i file */
+	  ||argv[optind][strlen(argv[optind])+3]!='o')) /* not a .cio file */
 	ICK_SYSTEM(buf2); /* run the C preprocessor */
       buf2ptr = strrchr(buf2,'>'); /* get the .cio's filename */
       cioin=NULL;
