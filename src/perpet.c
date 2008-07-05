@@ -1580,10 +1580,10 @@ int main(int argc, char *argv[])
 	   C-INTERCAL preprocessor (that handles WHILE); that isn't a
 	   problem because external calls are inconsistent with
 	   multithreading anyway. */
-	long ppnum1=65538L*2L;
-	long ppnum2=65538L*2L;
-	long ppnum3=65538L*2L;
-	long ppnum6=65538L*2L;
+	static long ppnum1=65538L*2L;
+	static long ppnum2=65538L*2L;
+	static long ppnum3=65538L*2L;
+	static long ppnum6=65538L*2L;
 	long ciopos=0L;
 	/*@+charintliteral@*/ /* literal chars are ints */
 	while(inchar != EOF)

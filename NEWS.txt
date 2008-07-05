@@ -128,6 +128,10 @@ Changes by Alex Smith
     nasty typos (two of the worst were specifying variables as IGNORED by
     default, and stating that select acts like OR in TriIntercal!).
 
+23. Fixed a bug in the external calls system that made it impossible to write
+    a COME FROM in more than one file at a time whilst still having the
+    resulting program work reliably.
+
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
 Patches, suggestions and bugs found by Joris Huizer
