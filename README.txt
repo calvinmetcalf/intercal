@@ -90,6 +90,11 @@ districk.sh             --|the same as above, but in sh format
 cleanick.sh             --|(use .bat under command.com/cmd, and .sh under bash)
 etc/ctrlmfix.sh         --/
 
+etc/cftoec.sh         	-- script to convert cfunge to a library (see below)
+etc/IFFI*               -- input to that script
+etc/cfunge.patch        -- more input to that script
+etc/temp                -- temporary directory used by that script
+
 config.sh               -- GNU Autoconf script that generates a makefile
                            from Makefile.in
 ickspec.in              -- Input to config.sh
@@ -102,6 +107,8 @@ include/*               -- Directory that holds header files after the build
 lib/*                   -- Directory that holds library files after the build
 
 pit/*                   -- sample INTERCAL code; see pit/CATALOG
+pit/explib/*            -- source code for expansion libraries
+pit/lib/syslib.*i       -- source code for the system libraries
 
                               HOW TO GET STARTED
 
@@ -290,6 +297,30 @@ pick1.h and pick2.h in the /src directory; these need to be placed somewhere
 your compiler can find them, and pick1.h will need to be modified to contain
 compiler-specific data (like the names of data types and the syntax for
 specifying the device type, fuses, and various commands).
+
+	    NOTES ON THE C-INTERCAL / CFUNGE EXTERNAL CALLS SYSTEM
+
+Code is provided to allow linking of Funge-98 programs to INTERCAL programs;
+however, this requires a Funge-98 interpreter, which is not present in this
+distribution. Therefore, in order to do this, a Funge-98 interpreter must
+first be downloaded and prepared for use with C-INTERCAL. At present, code is
+only available for linking with 'cfunge', a Funge-98 interpreter written in
+C. You can get the latest sources for that interpreter from the Internet via
+the bzr version-control system by running this command:
+
+bzr branch http://rage.kuonet.org/~anmaster/bzr/cfunge
+
+Once you have the source code to cfunge, you can compile it into a library
+suitable for use by C-INTERCAL by changing to the /etc directory of the
+C-INTERCAL distribution, and running the cftoec.sh shell script in that
+directory with the path to the cfunge distribution as an argument. The script
+will make a copy of cfunge, modify it as required, and then place the
+resulting library (libick_ecto_b98.a) in the /lib directory of the C-INTERCAL
+distribution; installing (or reinstalling) C-INTERCAL after that will copy
+that library into the correct location in your filesystem.
+
+For information on actually using this system once you've set it up, consult
+the Revamped Manual.
 
                                    LICENSING
 

@@ -14,9 +14,15 @@
 ./doc/ick.info-1
 ./doc/ick.info-2
 ./doc/ick.txt
+./etc/cfunge.patch
+./etc/cftoec.sh
+./etc/IFFI.spec
+./etc/IFFI/IFFI.h
+./etc/IFFI/IFFI.c
 ./etc/ctrlmfix.bat
 ./etc/ctrlmfix.sh
 ./etc/intercal.el
+./pit/explib/ecto_b98.c
 ./pit/explib/syslibc.doc
 ./pit/explib/compunex.c
 ./pit/explib/syslibc.c
@@ -130,7 +136,6 @@
 ./pit/unlambda.i
 ./pit/yapp.doc
 ./pit/yapp.i
-./src/autoscan.log
 ./src/abcess.h
 ./src/arrgghh.c
 ./src/atari.bin

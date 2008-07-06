@@ -132,6 +132,7 @@ by Alex Smith
   tests/testcreate.i  A test for the CREATE statement
   explib/syslibc.c    The INTERCAL base 2 syslib, optimised version in C
   explib/compunex.c   An example flow-control routine (computed NEXT)
+  explib/ecto_b98.c   A library that links INTERCAL and Funge-98 code
   sort.i              An insertion-sort program testing computed ABSTAIN
   continuation.i      A continuation library and example program
   continuation.doc    About usage and internals of the continuation library

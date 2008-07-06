@@ -1553,9 +1553,11 @@ int main(int argc, char *argv[])
 #else
       (void) snprintf(buf2, sizeof buf2,
 #endif
-		      "%s --std=c%d -E -I%s -I%s -I%s/../include "
+		      "%s --std=c%d -E -DICK_HAVE_STDINT_H=%d "
+		      "-I%s -I%s -I%s/../include "
 		      "-x c %s.c%c%c > %s.cio",
 		      compiler, argv[optind][strlen(argv[optind])+2]=='9'?99:89,
+		      ICK_HAVE_STDINT_H+1-1,
 		      includedir, path, path, argv[optind],
 		      argv[optind][strlen(argv[optind])+2]=='9'?
 		      (needc99=1),'9':' ',
