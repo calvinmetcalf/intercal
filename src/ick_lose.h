@@ -137,6 +137,10 @@
 /* Source file name with invalid extension (use .i or .[3-7]i). */
 #define IE998 "998 EXCUSE ME,\n\
 	YOU MUST HAVE ME CONFUSED WITH SOME OTHER COMPILER\n"
+/* (AIS) File used of a type for which the required libraries aren't
+   available. */
+#define IE899 "899 HELLO?\n\
+	CAN ANYONE GIVE ME A HAND HERE?\n"
 /* Illegal possession of a controlled unary operator. */
 #define IE997 "997 ILLEGAL POSSESSION OF A CONTROLLED UNARY OPERATOR.\n\
 	ON THE WAY TO %d\n"

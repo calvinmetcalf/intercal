@@ -37,7 +37,7 @@ int ick_printfopens=0;
   return t;
 }
 
-/* This function looks for the skeleton and syslib, searching ick_first the
+/* This function looks for the skeleton and syslib, searching first the
    path they should be in, then the current directory, then argv[0]'s
    directory (if one was given). This function avoids possible buffer
    overflows, instead truncating filenames (and if that manages to find them,

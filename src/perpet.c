@@ -528,10 +528,12 @@ int main(int argc, char *argv[])
 	     along the same lines as CLC-INTERCAL's preloads. Search for
 	     it in the usual places, then make a copy in a temp directory
 	     and substitute that on the command line. */
-	  char* tempfn="%s.c";
+	  char* tempfn;
 	  FILE* fromcopy;
 	  FILE* tocopy;
 	  int c2;
+	fixexpansionlibrary:
+	  tempfn="%s.c";
 #ifndef HAVE_SNPRINTF
 	  (void) sprintf(buf2, "%s.c", argv[optind]);
 #else
@@ -614,6 +616,90 @@ int main(int argc, char *argv[])
 #endif
 	*argv[optind]=0;
 	continue;
+      }
+
+      if(useickec && !strcmp(chp,"b98"))
+      {
+	/* AIS: Compile the .b98 file into a .cio so that it can be used
+	   later, and include the necessary libraries to use it, or error
+	   if the libraries aren't installed yet. I use a somewhat dubious
+	   trick here: the .b98 file's .cio, and the necessary libraries,
+	   are added in the libraries section of the command line, whereas
+	   the space on the command line where the .b98 file was is used
+	   for the expansion library ecto_b98. This is because ecto_b98
+	   requires preprocessing/prelinking/interprocessing or whatever
+	   you want to call it, whereas unlike for other .cios, the .cio
+	   produced from the Befunge file doesn't.
+	*/
+
+#define MARKERMAX 128
+
+	FILE* of;
+	int x,y,jlb;
+	int markerposns[MARKERMAX][2];
+	int markercount=0;
+
+	/* Error if libick_ecto_b98.a is missing. It might be, and not
+	   just due to installation problems. */
+	if(!ick_findandtestopen("libick_ecto_b98.a",libdir,"rb",argv[0]))
+	  ick_lose(IE899,-1,(char *)NULL);
+
+	/* Compile the .b98 file into a .cio. It's open on stdin right now,
+	   so we just need to handle the output side of things. */
+
+#ifndef HAVE_SPRINTF
+	sprintf(buf2, "%s.cio", argv[optind]);
+#else
+	snprintf(buf2, sizeof buf2, "%s.cio", argv[optind]);
+#endif
+
+	if(!((of = ick_debfopen(buf2,"w"))))
+	  ick_lose(IE888,-1,(char *)NULL);
+
+	fprintf(of,"const char* ick_iffi_befungeString=\n\"");
+
+	x=0; y=0; jlb=0;
+	for(;;)
+	{
+	  int c=getchar();
+	  if(c==EOF) break;
+	  if(c==0xB7)
+	  {
+	    /* Middot (0xB7) has special handling. */
+	    c='M';
+	    markerposns[markercount][0]=x;
+	    markerposns[markercount++][1]=y;
+	  }
+	  if(c=='\r') {jlb = 1; x=0; y++; c='\n';}
+	  else if(c=='\n' && jlb) {jlb = 0; continue;}
+	  else if(c=='\n') {x=0; y++; jlb = 0;}
+	  else x++;
+	  fprintf(of,"\\x%x",c);
+	  if(!x) fprintf(of,"\"\n\"");
+	}
+	fprintf(of,"\";\n\nint ick_iffi_markercount=%d;\n"
+		"long long ick_iffi_markerposns[][2]={\n",markercount);
+	if(!markercount) fprintf(of,"{0,0}\n");
+	while(markercount--) fprintf(of,"{%d,%d},\n",
+				     markerposns[markercount][0],
+				     markerposns[markercount][1]);
+	fprintf(of,"};\n");
+
+	fclose(of);
+
+	/* Put the libraries and .cio file in the command line. */
+#ifndef HAVE_SNPRINTF
+	sprintf(libbuf+strlen(libbuf),
+#else
+		snprintf(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
+#endif
+#if 0
+			 0) // to unconfuse Emacs
+#endif
+		" %s.cio -lick_ecto_b98 -lm", argv[optind]);
+	/* Sort out the ecto_b98 expansion library. */
+	argv[optind] = "ecto_b98";
+	goto fixexpansionlibrary;
       }
 
       if(useickec && firstfile == ick_FALSE) /* AIS */
