@@ -381,6 +381,13 @@ Configure @cic{}, by typing @command{sh config.sh}
 Compile the source code, with the command @command{make}
 
 @item
+Optionally, create libraries from third-party interpreters to add
+support for more languages to the @cic{} external calls system; see
+@ref{Creating the Funge-98 Library}.  (This step can be skipped; you
+can also do it later, but if you do so you need to run the next step
+again.)
+
+@item
 Install the executables, help files, include files, and libraries,
 using @command{make install}.  (This is the only step that needs
 root/administrator permissions; so on a system that uses sudo to
@@ -850,8 +857,8 @@ command line, give one @ical{} program, followed by any number of
 programs in other languages that have been written to be able to link
 to @ical{} programs.  It also allows expansion libraries to be
 specified on the command line, after the @ical{} program (expansion
-libraries are given with no extension). For more information,
-@xref{External Calls}.  Also, both the @option{-a} and @option{-e}
+libraries are given with no extension). For more information, see
+@ref{External Calls}.  Also, both the @option{-a} and @option{-e}
 options must be set to use CREATEd operators (regardless of whether
 external calls are used or not).
 
@@ -1955,10 +1962,27 @@ debug-time error.
 @quotation
 I HAVE NO FILE AND I MUST SCREAM
 @end quotation
+@cindex output file, failure to write
 
 The output file couldn't be written, maybe because the disk is full or
 because there's already a read-only file with the same name.  This is a
 compile-time error.
+
+@ieanchor E899
+@quotation
+HELLO?
+CAN ANYONE GIVE ME A HAND HERE?
+@end quotation
+@cindex Funge, no external library
+@cindex Befunge, no external library
+@cindex external libraries, unavailable
+@cindex .b98, no external library
+
+This error occurs at compile-time if a file type was requested for
+which the required libraries are unavailable.  (Support for Funge does
+not ship with the compiler; instead, you need to generate the library
+yourself from the cfunge sources.  For more information, see
+@ref{Creating the Funge-98 Library}.)
 
 @ieanchor E991
 @cindex out of memory, multithreading
@@ -2010,6 +2034,20 @@ base in which they make sense.  This error happens at compile-time if
 you try to use an operator that conflicts with the base you're in (such
 as using @abbr{TriINTERCAL} operators in an @ical{} program in the
 default base 2).
+
+@ieanchor E998
+@cindex unsupported file type
+@cindex file type, unsupported
+@quotation
+EXCUSE ME,
+YOU MUST HAVE ME CONFUSED WITH SOME OTHER COMPILER
+@end quotation
+
+This error occurs just before compile-time if a file is encountered on
+the command line that C-INTERCAL doesn't recognise.  (If this error
+occurs due to a @samp{.a}, @samp{.b98}, @samp{.c}, or @samp{.c99},
+then you forgot to enable the external calls system using @option{-e}
+(@pxref{-e}).)
 
 @ieanchor E999
 @cindex skeleton file, errors
@@ -4710,6 +4748,7 @@ current version of @cic{}.
 
 @menu
 * External Calls to C::          How to put @ical{} calls in C.
+* External Calls to Funge-98::   Linking Befunge-98 and @ical{}.
 * Miscellaneous External Calls:: Other things you can link in.
 * Using External Calls::         What happens when you use -e.
 * Expansion Libraries::          Expanding the compiler's capabilities.
@@ -5298,6 +5337,102 @@ would not be particularly difficult.)
 Note that @ical{} variables are not stored on the C stack, nor are any of
 the metadata surrounding them, and so are not affected unduly by control
 flow operations.
+
+@node External Calls to Funge-98
+@section External Calls to Funge-98
+@cindex .b98
+@cindex external calls, Funge
+@cindex external calls, Befunge
+@cindex Funge
+@cindex Befunge
+
+@cic{} supports linking @ical{} programs with Funge-98 programs (to be
+precise, only Befunge-98 programs are currently supported).  However,
+it does not ship with a Funge-98 interpreter, and such an interpreter
+needs to be linked to the resulting program in order to run the
+Befunge program.  Therefore, you need to convert a third-party
+Funge-98 interpreter to a library usable by @cic{} before you can use
+this part of the external calls system (@pxref{Creating the Funge-98
+Library}); however, this only has to be done once.
+
+Once the library has been created, you can link an @ical{} program
+with a Befunge-98 program by invoking @command{ick} like this:
+
+@example
+ick -e intercalprogram.i befungeprogram.b98
+@end example
+
+You can link no more than one Befunge-98 program at once (just like
+you can link no more than one @ical{} program at once).  Also, the
+@ical{} program must come first on the command line.
+
+It is legal to link @ical{}, C, and Befunge-98 simultaneously;
+however, the identifiers used in the third-party Funge-98 interpreter
+have not been mangled to avoid collisions, and therefore problems may
+be caused if the C program uses the same identifiers as the Funge-98
+interpreter.
+
+@menu
+* Creating the Funge-98 Library:: How to create the Funge-98 library.
+@end menu
+
+@node Creating the Funge-98 Library
+@subsection Creating the Funge-98 Library
+@cindex libick_ecto_b98.a
+@cindex Funge, installing
+@cindex Befunge, installing
+@cindex libraries, Funge
+@cindex libraries, Befunge
+
+Before external calls to Funge-98 can be used, the relevant library
+must be compiled.  (After the library has been compiled, then you will
+need to reinstall @cic{}; however, you will not need to recompile
+@cic{}.)
+
+At present, only the cfunge Funge-98 interpreter can be converted into
+a library suitable for use by @cic{}; also, doing this is only
+supported on POSIX systems (although if someone gets it to work on
+DOS/Windows, the author of this manual would be interested to hear
+about it.)  Also, a source-code distribution (rather than a binary
+distribution) is needed.  One way to obtain the latest cfunge sources
+is via the bzr version-control system, using the following command
+(correct as of the time of writing, but as always, links can become
+dead):
+
+@example
+bzr branch http://rage.kuonet.org/~anmaster/bzr/cfunge
+@end example
+
+(As a licensing note, note that cfunge is licensed under the GNU
+General Public licence version 3, whereas @cic{} is licensed under
+version 2 and all later versions of that licence; although these terms
+are obviously compatible with each other, you must ensure yourself
+that your program has appropriate licensing terms to allow a GPLv3
+library to be linked to it.)
+
+Once you have downloaded the cfunge sources, you need to compile them
+into a library suitable for use with @cic{} (note that this is a
+somewhat different process to compiling them into a standalone
+Funge-98 interpreter).  There is a script provided in the @cic{}
+distribution to do this, @file{etc/cftoec.sh}.  It must be run in the
+@file{etc} subdirectory of the @cic{} distribution (i.e. the directory
+the script itself is in), and must be given the path to the root
+directory of the cfunge source distribution (that is, the directory
+that contains the @file{src}, @file{lib} and @file{tools}
+subdirectories of that distribution) as its only argument.  Note that
+it may give some compiler warnings on compilation; my experience is
+that warnings about C99 inlining can be safely ignored (they reflect a
+deficiency in @command{gcc} itself that luckily seems to be irrelevant
+in this case), but other warnings may indicate problems in the exact
+versions of the sources that you downloaded (and errors definitely
+indicate such problems).
+
+Once the library has been created, it will appear as the new file
+@file{lib/libick_ecto_b98} in the @cic{} distribution (the cfunge
+distribution will be left unchanged); reinstalling @cic{} will install
+this file to its proper location.  (It is also in a valid location to
+be able to be run if you aren't installing @cic{} but instead just
+running it from the distribution's directory.)
 
 @node Miscellaneous External Calls
 @section Miscellaneous External Calls
