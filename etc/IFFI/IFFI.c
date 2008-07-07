@@ -93,6 +93,15 @@ void ick_iffi_InterpreterOneIteration(void)
 		iffiIP->needMove = true;
 }
 
+// A - CREATE a new INTERCAL instruction
+static void FingerIFFIcreate(instructionPointer * ip)
+{
+    // arguments: line number on TOS, signature as 0gnirts beneath it
+	FUNGEDATATYPE l = StackPop(ip->stack);
+	char * restrict str = StackPopString(ip->stack);
+	ick_create(str, l);
+}
+
 // C - In markmode COME FROM the top of stack
 static void FingerIFFIcomeFrom(instructionPointer * ip)
 {
@@ -105,6 +114,27 @@ static void FingerIFFIcomeFrom(instructionPointer * ip)
 		ick_iffi_linelabel = l;
 		ick_iffi_comingfrom = 1;
 	}
+}
+
+// D - Push information about a CREATED instruction argument
+static void FingerIFFIcreateData(instructionPointer * ip)
+{
+	// Arguments: argument's index (0-based) on TOS
+	// Return: the following values (from bottom to top):
+	// The argument's data type, in bits
+	// Whether the argument is an array variable
+	// 0 if the argument is not a variable, or its number if it is
+	// The argument's value at the time the CREATED instruction was called
+	// The argument's value now (same as previous if -a was not used)
+	FUNGEDATATYPE i;
+
+	i = StackPop(ip->stack);
+
+	StackPush(ip->stack, ick_c_i_width(i));
+	StackPush(ip->stack, ick_c_i_isarray(i));
+	StackPush(ip->stack, ick_c_i_varnumber(i));
+	StackPush(ip->stack, ick_c_i_value(i));
+	StackPush(ip->stack, ick_c_i_getvalue(i));
 }
 
 // F - FORGET NEXT stack entries equal to top of stack
@@ -122,6 +152,26 @@ static void FingerIFFIforget(instructionPointer * ip)
 	if (f > 81 || f < 0) f = 81;
 
 	ick_iffi_forgetcount = f;
+}
+
+// G - Get the value of an INTERCAL scalar variable
+static void FingerIFFIvarGet(instructionPointer * ip)
+{
+	// arguments: var number on TOS
+	// var numbers are positive for onespot, negative for twospot
+	// return: the value of the variable
+
+	FUNGEDATATYPE v;
+
+	v = StackPop(ip->stack);
+
+	if (v == 0) {
+		ipReverse(ip);
+	} else if (v > 0) {
+		StackPush(ip->stack, ick_getonespot(v));
+	} else {
+		StackPush(ip->stack, ick_gettwospot(-v));
+	}
 }
 
 // L - Use top of stack as a line label for this point
@@ -181,6 +231,40 @@ static void FingerIFFIresume(instructionPointer * ip)
 	ick_iffi_breakloop = 1;
 }
 
+// S - Set the value of an INTERCAL scalar variable
+static void FingerIFFIvarSet(instructionPointer * ip)
+{
+	// arguments: var number on TOS, new value beneath it
+	// var numbers are positive for onespot, negative for twospot
+	// return: the value of the variable
+
+	FUNGEDATATYPE v, d;
+
+	v = StackPop(ip->stack);
+	d = StackPop(ip->stack);
+
+	if (v == 0) {
+		ipReverse(ip);
+	} else if (v > 0) {
+		ick_setonespot(v, d);
+	} else {
+		ick_settwospot(-v, d);
+	}
+}
+
+// V - Assign to a CREATEd instruction argument
+static void FingerIFFIargSet(instructionPointer * ip)
+{
+	// arguments: 0-based argument index on TOS, new value beneath it
+	// note that this is a NOP unless -a was used when compiling
+	FUNGEDATATYPE i, d;
+
+	i = StackPop(ip->stack);
+	d = StackPop(ip->stack);
+
+	ick_c_i_setvalue(i, d);
+}
+
 // X - In markmode NEXT FROM the top of stack
 static void FingerIFFInextFrom(instructionPointer * ip)
 {
@@ -195,17 +279,30 @@ static void FingerIFFInextFrom(instructionPointer * ip)
 	}
 }
 
+// Y - Marks the end of initialisation
+static void FingerIFFIyield(instructionPointer * ip)
+{
+	static bool firstload = true;
+	ick_iffi_breakloop = firstload;
+	if (! firstload)
+		ipReverse(ip);
+	firstload = false;
+}
+
 bool FingerIFFIload(instructionPointer * ip)
 {
-	static int firstload = 1;
-	ick_iffi_breakloop = firstload;
-	firstload = 0;
+	ManagerAddOpcode(IFFI,  'A', create)
 	ManagerAddOpcode(IFFI,  'C', comeFrom)
+	ManagerAddOpcode(IFFI,  'D', createData)
 	ManagerAddOpcode(IFFI,  'F', forget)
+	ManagerAddOpcode(IFFI,  'G', varGet)
 	ManagerAddOpcode(IFFI,  'L', label)
 	ManagerAddOpcode(IFFI,  'M', marker)
 	ManagerAddOpcode(IFFI,  'N', next)
 	ManagerAddOpcode(IFFI,  'R', resume)
+	ManagerAddOpcode(IFFI,  'S', varSet)
+	ManagerAddOpcode(IFFI,  'V', argSet)
 	ManagerAddOpcode(IFFI,  'X', nextFrom)
+	ManagerAddOpcode(IFFI,  'Y', yield)
 	return true;
 }

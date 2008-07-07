@@ -35,10 +35,11 @@ struct ick_ipposdeltatype
   long long ix, iy, dx, dy;
 };
 
+// Externally-visible functions from IFFI.c
 bool FingerIFFIload(instructionPointer * ip);
-
 void ick_InterpreterMainLoop(void);
 
+// Communication variables with ecto_b98
 extern unsigned short ick_iffi_forgetcount;
 extern int ick_iffi_nexting;
 extern int ick_iffi_comingfrom;
@@ -49,7 +50,23 @@ extern uint32_t ick_iffi_linelabel;
 extern int ick_iffi_breakloop;
 extern int ick_iffi_inmarkmode;
 
+// Communication variables with the compiled .cio file
 extern const char * ick_iffi_befungeString;
+
+// Communication variables with the runtime library
 extern int ick_printflow;
+
+// Accessors and mutators for INTERCAL storage
+extern void ick_create(char*, unsigned long);
+extern uint16_t ick_getonespot(unsigned short);
+extern void ick_setonespot(unsigned short, uint16_t);
+extern uint32_t ick_gettwospot(unsigned short);
+extern void ick_settwospot(unsigned short, uint32_t);
+extern int ick_c_i_width(int);
+extern int ick_c_i_isarray(int);
+extern unsigned short ick_c_i_varnumber(int);
+extern uint32_t ick_c_i_value(int);
+extern uint32_t ick_c_i_getvalue(int);
+extern void ick_c_i_setvalue(int, uint32_t);
 
 #endif
