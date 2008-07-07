@@ -8,7 +8,9 @@ COPYING.txt from the main installation directory if you want to
 redistribute these separately from that compiler.
 
 The subdirectory lib contains code fragments that are not complete
-programs.
+programs; the programs in explib are expansion libraries written in C,
+which serve as examples of the C-INTERCAL to C interface as well as
+potentially being useful.
 
 Contents:
 
@@ -130,6 +132,9 @@ by Alex Smith
   tests/ignorret.doc  What ignorret does on several compilers
   tests/normaldist.i  Checking the standard deviation of (1910)
   tests/testcreate.i  A test for the CREATE statement
+  tests/iffit1.i      The INTERCAL side of the INTERCAL/Funge-98 test
+  tests/iffit2.b98    The Funge side of the INTERCAL/Funge-98 test
+  tests/iffit.doc     Documentation for the INTERCAL/Funge-98 test
   explib/syslibc.c    The INTERCAL base 2 syslib, optimised version in C
   explib/compunex.c   An example flow-control routine (computed NEXT)
   explib/ecto_b98.c   A library that links INTERCAL and Funge-98 code

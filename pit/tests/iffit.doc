@@ -1,0 +1,51 @@
+iffit1.i and iffit2.b98 are a test of the C-INTERCAL/cfunge external
+calls system. To use the test, use this command:
+
+ick -ea iffit1.i iffit2.b98
+
+What follows is the expected output, annotated to show what causes
+each line to be printed.
+
+Before IFFI... Printed by the Funge program before IFFI is loaded.
+0              Printed immediately after IFFI loads; the program then
+               yields immediately, running the INTERCAL program.
+I	       Printed at the start of the INTERCAL program; tests Y.
+2	       Printed by the Funge program after (100) is NEXTed to.
+	       This tests NEXTING to an L in the Funge program.
+III	       Printed by INTERCAL after the Funge program does 2R
+	       (i.e. RESUME 2).
+IV	       Tests COMING FROM an L when in mark-mode after a NEXT.
+5	       Tests NEXTING FROM the INTERCAL program to the Funge
+	       program using X.
+VI	       Tests RESUMING to the INTERCAL program after the NEXT
+	       FROM in the Befunge program.
+VII	       Tests that COME FROMs happen at the end of a command.
+8	       Tests COMING FROM the INTERCAL program to the Funge
+	       program using C.
+IX	       Tests FORGET using F, and also RESUME after a COME FROM
+	       in the Befunge program.
+X	       This (irrelevantly) tests ONCE in the INTERCAL program.
+11	       This (likewise irrelevantly) tests that p in Funge has
+	       correctly altered the flow of control.
+XII	       Tests COMING FROM an L when not in mark-mode.
+13	       Tests variable access using G in the Funge program to
+	       read an INTERCAL variable, also a second marker.
+XIV	       Tests the use of S to set an INTERCAL variable.
+15	       Tests that CREATEd commands send values correctly.
+16	       Tests that CREATEd commands send bitwidths correctly.
+17	       Tests that CREATEd commands send names correctly.
+	       The above three tests test CREATION using A and D.
+XVIII	       Tests that V sets arguments to CREATED commands
+	       correctly, and also that Y correctly reflects the
+	       second time.
+
+At this point the program should end, having tested all the commands
+in the IFFI fingerprint. (Obviously, this is not an exhaustive test,
+because, for instance, G was only used to get onespot variables not
+twospot variables.)
+
+It is an interesting challenge to try to figure out how the tests
+work, especially given that the Funge program is self-modifying, the
+statements in the INTERCAL program don't always do the same thing
+every time they're run, and the Funge program modifies the syntax of
+the INTERCAL program at runtime.
