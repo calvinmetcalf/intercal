@@ -138,6 +138,8 @@ Changes by Alex Smith
     library for use with C-INTERCAL (see README.txt or the Revamped Manual for
     information on this). Also added a test program for this to the pit.
 
+25. Fixed some bugs in the go-away command in interfunge.i.
+
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
 Patches, suggestions and bugs found by Joris Huizer
