@@ -132,6 +132,12 @@ Changes by Alex Smith
     a COME FROM in more than one file at a time whilst still having the
     resulting program work reliably.
 
+24. Added support for external calls to Befunge-98 programs; however, this
+    distribution does not ship with a Funge-98 interpreter, so in order to use
+    this feature you will first have to compile a Funge-98 interpreter into a
+    library for use with C-INTERCAL (see README.txt or the Revamped Manual for
+    information on this). Also added a test program for this to the pit.
+
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
 Patches, suggestions and bugs found by Joris Huizer

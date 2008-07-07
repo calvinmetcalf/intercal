@@ -27,6 +27,8 @@
 
 static instructionPointer *iffiIP = NULL;
 
+static bool firstload = true;
+
 // Communication functions with the ecto_b98 expansion library
 void ick_SaveIPPosDelta(struct ick_ipposdeltatype* ippd)
 {
@@ -128,6 +130,11 @@ static void FingerIFFIcreateData(instructionPointer * ip)
 	// The argument's value now (same as previous if -a was not used)
 	FUNGEDATATYPE i;
 
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
+
 	i = StackPop(ip->stack);
 
 	StackPush(ip->stack, ick_c_i_width(i));
@@ -141,6 +148,11 @@ static void FingerIFFIcreateData(instructionPointer * ip)
 static void FingerIFFIforget(instructionPointer * ip)
 {
 	FUNGEDATATYPE f;
+
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
 
 	if (ick_iffi_inmarkmode) { /* this is an error in the user's code */
 		ipReverse(ip);
@@ -163,6 +175,11 @@ static void FingerIFFIvarGet(instructionPointer * ip)
 
 	FUNGEDATATYPE v;
 
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
+
 	v = StackPop(ip->stack);
 
 	if (v == 0) {
@@ -178,6 +195,11 @@ static void FingerIFFIvarGet(instructionPointer * ip)
 static void FingerIFFIlabel(instructionPointer * ip)
 {
 	FUNGEDATATYPE l;
+
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
 
 	l = StackPop(ip->stack);
 
@@ -198,6 +220,11 @@ static void FingerIFFInext(instructionPointer * ip)
 {
 	FUNGEDATATYPE l;
 
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
+
 	if (ick_iffi_inmarkmode) { /* this is an error in the user's code */
 		ipReverse(ip);
 		return;
@@ -214,6 +241,11 @@ static void FingerIFFInext(instructionPointer * ip)
 static void FingerIFFIresume(instructionPointer * ip)
 {
 	FUNGEDATATYPE f;
+
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
 
 	if (ick_iffi_inmarkmode) { /* this is an error in the user's code */
 		ipReverse(ip);
@@ -240,6 +272,11 @@ static void FingerIFFIvarSet(instructionPointer * ip)
 
 	FUNGEDATATYPE v, d;
 
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
+
 	v = StackPop(ip->stack);
 	d = StackPop(ip->stack);
 
@@ -258,6 +295,11 @@ static void FingerIFFIargSet(instructionPointer * ip)
 	// arguments: 0-based argument index on TOS, new value beneath it
 	// note that this is a NOP unless -a was used when compiling
 	FUNGEDATATYPE i, d;
+
+	if (firstload) {
+		ipReverse(ip);
+		return;
+	}
 
 	i = StackPop(ip->stack);
 	d = StackPop(ip->stack);
@@ -282,7 +324,6 @@ static void FingerIFFInextFrom(instructionPointer * ip)
 // Y - Marks the end of initialisation
 static void FingerIFFIyield(instructionPointer * ip)
 {
-	static bool firstload = true;
 	ick_iffi_breakloop = firstload;
 	if (! firstload)
 		ipReverse(ip);
