@@ -1,4 +1,4 @@
-%fingerprint-spec 1.1
+%fingerprint-spec 1.2
 %fprint:IFFI
 %url:http://example.com
 %desc:INTERCAL-like Foreign Function Interface

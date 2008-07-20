@@ -696,7 +696,7 @@ int main(int argc, char *argv[])
 #if 0
 			 0) // to unconfuse Emacs
 #endif
-		" %s.cio -lick_ecto_b98 -lm", argv[optind]);
+		" %s.cio -lick_ecto_b98 -lm -lncurses", argv[optind]);
 	/* Sort out the ecto_b98 expansion library. */
 	argv[optind] = "ecto_b98";
 	goto fixexpansionlibrary;
