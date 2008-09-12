@@ -77,17 +77,17 @@ void ick_InterpreterRun(void)
 
 void ick_iffi_InterpreterOneIteration(void)
 {
-	FUNGEDATATYPE opcode;
+	fungeCell opcode;
 	opcode = FungeSpaceGet(&iffiIP->position);
 
 	if (SettingTraceLevel > 8) {
-		fprintf(stderr, "x=%" FUNGEVECTORPRI " y=%" FUNGEVECTORPRI
-				": %c (%" FUNGEDATAPRI ")\n",
+		fprintf(stderr, "x=%" FUNGECELLPRI " y=%" FUNGECELLPRI
+				": %c (%" FUNGECELLPRI ")\n",
 				iffiIP->position.x, iffiIP->position.y, (char)opcode, opcode);
 		PrintStackTop(iffiIP->stack);
 	} else if (SettingTraceLevel > 3) {
-		fprintf(stderr, "x=%" FUNGEVECTORPRI " y=%" FUNGEVECTORPRI
-				": %c (%" FUNGEDATAPRI ")\n",
+		fprintf(stderr, "x=%" FUNGECELLPRI " y=%" FUNGECELLPRI
+				": %c (%" FUNGECELLPRI ")\n",
 				iffiIP->position.x, iffiIP->position.y, (char)opcode, opcode);
 	} else if (SettingTraceLevel > 2)
 		fprintf(stderr, "%c", (char)opcode);
@@ -103,7 +103,7 @@ void ick_iffi_InterpreterOneIteration(void)
 static void FingerIFFIcreate(instructionPointer * ip)
 {
     // arguments: line number on TOS, signature as 0gnirts beneath it
-	FUNGEDATATYPE l = StackPop(ip->stack);
+	fungeCell l = StackPop(ip->stack);
 	char * restrict str = StackPopString(ip->stack);
 	ick_create(str, l);
 }
@@ -111,7 +111,7 @@ static void FingerIFFIcreate(instructionPointer * ip)
 // C - In markmode COME FROM the top of stack
 static void FingerIFFIcomeFrom(instructionPointer * ip)
 {
-	FUNGEDATATYPE l;
+	fungeCell l;
 
 	l = StackPop(ip->stack);
 
@@ -132,7 +132,7 @@ static void FingerIFFIcreateData(instructionPointer * ip)
 	// 0 if the argument is not a variable, or its number if it is
 	// The argument's value at the time the CREATED instruction was called
 	// The argument's value now (same as previous if -a was not used)
-	FUNGEDATATYPE i;
+	fungeCell i;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -151,7 +151,7 @@ static void FingerIFFIcreateData(instructionPointer * ip)
 // F - FORGET NEXT stack entries equal to top of stack
 static void FingerIFFIforget(instructionPointer * ip)
 {
-	FUNGEDATATYPE f;
+	fungeCell f;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -177,7 +177,7 @@ static void FingerIFFIvarGet(instructionPointer * ip)
 	// var numbers are positive for onespot, negative for twospot
 	// return: the value of the variable
 
-	FUNGEDATATYPE v;
+	fungeCell v;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -198,7 +198,7 @@ static void FingerIFFIvarGet(instructionPointer * ip)
 // L - Use top of stack as a line label for this point
 static void FingerIFFIlabel(instructionPointer * ip)
 {
-	FUNGEDATATYPE l;
+	fungeCell l;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -222,7 +222,7 @@ static void FingerIFFImarker(instructionPointer * ip)
 // N - Try to NEXT to the line labelled with the top of stack
 static void FingerIFFInext(instructionPointer * ip)
 {
-	FUNGEDATATYPE l;
+	fungeCell l;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -244,7 +244,7 @@ static void FingerIFFInext(instructionPointer * ip)
 // R - RESUME to the top-of-stackth NEXT stack entry
 static void FingerIFFIresume(instructionPointer * ip)
 {
-	FUNGEDATATYPE f;
+	fungeCell f;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -274,7 +274,7 @@ static void FingerIFFIvarSet(instructionPointer * ip)
 	// var numbers are positive for onespot, negative for twospot
 	// return: the value of the variable
 
-	FUNGEDATATYPE v, d;
+	fungeCell v, d;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -298,7 +298,7 @@ static void FingerIFFIargSet(instructionPointer * ip)
 {
 	// arguments: 0-based argument index on TOS, new value beneath it
 	// note that this is a NOP unless -a was used when compiling
-	FUNGEDATATYPE i, d;
+	fungeCell i, d;
 
 	if (firstload) {
 		ipReverse(ip);
@@ -314,7 +314,7 @@ static void FingerIFFIargSet(instructionPointer * ip)
 // X - In markmode NEXT FROM the top of stack
 static void FingerIFFInextFrom(instructionPointer * ip)
 {
-	FUNGEDATATYPE l;
+	fungeCell l;
 
 	l = StackPop(ip->stack);
 
