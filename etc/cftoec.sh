@@ -2,7 +2,8 @@
 # This shell-script takes one argument, the path to a source
 # distribution of cfunge, and compiles that source distribution into a
 # library (libick_ecto_b98.a) suitable for linking to C-INTERCAL
-# programs.
+# programs. The cfunge distribution itself is not modified; all changes
+# are made on a copy.
 
 test x$1 != x || (
     echo Please give the path to the root of a cfunge source
@@ -10,7 +11,7 @@ test x$1 != x || (
     exit 1
 ) || exit 1
 
-CFUNGEPATH=`realpath $1` || (
+CFUNGEPATH=`(cd $1; pwd)` || (
     echo Please give the path to the root of a cfunge source
     echo distribution as an argument to this script\; the directory
     echo or file you gave does not exist.
@@ -59,8 +60,8 @@ echo "   " Compiling source...
 find . -name '*.c' -printf "gcc $CFLAGS -c %p -o %f.o\n" | sh
 
 echo "   " Creating library...
-ar cr ../../lib/libick_ecto_b98.a *.o
-ranlib ../../lib/libick_ecto_b98.a
+ar cr ../../prebuilt/libick_ecto_b98.a *.o
+ranlib ../../prebuilt/libick_ecto_b98.a
 
 echo "   " Cleaning up...
 rm -rf *

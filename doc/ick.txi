@@ -240,9 +240,7 @@ directly to the maintainers.)
 @menu
 * Obtaining::            How to get a @cic{} distribution to install
 * Unpacking::            What to do with the distribution file
-* Simple Installation::  Normally you can just do things the easy way
-* DOS/Windows Install::  For users of DOS or of Microsoft Windows
-* Not Installing::       You can use the software without installing it
+* Simple Installation::  How to install things the easy way
 * Uninstalling::         If you don't want to use the software
 * Reporting Bugs::       If it doesn't work or you know how to fix it
 * Distributing::         How to make your own @cic{} distribution
@@ -283,12 +281,20 @@ This has not always been the case, though.)
 @cindex C-INTERCAL, unpacking
 @cindex unzipping C-INTERCAL
 @cindex unpacking C-INTERCAL
-@cindex ick-@value{VERSIONDASH}.tgz
+@cindex ick-@value{VERSIONDASH}.pax.*
 
-The distribution is likely to be a single file with extension
-@samp{.tgz}; this refers to a gzipped tar file.  Most computer systems
-can extract files in this format (nowadays even many computers running
-Windows have the appropriate software).
+@cic{} is distributed in compressed pax format; for instance, you may
+find as a @samp{.pax.lzma} file if you have the @command{unlzma}
+decompression program (this is advised, as it's the smallest);
+@samp{.pax.bz2} is larger and @samp{.pax.gz} is larger still.  Most
+computers can decompress files in this format, even if they don't
+realise it, because pax is forwards-compatible with tar; try renaming
+the extension from @samp{.pax} to @samp{.tar} after decompressing to
+see if you have a progam that can decompress it.  (If you're wondering
+why such an apparently non-standard format is being used, this is is
+actually a case where @cic{} is being perfectly nonstandard by
+conforming to the standards; tar is no longer specified by POSIX, and
+pax is its replacement. It's just that pax never really caught on.)
 
 It doesn't matter where you extract the distribution file to: it's best
 if you don't put it anywhere special.  If you aren't an administrator,
@@ -303,49 +309,71 @@ anywhere).  Some commands that you might use to extract it:
 @item Generic UNIX/Linux
 
 @example
-gunzip ick-@value{VERSIONDASH}.tgz
-tar xvf ick-@value{VERSIONDASH}.tar
+unlzma ick-@value{VERSIONDASH}.pax.lzma
+tar xvf ick-@value{VERSIONDASH}.pax
+@end example
+@i{or}
+@example
+bunzip2 ick-@value{VERSIONDASH}.pax.bz2
+tar xvf ick-@value{VERSIONDASH}.pax
+@end example
+@i{or}
+@example
+gunzip ick-@value{VERSIONDASH}.pax.gz
+tar xvf ick-@value{VERSIONDASH}.pax
 @end example
 
 On most UNIX-based and Linux-based systems, @command{tar} will be
 available to unpack the installation files once they've been
-uncompressed with @command{gunzip}.  @command{gunzip} is also likely to
-be available; if it isn't, you will need to download a copy from the
-Internet.
+uncompressed with @command{gunzip}.  (I've heard that some BSD systems
+have @command{pax} itself to decompress the files, although have not
+been able to verify this; some Linux distributions also have
+@command{pax} in their package managers.  Both tar and pax should work
+fine, though.)  @command{gunzip} is also likely to be available (and
+@command{bunzip2} and @command{unlzma} are less likely, but use those
+versions if you have them to save on your bandwidth); if it isn't, you
+will need to download a copy from the Internet.
 
 @item Using GNU tar
 
 @example
-tar xzvf ick-@value{VERSIONDASH}.tgz
+tar xzvf ick-@value{VERSIONDASH}.pax.gz
+@end example
+@i{or}
+@example
+tar xqvf ick-@value{VERSIONDASH}.pax.bz2
 @end example
 
 If you are using the GNU version of @command{tar} (which is very likely
-on Linux), you can combine the two steps into one as shown here.
+on Linux), you can combine the two steps into one as shown here,
+except when using the lzma-compressed version.
 
 @item Using DJGPP
 
 @example
-djtar -x ick-@value{VERSIONDASH}.tgz
+djtar -x ick-@value{VERSIONDASH}.pax.gz
 @end example
 
-On a DOS or Windows system, you will have to install DJGPP anyway to be
-able to compile the distribution (@pxref{DOS/Windows Install}), and once
-you've done that you will be able to use DJGPP's decompressing and
-unpacking utility to extract the files needed to install the
-distribution.  (You will need to type this at the command line; on
-Windows 95 and later, try choosing Run...@: from the start menu then
-typing @command{cmd} (or @command{command} if that fails) in the dialog
-box that opens to get a command prompt, which you can exit by typing
-@command{exit}.  After typing any command at a command line, press
-@key{RET} to tell the shell to execute that command.)
+On a DOS system, you will have to install DJGPP anyway to be able to
+compile the distribution, and once you've done that you will be able
+to use DJGPP's decompressing and unpacking utility to extract the
+files needed to install the distribution.  (You will need to type this
+at the command line; on Windows 95 and later, try choosing Run...@:
+from the start menu then typing @command{cmd} (or @command{command} if
+that fails) in the dialog box that opens to get a command prompt,
+which you can exit by typing @command{exit}.  After typing any command
+at a command line, press @key{RET} to tell the shell to execute that
+command.)
 
 @item On Windows
 
-If you're running a Windows system, you could always try double-clicking
-on the ick-@value{VERSIONDASH}.tgz file.  It's quite possible that
-you'll have a program installed that's capable of decompressing and
-unpacking it.  Unfortunately, I can't guess what program that might be,
-so I can't give you any instructions for using it.
+If you're running a Windows system, you could always try
+double-clicking on the ick-@value{VERSIONDASH}.pax.gz file; probably
+renaming it to have the extension @samp{.tgz} is likely to give the
+best results.  It's quite possible that you'll have a program
+installed that's capable of decompressing and unpacking it.
+Unfortunately, I can't guess what program that might be, so I can't
+give you any instructions for using it.
 
 @end table
 
@@ -375,10 +403,33 @@ use the following routine:
 @enumerate
 
 @item
-Configure @cic{}, by typing @command{sh config.sh}
+Configure @cic{}, by running @command{configure}.  Although building
+in the distribution directory works; it is recommended that you build
+elsewhere; create a directory to build in (using @command{mkdir} on
+most operating systems), then run @command{configure} from inside that
+directory (for instance, you could do this from inside the main
+installation directory:
+@example
+mkdir build
+cd build
+../configure
+@end example
+to build in a subdirectory of the distribution called ``build'').  You
+also specify where you want the files to be installed at this stage;
+the default of @samp{/usr/local} is good for many people, but you may
+want to install elsewhere (in particular, if you want to test out
+C-INTERCAL without installing it, create a new directory somewhere you
+own and specify that as the place to install it, so the install will
+actually just copy the files into the right structure for use instead
+of installing them).  To specify a location, give the option
+@option{--prefix=@var{location}} to configure; for instance,
+@command{configure --prefix=/usr} would install in /usr.
 
 @item
-Compile the source code, with the command @command{make}
+Compile the source code, with the command @command{make}.  The
+Makefile will be set up for your version of @command{make}, and to
+automatically recompile only what needs compiling (it will even
+recompile the build system if you change that).
 
 @item
 Optionally, create libraries from third-party interpreters to add
@@ -392,39 +443,42 @@ Install the executables, help files, include files, and libraries,
 using @command{make install}.  (This is the only step that needs
 root/administrator permissions; so on a system that uses sudo to
 elevate permissions, for instance, write it as @command{sudo make
-install}.)
+install} if you're installing into a directory that you can't write to
+as a non-administrative user.)
 
 @end enumerate
 
 On all systems, it's worth just trying this to see if it works.  This
 requires a lot of software on your computer to work, but all of it is
-standard on Linux and UNIX systems.  The first command is a shell-script
-which will analyse your system and set settings accordingly; it will
-explain what it's doing and what settings it detected, and create several
-files in the installation directory to record its results.  (This is a
-configure script produced by the GNU autoconf (config.sh); its autoconf
-source code is available in the file @file{config.ac}.)  The second
-command actually compiles the source code to produce binaries; this takes
-the longest of any of the steps.  You will see all the commands that it's
-running as it runs them.  The third command will copy the files it's
-compiled to appropriate shared locations on your system so that anyone on
-the system can just use @command{ick}.
+standard on Linux and UNIX systems.  The first command is a
+shell-script which will analyse your system and set settings
+accordingly; it will explain what it's doing and what settings it
+detected, and create several files in the installation directory to
+record its results.  (This is a configure script produced by the GNU
+autoconf (configure); its autoconf source code is available in the
+file @file{configure.ac}.)  The second command actually compiles the
+source code to produce binaries; this takes the longest of any of the
+steps.  You will see all the commands that it's running as it runs
+them.  The third command will copy the files it's compiled to
+appropriate shared locations on your system so that anyone on the
+system can just use @command{ick}.
 
 There may be various factors that prevent this simple installation
 method working.  On a system not based on UNIX or Linux, you may find
 that you don't have some of the software required to run this (for
-instance, you may be missing the shell @command{sh}, and don't have the
-shell @command{bash} which can emulate it, and so can't run @command{sh
-config.sh} that depends on one of those shells being available) and so
-this method won't work for you.  In such cases, one solution may be to
-install all the software required; the GNU project has a version of all
-the commands required, for instance, and there may be ports available
-for your operating system.  However, the only software absolutely
-required is a C compiler (@cic{} was designed to work with @command{gcc}
-and has only been tested in combination with that compiler, but in
-theory it should be possible to adapt it to work with other compilers)
-and the associated software needed to compile C files to object files
-and executables, combine object files into libraries, etc.
+instance, you may be missing the shell @command{sh}, and don't have
+the shell @command{bash} which can emulate it, and so can't run
+@command{sh config.sh} that depends on one of those shells being
+available) and so this method won't work for you.  In such cases, one
+solution may be to install all the software required; the GNU project
+has a version of all the commands required, for instance, and there
+may be ports available for your operating system.  However, the only
+software absolutely required is a C compiler (@cic{} was designed to
+work with @command{gcc} and is tested mostly with that compiler, but
+in theory it should work with other C compilers too, and this is
+tested on occasion) and the associated software needed to compile C
+files to object files and executables, combine object files into
+libraries, etc.
 
 Another possibility that might stop this process working is if your
 version of the relevant software is incompatible with the GNU versions
@@ -442,156 +496,27 @@ files that will cause the compilation to work again.
 Some Linux and UNIX systems (notably Debian and Ubuntu) don't have the
 required files for compilation installed by default.  To install them,
 just download and install the required packages: for Ubuntu at the
-time of writing, they are @samp{binutils}, @samp{bison}, @samp{cpp},
-@samp{flex}, @samp{gcc}, @samp{libc6-dev}, @samp{make} to compile
-@cic{}, and if you want to modify it, you may also need
-@samp{autoconf}.  For debugging help, you may also want @samp{gdb},
-and to recompile the documentation, you may need @samp{groff},
-@samp{tetex-bin}, @samp{texinfo}, and @samp{tidy}.  Of course, if
-@ical{} ever (the author of this sentence was going to write something
-like ``becomes popular, someone will probably package up a compiler
-for Debian or Ubuntu anyway'', but at that point on a whim did an
-Ubunutu package search for 'intercal' and actually came up with two
-results, which look suspiciously like @cic{} and @clcic{}, later
-confirming this.  The author was vaguely aware that there was a
+time of writing, they are @samp{binutils}, @samp{cpp}, @samp{gcc},
+@samp{libc6-dev}, @samp{make} to compile @cic{}, and if you want to
+modify it, you may also need @samp{autoconf}, @samp{automake},
+@samp{bison}, and @samp{flex}.  For debugging help, you may also want
+@samp{gdb}, and to recompile the documentation, you may need
+@samp{groff}, @samp{tetex-bin}, @samp{texinfo}, and @samp{tidy}.  Of
+course, if @ical{} ever (the author of this sentence was going to
+write something like ``becomes popular, someone will probably package
+up a compiler for Debian or Ubuntu anyway'', but at that point on a
+whim did an Ubuntu package search for 'intercal' and actually came up
+with two results, which look suspiciously like @cic{} and @clcic{},
+later confirming this.  The author was vaguely aware that there was a
 @clcic{} package floating around, but was unaware of the @cic{}
 package, and as a result was too surprised to finish the sentence.)
 
 If you're trying to do something unusual, you probably want to set some
 of the settings yourself rather than letting the compilation process
-guess everything.  In this case, use @command{sh config.sh --help} to
-view the options that you can set on @command{config.sh}; there's a wide
+guess everything.  In this case, use @command{configure --help} to
+view the options that you can set on @command{configure}; there's a wide
 range of settings that you can set available there, and one of them may
-be what you want.  For the special case of a non-administrator user who
-wants to test the @cic{} compiler without having admin rights, or
-equivalently any user who wants to test the compiler without installing
-it, see @ref{Not Installing}.
-
-@node DOS/Windows Install
-@section DOS/Windows Install
-@cindex installation, on DOS or Windows
-@cindex DOS
-@cindex Windows
-@cindex DJGPP
-@findex makeick.sh
-@findex makeick.bat
-
-On DOS and Windows, it's possible to install @cic{} by using the C
-compiler and utilities provided by DJGPP.  (Possibly other environments
-also work, but DJGPP is the only C compilation system on which recent
-versions of @cic{} have been tested.)  If you don't have a copy of DJGPP,
-or you're not sure whether you have the most recent version, visit
-@uref{http://www.delorie.com/djgpp}.  I think it's possible to compile
-@cic{} to binaries from only the files in the distribution and the C
-compilation parts of DJGPP, but this relies on some prebuilt files
-enclosed in the distribution, and I haven't actually tested this, so I
-might be wrong.  At the other extreme, if you download and install not
-only the DJGPP C compiler but also all the DJGPP ports of the GNU
-utilities required to run @command{config.sh} and @command{make}, you
-can use the simple installation method; see @ref{Simple Installation}.
-(This is actually somewhat recommended; doing this will not only allow
-you to change source code, recompile, and be guaranteed to have your
-changes to the source code affect the executables, and allow you to
-install @cic{} without having to fiddle around with the @samp{PATH}
-environment variable, but also you may then be able to install other
-programs distributed in source form without further hassle.)
-
-Assuming that you decide not to download all the utilites required to
-carry out a simple install, follow the following instructions to compile
-and install the @cic{} compiler:
-
-@enumerate
-
-@item
-If you haven't already installed DJGPP, do that now, following the
-instructions given there.
-
-@item
-Open a command prompt if you aren't at one already, unpack the
-distribution if you haven't already, and change directory to the main
-installation directory (@pxref{Unpacking}).
-
-@item
-Run one of two commands included in the distribution especially for
-installing @cic{} under DJGPP.  Which one you run depends on the shell
-you're using: if you're running under one of the DOS/Windows shells
-(@command{cmd.exe} or @command{command.com}), type
-@command{makeick.bat}, and if you're running under a port of a UNIX or
-Linux shell (such as @command{bash}), type @command{makeick.sh}.
-
-@item
-The distribution should now have been compiled, but it still needs to be
-installed.  To do this, you will need to edit your @samp{PATH}
-environment variable.  Under DOS and earlier versions of Windows, you
-can do this by editing @file{C:\autoexec.bat}; look for the last command
-that sets the @samp{PATH} environment variable (i.@:e.@: that starts
-with @samp{set PATH=}), and add another semicolon and the @file{bin}
-subdirectory of your main installation directory to it (for instance, if
-your installation directory is
-@file{C:\stuff\intercal\ick-@value{VERSION}}, you want to add
-@samp{;C:\stuff\intercal\ick-@value{VERSION}\bin} to the end of that
-line).  Under later versions of Windows, this won't work (I'm not sure
-exactly where the cutoff is, but I know the other method doesn't work on
-Windows XP); instead, go via the Start menu to Settings, Control Panel,
-System, Advanced, Environment Variables, and edit either your own or the
-system-wide PATH setting (depending on whether you want to install for
-yourself or for everyone) to end with the @file{bin} subdirectory of the
-main installation directory, the same way as for older versions of
-Windows.
-
-@end enumerate
-
-To test that the @samp{PATH} setting is set correctly, try changing to
-an unrelated directory (for instance, by typing @command{cd \} at a
-command prompt), and typing @command{ick -@@}; if you get a usage
-message for @command{ick}, then you've set the @samp{PATH} setting
-correctly.  Note that if things go wrong during compilation, other than
-errors about inability to find @command{flex} or @command{bison} (the
-compilation process can succeed despite either of these errors), it's
-likely that you've messed up your DJGPP installation (maybe by setting
-the @samp{PATH} or @samp{DJDIR} environment variables incorrectly for
-it).
-
-@node Not Installing
-@section Not Installing
-@cindex @command{ick}, using without installation
-@cindex @command{ick}, not installating
-@cindex trying out @command{ick}
-@cindex not installing
-@cindex non-root installation
-@cindex installation, non-root
-@cindex live CD/USB stick
-@cindex making a live CD/USB stick
-
-You don't have to install @cic{} to be able to use it; you can instead
-stop any of the other install techniques just after compiling the source
-code, before the installation step.  (This may be useful if you just
-want to try out @cic{}, or if you aren't a root/admin user and therefore
-don't have the permissions to install things.)  When @cic{} hasn't been
-installed, @command{ick} won't be able to find the files it looks for in
-the places that they ought to have been installed, so it will look in a
-variety of places they might be instead (the installation directory, if
-it can figure out where it is; the same directory as the binary; the
-current directory).  In order for this to work, just don't move any of
-the files that were compiled anywhere else.
-
-Of course, if you haven't installed the compiler, just typing
-@command{ick} is unlikely to work, because your computer won't know what
-you mean.  Instead, you should give a pathname (absolute or relative) to
-where @command{ick} is, so that your computer can find it.  With any
-luck, your computer will communicate the pathname you used to
-@command{ick} itself, and if that happens @command{ick} will use it to
-figure out where the main installation directory is, and find the files
-it needs that way.  If you suspect that errors you are getting are due
-to inability to find files (such as E127 (@pxref{E127}) or E999
-(@pxref{E999})), try giving the @option{-u} (@pxref{-u}) option to
-@command{ick} to see where it's looking.
-
-You can make a `live' CD or USB-stick version of @cic{} using similar
-methods; configure (if possible) and compile it, but instead of
-installing it, copy the entire @file{ick-@value{VERSION}} directory to the
-CD or USB stick.  @ical{} can then be run from there by explicitly giving
-a pathname to @file{bin/ick} or @file{bin/ick.exe}.
+be what you want.
 
 @node Uninstalling
 @section Uninstalling
@@ -603,31 +528,28 @@ this may be useful if you want to test the installation system, or
 change the location you install programs, or for some reason you don't
 want it on your computer.  It's worth uninstalling just before you
 install a new version of @cic{} because this will save some disk space;
-you cannot install two versions of @cic{} at once (but see @ref{Not
-Installing} for information on how you can use @cic{} without installing
-it).
+you cannot install two versions of @cic{} at once (at least, not in
+the same directory; but you can change the --prefix of one of the
+installations to get two versions at once).
 
 If you installed @cic{} using @command{make install}, you can
 uninstall it by using @command{make uninstall} from the installation
 directory, assuming that it still exists.  If you can't use that
 method for some reason, you can uninstall it by deleting the files
-@file{ick.exe} where your computer installs binaries, @file{libick.a},
-@file{libickmt.a}, @file{libickec.a}, and @file{libyuk.a} where your
-computer installs libraries, and the subdirectories
-@file{ick-@value{VERSION}} in the places where your computer installs
-data files and include files, and their contents.
+@file{ick} and @file{convickt} where your computer installs binaries
+(with an extension like @samp{.exe} added if that's usual for binaries
+on your operating system), @file{libick.a}, @file{libickmt.a},
+@file{libickec.a}, and @file{libyuk.a} where your computer installs
+libraries, and the subdirectories @file{ick-@value{VERSION}} in the
+places where your computer installs data files and include files, and
+their contents.
 
-If you installed @cic{} by changing your @samp{PATH} environment
-variable, you can uninstall by changing it back.
-
-You can go further than uninstalling.  Running @command{make distr},
-@command{districk.sh}, or @command{districk.bat} will delete any files
-created by compilation; @command{make distclean} will delete those
-files, and also any files created by configuring.  The distribution
-contains prebuilt versions of the parser, lexical analyser and OIL
-compiler; doing @command{make clean} (or @command{cleanick.sh} or
-@command{cleanick.bat}) will do the same thing as @command{make distr}
-and also delete those prebuilt versions.
+You can go further than uninstalling.  Running @command{make clean}
+will delete any files created by compilation; @command{make distclean}
+will delete those files, and also any files created by configuring.
+It's probably a wise idea to uninstall before doing a distclean,
+though, as otherwise information needed to uninstall will be deleted,
+as that information is generated by @command{configure}.
 
 @node Reporting Bugs
 @section Reporting Bugs
@@ -718,17 +640,17 @@ Increment the version number; if you add any new features, increment the
 major version number (after the decimal point) and drop the minor version
 number (before the decimal point) to 0, and otherwise increment the minor
 version number.  You have to update the version number in the following
-files: @file{config.in}, @file{config.sh}, and @file{doc/ick.txi}.  You
+files: @file{configure.ac}, @file{configure}, and @file{doc/ick.txi}.  You
 also have to rename the installation directory to reflect the new version
 number.
 
 @item
-Add an entry to the @file{NEWS.txt} file explaining what's new in the
+Add an entry to the @file{NEWS} file explaining what's new in the
 version that you're releasing, following the same format as the other
 entries.
 
 @item
-Update the @file{README.txt} with a description of any new files you may
+Update the @file{README} with a description of any new files you may
 have added.
 
 @item
@@ -736,26 +658,13 @@ Remove any autosave or backup files that may be littering the
 installation directory or its subdirectories.
 
 @item
-Run @command{make distclean}, or @command{districk.sh} or
-@command{districk.bat} if you didn't manage to configure; this will
-remove all files created by the compilation process that shouldn't be
-in the distribution.
-
-@item
-Update the @file{MANIFEST.txt} file that lists all files in the
-distribution; on a Linux or UNIX system, you can do this by typing
-@command{ls -R1 > MANIFEST.txt} in the main installation directory.
-
-@item
-If creating the distribution under DJGPP, run @command{etc/ctrlmfix.bat}
-or @command{etc/ctrlmfix.sh}, even if you managed to configure; this
-will sort out portability problems with newlines.
-
-@item
-Create a gzipped tar file containing the installation directory.  Its
-filename should be @samp{ick-}, followed by the version number with the
-dot replaced by a dash, followed by @samp{.tgz}; this form of filename
-is friendly to DOS.
+Run @command{make distcheck}, which will make the distribution
+paxballs, and rename them to have the correct extensions (Automake
+thinks they're tarballs, so will use @samp{.tar} rather than
+@samp{.pax}, and you have to fix this by hand).  @command{make
+distcheck} will also perform some sanity checks on the build system of
+the resulting paxball, which will help to ensure that nothing
+important is missing from it.
 
 @item
 Place the new version somewhere on the Internet, and announce the

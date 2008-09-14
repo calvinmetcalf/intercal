@@ -7,32 +7,20 @@ Bugs found by the people on irc.freenode.org/esoteric (thanks for testing!)
 1.  Fixed the configure script to work with the default Debian shell dash.
     (reported by <ehird>)
 
-2.  Installation to a --prefix that doesn't contain /bin and /lib
-    subdirectories beforehand now works; the prefix needn't even exist itself
-    (if it doesn't, it will be created). Also, installation will now not
-    attempt to install Info documentation to the main Info documentation tree
-    if it isn't under the --prefix (you will get a warning about this during
-    configuration if this happens, including instructions on how to override
-    this and go back to the old buggy behaviour if you found it convenient),
-    and mandb (which updates information for the man -k and apropos commands)
-    is only run if you are root. This allows non-default builds for people who
-    like to install things (even though they work without installation) but
-    don't want to install them as root. (reported by <AnMaster>)
-
-3.  Fixed a typo in the perpet.c version of the help information.
+2.  Fixed a typo in the perpet.c version of the help information.
     (reported by <AnMaster>)
 
-4.  Fixed the CREATE statement to work on 64-bit architectures.
+3.  Fixed the CREATE statement to work on 64-bit architectures.
     (reported by <AnMaster>)
 
-5.  Actually fixed unlambda.i; the fix was meant to be in 0.28, and is
+4.  Actually fixed unlambda.i; the fix was meant to be in 0.28, and is
     described in its changelog, but for some reason never made it to
     the distributed tarball. (reported by <ehird>)
 
-6.  The -F option again works. (I accidentally broke it in the preceding
+5.  The -F option again works. (I accidentally broke it in the preceding
     version, making it basically a no-op by mistake.) (reported by <ehird>)
 
-7.  The availability of variable argument list mechanisms is now determined
+6.  The availability of variable argument list mechanisms is now determined
     automatically by the configure script, rather than relying on the old
     method of checking which usually gets the wrong answer with modern
     compilers, leading to build failures on many modern systems (previously
@@ -41,27 +29,25 @@ Bugs found by the people on irc.freenode.org/esoteric (thanks for testing!)
     DOS, FreeBSD and Mac OS X, and possibly affects other platforms. (reported
     independently by both <ehird> and <AnMaster>)
 
-8.  The build now succeeds (with warnings) when lex or yacc are missing,
+7.  The build now succeeds (with warnings) when lex or yacc are missing,
     rather than failing with mysterious error messages that seem to have
     nothing to do with the problems. (The success is made possible by using
     the prebuilt versions; see change 11 of version 0.26, this is finishing
-    what that started.) Also improved the autoconfiguration some more.
-    (reported by <ehird>)
+    what that started.) (reported by <ehird>)
 
 Changes by Joris Huizer
 
-9.  The [xoritself] optimiser idiom has been generalised to handle some
+8.  The [xoritself] optimiser idiom has been generalised to handle some
     situations where the redundant XOR operands are on different grouping
     levels; this helps to optimise some heavily inlined greater-than tests.
 
-10. Fixed unary operators applied to constants (AIS: it seems that my patch to
+9.  Fixed unary operators applied to constants (AIS: it seems that my patch to
     solve this issue earlier was itself buggy).
 
-11. The -g option now causes optimisation of the output compiled C to be
+10. The -g option now causes optimisation of the output compiled C to be
     turned off, and adds comments to the output file the same way -c does.
 
-
-12. Added more optimiser idioms: [cxorand16], [cxorand32], [cfoldintoorinand],
+11. Added more optimiser idioms: [cxorand16], [cxorand32], [cfoldintoorinand],
     [or16and], [xor16and], [lshift32half], [rshiftoutofneg], [andoutofneg];
     also generalised the idiom-matching code to compare 16-bit and 32-bit
     constants as equal if they have the same value, and fixed some typos in
@@ -69,7 +55,7 @@ Changes by Joris Huizer
 
 Bugs reported by the Debian autobuilders and Joey Hess
 
-13. The build of the optimiser idioms is now split over many files, to reduce
+12. The build of the optimiser idioms is now split over many files, to reduce
     the memory usage of gcc when it tries to compile the giant output C file.
     This was a problem on ia64. (The ulimit method of preventing thrashing has
     been removed, as this method works better; likewise, the optimiser
@@ -77,19 +63,32 @@ Bugs reported by the Debian autobuilders and Joey Hess
 
 Changes by Alex Smith
 
-14. convickt can now produce its output as INTERCAL initialisation of a tail
+13. The build system has been completely redone, again; it now uses automake
+    as well as a much newer version of autoconf. This means that there is now
+    one build system that works the same way on all systems, and that all
+    sorts of clever tricks like out-of-tree builds, a self-rebuilding build
+    system, and building the distribution directly from the Makefile, are
+    possible. As a side effect, the directory structure looks somewhat
+    different to how it looked in previous versions; src, doc, etc and pit are
+    still there, but now there's prebuilt instead of temp, an extra directory
+    buildaux, and bin, lib and include have disappeared.
+
+14. The distribution now comes in compressed pax format. (Before anyone
+    complains that they have no idea what that is, or that I'm using something
+    strange and nonstandard, I'd like to point out that tar is no longer part
+    of POSIX, but that pax is. (See man 5 tar on a recent Linux system for
+    details of the whole mess.)  Luckily, pax is forward-compatible with tar
+    so tar readers should be able to read it just fine, if you can't get your
+    hands on a pax reader.)
+
+15. convickt can now produce its output as INTERCAL initialisation of a tail
     array. (This doesn't auto-offset between the different characters; it is
     therefore mostly useful for producing Baudot arrays for CLC-INTERCAL-style
     IO.)
 
-15. The function clock_gettime is now supported by the yuk profiler as an
+16. The function clock_gettime is now supported by the yuk profiler as an
     alternative method of getting a high-resolution clock for profiling (it
     is available on at least Linux).
-
-16. Upgraded the autoconfiguration to a substantially newer version of
-    autoconf. Hopefully the same script works on all operating systems now,
-    because I've removed the one that configures for DOS (which was previously
-    separate).
 
 17. Added support for computed CREATE (the computation is done at create-time,
     rather than when the unknown statement is encountered); partly because
