@@ -24,7 +24,7 @@ LICENSE TERMS
 
 %{
 
-#include "config.h"
+#include "bconfig.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

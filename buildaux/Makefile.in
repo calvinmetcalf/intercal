@@ -37,11 +37,11 @@ bin_PROGRAMS = ick$(EXEEXT) convickt$(EXEEXT)
 noinst_PROGRAMS = oil$(EXEEXT) bin2c$(EXEEXT)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(dist_ickdata_DATA) \
-	$(dist_man1_MANS) $(ickinclude_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/configure \
+	$(dist_man1_MANS) $(ickinclude_HEADERS) \
+	$(top_srcdir)/buildaux/Makefile.am \
+	$(top_srcdir)/buildaux/Makefile.in $(top_srcdir)/configure \
 	$(top_srcdir)/src/configh.in $(top_srcdir)/src/cooptsh.in \
-	COPYING NEWS buildaux/depcomp buildaux/install-sh \
-	buildaux/missing buildaux/ylwrap oil-oil.c
+	COPYING NEWS oil-oil.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -183,6 +183,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GREP = @GREP@
 HAVE_STDINT_H = @HAVE_STDINT_H@
+INCLUDE_HIDDEN_FROM_AUTOMAKE = @INCLUDE_HIDDEN_FROM_AUTOMAKE@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -311,7 +312,10 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
              doc/ickstyle.css doc/ick.txt doc/intercal.mm doc/READ.ME \
              doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
-             lexer.c doc/ick.txi doc/ick.txt NEWS README
+             lexer.c doc/ick.txi doc/ick.txt NEWS README \
+             buildaux/buildconfig buildaux/buildconfig.ac \
+             buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
+             buildaux/missing buildaux/ylwrap src/bconfigh.in
 
 
 # N.B. the parser.y and lexer.l are the links made to simplify the
@@ -324,7 +328,8 @@ CLEANFILES = oilout*.c parser.y lexer.l \
 # versions of the prebuilt files. (The source tree versions will
 # be safe in the prebuilt dir, which Automake doesn't even know
 # about.)
-DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c
+DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.status.build
+CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/buildaux/buildconfig $(top_srcdir)/src/bconfigh.in
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -332,7 +337,7 @@ all: $(BUILT_SOURCES) config.h
 .SUFFIXES: .c .dvi .l .o .obj .ps .y
 am--refresh:
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(top_srcdir)/buildaux/Makefile.in:  $(top_srcdir)/buildaux/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -342,11 +347,11 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile:buildaux/Makefile.in'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --foreign  Makefile:buildaux/Makefile.in
 .PRECIOUS: Makefile
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+Makefile: $(top_srcdir)/buildaux/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
 	    echo ' $(SHELL) ./config.status'; \
@@ -358,9 +363,6 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
-
-$(top_srcdir)/configure:  $(am__configure_deps)
-	cd $(srcdir) && $(AUTOCONF)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
@@ -456,9 +458,6 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-bin2c$(EXEEXT): $(bin2c_OBJECTS) $(bin2c_DEPENDENCIES) 
-	@rm -f bin2c$(EXEEXT)
-	$(LINK) $(bin2c_OBJECTS) $(bin2c_LDADD) $(LIBS)
 convickt$(EXEEXT): $(convickt_OBJECTS) $(convickt_DEPENDENCIES) 
 	@rm -f convickt$(EXEEXT)
 	$(LINK) $(convickt_OBJECTS) $(convickt_LDADD) $(LIBS)
@@ -470,9 +469,6 @@ parser.h: parser.c
 ick$(EXEEXT): $(ick_OBJECTS) $(ick_DEPENDENCIES) 
 	@rm -f ick$(EXEEXT)
 	$(LINK) $(ick_OBJECTS) $(ick_LDADD) $(LIBS)
-oil$(EXEEXT): $(oil_OBJECTS) $(oil_DEPENDENCIES) 
-	@rm -f oil$(EXEEXT)
-	$(LINK) $(oil_OBJECTS) $(oil_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1381,17 +1377,25 @@ libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
 	for oo in oilout*.c; do echo $$oo; $(COMPILE) -c $$oo; done
 	$(AR) $(ARFLAGS) libidiot.a oilout*.o
 	$(RANLIB) libidiot.a
-atari.o: bin2c$(EXEEXT) src/atari.bin
-	./bin2c$(EXEEXT) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
+
+@INCLUDE_HIDDEN_FROM_AUTOMAKE@ ./host.mak
+oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c
+bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c
+oil:
+bin2c:
+atari.o: bin2c$(EXEEXT_FOR_BUILD) src/atari.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
 	$(COMPILE) -c atari.c
-baudot.o: bin2c$(EXEEXT) src/baudot.bin
-	./bin2c$(EXEEXT) ick_clc_cset_baudot < `test -f 'src/baudot.bin' || echo '$(srcdir)/'`src/baudot.bin > baudot.c
+baudot.o: bin2c$(EXEEXT_FOR_BUILD) src/baudot.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_baudot < `test -f 'src/baudot.bin' || echo '$(srcdir)/'`src/baudot.bin > baudot.c
 	$(COMPILE) -c baudot.c
-ebcdic.o: bin2c$(EXEEXT) src/ebcdic.bin
-	./bin2c$(EXEEXT) ick_clc_cset_ebcdic < `test -f 'src/ebcdic.bin' || echo '$(srcdir)/'`src/ebcdic.bin > ebcdic.c
+ebcdic.o: bin2c$(EXEEXT_FOR_BUILD) src/ebcdic.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_ebcdic < `test -f 'src/ebcdic.bin' || echo '$(srcdir)/'`src/ebcdic.bin > ebcdic.c
 	$(COMPILE) -c ebcdic.c
-latin1.o: bin2c$(EXEEXT) src/latin1.bin
-	./bin2c$(EXEEXT) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
+latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
 	$(COMPILE) -c latin1.c
 
 # It's ugly to distribute the prebuilt files in the root of the
@@ -1404,7 +1408,31 @@ dist-hook:
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
-	(cd $(distdir); ls -1R > MANIFEST)
+	(cd $(distdir); find . | sort > MANIFEST)
+
+# Update the prebuilt directory in the original source from the built
+# versions; this is for the repository version of C-INTERCAL, so it's
+# up to date the same way that distributed versions are.
+repoupdate: parser.c parser.h lexer.c oil-oil.c $(srcdir)/MANIFEST
+	cp parser.c $(srcdir)/prebuilt/parser.c
+	cp parser.h $(srcdir)/prebuilt/parser.h
+	cp lexer.c $(srcdir)/prebuilt/lexer.c
+	cp oil-oil.c $(srcdir)/prebuilt/oil-oil.c
+$(srcdir)/MANIFEST: distdir
+	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
+	$(am__remove_distdir)
+
+# The build system itself is included in the makefile; tell Automake
+# about my tweaking.
+$(top_srcdir)/configure:  $(am__configure_deps)
+	cd $(top_srcdir) && $(AUTOCONF)
+$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/src/bconfigh.in
+	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
+	chmod a+x $(top_srcdir)/buildaux/buildconfig
+$(top_srcdir)/src/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
+	cd $(top_srcdir)/buildaux && $(AUTOHEADER) buildconfig.ac
+	rm -f stamp-h1
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -29,10 +29,18 @@ libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
 	$(RANLIB) libidiot.a
 convickt_SOURCES = src/convickt.c src/clc-cset.c src/uncommon.c
 
+@INCLUDE_HIDDEN_FROM_AUTOMAKE@ ./host.mak
+
 noinst_PROGRAMS = oil bin2c
 oil_SOURCES = src/oil.y
 oil_YFLAGS =
 bin2c_SOURCES = src/bin2c.c
+oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c
+bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c
+oil:
+bin2c:
 
 lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a
 libick_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
@@ -45,17 +53,17 @@ libickec_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
                      src/arrgghh.c src/clc-cset.c src/uncommon.c src/ick_ec.c
 libickec_a_LIBADD = atari.o baudot.o ebcdic.o latin1.o
 libyuk_a_SOURCES = src/yuk.c
-atari.o: bin2c$(EXEEXT) src/atari.bin
-	./bin2c$(EXEEXT) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
+atari.o: bin2c$(EXEEXT_FOR_BUILD) src/atari.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
 	$(COMPILE) -c atari.c
-baudot.o: bin2c$(EXEEXT) src/baudot.bin
-	./bin2c$(EXEEXT) ick_clc_cset_baudot < `test -f 'src/baudot.bin' || echo '$(srcdir)/'`src/baudot.bin > baudot.c
+baudot.o: bin2c$(EXEEXT_FOR_BUILD) src/baudot.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_baudot < `test -f 'src/baudot.bin' || echo '$(srcdir)/'`src/baudot.bin > baudot.c
 	$(COMPILE) -c baudot.c
-ebcdic.o: bin2c$(EXEEXT) src/ebcdic.bin
-	./bin2c$(EXEEXT) ick_clc_cset_ebcdic < `test -f 'src/ebcdic.bin' || echo '$(srcdir)/'`src/ebcdic.bin > ebcdic.c
+ebcdic.o: bin2c$(EXEEXT_FOR_BUILD) src/ebcdic.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_ebcdic < `test -f 'src/ebcdic.bin' || echo '$(srcdir)/'`src/ebcdic.bin > ebcdic.c
 	$(COMPILE) -c ebcdic.c
-latin1.o: bin2c$(EXEEXT) src/latin1.bin
-	./bin2c$(EXEEXT) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
+latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
+	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
 	$(COMPILE) -c latin1.c
 
 ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/abcess.h src/ick_lose.h \
@@ -77,7 +85,10 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
              doc/ickstyle.css doc/ick.txt doc/intercal.mm doc/READ.ME \
              doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
-             lexer.c doc/ick.txi doc/ick.txt NEWS README
+             lexer.c doc/ick.txi doc/ick.txt NEWS README \
+             buildaux/buildconfig buildaux/buildconfig.ac \
+             buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
+             buildaux/missing buildaux/ylwrap src/bconfigh.in
 
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
@@ -89,7 +100,19 @@ dist-hook:
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
-	(cd $(distdir); ls -1R > MANIFEST)
+	(cd $(distdir); find . | sort > MANIFEST)
+
+# Update the prebuilt directory in the original source from the built
+# versions; this is for the repository version of C-INTERCAL, so it's
+# up to date the same way that distributed versions are.
+repoupdate: parser.c parser.h lexer.c oil-oil.c $(srcdir)/MANIFEST
+	cp parser.c $(srcdir)/prebuilt/parser.c
+	cp parser.h $(srcdir)/prebuilt/parser.h
+	cp lexer.c $(srcdir)/prebuilt/lexer.c
+	cp oil-oil.c $(srcdir)/prebuilt/oil-oil.c
+$(srcdir)/MANIFEST: distdir
+	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
+	$(am__remove_distdir)
 
 # N.B. the parser.y and lexer.l are the links made to simplify the
 # build, not the originals
@@ -100,4 +123,17 @@ CLEANFILES = oilout*.c parser.y lexer.l \
 # versions of the prebuilt files. (The source tree versions will
 # be safe in the prebuilt dir, which Automake doesn't even know
 # about.)
-DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c
+DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.status.build
+
+# The build system itself is included in the makefile; tell Automake
+# about my tweaking.
+$(top_srcdir)/configure:  $(am__configure_deps)
+	cd $(top_srcdir) && $(AUTOCONF)
+$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/src/bconfigh.in
+	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
+	chmod a+x $(top_srcdir)/buildaux/buildconfig
+$(top_srcdir)/src/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
+	cd $(top_srcdir)/buildaux && $(AUTOHEADER) buildconfig.ac
+	rm -f stamp-h1
+	touch $@
+CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/src/bconfigh.in

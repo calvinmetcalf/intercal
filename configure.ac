@@ -68,9 +68,12 @@ CFLAGS="$CFLAGS -lrt"
 AC_CHECK_FUNCS(clock_gettime)
 CFLAGS=$ICK_SAVECFLAGS
 
+dnl Substitutions.
+INCLUDE_HIDDEN_FROM_AUTOMAKE="include"
 AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(INCLUDE_HIDDEN_FROM_AUTOMAKE)
 
-AC_CONFIG_FILES([Makefile coopt.sh:src/cooptsh.in])
+AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in])
 AC_OUTPUT
 # After the output, chmod coopt.sh to be executable.
 chmod a+x coopt.sh
@@ -80,13 +83,57 @@ chmod a+x coopt.sh
 # be in the directory configure was run in.
 if test ! -n "$LEX"; then
   cp $srcdir/prebuilt/lexer.c $ac_pwd/lexer.c
-  AC_WARN([No version of lex was found; using prebuilt lexer.])
-  AC_WARN([Changes to src/lexer.l will be ignored.])
+  AC_MSG_WARN([No version of lex was found; using prebuilt lexer.])
+  AC_MSG_WARN([Changes to src/lexer.l will be ignored.])
 fi
 if test ! -n "$YACC"; then
   cp $srcdir/prebuilt/parser.c $ac_pwd/parser.c
   cp $srcdir/prebuilt/parser.h $ac_pwd/parser.h
   cp $srcdir/prebuilt/oil-oil.c $ac_pwd/oil-oil.c
-  AC_WARN([No version of yacc was found; using prebuilt parser.])
-  AC_WARN([Changes to src/parser.y and src/oil.y will be ingored.])
+  AC_MSG_WARN([No version of yacc was found; using prebuilt parser.])
+  AC_MSG_WARN([Changes to src/parser.y and src/oil.y will be ingored.])
 fi
+
+# Configure again, for the build system.
+# It's simpler the second time round as we don't care about things like
+# installation dirs, just about how to do things like run the compiler.
+
+cd $ac_pwd;
+
+# This trick for unsetting variables comes from the autoconf manual
+
+# "|| exit" suppresses any "Segmentation fault" message.
+if ( (MAIL=60; unset MAIL) || exit) >/dev/null 2>&1; then
+  unset=unset
+else
+  unset=false
+fi
+
+AC_DEFUN([GEN_BUILD_CMD_LINE],[
+BUILD_$1_ARG="FOO=BAR"
+if test ! "x$[]$1_FOR_BUILD" == x;
+then
+  BUILD_$1_ARG="$1=$[]$1_FOR_BUILD";
+fi
+$1=foo
+$unset $1 || $1=''])
+
+GEN_BUILD_CMD_LINE(CC)
+GEN_BUILD_CMD_LINE(CFLAGS)
+GEN_BUILD_CMD_LINE(LDFLAGS)
+GEN_BUILD_CMD_LINE(LIBS)
+GEN_BUILD_CMD_LINE(CPPFLAGS)
+GEN_BUILD_CMD_LINE(CPP)
+
+BUILD_MACHINE_ARG="FOO=BAR"
+if test ! "x$build_alias" == x;
+then
+  BUILD_MACHINE_ARG="--build=$build_alias"
+fi
+
+# Run the new configure script.
+mv config.status config.status.save
+(env -i "PATH=$PATH" $srcdir/buildaux/buildconfig "$BUILD_MACHINE_ARG" "$BUILD_CC_ARG" "$BUILD_CFLAGS_ARG" "$BUILD_LDFLAGS_ARG" "$BUILD_LIBS_ARG" "$BUILD_CPPFLAGS_ARG" "$BUILD_CPP_ARG")
+mv config.status config.status.build
+mv config.status.save config.status
+

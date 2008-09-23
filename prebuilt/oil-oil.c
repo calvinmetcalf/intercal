@@ -79,7 +79,7 @@
 #line 25 "oil.y"
 
 
-#include "config.h"
+#include "bconfig.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

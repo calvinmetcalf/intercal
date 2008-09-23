@@ -1,0 +1,38 @@
+The ecto_b98 expansion library is used to link .b98 files with .i
+files to form combined programs which allow communication between
+Befunge-98 and INTERCAL. It is written specifically to link to the
+cfunge Funge-98 interpreter, which can be compiled as a library.
+
+This library is included automatically by the compiler when needed,
+but to use it manually, compile the .b98 file to a .cio by hand
+(for a .b98 file, the resulting .cio file is reusable) and invoke the
+compiler like this:
+
+ick -options intercalfile.i befungefile.cio ecto_b98 libick_ecto_b98.a libm.a
+
+(This corresponds to ick -options intercalfile.i befungefile.b98. Note
+that at least the -e option is needed because expansion libraries are
+being used; most likely, you want to use other options too.)
+
+libick_ecto_b98.a is actually the cfunge interpreter, built a slightly
+different way, with a Funge fingerprint added so that it Befunge
+programs can communicate with the INTERCAL program in a way that fits
+within the syntax of that language.
+
+This library implements no commands accessible from the INTERCAL
+program; instead, the Befunge program that must be linked in at the
+same time (you'll get a link error if you don't) becomes accessible
+from the INTERCAL program, with its COME FROMs and NEXT FROMs able to
+access the INTERCAL program and with the INTERCAL program's NEXTs able
+to affect it (and vice versa). Likewise, some other INTERCAL control
+structures are programmed, and they stretch across both the INTERCAL
+program and the Befunge program, as do things like the NEXT stack.
+(They will also stretch to any C programs that may be implemented, but
+note that libick_ecto_b98.a has not been name-mangled, so care is
+needed to prevent collisions of identifiers when linking INTERCAL,
+Befunge and C simultaneously.)
+
+libick_ecto_b98.a does not ship with C-INTERCAL, but can be created
+using the script provided in the /etc directory if you have a source
+code distribution for cfunge available. See the provided cftoec.sh
+script in that directory.
