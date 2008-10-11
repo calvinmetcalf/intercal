@@ -39,7 +39,8 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(dist_ickdata_DATA) \
 	$(dist_man1_MANS) $(ickinclude_HEADERS) \
 	$(top_srcdir)/buildaux/Makefile.am \
-	$(top_srcdir)/buildaux/Makefile.in $(top_srcdir)/configure \
+	$(top_srcdir)/buildaux/Makefile.in \
+	$(top_srcdir)/buildaux/hostmak.in $(top_srcdir)/configure \
 	$(top_srcdir)/src/configh.in $(top_srcdir)/src/cooptsh.in \
 	COPYING NEWS oil-oil.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,7 +51,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = coopt.sh
+CONFIG_CLEAN_FILES = coopt.sh host.mak
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -63,7 +64,6 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(ickincludedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES) $(noinst_LIBRARIES)
-AR = ar
 ARFLAGS = cru
 libick_a_AR = $(AR) $(ARFLAGS)
 libick_a_DEPENDENCIES = atari.o baudot.o ebcdic.o latin1.o
@@ -164,6 +164,7 @@ distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -383,6 +384,8 @@ $(top_srcdir)/src/configh.in:  $(am__configure_deps)
 distclean-hdr:
 	-rm -f config.h stamp-h1
 coopt.sh: $(top_builddir)/config.status $(top_srcdir)/src/cooptsh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+host.mak: $(top_builddir)/config.status $(top_srcdir)/buildaux/hostmak.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 install-libLIBRARIES: $(lib_LIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -1408,6 +1411,7 @@ dist-hook:
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
+	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
 
 # Update the prebuilt directory in the original source from the built

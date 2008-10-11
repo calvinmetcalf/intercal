@@ -19,6 +19,8 @@ AC_PROG_CC
 AM_PROG_LEX
 AC_PROG_RANLIB
 AC_PROG_LN_S
+AC_CHECK_TOOL([AR],[ar])
+AC_SUBST(AR)
 
 dnl Checks for libraries.
 
@@ -73,7 +75,7 @@ INCLUDE_HIDDEN_FROM_AUTOMAKE="include"
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(INCLUDE_HIDDEN_FROM_AUTOMAKE)
 
-AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in])
+AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in host.mak:buildaux/hostmak.in])
 AC_OUTPUT
 # After the output, chmod coopt.sh to be executable.
 chmod a+x coopt.sh
@@ -94,9 +96,13 @@ if test ! -n "$YACC"; then
   AC_MSG_WARN([Changes to src/parser.y and src/oil.y will be ingored.])
 fi
 
-# Configure again, for the build system.
+# Configure again, for the build system, if necessary.
 # It's simpler the second time round as we don't care about things like
 # installation dirs, just about how to do things like run the compiler.
+if test "$cross_compiling" != yes; then
+  cp config.h bconfig.h
+  exit 0
+fi
 
 cd $ac_pwd;
 

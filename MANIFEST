@@ -39,6 +39,7 @@
 ./etc/IFFI.spec
 ./etc/intercal.el
 ./etc/temp
+./MANIFEST
 ./NEWS
 ./pit
 ./pit/beer.doc

@@ -100,6 +100,7 @@ dist-hook:
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
+	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
 
 # Update the prebuilt directory in the original source from the built
