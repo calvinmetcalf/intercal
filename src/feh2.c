@@ -2258,104 +2258,52 @@ void emit(tuple *tn, FILE *fp)
         break;
 
     case ENABLE:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
-        (void) fprintf(fp,
-		       "\t""int i;\n");
-	for (np = tn->u.node; np; np = np->rval)
-	{
-	    (void) fprintf(fp,
-			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
-	    if (np->constant == ABSTAIN) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2], enablers[FROM-GETS], enablers[MANYFROM-GETS]);
-	    } else if (np->constant == REINSTATE) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
-	    } else if (np->constant == GETS) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[GETS-GETS], enablers[RESIZE-GETS]);
-	    } else if (np->constant == COME_FROM) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[COME_FROM-GETS], enablers[COMPUCOME-GETS], enablers[GERUCOME-GETS]);
-	    } else if (np->constant == NEXTFROMLABEL) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[NEXTFROMLABEL-GETS], enablers[NEXTFROMGERUND-GETS], enablers[NEXTFROMEXPR-GETS]);
-	    } else {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
-	    }
-	    (void) fprintf(fp,
-			   "\t""\tif(ick_abstained[i]) ick_abstained[i]--;\n");
-	}
-	break;
-
     case DISABLE:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
-        (void) fprintf(fp,
-		       "\t""int i;\n");
-	for (np = tn->u.node; np; np = np->rval)
-	{
-	    (void) fprintf(fp,
-			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
-	    if (np->constant == ABSTAIN) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2], enablers[FROM-GETS], enablers[MANYFROM-GETS]);
-	    } else if (np->constant == REINSTATE) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
-	    } else if (np->constant == GETS) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[GETS-GETS], enablers[RESIZE-GETS]);
-	    } else if (np->constant == COME_FROM) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[COME_FROM-GETS], enablers[COMPUCOME-GETS], enablers[GERUCOME-GETS]);
-	    } else if (np->constant == NEXTFROMLABEL) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[NEXTFROMLABEL-GETS], enablers[NEXTFROMGERUND-GETS], enablers[NEXTFROMEXPR-GETS]);
-	    } else {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
-	    }
-	    (void) fprintf(fp,
-			   "\t""\tif(!ick_abstained[i]) ick_abstained[i] = 1;\n");
-	}
-	break;
-
     case MANYFROM:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
-        (void) fprintf(fp,
-		       "\t""int i;\n\tint j;\n\tj=");
-	tn->u.node->lval->width=32;
-	prexpr(tn->u.node->lval,fp, 1);
-	(void) fprintf(fp,
-		       ";\n");
-	for (np = tn->u.node->rval; np; np = np->rval)
+      /* AIS: This code has been rewritten to make use of the revlinetype array
+	 (an optimisation that Joris Huizer came up with; however, I am not
+	 using his code, but rewriting it, to make use of a single array and an
+	 index to it, rather than one array for each command type, for
+	 maintainability reasons. */
+      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL);
+      (void) fprintf(fp,"\tint i;\n");
+      np=tn->u.node;
+      if(tn->type==MANYFROM)
+      {
+	np=np->rval;
+	fprintf(fp,"\tint j = ");
+	prexpr(tn->u.node->lval, fp, 1);
+	fprintf(fp,";\n");
+      }
+      for(; np; np = np->rval)
+      {
+	int npc = np->constant;
+      anothertype:
+	(void) fprintf(fp,"\n\tfor(i=revlineindex[%s];i<revlineindex[%s+1];i++)\n",
+		       enablers[npc-GETS],enablers[npc-GETS]);
+	switch(tn->type)
 	{
-	    (void) fprintf(fp,
-			   "\n\tfor (i = 0; i < (int)(sizeof(linetype)/sizeof(int)); i++)\n");
-	    if (np->constant == ABSTAIN) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2], enablers[FROM-GETS], enablers[MANYFROM-GETS]);
-	    } else if (np->constant == REINSTATE) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[np->constant-GETS], enablers[np->constant-GETS+2]);
-	    } else if (np->constant == GETS) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s)\n", enablers[GETS-GETS], enablers[RESIZE-GETS]);
-	    } else if (np->constant == COME_FROM) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[COME_FROM-GETS], enablers[COMPUCOME-GETS], enablers[GERUCOME-GETS]);
-	    } else if (np->constant == NEXTFROMLABEL) {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s || linetype[i] == %s || linetype[i] == %s)\n", enablers[NEXTFROMLABEL-GETS], enablers[NEXTFROMGERUND-GETS], enablers[NEXTFROMEXPR-GETS]);
-	    } else {
-	      (void) fprintf(fp,
-			     "\t""    if (linetype[i] == %s)\n", enablers[np->constant-GETS]);
-	    }
-	    (void) fprintf(fp,
-			   "\t""\tick_abstained[i] += j;\n");
+	case ENABLE:  (void) fprintf(fp,"\t    if (ick_abstained[revlinetype[i]])"
+				    "\t\tick_abstained[revlinetype[i]]--;\n"); break;
+	case DISABLE: (void) fprintf(fp,"\t    if(!ick_abstained[revlinetype[i]])"
+				    "\t\tick_abstained[revlinetype[i]]=1;\n"); break;
+	case MANYFROM:(void) fprintf(fp,"\tick_abstained[revlinetype[i]]+=j;\n"); break;
+	default:      ick_lose(IE778, emitlineno, (char *)NULL);
 	}
-	break;
+	switch(npc)
+	{
+	case ABSTAIN:       npc=DISABLE;        goto anothertype;
+	case DISABLE:       npc=FROM;           goto anothertype;
+	case FROM:          npc=MANYFROM;       goto anothertype;
+	case REINSTATE:     npc=ENABLE;         goto anothertype;
+	case COME_FROM:     npc=COMPUCOME;      goto anothertype;
+	case COMPUCOME:     npc=GERUCOME;       goto anothertype;
+	case NEXTFROMLABEL: npc=NEXTFROMEXPR;   goto anothertype;
+	case NEXTFROMEXPR:  npc=NEXTFROMGERUND; goto anothertype;
+	default: break;
+	}
+      }
+      break;
 
     case NEXTFROMEXPR:
     case NEXTFROMGERUND:

@@ -204,8 +204,8 @@ static void print_usage(char *prog, char *options)
   fprintf(stderr,"\t\t separate output files; with it, the first file given\n");
   fprintf(stderr,"\t\t must be the only INTERCAL file) (prevents -mypPf)\n");
   fprintf(stderr,"\t-E\t:never include the system library (prevents -P)\n");
-  fprintf(stderr,"\t-t\t:ick_traditional mode, accept only INTERCAL-72\n");
-  fprintf(stderr,"\t-C\t:ick_clockface output (e.g. use IIII instead of IV)\n");
+  fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
+  fprintf(stderr,"\t-C\t:clockface output (e.g. use IIII instead of IV)\n");
   fprintf(stderr,"\t-O\t:optimize expresssions in generated code\n");
   /* AIS: Changed the help message for the previous line (because the
      function of -O has changed). I wrote the next group of options. */
@@ -1029,15 +1029,15 @@ int main(int argc, char *argv[])
 	       }
 	       break;
 
-	     case 'D':	/* linetypes ick_array for abstention handling */
+	     case 'D':	/* linetypes array for abstention handling */
 	       maxabstain = 0;
 	       for (tp = tuples; tp->type; tp++)
 		 if (tp->type == ENABLE || tp->type == DISABLE || tp->type == MANYFROM)
 		   maxabstain++;
 	       if (maxabstain || /* AIS */ gerucomesused)
 	       {
+		 int j=0; /* AIS */
 		 /* AIS: Changed to use enablersm1 */
-		 /*(void) fprintf(ofp, "#define UNKNOWN\t\t0\n");*/
 		 i = 0;
 		 for (;i < (int)(sizeof(enablersm1)/sizeof(char *));i++)
 		   (void) fprintf(ofp,
@@ -1064,7 +1064,55 @@ int main(int argc, char *argv[])
 			respectively) both become UNKNOWN in the
 			linetypes array. */
 		     (void) fprintf(ofp, " UNKNOWN,\n");
-		 (void) fprintf(ofp, "};\n"); } break;
+		 (void) fprintf(ofp, "};\n");
+		 /* AIS: Implement the reverse of this array too (i.e.
+		    from line types to lines); this significantly
+		    speeds up up reinstate/abstain on gerunds. Joris
+		    Huizer originally suggested the optimisation in
+		    question; this implements the same algorithm in a
+		    more maintainable way. (I didn't want to have to
+		    keep five copies of the command list in sync; two
+		    is bad enough!) */
+		 (void) fprintf(ofp, "int revlinetype[] = {\n");
+		 for(i=0;i < (int)(sizeof(enablersm1)/sizeof(char *));i++)
+		 {
+		   (void) fprintf(ofp,"/* %s */",enablersm1[i]);
+		   for (tp = tuples; tp->type; tp++)
+		   {
+		     if((tp->ppnewtype && tp->ppnewtype-GETS == i-1) ||
+			(!tp->ppnewtype && tp->preproc &&
+			 i-1 == PREPROC-GETS) ||
+			(!tp->ppnewtype && !tp->preproc &&
+			 tp->type >= GETS && tp->type <= FROM &&
+			 tp->type-GETS == i-1) ||
+			(!i && !tp->ppnewtype && !tp->preproc &&
+			 (tp->type < GETS || tp->type > FROM)))
+		       (void) fprintf(ofp, " %ld,",(long)(tp-tuples));
+		   }
+		   (void) fprintf(ofp,"\n");
+		 }
+		 (void) fprintf(ofp, "};\n");
+		 (void) fprintf(ofp, "int revlineindex[] = {\n");
+		 for(i=0;i < (int)(sizeof(enablersm1)/sizeof(char *));i++)
+		 {
+		   (void) fprintf(ofp,"/* %s */",enablersm1[i]);
+		   (void) fprintf(ofp," %d,\n",j);
+		   for (tp = tuples; tp->type; tp++)
+		   {
+		     if((tp->ppnewtype && tp->ppnewtype-GETS == i-1) ||
+			(!tp->ppnewtype && tp->preproc &&
+			 i-1 == PREPROC-GETS) ||
+			(!tp->ppnewtype && !tp->preproc &&
+			 tp->type >= GETS && tp->type <= FROM &&
+			 tp->type-GETS == i-1) ||
+			(!i && !tp->ppnewtype && !tp->preproc &&
+			 (tp->type < GETS || tp->type > FROM)))
+		       j++;
+		   }
+		 }
+		 (void) fprintf(ofp, "/* end */ %d\n};\n",j);
+	       }
+	       break;
 
 	     case 'E':	/* extern to intern map */
 	       if(!pickcompile)
