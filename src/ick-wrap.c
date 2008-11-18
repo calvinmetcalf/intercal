@@ -91,13 +91,13 @@ ICK_EC_FUNC_START(ick_main)
     case 0:
       $G
     default:
-      ick_lose(IE129, 0, (char *)0);
+      ick_lose(IE129, 0, (const char *)0);
     }
 
 #ifdef YUK
     if(yukloop) goto ick_restart;
 #endif
-    ick_lose(IE633, $J, (char *)0);
+    ick_lose(IE633, $J, (const char *)0);
 
     $H
 #ifndef ICK_EC

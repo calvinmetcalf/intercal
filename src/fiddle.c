@@ -30,7 +30,7 @@ unsigned int ick_mingle(register unsigned int r, register unsigned int s)
 {
   if (ick_Base == 2) {
     if (r>0xffff || s>0xffff)
-      ick_lose(IE533, ick_lineno, (char *)NULL);
+      ick_lose(IE533, ick_lineno, (const char *)NULL);
     r = ((r & 0x0000ff00) << 8) | (r & 0x000000ff);
     r = ((r & 0x00f000f0) << 4) | (r & 0x000f000f);
     r = ((r & 0x0c0c0c0c) << 2) | (r & 0x03030303);
@@ -268,28 +268,28 @@ static unsigned int ick_rotleft32(unsigned int n)
 unsigned int ick_rev_or16(unsigned int n)
 {
   if(ick_or16(ick_rotleft16(ick_and16(n)))==n) return ick_rotleft16(ick_and16(n));
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
 unsigned int ick_rev_or32(unsigned int n)
 {
   if(ick_or32(ick_rotleft32(ick_and32(n)))==n) return ick_rotleft32(ick_and32(n));
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
 unsigned int ick_rev_and16(unsigned int n)
 {
   if(ick_and16(ick_rotleft16(ick_or16(n)))==n) return ick_rotleft16(ick_or16(n));
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
 unsigned int ick_rev_and32(unsigned int n)
 {
   if(ick_and32(ick_rotleft32(ick_or32(n)))==n) return ick_rotleft32(ick_or32(n));
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -305,7 +305,7 @@ unsigned int ick_rev_xor16(unsigned int n)
     l*=2;
   }
   if(ick_xor16(a)==n) return a;
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -322,7 +322,7 @@ unsigned int ick_rev_xor32(unsigned int n)
     l*=2;
   }
   if(ick_xor32(a)==n) return a;
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -338,7 +338,7 @@ unsigned int ick_rev_fin16(unsigned int n)
     l*=2;
   }
   if(ick_fin16(a)==n) return a;
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -355,7 +355,7 @@ unsigned int ick_rev_fin32(unsigned int n)
     l*=2;
   }
   if(ick_fin32(a)==n) return a;
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -363,7 +363,7 @@ unsigned int ick_rev_whirl16(unsigned int p, unsigned int n)
 {
   /* Only reverse if all digits are the same. */
   if(ick_whirl16(p,n)==n) return n;
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -371,7 +371,7 @@ unsigned int ick_rev_whirl32(unsigned int p, unsigned int n)
 {
   /* Only reverse if all digits are the same. */
   if(ick_whirl32(p,n)==n) return n;
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -380,7 +380,7 @@ unsigned int ick_rev_whirl32(unsigned int p, unsigned int n)
 unsigned int ick_xselx(unsigned int x)
 {
   register unsigned int r=0;
-  if(ick_Base != 2) ick_lose(IE778, ick_lineno, (char*) NULL);
+  if(ick_Base != 2) ick_lose(IE778, ick_lineno, (const char*) NULL);
   while(x) {if(x&1) r=(r<<1)|1; x>>=1;}
   return r;
 }

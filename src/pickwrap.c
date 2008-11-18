@@ -35,7 +35,7 @@ int ick_main(void)
 #ifdef YUK
     if(yukloop) goto ick_restart; 
 #endif
-    ick_lose(IE633, $J, (char *)0);
+    ick_lose(IE633, $J, (const char *)0);
 
     $H
     

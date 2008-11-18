@@ -201,7 +201,7 @@ void yukline(int aboff,int emitlineno)
   const char* tempcharp;
   if(!yukopts) return;
   if(globalargc!=3)
-    ick_lose(IE778,emitlineno,(char*)NULL);
+    ick_lose(IE778,emitlineno,(const char*)NULL);
   if(yukopts & 1)
   { /* profile */
     temptick=YPGETTIME;
@@ -337,7 +337,7 @@ void yukline(int aboff,int emitlineno)
 	(void) fgets(buf,20,stdin);
 	if(!strchr(buf,'\n'))
 	{
-	  ick_lose(IE810,emitlineno,(char*)NULL);
+	  ick_lose(IE810,emitlineno,(const char*)NULL);
 	}
 	templine=0;
 	switch(*buf)
@@ -683,7 +683,7 @@ void yukline(int aboff,int emitlineno)
 	  {
 	    printf("Breakpoint set at line %d.\n",templine);
 	    breakpoints[nbreakpoints++]=templine;
-	    if(nbreakpoints>=80) ick_lose(IE811,emitlineno,(char*)NULL);
+	    if(nbreakpoints>=80) ick_lose(IE811,emitlineno,(const char*)NULL);
 	  }
 	  else
 	    (void) puts("Don't know which line you mean.");
@@ -709,7 +709,7 @@ void yukline(int aboff,int emitlineno)
 	  {
 	    printf("Monitor set at line %d.\n",templine);
 	    monitors[nmonitors++]=templine;
-	    if(nmonitors>=80) ick_lose(IE811,emitlineno,(char*)NULL);
+	    if(nmonitors>=80) ick_lose(IE811,emitlineno,(const char*)NULL);
 	  }
 	  else
 	    (void) puts("Don't know which line you mean.");
