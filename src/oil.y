@@ -69,12 +69,12 @@ struct ickstype
 			 sequence of lvals (=0) or rvals (=1) this is from the
 			 root; depth bits from the end are relevant, and the
 			 bit nearest the root is least significant */
-  char* condition;    /* Points to a constant string; the condition to generate
+  const char* condition; /* Points to a constant string; the condition to generate
 			 on that node. Could also point to something the lexer
 			 mallocs, but then the lexer has to keep track of being
 			 able to free it again. If this is NULL, it means that
 			 there isn't a condition other than maybe mustbemesh */
-  char* nodetypename; /* The name of the type of node this condition matches,
+  const char* nodetypename; /* The name of the type of node this condition matches,
 		         or NULL for a LEXERLEAF */
   mybool usec;        /* Whether to append the value of c to the condition */
   mybool mustbemesh;  /* Must this node be a mesh or mesh32? */

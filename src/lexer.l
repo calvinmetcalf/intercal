@@ -81,7 +81,7 @@ static char *lineptr = linebuf;
 ick_bool re_send_token = ick_FALSE;
 
 int lexer(void);
-static int myatoi(char *text);
+static int myatoi(const char *text);
 
 #define SETLINENO					\
     {if (stbeginline == 0)	stbeginline = iyylineno;\
@@ -469,7 +469,7 @@ int lexer(void)
     return(tok);
 }
 
-static int myatoi(char *text) /* AIS */
+static int myatoi(const char *text) /* AIS */
 {
 #define MAXTEXT 100
     static char buf[MAXTEXT];
@@ -492,7 +492,7 @@ static int myatoi(char *text) /* AIS */
     return atoi(thinbuf);
 }
 
-void yyerror(char *errtype)
+void yyerror(const char *errtype)
 {
 #ifdef MAIN
     (void) printf("lextest: lexer error: %s.\n", errtype);
