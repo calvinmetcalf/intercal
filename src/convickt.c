@@ -35,7 +35,7 @@ extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const c
 /* For communication with clc_cset.c */
 /*@observer@*/ char* ick_globalargv0;
 /*@-redef@*/ /* it's never the case that both definitions are used at once */
-/*@observer@*/ /*@dependent@*/ char* ick_datadir;
+/*@observer@*/ /*@dependent@*/ const char* ick_datadir;
 /*@=redef@*/
 /* We want to read the latest versions of the character sets from disk. */
 /*@null@*/ char* ick_clc_cset_atari=0;

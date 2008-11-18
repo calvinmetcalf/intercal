@@ -93,7 +93,7 @@ static int ick_csetow=0; /* which cset to overwrite ick_next */
 
 /* For help finding files */
 /*@observer@*/ extern char* ick_globalargv0;
-/*@observer@*/ extern char* ick_datadir;
+/*@observer@*/ extern const char* ick_datadir;
 
 /*@-mustfreefresh@*/
 /* because Splint doesn't understand how findandfopen works */

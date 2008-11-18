@@ -84,7 +84,7 @@ LICENSE TERMS
  * give it a sane value just in case it does. (This is referenced by
  * clc-cset.c, but due to the linking-in of the character sets
  * themselves the reference should never be used.) */
-/*@observer@*/ /*@dependent@*/ char* ick_datadir=".";
+/*@observer@*/ /*@dependent@*/ const char* ick_datadir=".";
 
 /**********************************************************************
  *
