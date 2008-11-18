@@ -82,7 +82,7 @@ extern void ick_clockface(ick_bool mode);
 extern void ick_setclcsemantics(ick_bool mode); /* AIS */
 extern void ick_pout(unsigned int val);
 extern void ick_binin(unsigned int type, ick_array *a, ick_bool forget);
-extern void ick_binout(unsigned int type, ick_array *a);
+extern void ick_binout(unsigned int type, const ick_array *a);
 extern unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
 			   unsigned int value);
 
