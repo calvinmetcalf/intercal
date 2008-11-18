@@ -304,7 +304,7 @@ void yukline(int aboff,int emitlineno)
 	  }
 	}
       }
-    }    
+    }
     if(writelines||broken)
     {
       /* write line that we're on */
@@ -567,7 +567,7 @@ void yukline(int aboff,int emitlineno)
 		if(yukvars[i].vartype==ick_TAIL)
 		  ick_tailforget[yukvars[i].intername]=*buf=='i';
 		if(yukvars[i].vartype==ick_HYBRID)
-		  ick_hyforget[yukvars[i].intername]=*buf=='i';		
+		  ick_hyforget[yukvars[i].intername]=*buf=='i';
 	      }
 	    }
 	  }
@@ -728,7 +728,7 @@ void yukline(int aboff,int emitlineno)
 	  }
 	  else
 	    (void) puts("Don't know which line you mean.");
-	  break;	  
+	  break;
 	case 's':
 	  singlestep=1;
 	  writelines=1;

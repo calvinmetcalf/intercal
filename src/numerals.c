@@ -19,7 +19,7 @@
  * to fulfill the requirement for Ancient Roman localization.
  *
 LICENSE TERMS
-    Copyright (C) 1996 Eric S. Raymond 
+    Copyright (C) 1996 Eric S. Raymond
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

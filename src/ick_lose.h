@@ -1,13 +1,13 @@
 /* ick_lose.h --- error message strings */
 
 /*
- * Note: these error message texts, with one exception, are direct from 
+ * Note: these error message texts, with one exception, are direct from
  * the Princeton compiler (INTERCAL-72) sources (transmitted by Don Woods).
  * The one exception is IE632, which in INTERCAL-72 had the error message
  *	PROGRAM ATTEMPTED TO EXIT WITHOUT ERROR MESSAGE
  * ESR's "THE NEXT STACK HAS RUPTURED!..." has been retained on the grounds
  * that it is more obscure and much funnier.  For context, find a copy of
- * Joe Haldeman's SF short story "A !Tangled Web", ick_first published in 
+ * Joe Haldeman's SF short story "A !Tangled Web", ick_first published in
  * Analog magazine in September 1981 and later anthologized in the author's
  * "Infinite Dreams" (Ace 1985).
  */

@@ -484,7 +484,7 @@ int main(int argc, char *argv[])
 #ifdef SIGBUS
   (void) signal(SIGBUS, abend);
 #endif /* SIGBUS */
-    
+
   if (!nocompilerbug) {
 #ifdef USG
     srand48(time(NULL) + getpid());
@@ -950,7 +950,7 @@ int main(int argc, char *argv[])
       /* AIS: Possibly link in the debugger yuk and/or libickmt.a here. */
       /* AIS: Added -g support. */
       /* AIS: Added argv[0] (now path) to the -I, -L settings. */
-		     
+
       textlinecount=0; /* AIS: If there are no files, there's
 			  no need to free any textlines */
       while ((c = myfgetc(ifp)) != EOF)
@@ -1860,4 +1860,3 @@ needc99?99:89,tempfn);
 }
 
 /* perpet.c ends here */
-

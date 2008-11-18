@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-NAME 
+NAME
     unravel.c -- multithreading and backtracking support for C-INTERCAL
 
 LICENSE TERMS
@@ -124,7 +124,7 @@ static void fluputs(const char* s)
  * ickthread objects. choicepoint creates a choicepoint or marks a
  * choicepoint as stale; choiceahead eliminates a choicepoint;
  * choiceback eliminates a stale choicepoint or returns to a fresh
- * choicepoint. 
+ * choicepoint.
  *
  *********************************************************************/
 
@@ -213,7 +213,7 @@ void choiceahead(void)
   }
 
   if(ick_printflow) fluputs("(ahead)");
-    
+
   /* This code works by converting topchoice back to a thread and placing it
      just before the current thread, and then killing it. First, the data from
      this thread, apart from the choicepoint stack, must be saved. */
@@ -380,12 +380,12 @@ int multicome1(int errlineno, jmp_buf pc)
     i = tailcount;
     tvp = ick_tailforget;
     ick_tailforget = malloc(i * sizeof *ick_tailforget);
-    if(!ick_tailforget) ick_lose(IE991, errlineno, (const char *) NULL);  
+    if(!ick_tailforget) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_tailforget, tvp, i * sizeof *ick_tailforget);
     i = hybridcount;
     tvp = ick_hyforget;
     ick_hyforget = malloc(i * sizeof *ick_hyforget);
-    if(!ick_hyforget) ick_lose(IE991, errlineno, (const char *) NULL);  
+    if(!ick_hyforget) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_hyforget, tvp, i * sizeof *ick_hyforget);
 
   /* duplicate data stored in arrays */
@@ -490,7 +490,7 @@ int multicome1(int errlineno, jmp_buf pc)
 	isb->save.a->data.hybrid = (ick_type32*)malloc(prod * sizeof(ick_type32));
 	if(!isb->save.a->data.hybrid) ick_lose(IE991, errlineno, (const char *) NULL);
 	memcpy(isb->save.a->data.hybrid, isb2->save.a->data.hybrid,
-	       prod * sizeof(ick_type32));      
+	       prod * sizeof(ick_type32));
       }
       isb2 = isb->ick_next;
     }
@@ -679,7 +679,7 @@ void killthread(void)
   /*@-unqualifiedtrans@*/ /* it is only at this point */
   free(ick_next); /* Free NEXT stack */
   /*@=unqualifiedtrans@*/
-    
+
   ickmt_prev->ick_next = ickmt_cur->ick_next;
   if(ickmt_cur->ick_next == ickmt_cur)
   {
@@ -731,7 +731,7 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
   /* OK, so I've spaghettified this procedure slightly by using goto
      instead of if. But I was so deep into figuring out setjmp/longjmp,
      a goto seemed crystal-clear by comparison. */
-  
+
   /* save variables */
   ickmt_cur->dsi->varforget[0] = ick_onespots;
   ickmt_cur->dsi->varforget[1] = ick_twospots;
@@ -807,7 +807,7 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
 
   /* load choicepoints */
   if(!choicing) topchoice = ickmt_cur->choicepoint;
-  
+
   /* load ick_stashbox */
   /*@-onlytrans@*/ /* ditto */
   ick_first = ickmt_cur->dsi->sb;

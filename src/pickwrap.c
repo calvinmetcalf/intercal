@@ -24,21 +24,21 @@ int ick_main(void)
 {
   pickinit();
       /* degenerated code */
- ick_restart: 
+ ick_restart:
  top:
     switch(ick_skipto)
     {
     case 0:
       $G
 	}
-    
+
 #ifdef YUK
-    if(yukloop) goto ick_restart; 
+    if(yukloop) goto ick_restart;
 #endif
     ick_lose(IE633, $J, (const char *)0);
 
     $H
-    
+
     return 0;
 }
 $Q

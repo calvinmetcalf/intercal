@@ -44,7 +44,7 @@ extern int yukloop;
          with decent accuracy under DOS. DJGPP implements timer types 0, 1,
          and 2, so it will 'work' with the default value of 2, but the results
          you get will be basically meaningless as the base information can't
-         be accurately obtained (the resolution is slightly worse than 50ms, 
+         be accurately obtained (the resolution is slightly worse than 50ms,
          which is far too slow for profiling). */
 #ifndef YPTIMERTIME
 # ifdef HAVE_GETHRTIME

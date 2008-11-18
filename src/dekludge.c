@@ -7,7 +7,7 @@ DESCRIPTION
     This file contains optimizations used by the C-INTERCAL compiler.
 
 LICENSE TERMS
-    Copyright (C) 1996 Eric S. Raymond 
+    Copyright (C) 1996 Eric S. Raymond
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -212,7 +212,7 @@ void optimizef(void)
   }
   /* There are some flow idioms that maybe should be optimized. The most
      common is the NEXTing idiom for if(), which looks like this:
-     
+
          DO (1) NEXT
 	 block 2
 	 escape via NEXTING or COMEFROM
@@ -370,7 +370,7 @@ void optimize(node *np)
   }
   do
   {
-    optflag = optimize_pass1(np); 
+    optflag = optimize_pass1(np);
   } while(optflag); /* Keep optimizing until no optimizations are found */
   if(optdebug && optdebug != 3) explexpr(np,stderr);
   if(optdebug == 3) prexpr(np,stderr,0);
@@ -630,6 +630,3 @@ void checknodeactbits(node *np)
     break;
   }
 }
-
-
-

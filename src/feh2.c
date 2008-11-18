@@ -741,12 +741,12 @@ void explexpr(node* np, FILE* fp)
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
-	
+
   case C_NOT:
     (void) fprintf(fp, "(~ ");
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
-    break;	
+    break;
 
   case C_NOTEQUAL:
     (void) fprintf(fp, "(");
@@ -880,8 +880,8 @@ void explexpr(node* np, FILE* fp)
     (void) fprintf(fp, " BY ");
     explexpr(np->rval, fp);
     break;
-    
-  default: 
+
+  default:
     ick_lose(IE778, emitlineno, (const char*) NULL);
     /*@-unreachable@*/ break; /*@=unreachable@*/
   }
@@ -962,7 +962,7 @@ static void ooprvar(node *np, FILE *fp, int freenode)
       /* This should never be reached */
       ick_lose(IE778, emitlineno, (const char*) NULL);
       /*@-unreachable@*/ break; /*@=unreachable@*/
-      
+
     case SUB:
 	{
 	  (void) fprintf(fp, "ick_aref(");
@@ -1436,7 +1436,7 @@ void prexpr(node *np, FILE *fp, int freenode)
 	prexpr(np->rval, fp, freenode);
 	(void) fprintf(fp, ")");
 	break;
-	
+
     case C_NOT:
 	(void) fprintf(fp, "(~");
         tempint=np->rval->width; /* AIS */
@@ -1445,7 +1445,7 @@ void prexpr(node *np, FILE *fp, int freenode)
 	    (void) fprintf(fp, " & ick_Max_small)");
 	else
 	    (void) fprintf(fp, " & ick_Max_large)");
-	break;	
+	break;
 
 	/* AIS: I added the rest of the cases */
     case C_NOTEQUAL:
@@ -1473,7 +1473,7 @@ void prexpr(node *np, FILE *fp, int freenode)
       prexpr(np->rval, fp, freenode);
       (void) fprintf(fp, ")");
       break;
-      
+
     case C_LSHIFTBY:
       (void) fprintf(fp, "(");
       prexpr(np->lval, fp, freenode);
