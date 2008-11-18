@@ -38,10 +38,10 @@ extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const c
 /*@observer@*/ /*@dependent@*/ const char* ick_datadir;
 /*@=redef@*/
 /* We want to read the latest versions of the character sets from disk. */
-/*@null@*/ char* ick_clc_cset_atari=0;
-/*@null@*/ char* ick_clc_cset_baudot=0;
-/*@null@*/ char* ick_clc_cset_ebcdic=0;
-/*@null@*/ char* ick_clc_cset_latin1=0;
+/*@null@*/ const char* ick_clc_cset_atari=0;
+/*@null@*/ const char* ick_clc_cset_baudot=0;
+/*@null@*/ const char* ick_clc_cset_ebcdic=0;
+/*@null@*/ const char* ick_clc_cset_latin1=0;
 
 #ifndef ICKDATADIR
 #define ICKDATADIR "/usr/local/share/ick-0.27"
