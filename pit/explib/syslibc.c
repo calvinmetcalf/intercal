@@ -22,7 +22,7 @@
    compiler, and so doesn't clash with it either.
 */
 
-static void errout(int routine, char* msg)
+static void errout(int routine, const char* msg)
 {
   fprintf(stderr,"C-INTERCAL system library: (%d): %s\n", routine, msg);
   exit(EXIT_FAILURE);
