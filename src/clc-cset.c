@@ -56,12 +56,12 @@ LICENSE TERMS
  * rather than reading them from disk; in this case, these extern
  * variables will be set non-null by object files invented
  * specifically for the purpose. */
-extern /*@null@*/ char* ick_clc_cset_atari;
-extern /*@null@*/ char* ick_clc_cset_baudot;
-extern /*@null@*/ char* ick_clc_cset_ebcdic;
-extern /*@null@*/ char* ick_clc_cset_latin1;
+extern /*@null@*/ const char* ick_clc_cset_atari;
+extern /*@null@*/ const char* ick_clc_cset_baudot;
+extern /*@null@*/ const char* ick_clc_cset_ebcdic;
+extern /*@null@*/ const char* ick_clc_cset_latin1;
 
-static /*@null@*/ char* ick_clc_cset_ptr=0;
+static /*@null@*/ const char* ick_clc_cset_ptr=0;
 
 /* Fake that we're reading hardcoded characters from a file. This
  * method of doing it is obviously not thread-safe. */
