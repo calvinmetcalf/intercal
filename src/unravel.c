@@ -220,7 +220,7 @@ void choiceahead(void)
   choicing = 1;
   if(setjmp(fakepc) == 0)
   {
-    memcpy((void*)ickmt_cur->pc,(void*)fakepc,sizeof(jmp_buf));
+    memcpy((void*)ickmt_cur->pc,(const void*)fakepc,sizeof(jmp_buf));
     nextthread(fakepc, -1, 5);
   }
   choicing = 0;
@@ -235,13 +235,13 @@ void choiceahead(void)
   choicing = 1;
   if(setjmp(fakepc) == 0)
   {
-    memcpy((void *)ickmt_cur->pc,(void *)fakepc,sizeof(jmp_buf));
+    memcpy((void *)ickmt_cur->pc,(const void *)fakepc,sizeof(jmp_buf));
     nextthread(fakepc, -1, 6);
   }
   /* only to destroy it! Mwahahahahah! */
   if(setjmp(fakepc) == 0)
   {
-    memcpy((void *)ickmt_cur->ick_next->pc,(void *)fakepc,sizeof(jmp_buf));
+    memcpy((void *)ickmt_cur->ick_next->pc,(const void *)fakepc,sizeof(jmp_buf));
     killthread();
   }
   choicing = 0;
@@ -317,7 +317,7 @@ int multicome1(int errlineno, jmp_buf pc)
 
   if(setjmp(fakepc) == 0)
   {
-    memcpy((void *)newthread->ick_next->pc,(void *)fakepc,sizeof(jmp_buf));
+    memcpy((void *)newthread->ick_next->pc,(const void *)fakepc,sizeof(jmp_buf));
     nextthread(pc, -1, 1);
   }
   /* So on the previous line: Save the value of pc as the program
@@ -759,12 +759,12 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
   if(!choicing) ickmt_cur->choicepoint = topchoice;
 
   /* save comefrom information */
-  memcpy((void*)(ickmt_cur->ick_cjb), (void*)ick_cjb, sizeof(jmp_buf));
+  memcpy((void*)(ickmt_cur->ick_cjb), (const void*)ick_cjb, sizeof(jmp_buf));
   ickmt_cur->ick_ccfc = ick_ccfc;
   ickmt_cur->ick_skipto = ick_skipto;
 
   /* save program counter */
-  memcpy((void*)(ickmt_cur->pc), (void*)pc, sizeof(jmp_buf));
+  memcpy((void*)(ickmt_cur->pc), (const void*)pc, sizeof(jmp_buf));
   /* And another thing about setjmp/longjmp. A jmp_buf
      acts like a structure that passes itself around by
      reference. However, it cannot be assigned, although
@@ -814,7 +814,7 @@ void nextthread(jmp_buf pc, int errlineno, int flags)
   /*@=onlytrans@*/
 
   /* load comefrom information */
-  memcpy((void*)ick_cjb, (void*)(ickmt_cur->ick_cjb), sizeof(jmp_buf));
+  memcpy((void*)ick_cjb, (const void*)(ickmt_cur->ick_cjb), sizeof(jmp_buf));
   ick_ccfc = ickmt_cur->ick_ccfc;
   ick_skipto = ickmt_cur->ick_skipto;
 
