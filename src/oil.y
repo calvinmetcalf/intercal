@@ -98,8 +98,8 @@ char optname[MAXOPTNAMELEN]="undefined";
 
 typedef struct ickstype *YYSTYPE;
 
-void splitend();
-void splitstart();
+void splitend(void);
+void splitstart(void);
 
 void treedepthup(YYSTYPE, mybool);
 void treefree(YYSTYPE);
@@ -708,7 +708,7 @@ int countungetc(int c, FILE* f)
   return c;
 }
 
-void splitstart()
+void splitstart(void)
 {
   static char fname[]="oilout00.c";
   if(filenumber>255)
@@ -730,7 +730,7 @@ void splitstart()
 	 "  node *tp;\n", filenumber);
 }
 
-void splitend()
+void splitend(void)
 {
   /* Disabling warnings about unused variables. gcc will optimize this right
      out, and in any case the raise(SIGSEGV) will be unreachable (but will

@@ -82,6 +82,7 @@ ick_bool re_send_token = ick_FALSE;
 
 int lexer(void);
 static int myatoi(const char *text);
+void yyerror(const char *errtype);
 
 #define SETLINENO					\
     {if (stbeginline == 0)	stbeginline = iyylineno;\
