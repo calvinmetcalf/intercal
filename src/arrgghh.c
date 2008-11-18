@@ -26,6 +26,7 @@ LICENSE TERMS
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
+#include "config.h"
 #include "abcess.h"
 #include "ick_lose.h"
 

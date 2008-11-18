@@ -29,6 +29,7 @@ LICENSE TERMS
 
 #define ICK_EC 1
 #include "ick_lose.h"
+#include "config.h"
 #include "abcess.h" /* must come before ick_ec.h */
 #include "ick_ec.h"
 #include <setjmp.h>
