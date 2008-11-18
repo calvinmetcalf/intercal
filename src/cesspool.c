@@ -357,8 +357,8 @@ void ick_pout(unsigned int val)
  **********************************************************************/
 
 /* AIS: From clc-cset.c */
-extern int ick_clc_cset_convert(char* in, /*@partial@*/ char* out, char* incset,
-				char* outcset, int padstyle, size_t outsize,
+extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const char* incset,
+				const char* outcset, int padstyle, size_t outsize,
 				/*@null@*/ FILE* errsto);
 
 static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
@@ -415,7 +415,7 @@ static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
   free(buf);
 }
 
-static void clcbinout(unsigned int type, ick_array* a)
+static void clcbinout(unsigned int type, const ick_array* a)
 {
   size_t i;
   int ti;
@@ -499,7 +499,7 @@ void ick_binin(unsigned int type, ick_array *a, ick_bool forget)
   }
 }
 
-void ick_binout(unsigned int type, ick_array *a)
+void ick_binout(unsigned int type, const ick_array *a)
 {
   static unsigned int lastout = 0;
   unsigned int c;
@@ -785,9 +785,9 @@ void ick_retrieve(void *to, unsigned int type, unsigned int index,
   else if (!forget) {
     if(oo) oo[index]=sp->overloadinfo; /* AIS */
     if (type == ick_ONESPOT)
-      memcpy(to, (char *)&sp->save.onespot, sizeof(ick_type16));
+      memcpy(to, (const char *)&sp->save.onespot, sizeof(ick_type16));
     else if (type == ick_TWOSPOT)
-      memcpy(to, (char *)&sp->save.twospot, sizeof(ick_type32));
+      memcpy(to, (const char *)&sp->save.twospot, sizeof(ick_type32));
     else if (type == ick_TAIL || type == ick_HYBRID) {
       ick_array *a = (ick_array*)to;
       /*@-branchstate@*/ /* it's a union, so one valid is correct */
@@ -798,7 +798,7 @@ void ick_retrieve(void *to, unsigned int type, unsigned int index,
 	  free(a->data.tail);
 	else
 	  free(a->data.hybrid);
-	memcpy(to, (char*)sp->save.a, sizeof(ick_array));
+	memcpy(to, (const char*)sp->save.a, sizeof(ick_array));
       }
       /*@=branchstate@*/
       /* AIS: there isn't a memory leak here, because we memcpyd the

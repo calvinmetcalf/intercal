@@ -97,7 +97,7 @@ static int ick_csetow=0; /* which cset to overwrite ick_next */
 
 /*@-mustfreefresh@*/
 /* because Splint doesn't understand how findandfopen works */
-static void ick_clc_cset_load(/*@unique@*/ struct cset* cs, /*@unique@*/ char* fname)
+static void ick_clc_cset_load(/*@unique@*/ struct cset* cs, /*@unique@*/ const char* fname)
 {
   FILE* in;
   char buf[13]; /* enough for an 8.3 filename */
@@ -182,7 +182,7 @@ static void ick_clc_cset_load(/*@unique@*/ struct cset* cs, /*@unique@*/ char* f
 /*@=mustfreefresh@*/
 
 /* Helper function for fixing bit order in output. */
-static void ick_bitencout(char** pop, struct cset* co,
+static void ick_bitencout(char** pop, const struct cset* co,
 		      unsigned short val, int padstyle)
 {
   unsigned short outword=0;
@@ -212,15 +212,16 @@ static void ick_bitencout(char** pop, struct cset* co,
  * outsize-1 characters and a NUL will be written to out. The code is
  * conservative about this; to be safe, make outsize six times as long
  * as the in is (including in's terminal NUL), plus 6. */
-int ick_clc_cset_convert(char* in, /*@partial@*/ char* out, char* incset,
-			 char* outcset, int padstyle, size_t outsize,
+int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const char* incset,
+			 const char* outcset, int padstyle, size_t outsize,
 			 /*@null@*/ FILE* errsto)
 {
   int ic=-1, oc=-1;
   int i;
   int ssi, sso;
   unsigned short tus, csi;
-  char* ip, *op;
+  const char* ip;
+  char* op;
   struct cset *csri, *csro;
   int noconvwarn=0;
   int substwarn=0;

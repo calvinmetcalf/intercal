@@ -28,9 +28,9 @@ LICENSE TERMS
 #include <string.h>
 #include <unistd.h>
 
-int ick_clc_cset_convert(char* in, /*@partial@*/ char* out, char* incset,
-			 char* outcset, int padstyle, size_t outsize,
-			 /*@null@*/ FILE* errsto);
+extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const char* incset,
+				const char* outcset, int padstyle, size_t outsize,
+				/*@null@*/ FILE* errsto);
 
 /* For communication with clc_cset.c */
 /*@observer@*/ char* ick_globalargv0;
