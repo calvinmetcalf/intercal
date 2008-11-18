@@ -143,7 +143,7 @@ void choicepoint(void)
     /*@-onlytrans@*/
     topchoice = (ickthread*) malloc(sizeof(ickthread));
     /*@=onlytrans@*/
-    if(!topchoice) ick_lose(IE991, ick_lineno, (char*) NULL);
+    if(!topchoice) ick_lose(IE991, ick_lineno, (const char*) NULL);
     topchoice->choicepoint = oldtc;
     topchoice->stale = 1;
     topchoice->refcount = 1; /* At the moment, this is the only
@@ -184,7 +184,7 @@ void choiceahead(void)
   ickthread* tempthread;
   jmp_buf fakepc;
 
-  if(!topchoice) ick_lose(IE404, ick_lineno, (char*) NULL); /* That's what IE404's for */
+  if(!topchoice) ick_lose(IE404, ick_lineno, (const char*) NULL); /* That's what IE404's for */
   /* GO AHEAD with multithreading requires care. The choicepoint should only
      be removed from this thread. topchoice = topchoice->ick_next almost works, but
      is a memory leak. So most of this is garbage-collection. */
@@ -252,7 +252,7 @@ void choiceahead(void)
 
 void choiceback(void)
 {
-  if(!topchoice) ick_lose(IE404, ick_lineno, (char *) NULL);
+  if(!topchoice) ick_lose(IE404, ick_lineno, (const char *) NULL);
   if(topchoice->stale)
   {
     if(ick_printflow) fluputs("(back=)");
@@ -306,7 +306,7 @@ int multicome1(int errlineno, jmp_buf pc)
   ick_array* a;
   int prod, i, j;
   newthread = malloc(sizeof(ickthread));
-  if(!newthread) ick_lose(IE991, errlineno, (char *) NULL);
+  if(!newthread) ick_lose(IE991, errlineno, (const char *) NULL);
   ickmt_prev->ick_next = newthread;
   newthread->ick_next = ickmt_cur;
   ickmt_cur = newthread;
@@ -336,56 +336,56 @@ int multicome1(int errlineno, jmp_buf pc)
     i = onespotcount;
     tvp = ick_onespots;
     ick_onespots = malloc(i * sizeof *ick_onespots);
-    if(!ick_onespots) ick_lose(IE991, errlineno, (char *) NULL);
+    if(!ick_onespots) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_onespots, tvp, i * sizeof *ick_onespots);
     if(ick_oo_onespots)
     {
       tvp = ick_oo_onespots;
       ick_oo_onespots = malloc(i * sizeof *ick_oo_onespots);
-      if(!ick_oo_onespots) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!ick_oo_onespots) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(ick_oo_onespots, tvp, i * sizeof *ick_oo_onespots);
     }
     i = twospotcount;
     tvp = ick_twospots;
     ick_twospots = malloc(i * sizeof *ick_twospots);
-    if(!ick_twospots) ick_lose(IE991, errlineno, (char *) NULL);
+    if(!ick_twospots) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_twospots, tvp, i * sizeof *ick_twospots);
     if(ick_oo_twospots)
     {
       tvp = ick_oo_twospots;
       ick_oo_twospots = malloc(i * sizeof *ick_oo_twospots);
-      if(!ick_oo_twospots) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!ick_oo_twospots) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(ick_oo_twospots, tvp, i * sizeof *ick_oo_twospots);
     }
     i = tailcount;
     tvp = ick_tails;
     ick_tails = malloc(i * sizeof *ick_tails);
-    if(!ick_tails) ick_lose(IE991, errlineno, (char *) NULL);
+    if(!ick_tails) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_tails, tvp, i * sizeof *ick_tails);
     i = hybridcount;
     tvp = ick_hybrids;
     ick_hybrids = malloc(i * sizeof *ick_hybrids);
-    if(!ick_hybrids) ick_lose(IE991, errlineno, (char *) NULL);
+    if(!ick_hybrids) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_hybrids, tvp, i * sizeof *ick_hybrids);
     i = onespotcount;
     tvp = ick_oneforget;
     ick_oneforget = malloc(i * sizeof *ick_oneforget);
-    if(!ick_oneforget) ick_lose(IE991, errlineno, (char *) NULL);
+    if(!ick_oneforget) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_oneforget, tvp, i * sizeof *ick_oneforget);
     i = twospotcount;
     tvp = ick_twoforget;
     ick_twoforget = malloc(i * sizeof *ick_twoforget);
-    if(!ick_twoforget) ick_lose(IE991, errlineno, (char *) NULL);
+    if(!ick_twoforget) ick_lose(IE991, errlineno, (const char *) NULL);
     memcpy(ick_twoforget, tvp, i * sizeof *ick_twoforget);
     i = tailcount;
     tvp = ick_tailforget;
     ick_tailforget = malloc(i * sizeof *ick_tailforget);
-    if(!ick_tailforget) ick_lose(IE991, errlineno, (char *) NULL);  
+    if(!ick_tailforget) ick_lose(IE991, errlineno, (const char *) NULL);  
     memcpy(ick_tailforget, tvp, i * sizeof *ick_tailforget);
     i = hybridcount;
     tvp = ick_hyforget;
     ick_hyforget = malloc(i * sizeof *ick_hyforget);
-    if(!ick_hyforget) ick_lose(IE991, errlineno, (char *) NULL);  
+    if(!ick_hyforget) ick_lose(IE991, errlineno, (const char *) NULL);  
     memcpy(ick_hyforget, tvp, i * sizeof *ick_hyforget);
 
   /* duplicate data stored in arrays */
@@ -401,7 +401,7 @@ int multicome1(int errlineno, jmp_buf pc)
 	 write. So any errors in this code are probably mine, but the algorithm
 	 isn't. */
       a->dims = malloc(a->rank * sizeof *(a->dims));
-      if(a->dims == NULL) ick_lose(IE991, errlineno, (char *) NULL);
+      if(a->dims == NULL) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(a->dims, tvp, a->rank * sizeof *(a->dims));
       prod = (int)!!a->rank;
       i = (int)a->rank;
@@ -410,7 +410,7 @@ int multicome1(int errlineno, jmp_buf pc)
       tvp = a->data.tail;
       /*@=mustfreeonly@*/
       a->data.tail = malloc(prod * sizeof(ick_type16));
-      if(!a->data.tail) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!a->data.tail) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(a->data.tail, tvp, prod * sizeof(ick_type16));
       /*@-mustfreeonly@*/ /* likewise. This isn't only, honest! */
       tvp = NULL;
@@ -427,7 +427,7 @@ int multicome1(int errlineno, jmp_buf pc)
 	 write. So any errors in this code are probably mine, but the algorithm
 	 isn't. */
       a->dims = malloc(a->rank * sizeof(*(a->dims)));
-      if(!a->dims) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!a->dims) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(a->dims, tvp, a->rank * sizeof(*(a->dims)));
       prod = (int)!!a->rank;
       i = (int)a->rank;
@@ -436,7 +436,7 @@ int multicome1(int errlineno, jmp_buf pc)
       tvp = a->data.hybrid;
       /*@=mustfreeonly@*/
       a->data.hybrid = malloc(prod * sizeof(ick_type32));
-      if(!a->data.hybrid) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!a->data.hybrid) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(a->data.hybrid, tvp, prod * sizeof(ick_type32));
       /*@-mustfreeonly@*/
       tvp=NULL;
@@ -449,7 +449,7 @@ int multicome1(int errlineno, jmp_buf pc)
     while(isb2)
     {
       isb = (ick_stashbox*)malloc(sizeof(ick_stashbox));
-      if(!isb) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!isb) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(isb,isb2,sizeof(ick_stashbox));
       if(isbprev) isbprev->ick_next = isb;
       isbprev = isb;
@@ -464,13 +464,13 @@ int multicome1(int errlineno, jmp_buf pc)
 	 and variable names changed. So, although it's in this file, I can't
 	 take the credit for it. */
       isb->save.a = (ick_array*)malloc(sizeof(ick_array));
-      if(!isb->save.a) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!isb->save.a) ick_lose(IE991, errlineno, (const char *) NULL);
       assert(isb2 != NULL); /* we already said that in the while condition,
 			       so it's surprising that Splint needs this hint */
       isb->save.a->rank = isb2->save.a->rank;
       isb->save.a->dims = malloc(isb2->save.a->rank *
 				 sizeof(*(isb2->save.a->dims)));
-      if(!isb->save.a->dims) ick_lose(IE991, errlineno, (char *) NULL);
+      if(!isb->save.a->dims) ick_lose(IE991, errlineno, (const char *) NULL);
       memcpy(isb->save.a->dims, isb2->save.a->dims,
 	     isb2->save.a->rank * sizeof(*(isb2->save.a->dims)));
       prod = (int)!!isb2->save.a->rank;
@@ -481,14 +481,14 @@ int multicome1(int errlineno, jmp_buf pc)
       if(isb2->type == ick_TAIL)
       {
 	isb->save.a->data.tail = (ick_type16*)malloc(prod * sizeof(ick_type16));
-	if(!isb->save.a->data.tail) ick_lose(IE991, errlineno, (char *) NULL);
+	if(!isb->save.a->data.tail) ick_lose(IE991, errlineno, (const char *) NULL);
 	memcpy(isb->save.a->data.tail, isb2->save.a->data.tail,
 	       prod * sizeof(ick_type16));
       }
       else
       {
 	isb->save.a->data.hybrid = (ick_type32*)malloc(prod * sizeof(ick_type32));
-	if(!isb->save.a->data.hybrid) ick_lose(IE991, errlineno, (char *) NULL);
+	if(!isb->save.a->data.hybrid) ick_lose(IE991, errlineno, (const char *) NULL);
 	memcpy(isb->save.a->data.hybrid, isb2->save.a->data.hybrid,
 	       prod * sizeof(ick_type32));      
       }
@@ -500,7 +500,7 @@ int multicome1(int errlineno, jmp_buf pc)
     ickthread* tempthread;
     if(ick_printflow) fluputs("(weave)");
     /* Sanity check to make sure that the threads are arranged correctly */
-    if(newthread->ick_next!=ickmt_cur) ick_lose(IE778, errlineno, (char *) NULL);
+    if(newthread->ick_next!=ickmt_cur) ick_lose(IE778, errlineno, (const char *) NULL);
     tempthread=newthread->ick_next; /* the old current thread */
     while(tempthread->usesthis) tempthread=tempthread->usesthis;
     newthread->dsi=tempthread->dsi;
@@ -509,7 +509,7 @@ int multicome1(int errlineno, jmp_buf pc)
   /* duplicate NEXT stack */
   tvp = ick_next;
   ick_next = malloc(ick_MAXNEXT * sizeof *ick_next);
-  if(!ick_next) ick_lose(IE991, errlineno, (char *) NULL);
+  if(!ick_next) ick_lose(IE991, errlineno, (const char *) NULL);
   memcpy(ick_next, tvp, ick_MAXNEXT * sizeof *ick_next);
 
   /* allow for multithreading with choicepoints on the stack */
@@ -559,7 +559,7 @@ void ickmtinit(void)
   /*@-onlytrans@*/
   ickmt_cur = malloc(sizeof(ickthread));
   /*@=onlytrans@*/
-  if(!ickmt_cur) ick_lose(IE991, 1, (char *) NULL);
+  if(!ickmt_cur) ick_lose(IE991, 1, (const char *) NULL);
   ickmt_prev = ickmt_cur;
   ickmt_cur->ick_next = ickmt_cur;
   topchoice = (ickthread*) NULL; /* No choicepoints */
@@ -590,7 +590,7 @@ void killthread(void)
     if(ick_printflow) fluputs("(deweave)");
     while(!temp||temp->usesthis!=ickmt_cur)
     {
-      if(!temp) ick_lose(IE778, -1, (char *) NULL);
+      if(!temp) ick_lose(IE778, -1, (const char *) NULL);
       temp=temp->usesthis;
     }
     temp->usesthis=ickmt_cur->usesthis;
@@ -697,7 +697,7 @@ void killthread(void)
     /*@=dependenttrans@*/
     ickmt_cur = ickmt_prev;
     nextthread(dummy, -1, 2); /* dummy is not used by nextthread */
-    ick_lose(IE778, -1, (char *) NULL); /* nextthread does not return */
+    ick_lose(IE778, -1, (const char *) NULL); /* nextthread does not return */
   }
 }
 

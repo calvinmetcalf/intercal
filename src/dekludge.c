@@ -140,7 +140,7 @@ void optimizef(void)
   tuple* tp, *tpa, *tpb;
   atom* op;
   node* np;
-  if(!flowoptimize) ick_lose(IE778, iyylineno, (char *) NULL);
+  if(!flowoptimize) ick_lose(IE778, iyylineno, (const char *) NULL);
   for (tp = tuples; tp < tuples + ick_lineno; tp++) tp->abstainable = 0;
   /* abstainable holds whether a line's abstention status can change */
   for (op = oblist; op != NULL && op < obdex; op++) op->ignorable = 0;
@@ -489,7 +489,7 @@ void checknodeactbits(node *np)
   case WHIRL3:
   case WHIRL4:
   case WHIRL5: /* We must be in binary to reach this point, so: */
-    ick_lose(IE997, emitlineno, (char*) NULL);
+    ick_lose(IE997, emitlineno, (const char*) NULL);
     /*@-unreachable@*/
     break;
     /*@=unreachable@*/

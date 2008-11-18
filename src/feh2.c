@@ -64,7 +64,7 @@ extern int ick_clcsemantics;
 {
   node* temp;
   temp=calloc(sizeof(node), 1);
-  if(!temp) ick_lose(IE345, 0, (char*) NULL);
+  if(!temp) ick_lose(IE345, 0, (const char*) NULL);
   return temp;
 }
 
@@ -93,7 +93,7 @@ unsigned long intern(int type, unsigned long index)
 
     /* AIS: Allow use of a modifiable constant 0 or >65535. */
     if ((index < 1LU || index > 65535LU) && type!=MESH)
-	ick_lose(IE200, iyylineno, (char *)NULL);
+	ick_lose(IE200, iyylineno, (const char *)NULL);
 
     /*@-branchstate@*/
     if (!oblist)
@@ -101,7 +101,7 @@ unsigned long intern(int type, unsigned long index)
 	/* initialize oblist and obdex */
 	oblist = malloc(ALLOC_CHUNK * sizeof(atom));
 	if (!oblist)
-	    ick_lose(IE345, iyylineno, (char *)NULL);
+	    ick_lose(IE345, iyylineno, (const char *)NULL);
 	obdex = oblist;
 	obcount = ALLOC_CHUNK;
     }
@@ -124,7 +124,7 @@ unsigned long intern(int type, unsigned long index)
 	obcount += ALLOC_CHUNK;
 	x = realloc(oblist, obcount * sizeof(atom));
 	if (!x)
-	    ick_lose(IE333, iyylineno, (char *)NULL);
+	    ick_lose(IE333, iyylineno, (const char *)NULL);
 	obdex = x + (obdex - oblist);
 	oblist = x;
     }
@@ -162,7 +162,7 @@ unsigned long intern(int type, unsigned long index)
 void checklabel(int label)
 {
     if (label < 1 || label > 65535)
-	ick_lose(IE197, iyylineno, (char *)NULL);
+	ick_lose(IE197, iyylineno, (const char *)NULL);
 }
 
 /*************************************************************************
@@ -232,7 +232,7 @@ void treset(void)
     else
       tuples = malloc(tuplecount * sizeof(tuple));
     if (!tuples)
-      ick_lose(IE666, iyylineno, (char *)NULL);
+      ick_lose(IE666, iyylineno, (const char *)NULL);
     memset(tuples + ick_lineno, 0, (tuplecount - ick_lineno) * sizeof(tuple));
   }
   if(mark112) tuples[ick_lineno].warn112 = 1; mark112 = 0; /* AIS */
@@ -344,7 +344,7 @@ void codecheck(void)
     for (tp = tuples; tp < tuples + ick_lineno; tp++)
 	if (tp->type == GETS)
 	    if (tp->u.node->lval->width == 16 && tp->u.node->rval->width == 32)
-		ick_lose(IE275, tp - tuples + 1, (char *)NULL);
+		ick_lose(IE275, tp - tuples + 1, (const char *)NULL);
 */
 
     /* check for duplicate labels */
@@ -352,7 +352,7 @@ void codecheck(void)
 	if (tp->label)
 	    for (up = tuples; up < tuples + ick_lineno; up++)
 		if (tp != up && tp->label == up->label)
-		  ick_lose(IE182, tp - tuples + 1, (char *)NULL);
+		  ick_lose(IE182, tp - tuples + 1, (const char *)NULL);
 
     /*
      * Check that every NEXT, ABSTAIN, REINSTATE and COME_FROM actually has a
@@ -377,7 +377,7 @@ void codecheck(void)
 	    }
 
 	    if (tp->u.target > 65535 && !tp->preproc) /* AIS */
-	      ick_lose(IE197, tp - tuples + 1, (char*) NULL);
+	      ick_lose(IE197, tp - tuples + 1, (const char*) NULL);
 
 	    for (up = tuples; up < tuples + ick_lineno; up++)
 		if (tp->u.target == up->label)
@@ -395,23 +395,23 @@ void codecheck(void)
 		 a nonexistent line label */
 		if (tp->type == NEXT && !useickec &&
 		    (!pickcompile||tp->u.target<1000||tp->u.target>1999))
-		    ick_lose(IE129, tp - tuples + 1, (char *)NULL);
+		    ick_lose(IE129, tp - tuples + 1, (const char *)NULL);
 		else if (tp->type == NEXT) /* AIS */
 		{tp->nexttarget=0; continue;}
 		else if (useickec) /* AIS */
 		  continue;
 		/* AIS: NEXTFROMLABEL's basically identical to COME_FROM */
 		else if (tp->type == COME_FROM || tp->type == NEXTFROMLABEL)
-		    ick_lose(IE444, tp - tuples + 1, (char *)NULL);
+		    ick_lose(IE444, tp - tuples + 1, (const char *)NULL);
 		else
-		    ick_lose(IE139, tp - tuples + 1, (char *)NULL);
+		    ick_lose(IE139, tp - tuples + 1, (const char *)NULL);
 	    }
 	    /* tell the other tuple if it is a COME FROM target */
 	    /* AIS: NEXTFROMLABEL again */
 	    else if (tp->type == COME_FROM || tp->type == NEXTFROMLABEL)
 	    {
 	        if (up->ncomefrom && !multithread) /* AIS: multithread check */
-		    ick_lose(IE555, iyylineno, (char *)NULL);
+		    ick_lose(IE555, iyylineno, (const char *)NULL);
 		else
                     up->ncomefrom++; /* AIS: to handle multiple COME FROMs */
 	    }
@@ -567,12 +567,12 @@ static assoc typedefs[] =
 unsigned long varextern(unsigned long intern, int vartype)
 {
   atom *x;
-  if(!oblist) ick_lose(IE778, emitlineno, (char*) NULL);
+  if(!oblist) ick_lose(IE778, emitlineno, (const char*) NULL);
   for (x = oblist; x < obdex; x++)
     if (x->type == vartype && (unsigned long)x->intindex == intern)
       return(x->extindex);
   if(vartype==MESH) return 0; /* the mesh wasn't used after all */
-  ick_lose(IE778, emitlineno, (char*) NULL);
+  ick_lose(IE778, emitlineno, (const char*) NULL);
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
 
@@ -602,7 +602,7 @@ static void explvar(node* np, FILE* fp)
     (void) fprintf(fp, ")");
     break;
   default:
-    ick_lose(IE778, emitlineno, (char*) NULL);
+    ick_lose(IE778, emitlineno, (const char*) NULL);
   }
 }
 
@@ -677,7 +677,7 @@ void explexpr(node* np, FILE* fp)
 
   case FIN:
     if (ick_Base < 3)
-      ick_lose(IE997, emitlineno, (char *)NULL);
+      ick_lose(IE997, emitlineno, (const char *)NULL);
     (void) fprintf(fp, "(^ ");
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
@@ -689,7 +689,7 @@ void explexpr(node* np, FILE* fp)
   case WHIRL4:
   case WHIRL5:
     if (np->opcode - WHIRL + 3 > ick_Base)
-      ick_lose(IE997, emitlineno, (char *)NULL);
+      ick_lose(IE997, emitlineno, (const char *)NULL);
     if(np->opcode == WHIRL)
       (void) fprintf(fp, "(@ ");
     else
@@ -882,7 +882,7 @@ void explexpr(node* np, FILE* fp)
     break;
     
   default: 
-    ick_lose(IE778, emitlineno, (char*) NULL);
+    ick_lose(IE778, emitlineno, (const char*) NULL);
     /*@-unreachable@*/ break; /*@=unreachable@*/
   }
 }
@@ -936,7 +936,7 @@ static void prvar(node *np, FILE *fp, int freenode)
 	}
 	break;
     default: /* Added by AIS */
-      ick_lose(IE778, emitlineno, (char*) NULL);
+      ick_lose(IE778, emitlineno, (const char*) NULL);
       /*@-unreachable@*/ break; /*@=unreachable@*/
     }
 }
@@ -960,7 +960,7 @@ static void ooprvar(node *np, FILE *fp, int freenode)
     case ick_TAIL:
     case ick_HYBRID:
       /* This should never be reached */
-      ick_lose(IE778, emitlineno, (char*) NULL);
+      ick_lose(IE778, emitlineno, (const char*) NULL);
       /*@-unreachable@*/ break; /*@=unreachable@*/
       
     case SUB:
@@ -981,7 +981,7 @@ static void ooprvar(node *np, FILE *fp, int freenode)
 	}
 	break;
     default:
-      ick_lose(IE778, emitlineno, (char*) NULL);
+      ick_lose(IE778, emitlineno, (const char*) NULL);
       /*@-unreachable@*/ break; /*@=unreachable@*/
     }
 }
@@ -1016,8 +1016,8 @@ static void revprexpr(node *np, FILE *fp, node *target)
        to become equal to, as long as we're in base 2. */
     if(ick_Base!=2)
     {
-      fprintf(fp, "  ick_lose(IE277, ick_lineno, (char*) NULL);\n");
-      ick_lwarn(W278, emitlineno, (char*) NULL);
+      fprintf(fp, "  ick_lose(IE277, ick_lineno, (const char*) NULL);\n");
+      ick_lwarn(W278, emitlineno, (const char*) NULL);
       break;
     }
     temp=cons(MESH,0,0);
@@ -1043,8 +1043,8 @@ static void revprexpr(node *np, FILE *fp, node *target)
        to 0xffffffff or 0xffff. This only works in base 2. */
     if(ick_Base!=2)
     {
-      fprintf(fp, "  ick_lose(IE277, ick_lineno, (char*) NULL);\n");
-      ick_lwarn(W278, emitlineno, (char*) NULL);
+      fprintf(fp, "  ick_lose(IE277, ick_lineno, (const char*) NULL);\n");
+      ick_lwarn(W278, emitlineno, (const char*) NULL);
       break;
     }
     temp=cons(MESH,0,0);
@@ -1056,14 +1056,14 @@ static void revprexpr(node *np, FILE *fp, node *target)
     break;
 
   case UNKNOWNOP: /* don't be silly */
-    fprintf(fp, "  ick_lose(IE277, ick_lineno, (char*) NULL);\n");
-    ick_lwarn(W278, emitlineno, (char*) NULL);
+    fprintf(fp, "  ick_lose(IE277, ick_lineno, (const char*) NULL);\n");
+    ick_lwarn(W278, emitlineno, (const char*) NULL);
     break;
 
   case BACKSLAT:
     /* Unimplemented. This isn't even in the parser yet, so it's a
        ick_mystery how we got here. */
-    ick_lose(IE778, emitlineno, (char*) NULL);
+    ick_lose(IE778, emitlineno, (const char*) NULL);
     /*@-unreachable@*/ break; /*@=unreachable@*/
 
   case SLAT:
@@ -1124,8 +1124,8 @@ static void revprexpr(node *np, FILE *fp, node *target)
     if(!variableconstants)
     {
       /* Can't set a mesh in this case */
-      fprintf(fp, "  ick_lose(IE277, ick_lineno, (char*) NULL);\n");
-      ick_lwarn(W278, emitlineno, (char*) NULL);
+      fprintf(fp, "  ick_lose(IE277, ick_lineno, (const char*) NULL);\n");
+      ick_lwarn(W278, emitlineno, (const char*) NULL);
       break;
     }
     (void) fprintf(fp,"  meshes[%lu] = ",np->constant);
@@ -1208,7 +1208,7 @@ static void revprexpr(node *np, FILE *fp, node *target)
   case C_LOGICALOR:
   case GETS: /* should never come up */
   default:
-    ick_lose(IE778, emitlineno, (char*) NULL);
+    ick_lose(IE778, emitlineno, (const char*) NULL);
     /*@-unreachable@*/ break; /*@=unreachable@*/
   }
 }
@@ -1283,7 +1283,7 @@ void prexpr(node *np, FILE *fp, int freenode)
     case BACKSLAT: /* AIS */
       /* Unimplemented. This isn't even in the parser yet, so it's a
 	 ick_mystery how we got here. */
-      ick_lose(IE778, emitlineno, (char*) NULL);
+      ick_lose(IE778, emitlineno, (const char*) NULL);
       /*@-unreachable@*/ break; /*@=unreachable@*/
 
     case SLAT: /* AIS */
@@ -1323,7 +1323,7 @@ void prexpr(node *np, FILE *fp, int freenode)
 
     case FIN:
 	if (ick_Base < 3)
-	  ick_lose(IE997, emitlineno, (char *)NULL);
+	  ick_lose(IE997, emitlineno, (const char *)NULL);
 	(void) fprintf(fp, "ick_fin%d(", np->width);
 	prexpr(np->rval, fp, freenode);
 	(void) fprintf(fp, ")");
@@ -1335,7 +1335,7 @@ void prexpr(node *np, FILE *fp, int freenode)
     case WHIRL4:
     case WHIRL5:
 	if (np->opcode - WHIRL + 3 > ick_Base)
-	  ick_lose(IE997, emitlineno, (char *)NULL);
+	  ick_lose(IE997, emitlineno, (const char *)NULL);
 	(void) fprintf(fp, "ick_whirl%d(%d, ", np->width, np->opcode - WHIRL + 1);
 	prexpr(np->rval, fp, freenode);
 	(void) fprintf(fp, ")");
@@ -1362,7 +1362,7 @@ void prexpr(node *np, FILE *fp, int freenode)
 
     case REV_FIN:
 	if (ick_Base < 3)
-	  ick_lose(IE997, emitlineno, (char *)NULL);
+	  ick_lose(IE997, emitlineno, (const char *)NULL);
 	(void) fprintf(fp, "rev_fin%d(", np->width);
 	prexpr(np->rval, fp, freenode);
 	(void) fprintf(fp, ")");
@@ -1374,7 +1374,7 @@ void prexpr(node *np, FILE *fp, int freenode)
     case REV_WHIRL4:
     case REV_WHIRL5:
 	if (np->opcode - WHIRL + 3 > ick_Base)
-	  ick_lose(IE997, emitlineno, (char *)NULL);
+	  ick_lose(IE997, emitlineno, (const char *)NULL);
 	(void) fprintf(fp,
 		       "rev_whirl%d(%d, ", np->width, np->opcode - WHIRL + 1);
 	prexpr(np->rval, fp, freenode);
@@ -1563,7 +1563,7 @@ void prexpr(node *np, FILE *fp, int freenode)
       break;
 
     case GETS: /* AIS: this is used only if freenode == 0 */
-      if(freenode) ick_lose(IE778, emitlineno, (char*) NULL);
+      if(freenode) ick_lose(IE778, emitlineno, (const char*) NULL);
       prexpr(np->lval, fp, freenode);
       (void) fprintf(fp, " = ");
       prexpr(np->rval, fp, freenode);
@@ -1573,7 +1573,7 @@ void prexpr(node *np, FILE *fp, int freenode)
       if(!freenode) break; /* Be less careful when not freeing, because
 			      this is used by -hH to print out its
 			      intermediate optimization stages */
-      ick_lose(IE778, emitlineno, (char*) NULL);
+      ick_lose(IE778, emitlineno, (const char*) NULL);
       /*@-unreachable@*/ break; /*@=unreachable@*/
     }
 
@@ -1604,7 +1604,7 @@ static int prunknownstr(node *np, FILE* fp)
   case US_SCALAR: (void) fputc('.', fp); return 1;
   case US_ARRVAR: (void) fputc(',', fp); return 1;
   case US_EXPR: (void) fputc('~', fp); return 1;
-  default: ick_lose(IE778, emitlineno, (char*) NULL);
+  default: ick_lose(IE778, emitlineno, (const char*) NULL);
   }
   /*@-unreachable@*/ return 0; /*@=unreachable@*/
 }
@@ -1633,7 +1633,7 @@ static void prunknowncreatedata(node *np, FILE* fp)
   case US_EXPR: /* because expressions can be assigned to */
     fprintf(fp,"\t\t{%d,0,0,",np->rval->width);
     break;
-  default: ick_lose(IE778, emitlineno, (char*) NULL);
+  default: ick_lose(IE778, emitlineno, (const char*) NULL);
   }
   if(createsused)
     fprintf(fp,"{ick_og%lx,ick_os%lx},",
@@ -1744,7 +1744,7 @@ static void emit_guard(tuple *tn, FILE *fp)
 {
   if(tn->maybe) /* AIS */
   {
-    if(!multithread) ick_lose(IE405, emitlineno, (char *)NULL);
+    if(!multithread) ick_lose(IE405, emitlineno, (const char *)NULL);
     (void) fprintf(fp, "    gonebackto = setjmp(btjb); choicepoint();\n");
   }
   if(!flowoptimize || tn->abstainable) /* This condition by AIS */
@@ -1766,7 +1766,7 @@ static void emit_guard(tuple *tn, FILE *fp)
   }
   else
   { /* AIS */
-    if(tn->maybe) ick_lose(IE778, emitlineno, (char*) NULL);
+    if(tn->maybe) ick_lose(IE778, emitlineno, (const char*) NULL);
     if(!tn->initabstain)
     {
       if(tn->type != COMPUCOME && tn->type != GERUCOME
@@ -1869,14 +1869,14 @@ void emit(tuple *tn, FILE *fp)
     /* AIS: print warnings on -l */
     if(ick_checkforbugs)
     {
-      if(tn->warn112) ick_lwarn(W112, emitlineno, (char*) NULL);
-      if(tn->warn128) ick_lwarn(W128, emitlineno, (char*) NULL);
-      if(tn->warn534) ick_lwarn(W534, emitlineno, (char*) NULL);
-      if(tn->warn018) ick_lwarn(W018, emitlineno, (char*) NULL);
-      if(tn->warn016) ick_lwarn(W016, emitlineno, (char*) NULL);
-      if(tn->warn276) ick_lwarn(W276, emitlineno, (char*) NULL);
-      if(tn->warn239) ick_lwarn(W239, emitlineno, (char*) NULL);
-      if(tn->warn622) ick_lwarn(W622, emitlineno, (char*) NULL);
+      if(tn->warn112) ick_lwarn(W112, emitlineno, (const char*) NULL);
+      if(tn->warn128) ick_lwarn(W128, emitlineno, (const char*) NULL);
+      if(tn->warn534) ick_lwarn(W534, emitlineno, (const char*) NULL);
+      if(tn->warn018) ick_lwarn(W018, emitlineno, (const char*) NULL);
+      if(tn->warn016) ick_lwarn(W016, emitlineno, (const char*) NULL);
+      if(tn->warn276) ick_lwarn(W276, emitlineno, (const char*) NULL);
+      if(tn->warn239) ick_lwarn(W239, emitlineno, (const char*) NULL);
+      if(tn->warn622) ick_lwarn(W622, emitlineno, (const char*) NULL);
     }
 
     /* AIS: emit debugging information */
@@ -1984,7 +1984,7 @@ void emit(tuple *tn, FILE *fp)
        to be undesirable behaviour. */
     if(pasttryagain) /* AIS */
     {
-      ick_lose(IE993, emitlineno, (char*)NULL);
+      ick_lose(IE993, emitlineno, (const char*)NULL);
     }
 
     if(flowoptimize && tn->initabstain && !tn->abstainable
@@ -2090,7 +2090,7 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case RESIZE:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
+      if(pickcompile) ick_lose(IE256, emitlineno, (const char*) NULL); /* AIS */
 	np = tn->u.node;
 	dim = 0;
 	for (sp = np->rval; sp; sp = sp->rval)
@@ -2139,12 +2139,12 @@ void emit(tuple *tn, FILE *fp)
       break;
 
     case GO_BACK: /* By AIS */
-      if(!multithread) ick_lose(IE405, emitlineno, (char*) NULL);
+      if(!multithread) ick_lose(IE405, emitlineno, (const char*) NULL);
       (void) fprintf(fp, "\t""choiceback();\n");
       break;
 
     case GO_AHEAD: /* By AIS */
-      if(!multithread) ick_lose(IE405, emitlineno, (char*) NULL);
+      if(!multithread) ick_lose(IE405, emitlineno, (const char*) NULL);
       (void) fprintf(fp, "\t""choiceahead();\n");
       break;
 
@@ -2237,7 +2237,7 @@ void emit(tuple *tn, FILE *fp)
       break;
 
     case FROM:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL);
+      if(pickcompile) ick_lose(IE256, emitlineno, (const char*) NULL);
         (void) fprintf(fp, "\t""ICKABSTAINED(%u)+=", tn->u.target-1);
 	tn->u.node->width = 32;
 	prexpr(tn->u.node,fp, 1);
@@ -2265,7 +2265,7 @@ void emit(tuple *tn, FILE *fp)
 	 using his code, but rewriting it, to make use of a single array and an
 	 index to it, rather than one array for each command type, for
 	 maintainability reasons. */
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL);
+      if(pickcompile) ick_lose(IE256, emitlineno, (const char*) NULL);
       (void) fprintf(fp,"\tint i;\n");
       np=tn->u.node;
       if(tn->type==MANYFROM)
@@ -2288,7 +2288,7 @@ void emit(tuple *tn, FILE *fp)
 	case DISABLE: (void) fprintf(fp,"\t    if(!ick_abstained[revlinetype[i]])"
 				    "\t\tick_abstained[revlinetype[i]]=1;\n"); break;
 	case MANYFROM:(void) fprintf(fp,"\tick_abstained[revlinetype[i]]+=j;\n"); break;
-	default:      ick_lose(IE778, emitlineno, (char *)NULL);
+	default:      ick_lose(IE778, emitlineno, (const char *)NULL);
 	}
 	switch(npc)
 	{
@@ -2311,7 +2311,7 @@ void emit(tuple *tn, FILE *fp)
     case COMPUCOME: /* By AIS. Note that this doesn't even have balanced
 		       braces; it's designed to work with COMPUCOME's
 		       crazy guarding arrangements */
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
+      if(pickcompile) ick_lose(IE256, emitlineno, (const char*) NULL); /* AIS */
       if(useickec) /* use ick_ec's features for next from and come from*/
       {
 	if(tn->type == COMPUCOME)
@@ -2399,7 +2399,7 @@ void emit(tuple *tn, FILE *fp)
       break;
 
     case WRITE_IN:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
+      if(pickcompile) ick_lose(IE256, emitlineno, (const char*) NULL); /* AIS */
       for (np = tn->u.node; np; np = np->rval) {
 	  if (np->lval->opcode == ick_TAIL || np->lval->opcode == ick_HYBRID) {
 	    (void) fprintf(fp,"\t""ick_binin(");
@@ -2428,7 +2428,7 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case READ_OUT:
-      if(pickcompile) ick_lose(IE256, emitlineno, (char*) NULL); /* AIS */
+      if(pickcompile) ick_lose(IE256, emitlineno, (const char*) NULL); /* AIS */
 	for (np = tn->u.node; np; np = np->rval)
 	{
 	  if (np->lval->opcode == ick_TAIL || np->lval->opcode == ick_HYBRID) {
@@ -2569,7 +2569,7 @@ void emit(tuple *tn, FILE *fp)
     case WHILE: /* AIS: fall through to the error, because this shouldn't
 		   come up yet. */
     default:
-	ick_lose(IE778, emitlineno, (char *)NULL);
+	ick_lose(IE778, emitlineno, (const char *)NULL);
 	/*@-unreachable@*/ break; /*@=unreachable@*/
     }
 
@@ -2738,7 +2738,7 @@ void emitslat(FILE* fp)
   {
     fprintf(fp,
 	    "void ick_os%lx(%s a, void(*f)())\n{\n  static int l=0;\n"
-	    "  if(l)\n  {\n    if(!f) ick_lose(IE778, ick_lineno, (char *)NULL);\n"
+	    "  if(l)\n  {\n    if(!f) ick_lose(IE778, ick_lineno, (const char *)NULL);\n"
 	    "    f(a,0);\n    return;\n  }\n  l=1;\n",
 	    (unsigned long)np,t);
     temp=cons(C_A, 0, 0);

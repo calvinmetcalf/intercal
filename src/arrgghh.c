@@ -94,7 +94,7 @@ ick_parseargs(int argc, char **argv)
 	fprintf(stderr," do anything, but you can switch them on or off\n");
 	fprintf(stderr," if you like anyway. Isn't this helpful?\n\n");
 	(void) fflush(stderr);
-	ick_lose(IE778, 0, (char *)NULL);
+	ick_lose(IE778, 0, (const char *)NULL);
     }
     if(ick_wimp_mode) {
 	fprintf(stderr,"How sad... you have selected to run an INTERCAL\n");

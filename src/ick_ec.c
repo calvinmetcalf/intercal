@@ -129,7 +129,7 @@ extern ick_overop* ick_oo_twospots;
     longjmp(ick_next_jmpbufs[ick_nextindex],2);
   }
   else if(ick_nextindex==81)
-    ick_lose(IE123, emitlineno, (char*)NULL);
+    ick_lose(IE123, emitlineno, (const char*)NULL);
   /* longjmp return codes: 1 = resume, 2 = redo to a different target */
   if(setjmp(ick_next_jmpbufs[ick_nextindex])==1)
   {
@@ -144,7 +144,7 @@ extern ick_overop* ick_oo_twospots;
   ick_allecfuncs();
   /* If the checkmode is 4, we didn't find a target. */
   if(ick_global_checkmode == 4)
-    ick_lose(IE129, emitlineno, (char*) NULL);
+    ick_lose(IE129, emitlineno, (const char*) NULL);
   /* Otherwise, the function called return(). */
   ick_doresume(1,emitlineno);
 }
@@ -162,11 +162,11 @@ void ick_scheduleforget(unsigned short amount)
 /*@noreturn@*/ void ick_doresume(unsigned short amount, int emitlineno)
 {
   if(ick_printflow) fprintf(stderr,"[resume:%hu]",amount);
-  if(ick_forgetamount) ick_lose(IE778, emitlineno, (char *)NULL);
-  if(!amount) ick_lose(IE621, emitlineno, (char *)NULL);
+  if(ick_forgetamount) ick_lose(IE778, emitlineno, (const char *)NULL);
+  if(!amount) ick_lose(IE621, emitlineno, (const char *)NULL);
   ick_nextindex -= amount;
   if(ick_nextindex < 1) /* the very first NEXT can't be RESUMEd to */
-    ick_lose(IE632, emitlineno, (char *)NULL);
+    ick_lose(IE632, emitlineno, (const char *)NULL);
   longjmp(ick_next_jmpbufs[ick_nextindex],1);
 }
 
@@ -205,7 +205,7 @@ void ick_runstartups(void)
     return; /* we were RESUMEd to */
   }
   /* This line should be unreachable. */
-  ick_lose(IE778, -1, (char *)NULL);
+  ick_lose(IE778, -1, (const char *)NULL);
 }
 
 uint16_t ick_getonespot(unsigned short extername)
@@ -218,7 +218,7 @@ uint16_t ick_getonespot(unsigned short extername)
       if(ick_ec_vars[i].ick_ec_extername==extername)
 	return ick_onespots[ick_ec_vars[i].ick_ec_intername];
   }
-  ick_lose(IE200,-1,(char*)NULL);
+  ick_lose(IE200,-1,(const char*)NULL);
 }
 
 void ick_setonespot(unsigned short extername, uint16_t value)
@@ -235,7 +235,7 @@ void ick_setonespot(unsigned short extername, uint16_t value)
 	return;
       }
   }
-  ick_lose(IE200,-1,(char*)NULL);
+  ick_lose(IE200,-1,(const char*)NULL);
 }
 
 uint32_t ick_gettwospot(unsigned short extername)
@@ -248,7 +248,7 @@ uint32_t ick_gettwospot(unsigned short extername)
       if(ick_ec_vars[i].ick_ec_extername==extername)
 	return ick_twospots[ick_ec_vars[i].ick_ec_intername];
   }
-  ick_lose(IE200,-1,(char*)NULL);
+  ick_lose(IE200,-1,(const char*)NULL);
 }
 
 void ick_settwospot(unsigned short extername, uint32_t value)
@@ -265,7 +265,7 @@ void ick_settwospot(unsigned short extername, uint32_t value)
 	return;
       }
   }
-  ick_lose(IE200,-1,(char*)NULL);
+  ick_lose(IE200,-1,(const char*)NULL);
 }
 
 /* Register a CREATE target. This is just a wrapper for

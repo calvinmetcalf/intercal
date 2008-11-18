@@ -191,7 +191,7 @@ static int myfgetc(FILE* in)
 static RETSIGTYPE abend(int signim)
 {
   /*@-noeffect@*/ (void) signim; /*@=noeffect@*/
-  ick_lose(IE778, iyylineno, (char *)NULL);
+  ick_lose(IE778, iyylineno, (const char *)NULL);
 }
 static void print_usage(const char *prog, const char *options)
 {
@@ -358,8 +358,8 @@ int main(int argc, char *argv[])
 
     case 't':
       ick_traditional = ick_TRUE;
-      if(multithread) ick_lose(IE111, 1, (char*) NULL); /* AIS */
-      if(pickcompile) ick_lose(IE111, 1, (char*) NULL); /* AIS */
+      if(multithread) ick_lose(IE111, 1, (const char*) NULL); /* AIS */
+      if(pickcompile) ick_lose(IE111, 1, (const char*) NULL); /* AIS */
       break;
 
     case 'O':
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
       variableconstants = useickec = ick_FALSE;
       yukdebug = yukprofile = yydebug = outtostdout =
 	compile_only = cdebug = ick_FALSE;
-      if(pickcompile) ick_lose(IE256, 1, (char*) NULL);
+      if(pickcompile) ick_lose(IE256, 1, (const char*) NULL);
       break;
 
     case 'h': /* By AIS */
@@ -416,7 +416,7 @@ int main(int argc, char *argv[])
       yukprofile=ick_FALSE;
       yukdebug=ick_FALSE;
       useickec=ick_FALSE;
-      if(ick_traditional) ick_lose(IE111, 1, (char*) NULL);
+      if(ick_traditional) ick_lose(IE111, 1, (const char*) NULL);
       break;
 
     case 'a': /* By AIS */
@@ -496,7 +496,7 @@ int main(int argc, char *argv[])
   /* AIS: New function for enhanced file-finding */
   ifp = ick_findandfopen(pickcompile?PSKELETON:SKELETON,
 			 ick_datadir, "r", argv[0]);
-  if(!ifp) ick_lose(IE999, 1, (char *)NULL);
+  if(!ifp) ick_lose(IE999, 1, (const char *)NULL);
 
   /* now substitute in tokens in the skeleton */
 
@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
     if (/* AIS */ strrchr(argv[optind],'.') != NULL &&
 	freopen(argv[optind], "rb", stdin) == (FILE *)NULL &&
 	/* AIS */ strcmp(strchr(argv[optind],'.')+1,"a"))
-	ick_lose(IE777, 1, (char *)NULL);
+	ick_lose(IE777, 1, (const char *)NULL);
     else
     {
       /* strip off the file extension */
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
 #endif
 	  fromcopy = ick_findandfopen(buf2,ick_datadir,"rb",argv[0]);
 	  if(!fromcopy) /* same error as for syslib */
-	    ick_lose(IE127, 1, (char*) NULL);
+	    ick_lose(IE127, 1, (const char*) NULL);
 #if __DJGPP__
 	  /* Look for a temp directory to store a copy of the C file,
 	     the resulting .cio, .o files, etc. */
@@ -562,7 +562,7 @@ int main(int argc, char *argv[])
 #endif
 	  /*@=formatconst@*/
 	  if((tocopy = fopen(buf2,"wb")) == NULL)
-	    ick_lose(IE888, 1, (char*) NULL);
+	    ick_lose(IE888, 1, (const char*) NULL);
 
 	  for(;;)
 	  {
@@ -577,13 +577,13 @@ int main(int argc, char *argv[])
 	  argv[optind]=malloc(sizeof(buf2)+1);
 	  /*@=onlytrans@*/
 	  if(!(argv[optind]))
-	    ick_lose(IE888, 1, (char*) NULL);
+	    ick_lose(IE888, 1, (const char*) NULL);
 	  strcpy(argv[optind],buf2);
 	  *(strrchr(argv[optind],'.')) = '\0';
 	  continue;
 	}
 
-	ick_lose(IE998, 1, (char *)NULL);
+	ick_lose(IE998, 1, (const char *)NULL);
       }
       *chp++ = '\0';
 
@@ -591,7 +591,7 @@ int main(int argc, char *argv[])
 		      !strcmp(chp,"c99"))) /* AIS */
       {
 	if(firstfile != ick_FALSE) /* need exactly 1 INTERCAL file */
-	  ick_lose(IE998, 1, (char *)NULL);
+	  ick_lose(IE998, 1, (const char *)NULL);
 	continue; /* don't process C or cio files further yet */
       }
 
@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
 	/* Error if libick_ecto_b98.a is missing. It might be, and not
 	   just due to installation problems. */
 	if(!ick_findandtestopen("libick_ecto_b98.a",libdir,"rb",argv[0]))
-	  ick_lose(IE899,-1,(char *)NULL);
+	  ick_lose(IE899,-1,(const char *)NULL);
 
 	/* Compile the .b98 file into a .cio. It's open on stdin right now,
 	   so we just need to handle the output side of things. */
@@ -656,7 +656,7 @@ int main(int argc, char *argv[])
 #endif
 
 	if(!((of = ick_debfopen(buf2,"w"))))
-	  ick_lose(IE888,-1,(char *)NULL);
+	  ick_lose(IE888,-1,(const char *)NULL);
 
 	fprintf(of,"const char* ick_iffi_befungeString=\n\"");
 
@@ -705,7 +705,7 @@ int main(int argc, char *argv[])
       }
 
       if(useickec && firstfile == ick_FALSE) /* AIS */
-	ick_lose(IE998, 1, (char *)NULL);
+	ick_lose(IE998, 1, (const char *)NULL);
 
       /* wwp: reset the base variables to defaults, because if the  */
       /* sourcefile has extension .i they will not be reset in the  */
@@ -724,11 +724,11 @@ int main(int argc, char *argv[])
       {
 	ick_Base = (int)strtol(chp,&chp,10);
 	if (ick_Base < 2 || ick_Base > maxbase)
-	  ick_lose(IE998, 1, (char *)NULL);
+	  ick_lose(IE998, 1, (const char *)NULL);
 	else if (ick_traditional && ick_Base != 2)
-	  ick_lose(IE111, 1, (char *)NULL);
+	  ick_lose(IE111, 1, (const char *)NULL);
 	else if (pickcompile && ick_Base != 2)
-	  ick_lose(IE256, 1, (char *)NULL); /* AIS */
+	  ick_lose(IE256, 1, (const char *)NULL); /* AIS */
 	ick_Small_digits = smallsizes[ick_Base];
 	ick_Large_digits = 2 * ick_Small_digits;
 	ick_Max_small = maxsmalls[ick_Base];
@@ -777,9 +777,9 @@ int main(int argc, char *argv[])
       if (ick_lineno > 2)
       {
 	if (politesse == 0 || (ick_lineno - 1) / politesse >= 5)
-	  ick_lose(IE079, iyylineno, (char *)NULL);
+	  ick_lose(IE079, iyylineno, (const char *)NULL);
 	else if (ick_lineno / politesse < 3)
-	  ick_lose(IE099, iyylineno, (char *)NULL);
+	  ick_lose(IE099, iyylineno, (const char *)NULL);
       }
 
       /*
@@ -825,7 +825,7 @@ int main(int argc, char *argv[])
 	(void) snprintf(buf2, sizeof buf2, "%s.%di", SYSLIB, ick_Base);
 #endif
 	if (ick_findandfreopen(buf2, ick_datadir, "r", argv[0], stdin) == NULL)
-	  ick_lose(IE127, 1, (char*) NULL);
+	  ick_lose(IE127, 1, (const char*) NULL);
 #ifdef USE_YYRESTART
 	yyrestart(stdin);
 #endif /* USE_YYRESTART */
@@ -895,7 +895,7 @@ int main(int argc, char *argv[])
       /*@-branchstate@*/
       if(outtostdout) ofp=stdout; /* AIS */
       else if((ofp = ick_debfopen(buf, "w")) == (FILE *)NULL)
-	ick_lose(IE888, 1, (char *)NULL);
+	ick_lose(IE888, 1, (const char *)NULL);
       /*@=branchstate@*/
 
       (void) fseek(ifp,0L,0);	/* rewind skeleton file */
@@ -1299,10 +1299,10 @@ int main(int argc, char *argv[])
 		 /* Compiling for PIC */
 		 /* Arrays not supported on PICs */
 		 if(ntails || nhybrids)
-		   ick_lose(IE256, iyylineno, (char*) NULL);
+		   ick_lose(IE256, iyylineno, (const char*) NULL);
 		 /* and neither are variable constants */
 		 if(variableconstants)
-		   ick_lose(IE256, iyylineno, (char*) NULL);
+		   ick_lose(IE256, iyylineno, (const char*) NULL);
 		 assert(oblist != NULL);
 		 for (op = oblist; op < obdex; op++)
 		 {
@@ -1671,7 +1671,7 @@ int main(int argc, char *argv[])
 #endif
     cioallec=ick_debfopen(tempfn,"w");
     if(cioallec == NULL)
-      ick_lose(IE888, -1, (char*) NULL);
+      ick_lose(IE888, -1, (const char*) NULL);
     (void) fprintf(cioallec,"void ick_doresume(unsigned short,int);\n");
     (void) fprintf(cioallec,"extern int ick_global_checkmode;\n");
     (void) fprintf(cioallec,"void ick_allecfuncs(void)\n{\n");
@@ -1774,7 +1774,7 @@ int main(int argc, char *argv[])
 	      fprintf(cioin,"%-11ld",ppnum6++/2);
 	      break;
 	    default:
-	      ick_lose(IE778, -1, (char*) NULL);
+	      ick_lose(IE778, -1, (const char*) NULL);
 	    }
 	    (void) fseek(cioin,0L,SEEK_CUR); /* synch the file */
 	  }
@@ -1818,18 +1818,18 @@ needc99?99:89,tempfn);
       if(!*(argv[optind])) continue;
       remspace -= strlen(argv[optind]) - 5; /* 5 for <space>.cio */
       if(remspace <= 0)
-	ick_lose(IE666, -1, (char*)NULL);
+	ick_lose(IE666, -1, (const char*)NULL);
       strcat(buf2," ");
       strcat(buf2,argv[optind]);
       strcat(buf2,".cio");
     }
     remspace -= strlen(libbuf);
     if(remspace <= 0)
-      ick_lose(IE666, -1, (char*)NULL);
+      ick_lose(IE666, -1, (const char*)NULL);
     strcat(buf2,libbuf);
     remspace -= strlen(" -lickec");
     if(remspace <= 0)
-      ick_lose(IE666, -1, (char*)NULL);
+      ick_lose(IE666, -1, (const char*)NULL);
     strcat(buf2," -lickec");
     ICK_SYSTEM(buf2);
     (void) remove(tempfn);

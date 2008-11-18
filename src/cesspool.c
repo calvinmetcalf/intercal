@@ -103,7 +103,7 @@ void ick_pushnext(unsigned n)
     if (ick_nextindex < ick_MAXNEXT)
 	ick_next[ick_nextindex++] = n;
     else
-	ick_lose(IE123, ick_lineno, (char *)NULL);
+	ick_lose(IE123, ick_lineno, (const char *)NULL);
 }
 
 unsigned int ick_popnext(unsigned int n)
@@ -123,12 +123,12 @@ unsigned int ick_resume(unsigned int n)
 {
     if (n == 0)
     {
-	ick_lose(IE621, ick_lineno, (char *)NULL);
+	ick_lose(IE621, ick_lineno, (const char *)NULL);
 	/*@-unreachable@*/ return 0; /*@=unreachable@*/
     }
     else if ((n = ick_popnext(n)) == (unsigned int)-1)
     {
-	ick_lose(IE632, ick_lineno, (char *)NULL);
+	ick_lose(IE632, ick_lineno, (const char *)NULL);
 	/*@-unreachable@*/ return 0; /*@=unreachable@*/
     }
     return(n);
@@ -152,7 +152,7 @@ unsigned int ick_pin(void)
     if(!ick_cesspoolin) ick_cesspoolin=stdin; /* AIS */
 
     if (fgets(buf, INTBUFSIZ, ick_cesspoolin) == (char *)NULL)
-	ick_lose(IE562, ick_lineno, (char *)NULL);
+	ick_lose(IE562, ick_lineno, (const char *)NULL);
     n = strlen(buf) - 1;
     if (n > 0 && buf[n-1] == '\r')
 	--n;
@@ -182,13 +182,13 @@ unsigned int ick_pin(void)
 	    if (result < 429496729 || (result == 429496729 && digit < 6))
 		result = result * 10 + digit;
 	    else
-		ick_lose(IE533, ick_lineno, (char *)NULL);
+		ick_lose(IE533, ick_lineno, (const char *)NULL);
 	}
     }
     if (!n)
-	ick_lose(IE562, ick_lineno, (char *)NULL);
+	ick_lose(IE562, ick_lineno, (const char *)NULL);
     if (result > (unsigned int)ick_Max_large)
-	ick_lose(IE533, ick_lineno, (char *)NULL);
+	ick_lose(IE533, ick_lineno, (const char *)NULL);
     return(result);
 }
 
@@ -374,10 +374,10 @@ static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
    * at INT_MAX and hope that's enough. */
   i=a->dims[0]; /* we already know that there's 1 dim only */
   if(SIZE_MAX/6-2<=a->dims[0])
-    ick_lose(IE252, ick_lineno, (char*)NULL); /* size is too large */
+    ick_lose(IE252, ick_lineno, (const char*)NULL); /* size is too large */
   if(!i) i=1;
   buf=malloc(i+1);
-  if(!buf) ick_lose(IE252, ick_lineno, (char*)NULL);
+  if(!buf) ick_lose(IE252, ick_lineno, (const char*)NULL);
   if(!ick_cesspoolin) ick_cesspoolin=stdin;
   if(!fgets(buf,(int)(min(a->dims[0],(size_t)INT_MAX)),ick_cesspoolin))
     strcpy(buf,"\n"); /* EOF inputs the null string in CLC-INTERCAL */
@@ -385,12 +385,12 @@ static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
   if(!tempcp) /* input too long for the ick_array is an error */
   {
     free(buf);
-    ick_lose(IE241, ick_lineno, (char*)NULL);
+    ick_lose(IE241, ick_lineno, (const char*)NULL);
   }
   *tempcp='\0'; /* chomp the final newline */
   tempcp=malloc(6*i+12); /* to be on the safe side, even though
 			  * Baudot doesn't use 16-byte chars */
-  if(!tempcp) ick_lose(IE252, ick_lineno, (char*)NULL);
+  if(!tempcp) ick_lose(IE252, ick_lineno, (const char*)NULL);
   /* Zero the ick_array now. */
   i=a->dims[0];
   if(!forget) while(i--)
@@ -401,9 +401,9 @@ static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
   ti=ick_clc_cset_convert(buf,tempcp,"latin1","baudot",2,6*a->dims[0]+12,(FILE*)0);
   /* Negative ti ought to be impossible here; check anyway, and cause
    * an internal error if it has happened. */
-  if(ti<0) ick_lose(IE778, ick_lineno, (char*)NULL);
+  if(ti<0) ick_lose(IE778, ick_lineno, (const char*)NULL);
   i=(size_t)ti;
-  if(i>a->dims[0]) ick_lose(IE241, ick_lineno, (char*)0);
+  if(i>a->dims[0]) ick_lose(IE241, ick_lineno, (const char*)0);
   if(!forget) while(i--)
 		if(type==ick_TAIL)
 		  a->data.tail[i]=(ick_type16)tempcp[i]+
@@ -421,9 +421,9 @@ static void clcbinout(unsigned int type, const ick_array* a)
   int ti;
   char* buf, *tempcp;
   if(SIZE_MAX/6-2<=a->dims[0])
-    ick_lose(IE252, ick_lineno, (char*)NULL); /* size is too large */
+    ick_lose(IE252, ick_lineno, (const char*)NULL); /* size is too large */
   buf=malloc(a->dims[0]+1);
-  if(!buf) ick_lose(IE252, ick_lineno, (char*) NULL);
+  if(!buf) ick_lose(IE252, ick_lineno, (const char*) NULL);
   i=0; tempcp=buf;
   while(i<a->dims[0])
   {
@@ -444,9 +444,9 @@ static void clcbinout(unsigned int type, const ick_array* a)
    * obeyed because that way the code is robust against any future
    * changes in character sets. */
   tempcp=malloc(a->dims[0]*6+12);
-  if(!tempcp) ick_lose(IE252, ick_lineno, (char*) NULL);
+  if(!tempcp) ick_lose(IE252, ick_lineno, (const char*) NULL);
   ti=ick_clc_cset_convert(buf,tempcp,"baudot","latin1",0,6*a->dims[0]+12,(FILE*)0);
-  if(ti<0) ick_lose(IE778, ick_lineno, (char*)NULL);
+  if(ti<0) ick_lose(IE778, ick_lineno, (const char*)NULL);
   i=(size_t)ti;
   tempcp[i]='\0';
   /* CLC-INTERCAL bails out on invalid characters. C-INTERCAL uses
@@ -480,7 +480,7 @@ void ick_binin(unsigned int type, ick_array *a, ick_bool forget)
   size_t i;
 
   if (a->rank != 1)
-    ick_lose(IE241, ick_lineno, (char *)NULL);
+    ick_lose(IE241, ick_lineno, (const char *)NULL);
 
   if(!ick_cesspoolin) ick_cesspoolin=stdin; /* AIS */
 
@@ -506,7 +506,7 @@ void ick_binout(unsigned int type, const ick_array *a)
   size_t i;
 
   if (a->rank != 1)
-    ick_lose(IE241, ick_lineno, (char *)NULL);
+    ick_lose(IE241, ick_lineno, (const char *)NULL);
 
   if(!ick_cesspoolout) ick_cesspoolout=stdout; /* AIS */
 
@@ -539,7 +539,7 @@ unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
   unsigned int retval = 0;
   if (type == ick_ONESPOT || type == ick_TAIL) {
     if (value > (unsigned int)ick_Max_small)
-      ick_lose(IE275, ick_lineno, (char *)NULL);
+      ick_lose(IE275, ick_lineno, (const char *)NULL);
     if (forget)
       retval = value;
     else {
@@ -591,12 +591,12 @@ unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
   a = va_arg(ap, ick_array*);
 
   if (va_arg(ap, unsigned int) != a->rank)
-    ick_lose(IE241, ick_lineno, (char *)NULL);
+    ick_lose(IE241, ick_lineno, (const char *)NULL);
 
   for (i = 0 ; i < a->rank ; i++) {
     v = va_arg(ap, unsigned int);
     if (v == 0 || (size_t)v > a->dims[i])
-      ick_lose(IE241, ick_lineno, (char *)NULL);
+      ick_lose(IE241, ick_lineno, (const char *)NULL);
     address = address * a->dims[i] + v - 1;
   }
 
@@ -649,13 +649,13 @@ void ick_resize(va_alist) va_dcl
       free((char*)a->dims);
     a->dims = malloc(a->rank * sizeof(*(a->dims)));
     if (a->dims == NULL)
-      ick_lose(IE241, ick_lineno, (char *)NULL);
+      ick_lose(IE241, ick_lineno, (const char *)NULL);
   }
 
   for (i = 0 ; i < r ; i++) {
     v = va_arg(ap, size_t);
     if (v == 0)
-      ick_lose(IE240, ick_lineno, (char *)NULL);
+      ick_lose(IE240, ick_lineno, (const char *)NULL);
     if (!forget) {
       assert(a->dims != NULL); /* AIS: it isn't, because !forget, but
 				  splint doesn't know that */
@@ -670,14 +670,14 @@ void ick_resize(va_alist) va_dcl
 	free((char *)a->data.tail);
       a->data.tail   = (ick_type16*)malloc(prod * sizeof(ick_type16));
       if (a->data.tail == NULL)
-	ick_lose(IE241, ick_lineno, (char *)NULL);
+	ick_lose(IE241, ick_lineno, (const char *)NULL);
     }
     else {
       if (a->data.hybrid)
 	free((char *)a->data.hybrid);
       a->data.hybrid = (ick_type32*)malloc(prod * sizeof(ick_type32));
       if (a->data.hybrid == NULL)
-	ick_lose(IE241, ick_lineno, (char *)NULL);
+	ick_lose(IE241, ick_lineno, (const char *)NULL);
     }
   }
 
@@ -726,7 +726,7 @@ void ick_stash(unsigned int type, unsigned int index, void *from, ick_overop* oo
   /*@=nullassign@*/
   /* create a new ick_stashbox and push it onto the stack */
   ick_stashbox *sp = (ick_stashbox*)malloc(sizeof(ick_stashbox));
-  if (sp == NULL) ick_lose(IE222, ick_lineno, (char *)NULL);
+  if (sp == NULL) ick_lose(IE222, ick_lineno, (const char *)NULL);
   sp->ick_next = ick_first;
   ick_first = sp;
 
@@ -746,10 +746,10 @@ void ick_stash(unsigned int type, unsigned int index, void *from, ick_overop* oo
     int prod;
     unsigned int i;
     ick_first->save.a = (ick_array*)malloc(sizeof(ick_array));
-    if (ick_first->save.a == NULL) ick_lose(IE222, ick_lineno, (char *)NULL);
+    if (ick_first->save.a == NULL) ick_lose(IE222, ick_lineno, (const char *)NULL);
     ick_first->save.a->rank = a->rank;
     ick_first->save.a->dims = malloc(a->rank * sizeof(*(ick_first->save.a->dims)));
-    if (ick_first->save.a->dims == NULL) ick_lose(IE222, ick_lineno, (char *)NULL);
+    if (ick_first->save.a->dims == NULL) ick_lose(IE222, ick_lineno, (const char *)NULL);
     memcpy(ick_first->save.a->dims, a->dims,
 	   a->rank * sizeof(*(a->dims)));
     prod = a->rank ? 1 : 0;
@@ -759,14 +759,14 @@ void ick_stash(unsigned int type, unsigned int index, void *from, ick_overop* oo
     if (type == ick_TAIL) {
       ick_first->save.a->data.tail =
 	(ick_type16*)malloc(prod * sizeof(ick_type16));
-      if (ick_first->save.a->data.tail == NULL) ick_lose(IE222, ick_lineno, (char *)NULL);
+      if (ick_first->save.a->data.tail == NULL) ick_lose(IE222, ick_lineno, (const char *)NULL);
       memcpy(ick_first->save.a->data.tail,
 	     a->data.tail, prod * sizeof(ick_type16));
     }
     else {
       ick_first->save.a->data.hybrid =
 	(ick_type32*)malloc(prod * sizeof(ick_type32));
-      if (ick_first->save.a->data.hybrid == NULL) ick_lose(IE222, ick_lineno, (char *)NULL);
+      if (ick_first->save.a->data.hybrid == NULL) ick_lose(IE222, ick_lineno, (const char *)NULL);
       memcpy(ick_first->save.a->data.hybrid,
 	     a->data.hybrid, prod * sizeof(ick_type32));
     }
@@ -781,7 +781,7 @@ void ick_retrieve(void *to, unsigned int type, unsigned int index,
   ick_stashbox *sp;
 
   if ((sp = fetch(type, index)) == (ick_stashbox *)NULL)
-    ick_lose(IE436, ick_lineno, (char *)NULL);
+    ick_lose(IE436, ick_lineno, (const char *)NULL);
   else if (!forget) {
     if(oo) oo[index]=sp->overloadinfo; /* AIS */
     if (type == ick_ONESPOT)
@@ -850,7 +850,7 @@ int ick_multicome0(int errlineno, jmp_buf pc)
   /*@-noeffect@*/
   (void) pc; /* it's ignored by this function */
   /*@=noeffect@*/
-  ick_lose(IE555, errlineno, (char *) NULL);
+  ick_lose(IE555, errlineno, (const char *) NULL);
   /* this line number is quite possibly going to be wildly inaccurate */
   /*@-unreachable@*/
   return 0;
@@ -915,7 +915,7 @@ ick_type32 ick_ieg277(ick_type32 ignored)
   /*@-noeffect@*/
   (void) ignored;
   /*@=noeffect@*/
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
 }
 
 void ick_ies277(ick_type32 ignored, void(*ignored2)())
@@ -924,7 +924,7 @@ void ick_ies277(ick_type32 ignored, void(*ignored2)())
   (void) ignored;
   (void) ignored2;
   /*@=noeffect@*/
-  ick_lose(IE277, ick_lineno, (char*) NULL);
+  ick_lose(IE277, ick_lineno, (const char*) NULL);
 }
 
 /* cesspool.c ends here */
