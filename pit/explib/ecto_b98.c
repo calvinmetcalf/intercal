@@ -64,12 +64,18 @@ struct ick_ipposdeltatype
   long long ix, iy, dx, dy;
 };
 
-void ick_InterpreterMainLoop(void);
-void ick_InterpreterRun(void);
-void ick_iffi_InterpreterOneIteration(void);
-void ick_iffi_HandleControl(void);
-void ick_SaveIPPosDelta(struct ick_ipposdeltatype*);
-void ick_RestoreIPPosDelta(struct ick_ipposdeltatype*);
+/* This is called from IFFI. Remember to keep matching
+   extern over there in sync. */
+void ick_interpreter_main_loop(void);
+
+/* This is just a forward decl. */
+void ick_iffi_handle_control(void);
+
+/* These are implemented in IFFI. */
+extern void ick_interpreter_run(void);
+extern void ick_iffi_interpreter_one_iteration(void);
+extern void ick_save_ip_pos_delta(struct ick_ipposdeltatype*);
+extern void ick_restore_ip_pos_delta(const struct ick_ipposdeltatype*);
 
 unsigned short ick_iffi_forgetcount=0;
 int ick_iffi_nexting=0;
@@ -85,9 +91,9 @@ extern const char* ick_iffi_befungeString;
 extern long long ick_iffi_markerposns[][2];
 extern int ick_iffi_markercount;
 
-ICK_EC_FUNC_START(ick_InterpreterMainLoop)
+ICK_EC_FUNC_START(ick_interpreter_main_loop)
 {
-  ick_startup( {ick_InterpreterRun();} ); /* could be put anywhere, is put here
+  ick_startup( {ick_interpreter_run();} ); /* could be put anywhere, is put here
 					     for convenience */
 
   /* we enter here when running at startup code and continue until IFFI is loaded */
@@ -113,10 +119,10 @@ ICK_EC_FUNC_START(ick_InterpreterMainLoop)
     if(ick_global_linelabel == 0x70001ff2)
     {
       auto struct ick_ipposdeltatype ippd;
-      ick_SaveIPPosDelta(&ippd);
+      ick_save_ip_pos_delta(&ippd);
       ick_iffi_sucking = 0;
       ick_checksuckpoint(ick_iffi_linelabel); /* may not return */
-      ick_RestoreIPPosDelta(&ippd);
+      ick_restore_ip_pos_delta(&ippd);
     }
   }
 
@@ -125,7 +131,7 @@ ick_iffi_iml_rerun:
   ick_iffi_breakloop=0;
   while(!ick_iffi_breakloop)
   {
-    ick_iffi_InterpreterOneIteration();
+    ick_iffi_interpreter_one_iteration();
     if (ick_iffi_forgetcount && !ick_iffi_breakloop)
     {
       ick_forget(ick_iffi_forgetcount);
@@ -150,26 +156,26 @@ ick_iffi_iml_rerun:
        onto the C stack. This is done in a struct ick_ipposdatatype, using the
        functions available for such save/restore. */
     auto struct ick_ipposdeltatype ippd;
-    ick_SaveIPPosDelta(&ippd);
+    ick_save_ip_pos_delta(&ippd);
     ick_iffi_nexting = 0;
     ick_next(ick_iffi_linelabel); /* may not return */
-    ick_RestoreIPPosDelta(&ippd);
+    ick_restore_ip_pos_delta(&ippd);
     goto ick_iffi_iml_rerun; /* continue the main loop if we got here */
   }
   if(ick_iffi_sucking && ! ick_iffi_inmarkmode)
   {
     /* Handle a line-label encountered in normal execution. */
     auto struct ick_ipposdeltatype ippd;
-    ick_SaveIPPosDelta(&ippd);
+    ick_save_ip_pos_delta(&ippd);
     ick_iffi_sucking = 0;
     ick_checksuckpoint(ick_iffi_linelabel); /* may not return */
-    ick_RestoreIPPosDelta(&ippd);
+    ick_restore_ip_pos_delta(&ippd);
     goto ick_iffi_iml_rerun; /* continue the main loop if we got here */
   }
 }
 ICK_EC_FUNC_END
 
-ICK_EC_FUNC_START(ick_iffi_HandleControl)
+ICK_EC_FUNC_START(ick_iffi_handle_control)
 {
   static int recursing=0;
   int markerno, dirno, nextcheck;
@@ -203,7 +209,7 @@ ICK_EC_FUNC_START(ick_iffi_HandleControl)
 
   recursing=1;
 
-  ick_SaveIPPosDelta(&ippd);
+  ick_save_ip_pos_delta(&ippd);
 
   markerno=ick_iffi_markercount;
   while(markerno--)
@@ -222,11 +228,11 @@ ICK_EC_FUNC_START(ick_iffi_HandleControl)
 		tippd.ix, tippd.iy, dirno["^>v<"]);
       tippd.ix += tippd.dx;
       tippd.iy += tippd.dy;
-      ick_RestoreIPPosDelta(&tippd);
+      ick_restore_ip_pos_delta(&tippd);
       ick_iffi_inmarkmode = 1;
       ick_local_checkmode = ick_global_checkmode;
       ick_global_checkmode = 0;
-      ick_InterpreterMainLoop();
+      ick_interpreter_main_loop();
       ick_global_checkmode = ick_local_checkmode;
       ick_iffi_inmarkmode = 0;
       if((ick_iffi_nextingfrom||ick_iffi_comingfrom) &&
@@ -239,7 +245,7 @@ ICK_EC_FUNC_START(ick_iffi_HandleControl)
 	ick_global_goto=0x70001FF1; /* we found a suckpoint */
 	if(ick_iffi_nextingfrom) ick_global_checkmode = 3; /* do a next from */
 	/* if it's a come-from, the checkmode is already correct */
-	ick_SaveIPPosDelta(&ippd);
+	ick_save_ip_pos_delta(&ippd);
       }
       if(ick_iffi_sucking && ick_iffi_linelabel == ick_global_linelabel &&
 	 nextcheck)
@@ -247,7 +253,7 @@ ICK_EC_FUNC_START(ick_iffi_HandleControl)
 	if(ick_printflow)
 	  fprintf(stderr,"Line label found!\n");
 	/* Another part of the code is NEXTing to this line label. */
-	ick_SaveIPPosDelta(&ippd);
+	ick_save_ip_pos_delta(&ippd);
 	nextcheck = 2; /* when this loop ends, goto the main loop */
       }
       ick_iffi_nextingfrom = 0;
@@ -261,7 +267,7 @@ ICK_EC_FUNC_START(ick_iffi_HandleControl)
   /* Set the IP to what we want it to be on resume, or otherwise return it to
      its original value. (Returning it to its original value is unneccesary
      but harmless.) */
-  ick_RestoreIPPosDelta(&ippd);
+  ick_restore_ip_pos_delta(&ippd);
   recursing=0;
   ick_iffi_linelabel = ick_global_linelabel;
   if(nextcheck == 2)

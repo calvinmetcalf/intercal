@@ -29,12 +29,18 @@
 #include "../../settings.h"
 #include "../../interpreter.h"
 
+#ifdef HAVE_clock_gettime
+#  include <time.h>
+#else
+#  include <sys/time.h>
+#endif
+
 static instructionPointer *iffiIP = NULL;
 
 static bool firstload = true;
 
 // Communication functions with the ecto_b98 expansion library
-void ick_SaveIPPosDelta(struct ick_ipposdeltatype* ippd)
+void ick_save_ip_pos_delta(struct ick_ipposdeltatype* ippd)
 {
 	ippd->ix = iffiIP->position.x;
 	ippd->iy = iffiIP->position.y;
@@ -42,7 +48,7 @@ void ick_SaveIPPosDelta(struct ick_ipposdeltatype* ippd)
 	ippd->dy = iffiIP->delta.y;
 }
 
-void ick_RestoreIPPosDelta(struct ick_ipposdeltatype* ippd)
+void ick_restore_ip_pos_delta(const struct ick_ipposdeltatype* ippd)
 {
 	iffiIP->position.x = ippd->ix;
 	iffiIP->position.y = ippd->iy;
@@ -50,70 +56,80 @@ void ick_RestoreIPPosDelta(struct ick_ipposdeltatype* ippd)
 	iffiIP->delta.y = ippd->dy;
 }
 
-void ick_InterpreterRun(void)
+void ick_interpreter_run(void)
 {
-	if (!FungeSpaceCreate()) {
+	if (!fungespace_create()) {
 		perror("Couldn't create funge space!?");
 		exit(EXIT_FAILURE);
 	}
-	FungeSpaceLoadString(ick_iffi_befungeString);
-	iffiIP = ipCreate();
+	fungespace_load_string((const unsigned char*)ick_iffi_befungeString);
+	iffiIP = ip_create();
 	if (iffiIP == NULL) {
 		perror("Couldn't create instruction pointer!?");
 		exit(EXIT_FAILURE);
 	}
 	{
+#ifdef HAVE_clock_gettime
+		struct timespec tv;
+		if (clock_gettime(CLOCK_REALTIME, &tv)) {
+			perror("Couldn't get time of day?!");
+			exit(EXIT_FAILURE);
+		}
+		// Set up randomness
+		srandom(tv.tv_nsec);
+#else
 		struct timeval tv;
 		if (gettimeofday(&tv, NULL)) {
 			perror("Couldn't get time of day?!");
 			exit(EXIT_FAILURE);
 		}
-		/* Set up randomness */
+		// Set up randomness
 		srandom(tv.tv_usec);
+#endif
 	}
-	if(ick_printflow) SettingTraceLevel=9;
-	ick_InterpreterMainLoop();
+	if(ick_printflow) setting_trace_level=9;
+	ick_interpreter_main_loop();
 }
 
-void ick_iffi_InterpreterOneIteration(void)
+void ick_iffi_interpreter_one_iteration(void)
 {
 	fungeCell opcode;
-	opcode = FungeSpaceGet(&iffiIP->position);
+	opcode = fungespace_get(&iffiIP->position);
 
-	if (SettingTraceLevel > 8) {
+	if (setting_trace_level > 8) {
 		fprintf(stderr, "x=%" FUNGECELLPRI " y=%" FUNGECELLPRI
 				": %c (%" FUNGECELLPRI ")\n",
 				iffiIP->position.x, iffiIP->position.y, (char)opcode, opcode);
-		PrintStackTop(iffiIP->stack);
-	} else if (SettingTraceLevel > 3) {
+		stack_print_top(iffiIP->stack);
+	} else if (setting_trace_level > 3) {
 		fprintf(stderr, "x=%" FUNGECELLPRI " y=%" FUNGECELLPRI
 				": %c (%" FUNGECELLPRI ")\n",
 				iffiIP->position.x, iffiIP->position.y, (char)opcode, opcode);
-	} else if (SettingTraceLevel > 2)
+	} else if (setting_trace_level > 2)
 		fprintf(stderr, "%c", (char)opcode);
 
-	ExecuteInstruction(opcode, iffiIP);
+	execute_instruction(opcode, iffiIP);
 	if (iffiIP->needMove)
-		ipForward(iffiIP, 1);
+		ip_forward(iffiIP, 1);
 	else
 		iffiIP->needMove = true;
 }
 
 // A - CREATE a new INTERCAL instruction
-static void FingerIFFIcreate(instructionPointer * ip)
+static void finger_IFFI_create(instructionPointer * ip)
 {
     // arguments: line number on TOS, signature as 0gnirts beneath it
-	fungeCell l = StackPop(ip->stack);
-	char * restrict str = StackPopString(ip->stack);
-	ick_create(str, l);
+	fungeCell l = stack_pop(ip->stack);
+	unsigned char * restrict str = stack_pop_string(ip->stack);
+	ick_create((char*)str, l);
 }
 
 // C - In markmode COME FROM the top of stack
-static void FingerIFFIcomeFrom(instructionPointer * ip)
+static void finger_IFFI_come_from(instructionPointer * ip)
 {
 	fungeCell l;
 
-	l = StackPop(ip->stack);
+	l = stack_pop(ip->stack);
 
 	if (ick_iffi_inmarkmode) {
 		ick_iffi_breakloop = 1;
@@ -123,7 +139,7 @@ static void FingerIFFIcomeFrom(instructionPointer * ip)
 }
 
 // D - Push information about a CREATED instruction argument
-static void FingerIFFIcreateData(instructionPointer * ip)
+static void finger_IFFI_create_data(instructionPointer * ip)
 {
 	// Arguments: argument's index (0-based) on TOS
 	// Return: the following values (from bottom to top):
@@ -135,35 +151,35 @@ static void FingerIFFIcreateData(instructionPointer * ip)
 	fungeCell i;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	i = StackPop(ip->stack);
+	i = stack_pop(ip->stack);
 
-	StackPush(ip->stack, ick_c_i_width(i));
-	StackPush(ip->stack, ick_c_i_isarray(i));
-	StackPush(ip->stack, ick_c_i_varnumber(i));
-	StackPush(ip->stack, ick_c_i_value(i));
-	StackPush(ip->stack, ick_c_i_getvalue(i));
+	stack_push(ip->stack, ick_c_i_width(i));
+	stack_push(ip->stack, ick_c_i_isarray(i));
+	stack_push(ip->stack, ick_c_i_varnumber(i));
+	stack_push(ip->stack, ick_c_i_value(i));
+	stack_push(ip->stack, ick_c_i_getvalue(i));
 }
 
 // F - FORGET NEXT stack entries equal to top of stack
-static void FingerIFFIforget(instructionPointer * ip)
+static void finger_IFFI_forget(instructionPointer * ip)
 {
 	fungeCell f;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
 	if (ick_iffi_inmarkmode) { /* this is an error in the user's code */
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	f = StackPop(ip->stack);
+	f = stack_pop(ip->stack);
 
 	if (f > 81 || f < 0) f = 81;
 
@@ -171,7 +187,7 @@ static void FingerIFFIforget(instructionPointer * ip)
 }
 
 // G - Get the value of an INTERCAL scalar variable
-static void FingerIFFIvarGet(instructionPointer * ip)
+static void finger_IFFI_var_get(instructionPointer * ip)
 {
 	// arguments: var number on TOS
 	// var numbers are positive for onespot, negative for twospot
@@ -180,32 +196,32 @@ static void FingerIFFIvarGet(instructionPointer * ip)
 	fungeCell v;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	v = StackPop(ip->stack);
+	v = stack_pop(ip->stack);
 
 	if (v == 0) {
-		ipReverse(ip);
+		ip_reverse(ip);
 	} else if (v > 0) {
-		StackPush(ip->stack, ick_getonespot(v));
+		stack_push(ip->stack, ick_getonespot(v));
 	} else {
-		StackPush(ip->stack, ick_gettwospot(-v));
+		stack_push(ip->stack, ick_gettwospot(-v));
 	}
 }
 
 // L - Use top of stack as a line label for this point
-static void FingerIFFIlabel(instructionPointer * ip)
+static void finger_IFFI_label(instructionPointer * ip)
 {
 	fungeCell l;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	l = StackPop(ip->stack);
+	l = stack_pop(ip->stack);
 
 	ick_iffi_breakloop = 1;
 	ick_iffi_linelabel = l;
@@ -213,28 +229,28 @@ static void FingerIFFIlabel(instructionPointer * ip)
 }
 
 // M - Marks points where the code can be entered from outside
-static void FingerIFFImarker(instructionPointer * ip)
+static void finger_IFFI_marker(instructionPointer * ip)
 {
 	(void) ip;
 	ick_iffi_breakloop = ick_iffi_inmarkmode;
 }
 
 // N - Try to NEXT to the line labelled with the top of stack
-static void FingerIFFInext(instructionPointer * ip)
+static void finger_IFFI_next(instructionPointer * ip)
 {
 	fungeCell l;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
 	if (ick_iffi_inmarkmode) { /* this is an error in the user's code */
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	l = StackPop(ip->stack);
+	l = stack_pop(ip->stack);
 
 	ick_iffi_breakloop = 1;
 	ick_iffi_linelabel = l;
@@ -242,21 +258,21 @@ static void FingerIFFInext(instructionPointer * ip)
 }
 
 // R - RESUME to the top-of-stackth NEXT stack entry
-static void FingerIFFIresume(instructionPointer * ip)
+static void finger_IFFI_resume(instructionPointer * ip)
 {
 	fungeCell f;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
 	if (ick_iffi_inmarkmode) { /* this is an error in the user's code */
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	f = StackPop(ip->stack);
+	f = stack_pop(ip->stack);
 
 	if (f > 81 || f < 0) f = 81;
 
@@ -268,7 +284,7 @@ static void FingerIFFIresume(instructionPointer * ip)
 }
 
 // S - Set the value of an INTERCAL scalar variable
-static void FingerIFFIvarSet(instructionPointer * ip)
+static void finger_IFFI_var_set(instructionPointer * ip)
 {
 	// arguments: var number on TOS, new value beneath it
 	// var numbers are positive for onespot, negative for twospot
@@ -277,15 +293,15 @@ static void FingerIFFIvarSet(instructionPointer * ip)
 	fungeCell v, d;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	v = StackPop(ip->stack);
-	d = StackPop(ip->stack);
+	v = stack_pop(ip->stack);
+	d = stack_pop(ip->stack);
 
 	if (v == 0) {
-		ipReverse(ip);
+		ip_reverse(ip);
 	} else if (v > 0) {
 		ick_setonespot(v, d);
 	} else {
@@ -294,29 +310,29 @@ static void FingerIFFIvarSet(instructionPointer * ip)
 }
 
 // V - Assign to a CREATEd instruction argument
-static void FingerIFFIargSet(instructionPointer * ip)
+static void finger_IFFI_arg_set(instructionPointer * ip)
 {
 	// arguments: 0-based argument index on TOS, new value beneath it
 	// note that this is a NOP unless -a was used when compiling
 	fungeCell i, d;
 
 	if (firstload) {
-		ipReverse(ip);
+		ip_reverse(ip);
 		return;
 	}
 
-	i = StackPop(ip->stack);
-	d = StackPop(ip->stack);
+	i = stack_pop(ip->stack);
+	d = stack_pop(ip->stack);
 
 	ick_c_i_setvalue(i, d);
 }
 
 // X - In markmode NEXT FROM the top of stack
-static void FingerIFFInextFrom(instructionPointer * ip)
+static void finger_IFFI_next_from(instructionPointer * ip)
 {
 	fungeCell l;
 
-	l = StackPop(ip->stack);
+	l = stack_pop(ip->stack);
 
 	if (ick_iffi_inmarkmode) {
 		ick_iffi_breakloop = 1;
@@ -326,28 +342,28 @@ static void FingerIFFInextFrom(instructionPointer * ip)
 }
 
 // Y - Marks the end of initialisation
-static void FingerIFFIyield(instructionPointer * ip)
+static void finger_IFFI_yield(instructionPointer * ip)
 {
 	ick_iffi_breakloop = firstload;
 	if (! firstload)
-		ipReverse(ip);
+		ip_reverse(ip);
 	firstload = false;
 }
 
-bool FingerIFFIload(instructionPointer * ip)
+bool finger_IFFI_load(instructionPointer * ip)
 {
-	ManagerAddOpcode(IFFI,  'A', create)
-	ManagerAddOpcode(IFFI,  'C', comeFrom)
-	ManagerAddOpcode(IFFI,  'D', createData)
-	ManagerAddOpcode(IFFI,  'F', forget)
-	ManagerAddOpcode(IFFI,  'G', varGet)
-	ManagerAddOpcode(IFFI,  'L', label)
-	ManagerAddOpcode(IFFI,  'M', marker)
-	ManagerAddOpcode(IFFI,  'N', next)
-	ManagerAddOpcode(IFFI,  'R', resume)
-	ManagerAddOpcode(IFFI,  'S', varSet)
-	ManagerAddOpcode(IFFI,  'V', argSet)
-	ManagerAddOpcode(IFFI,  'X', nextFrom)
-	ManagerAddOpcode(IFFI,  'Y', yield)
+	manager_add_opcode(IFFI,  'A', create)
+	manager_add_opcode(IFFI,  'C', come_from)
+	manager_add_opcode(IFFI,  'D', create_data)
+	manager_add_opcode(IFFI,  'F', forget)
+	manager_add_opcode(IFFI,  'G', var_get)
+	manager_add_opcode(IFFI,  'L', label)
+	manager_add_opcode(IFFI,  'M', marker)
+	manager_add_opcode(IFFI,  'N', next)
+	manager_add_opcode(IFFI,  'R', resume)
+	manager_add_opcode(IFFI,  'S', var_set)
+	manager_add_opcode(IFFI,  'V', arg_set)
+	manager_add_opcode(IFFI,  'X', next_from)
+	manager_add_opcode(IFFI,  'Y', yield)
 	return true;
 }

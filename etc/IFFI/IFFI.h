@@ -24,8 +24,8 @@
     is not a legal requirement.
  */
 
-#ifndef _HAD_SRC_FINGERPRINTS_IFFI_H
-#define _HAD_SRC_FINGERPRINTS_IFFI_H
+#ifndef FUNGE_HAD_SRC_FINGERPRINTS_IFFI_H
+#define FUNGE_HAD_SRC_FINGERPRINTS_IFFI_H
 
 #include "../../global.h"
 #include "../manager.h"
@@ -34,14 +34,24 @@
 #error The C-INTERCAL/cfunge external calls interface cannot be used concurrently
 #endif
 
-struct ick_ipposdeltatype
-{
-  long long ix, iy, dx, dy;
+struct ick_ipposdeltatype {
+	long long ix, iy, dx, dy;
 };
 
 // Externally-visible functions from IFFI.c
-bool FingerIFFIload(instructionPointer * ip);
-void ick_InterpreterMainLoop(void);
+// This is for manager.c
+bool finger_IFFI_load(instructionPointer * ip);
+
+// We export these for use by ecto_b98
+// Please remember to update the matching extern(s) over there
+// if you change here.
+void ick_save_ip_pos_delta(struct ick_ipposdeltatype* ippd);
+void ick_restore_ip_pos_delta(const struct ick_ipposdeltatype* ippd);
+void ick_interpreter_run(void);
+void ick_iffi_interpreter_one_iteration(void);
+
+// Implemented in ecto_b98
+extern void ick_interpreter_main_loop(void);
 
 // Communication variables with ecto_b98
 extern unsigned short ick_iffi_forgetcount;

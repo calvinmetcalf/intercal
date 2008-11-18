@@ -5,51 +5,79 @@
 # programs. The cfunge distribution itself is not modified; all changes
 # are made on a copy.
 
-test x$1 != x || (
-    echo Please give the path to the root of a cfunge source
-    echo distribution as an argument to this script.
-    exit 1
-) || exit 1
+die() { echo "Error: $1"; exit 1; }
 
-CFUNGEPATH=`(cd $1; pwd)` || (
-    echo Please give the path to the root of a cfunge source
-    echo distribution as an argument to this script\; the directory
+if [ -z "$1" ] ||  [ -z "$2" ]; then
+	echo "Usage: $0 ick-source-path cfunge-path"
+	exit 1
+fi
+
+# test x$1 != x || (
+#     echo Please give the path to the root of a cfunge source
+#     echo distribution as an argument to this script.
+#     exit 1
+# ) || exit 1
+
+ICKSRC_PATH="$1"
+CFUNGE_PATH="$2"
+BUILD_PATH="$(pwd)"
+
+ICKSRC_PATH=`(cd $ICKSRC_PATH; pwd)` || (
+    echo Please give the path to the root of C-INTERCAL source
+    echo distribution as the first argument to this script\; the directory
     echo or file you gave does not exist.
     exit 1
 ) || exit 1
 
-test -f $CFUNGEPATH/src/interpreter.c || (
+CFUNGE_PATH=`(cd $CFUNGE_PATH; pwd)` || (
     echo Please give the path to the root of a cfunge source
-    echo distribution as an argument to this script.
-    echo You gave $CFUNGEPATH, but it does not appear to be a cfunge
+    echo distribution as the second argument to this script\; the directory
+    echo or file you gave does not exist.
+    exit 1
+) || exit 1
+
+test -f "$CFUNGE_PATH/src/interpreter.c" || (
+    echo Please give the path to the root of a cfunge source
+    echo distribution as the second argument to this script.
+    echo You gave $CFUNGE_PATH, but it does not appear to be a cfunge
     echo source distribution.
     exit 1
 ) || exit 1
 
-test -f IFFI.spec || (
-    echo Please run this script in the /etc directory of your
-    echo C-INTERCAL distribution.
+test -f "$ICKSRC_PATH/etc/IFFI.spec" || (
+    echo Please give the path to the root of the C-INTERCAL source
+    echo distribution as the first argument of this script.
+    echo You gave $ICKSRC_PATH, but it does not appear to be a C-INTERCAL
+    echo source distribution.
     exit 1
 ) || exit 1
 
 echo Compiling cfunge into a library suitable for use with C-INTERCAL:
 
-cd temp
+rm -rf temp || die "Failed to remove any old temp directory"
+mkdir -p temp || die "Failed to create temp directory"
+cd temp  || die "Failed to change directory to temp directory"
 
-CFLAGS="--std=c99 -DUSE32 -DDISABLE_GC -DFUNGE_EXTERNAL_LIBRARY -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -DFUNGE_OLD_HANDPRINT=0x43464649 '-DFUNGE_NEW_HANDPRINT=\"http://example.com/\"'"
+CFLAGS="-std=c99 -DUSE32 -DDISABLE_GC -DFUNGE_EXTERNAL_LIBRARY -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -DFUNGE_OLD_HANDPRINT=0x43464649 '-DFUNGE_NEW_HANDPRINT=\"http://example.com/\"'"
+# Allow optional -O2 or such:
+if [ "$CFUNGE_CFLAGS" ]; then
+	CFLAGS="$CFLAGS $CFUNGE_CFLAGS"
+fi
+# Please enable this when making changes. Requested by the cfunge author.
+#CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wpointer-arith -Wimplicit -Wnested-externs -Wcast-align -Wcast-qual -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wparentheses -Wshadow -Wundef -Wpacked -Wredundant-decls -Wfloat-equal -Wstrict-aliasing=2 -Wformat=2 -Wdisabled-optimization -Wmissing-noreturn -Wmissing-format-attribute -Wdeclaration-after-statement -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wwrite-strings"
 
 echo "   " Duplicating cfunge source tree so that it can be modified...
-cp -r $CFUNGEPATH/src $CFUNGEPATH/lib .
+cp -r $CFUNGE_PATH/src $CFUNGE_PATH/lib .
 
 # Comment these lines back in if patching is needed
 # echo "   " Patching cfunge source tree for use with C-INTERCAL...
 # patch -p0 < ../cfunge.patch
 
 echo "   " Adding the IFFI fingerprint...
-cp -r ../IFFI ../IFFI.spec src/fingerprints
+cp -r "$ICKSRC_PATH/etc/IFFI" "$ICKSRC_PATH/etc/IFFI.spec" src/fingerprints
 
 echo "   " Regenerating fingerprint lists...
-$CFUNGEPATH/tools/gen_fprint_list.sh > /dev/null
+$CFUNGE_PATH/tools/gen_fprint_list.sh > /dev/null || die "Failed to regen list."
 
 # Trust the filenames that are in the cfunge directory tree; if the user's
 # trying to trick themselves into running this on something that looks like
@@ -60,8 +88,8 @@ echo "   " Compiling source...
 find . -name '*.c' -printf "gcc $CFLAGS -c %p -o %f.o\n" | sh
 
 echo "   " Creating library...
-ar cr ../../prebuilt/libick_ecto_b98.a *.o
-ranlib ../../prebuilt/libick_ecto_b98.a
+ar cr ../libick_ecto_b98.a *.o
+ranlib ../libick_ecto_b98.a
 
 echo "   " Cleaning up...
 rm -rf *
