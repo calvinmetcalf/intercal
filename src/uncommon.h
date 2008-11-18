@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-/*@null@*/ /*@dependent@*/ extern FILE* ick_debfopen(/*@observer@*/ char*, /*@observer@*/ char*);
-/*@null@*/ /*@dependent@*/ extern FILE* ick_findandfopen(/*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*);
-/*@observer@*/ /*@null@*/ extern char* ick_findandtestopen(/*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*);
-/*@null@*/ /*@dependent@*/ extern FILE* ick_findandfreopen(/*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, /*@observer@*/ char*, FILE*);
+/*@null@*/ /*@dependent@*/ extern FILE* ick_debfopen(/*@observer@*/ const char*, /*@observer@*/ const char*);
+/*@null@*/ /*@dependent@*/ extern FILE* ick_findandfopen(/*@observer@*/ const char*, /*@observer@*/ const char*, /*@observer@*/ const char*, /*@observer@*/ const char*);
+/*@observer@*/ /*@null@*/ extern const char* ick_findandtestopen(/*@observer@*/ const char*, /*@observer@*/ const char*, /*@observer@*/ const char*, /*@observer@*/ const char*);
+/*@null@*/ /*@dependent@*/ extern FILE* ick_findandfreopen(/*@observer@*/ const char*, /*@observer@*/ const char*, /*@observer@*/ const char*, /*@observer@*/ const char*, FILE*);

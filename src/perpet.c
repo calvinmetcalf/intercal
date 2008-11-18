@@ -143,7 +143,7 @@ static int smallsizes[8] = {0, 0, 16, 10, 8, 6, 6, 5};
 static unsigned int maxsmalls[8] =
 {0, 0, 65535, 59048, 65535, 15624, 46655, 16806};
 
-/*@observer@*/ static char *compiler;
+/*@observer@*/ static const char *compiler;
 
 atom *oblist = NULL, *obdex;
 int obcount = 0;
@@ -193,7 +193,7 @@ static RETSIGTYPE abend(int signim)
   /*@-noeffect@*/ (void) signim; /*@=noeffect@*/
   ick_lose(IE778, iyylineno, (char *)NULL);
 }
-static void print_usage(char *prog, char *options)
+static void print_usage(const char *prog, const char *options)
 {
   fprintf(stderr,"Usage: %s [-%s] <file> [<file> ...]\n",prog,options);
   fprintf(stderr,"\t-b\t:reduce the probability of E774 to zero\n");
@@ -263,13 +263,15 @@ static void print_usage(char *prog, char *options)
   fprintf(stderr,"\t\tfor base 2 or .3i, etc., for base 3, etc.).\n");
 }
 
+#if __DJGPP__
 /* AIS: Determine whether an environment variable exists (this is used to
    find a temp directory) */
-int isenv(char* e)
+static int isenv(char* e)
 {
   char* x=getenv(e);
   return x != NULL && *x != '\0';
 }
+#endif
 
 /*@-redef@*/
 int main(int argc, char *argv[])
@@ -284,10 +286,10 @@ int main(int argc, char *argv[])
   atom	*op;
   int		c, i;
   /*@-shadow@*/ /* no it doesn't, cesspool isn't linked to perpet */
-  char	*includedir, *libdir, *ick_datadir;
+  const char	*includedir, *libdir, *ick_datadir;
   /*@=shadow@*/
   /* AIS: removed getenv(), added ick_datadir */
-  char        *cooptsh; /* AIS */
+  const char        *cooptsh; /* AIS */
   FILE	*ifp, *ofp;
   int		maxabstain, /* nextcount, AIS */ bugline;
   ick_bool        needsyslib, firstfile;
@@ -528,7 +530,7 @@ int main(int argc, char *argv[])
 	     along the same lines as CLC-INTERCAL's preloads. Search for
 	     it in the usual places, then make a copy in a temp directory
 	     and substitute that on the command line. */
-	  char* tempfn;
+	  const char* tempfn;
 	  FILE* fromcopy;
 	  FILE* tocopy;
 	  int c2;
@@ -1656,7 +1658,7 @@ int main(int argc, char *argv[])
     FILE* cioallec;
     char* buf2ptr;
     long remspace;
-    char* tempfn="ickectmp.c";
+    const char* tempfn="ickectmp.c";
     int needc99=0;
 #if __DJGPP__
     /* Look for a temp directory, as above. */

@@ -112,7 +112,7 @@ extern int ick_printflow; /* from arrgghh.c; a debug option */
 int weaving=0; /* Weave newly created threads? */
 
 /* Printflow debugging output */
-static void fluputs(char* s)
+static void fluputs(const char* s)
 {
   fprintf(stderr,"%s",s);
   (void) fflush(stderr);

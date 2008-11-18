@@ -26,8 +26,8 @@ LICENSE TERMS
 /* Options that might affect this */
 int ick_printfopens=0;
 
-/*@dependent@*/ /*@null@*/ FILE* ick_debfopen(/*@observer@*/ char* fname,
-					      /*@observer@*/ char* mode)
+/*@dependent@*/ /*@null@*/ FILE* ick_debfopen(/*@observer@*/ const char* fname,
+					      /*@observer@*/ const char* mode)
 {
   FILE* t;
   if(ick_printfopens) fprintf(stderr,"Trying to open '%s'...\n",fname);
@@ -43,13 +43,13 @@ int ick_printfopens=0;
    overflows, instead truncating filenames (and if that manages to find them,
    I'll be incredibly surprised). It also tries argv[0]/../lib and
    argv[0]/../include (where they are when running without installing). */
-/*@dependent@*/ /*@null@*/ FILE* ick_findandfopen(/*@observer@*/ char* file,
-						  /*@observer@*/ char* guessdir,
-						  /*@observer@*/ char* mode,
-						  /*@observer@*/ char* argv0)
+/*@dependent@*/ /*@null@*/ FILE* ick_findandfopen(/*@observer@*/ const char* file,
+						  /*@observer@*/ const char* guessdir,
+						  /*@observer@*/ const char* mode,
+						  /*@observer@*/ const char* argv0)
 {
   static char buf2[BUFSIZ];
-  /*@observer@*/ static char *fileiter;
+  /*@observer@*/ static const char *fileiter;
   size_t i = 0, j;
   FILE* ret;
   while(*guessdir != '\0' && i<BUFSIZ-2) buf2[i++] = *guessdir++;
@@ -96,13 +96,13 @@ int ick_printfopens=0;
 }
 
 /* AIS: The same, looking for an executable */
-/*@observer@*/ /*@null@*/ char* ick_findandtestopen(/*@observer@*/ char* file,
-						    /*@observer@*/ char* guessdir,
-						    /*@observer@*/ char* mode,
-						    /*@observer@*/ char* argv0)
+/*@observer@*/ /*@null@*/ const char* ick_findandtestopen(/*@observer@*/ const char* file,
+						          /*@observer@*/ const char* guessdir,
+						          /*@observer@*/ const char* mode,
+						          /*@observer@*/ const char* argv0)
 {
   static char buf2[BUFSIZ];
-  /*@observer@*/ static char *fileiter;
+  /*@observer@*/ static const char *fileiter;
   size_t i = 0, j;
   FILE* ret;
   while(*guessdir != '\0' && i<BUFSIZ-2) buf2[i++] = *guessdir++;
@@ -149,13 +149,13 @@ int ick_printfopens=0;
 }
 
 /* AIS: The same thing, but with freopen */
-/*@dependent@*/ /*@null@*/ FILE* ick_findandfreopen(/*@observer@*/ char* file,
-						    /*@observer@*/ char* guessdir,
-						    /*@observer@*/ char* mode,
-						    /*@observer@*/ char* argv0,
+/*@dependent@*/ /*@null@*/ FILE* ick_findandfreopen(/*@observer@*/ const char* file,
+						    /*@observer@*/ const char* guessdir,
+						    /*@observer@*/ const char* mode,
+						    /*@observer@*/ const char* argv0,
 						    FILE* over)
 {
-  char* s=ick_findandtestopen(file,guessdir,mode,argv0);
+  const char* s=ick_findandtestopen(file,guessdir,mode,argv0);
   if(s != NULL)
     return freopen(s,mode,over);
   else

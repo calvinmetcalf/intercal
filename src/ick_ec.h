@@ -293,7 +293,7 @@ void ick_c_i_setvalue(int, uint32_t);
 #define ICK_IE778 "778 UNEXPLAINED COMPILER BUG\n\
 	ON THE WAY TO %d\n"
 
-extern void /*@noreturn@*/ ick_lose(char *m, int n, /*@null@*/ char *s)
+extern void /*@noreturn@*/ ick_lose(const char *m, int n, /*@null@*/ const char *s)
 #ifdef __GNUC__
   __attribute__ ((noreturn))
 #endif

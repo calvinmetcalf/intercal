@@ -32,7 +32,7 @@ int ick_coreonerr = 0; /* AIS */
 int ick_checkforbugs; /* AIS */
 
 /*@-formatconst@*/
-void ick_lose(char *m, int n, char *s)
+void ick_lose(const char *m, int n, const char *s)
 {
     (void) fflush(stdout); /* AIS: To stop stdout getting muddled with stderr*/
     (void) fprintf(stderr,
@@ -52,7 +52,7 @@ void ick_lose(char *m, int n, char *s)
 }
 
 /* AIS: This function reports potential bugs. It's paraphrased from ick_lose. */
-void ick_lwarn(char *m, int n, char *s)
+void ick_lwarn(const char *m, int n, const char *s)
 {
   if(!ick_checkforbugs) return; /* Don't report a potential bug without -l */
   (void) fflush(stdout);

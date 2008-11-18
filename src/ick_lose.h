@@ -242,12 +242,12 @@
 
 extern int ick_lineno;
 
-extern void /*@noreturn@*/ ick_lose(char *m, int n, /*@null@*/ char *s)
+extern void /*@noreturn@*/ ick_lose(const char *m, int n, /*@null@*/ const char *s)
 #ifdef __GNUC__
   __attribute__ ((noreturn))
 #endif
 ;
 
-extern void ick_lwarn(char *m, int n, /*@null@*/ char *s);
+extern void ick_lwarn(const char *m, int n, /*@null@*/ const char *s);
 
 /* ick_lose.h ends here */

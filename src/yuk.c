@@ -198,7 +198,7 @@ void yukline(int aboff,int emitlineno)
   yptimer temptick;
   char* text=textlines[lineofaboff[aboff]];
   char copyloc[BUFSIZ+9];
-  char* tempcharp;
+  const char* tempcharp;
   if(!yukopts) return;
   if(globalargc!=3)
     ick_lose(IE778,emitlineno,(char*)NULL);
