@@ -67,7 +67,7 @@ extern ick_overop* ick_oo_twospots;
 				       void (*os1)(ick_type32, void(*)()),
 				       void (*os2)(ick_type32, void(*)()),
 				       void (*os3)(ick_type32, void(*)()),
-			/*@observer@*/ char* errstr)
+			/*@observer@*/ const char* errstr)
 {
   int st;
   uint32_t rv;

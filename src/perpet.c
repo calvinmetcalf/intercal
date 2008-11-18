@@ -138,9 +138,9 @@ unsigned int ick_Max_large;
 int ick_lineno;	/* after yyparse, this is the total number of statements */
 
 /* currently supported numeric bases, not exported */
-static int maxbase = 7;
-static int smallsizes[8] = {0, 0, 16, 10, 8, 6, 6, 5};
-static unsigned int maxsmalls[8] =
+static const int maxbase = 7;
+static const int smallsizes[8] = {0, 0, 16, 10, 8, 6, 6, 5};
+static const unsigned int maxsmalls[8] =
 {0, 0, 65535, 59048, 65535, 15624, 46655, 16806};
 
 /*@observer@*/ static const char *compiler;

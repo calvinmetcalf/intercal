@@ -243,7 +243,7 @@ void ick_runstartups(void);
 				       void(*)(ick_type32, void(*)()),
 				       void(*)(ick_type32, void(*)()),
 				       void(*)(ick_type32, void(*)()),
-				       char*);
+			/*@observer@*/ const char*);
 
 void ick_allecfuncs(void); /* in generated program */
 
