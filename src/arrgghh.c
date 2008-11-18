@@ -44,7 +44,7 @@ ick_parseargs(int argc, char **argv)
 {
     register int i, j;
     static int helpflag = -1;
-    static char *flags[] = {
+    static const char *flags[] = {
 	"help",
 	"wimpmode",
 	"traditional",
@@ -60,7 +60,7 @@ ick_parseargs(int argc, char **argv)
 	&ick_printflow, /* AIS */
 	&ick_mystery, /* AIS */
       };
-    static int nflags = (int)(sizeof(flags)/sizeof(flags[0]));
+    static const int nflags = (int)(sizeof(flags)/sizeof(flags[0]));
 
     for(i = 1;i < argc;i++) {
 	if(argv[i][0] != '+' && argv[i][0] != '-') {

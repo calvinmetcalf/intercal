@@ -270,7 +270,7 @@ void ick_settwospot(unsigned short extername, uint32_t value)
 
 /* Register a CREATE target. This is just a wrapper for
    ick_registercreation that gets around scoping problems. */
-void ick_create(char* sig, unsigned long target)
+void ick_create(const char* sig, unsigned long target)
 {
   ick_registercreation(sig, target);
 }

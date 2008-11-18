@@ -459,7 +459,7 @@ void prexpr(node *np, FILE *fp, int freenode);
  * If the order of statement-token defines in parser.y ever changes,
  * this will need to be reordered.
  */
-char *enablersm1[MAXTYPES+1] =
+const char *enablersm1[MAXTYPES+1] =
 {
     "UNKNOWN", /* AIS: so comments can be ABSTAINED/REINSTATED */
     "GETS",
@@ -495,64 +495,64 @@ char *enablersm1[MAXTYPES+1] =
     "COMPUCREATE", /* AIS */
     "FROM", /* AIS: ABSTAIN expr FROM LABEL */
 };
-char** enablers = enablersm1+1;
+const char** enablers = enablersm1+1;
 
-assoc vartypes[] =
+const assoc vartypes[] =
 {
     { ick_ONESPOT,	"ick_ONESPOT" },
     { ick_TWOSPOT,	"ick_TWOSPOT" },
     { ick_TAIL,	"ick_TAIL" },
     { ick_HYBRID,	"ick_HYBRID" },
-    { 0,	(char *)NULL }
+    { 0,	(const char *)NULL }
 };
 
-static assoc forgetbits[] =
+static const assoc forgetbits[] =
 {
     { ick_ONESPOT,	"ick_oneforget" },
     { ick_TWOSPOT,	"ick_twoforget" },
     { ick_TAIL,	"ick_tailforget" },
     { ick_HYBRID,	"ick_hyforget" },
-    { 0,	(char *)NULL }
+    { 0,	(const char *)NULL }
 };
 
 /* AIS: Destatic. This is now needed in perpet.c. */
-assoc varstores[] =
+const assoc varstores[] =
 {
     { ick_ONESPOT,	"ick_onespots" },
     { ick_TWOSPOT,	"ick_twospots" },
     { ick_TAIL,	"ick_tails" },
     { ick_HYBRID,	"ick_hybrids" },
-    { 0,	(char *)NULL }
+    { 0,	(const char *)NULL }
 };
 
 /* AIS: A demangled version */
-static assoc varstoresdem[] =
+static const assoc varstoresdem[] =
 {
     { ick_ONESPOT,	"onespots" },
     { ick_TWOSPOT,	"twospots" },
     { ick_TAIL,	"tails" },
     { ick_HYBRID,	"hybrids" },
-    { 0,	(char *)NULL }
+    { 0,	(const char *)NULL }
 };
 
-static assoc typedefs[] =
+static const assoc typedefs[] =
 {
     { ick_ONESPOT,	"ick_type16" },
     { ick_TWOSPOT,	"ick_type32" },
     { ick_TAIL,	"ick_type16" },
     { ick_HYBRID,	"ick_type32" },
-    { 0,	(char *)NULL }
+    { 0,	(const char *)NULL }
 };
 
-/*@observer@*/ char *nameof(int value, assoc table[])
+/*@observer@*/ const char *nameof(int value, const assoc table[])
 /* return string corresponding to value in table */
 {
-    assoc	*ap;
+    const assoc	*ap;
 
     for (ap = table; ap->name; ap++)
 	if (ap->value == value)
 	    return(ap->name);
-    return((char *)NULL);
+    return((const char *)NULL);
 }
 
 /* AIS: Code for printing explanations (mixed C/INTERCAL code that lets
@@ -2719,7 +2719,7 @@ void emit(tuple *tn, FILE *fp)
 void emitslatproto(FILE* fp)
 {
   node* np=firstslat;
-  char* t="ick_type32";
+  const char* t="ick_type32";
   while(np)
   {
     fprintf(fp,"%s ick_og%lx(%s);\nvoid ick_os%lx(%s, void(*)());\n",
@@ -2733,7 +2733,7 @@ void emitslat(FILE* fp)
 {
   node* np=firstslat;
   node* temp, *temp2;
-  char* t="ick_type32";
+  const char* t="ick_type32";
   while(np)
   {
     fprintf(fp,

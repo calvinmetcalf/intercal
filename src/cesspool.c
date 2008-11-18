@@ -167,7 +167,7 @@ unsigned int ick_pin(void)
 	for(n=0,cp = strtok(buf, " ");cp;cp = strtok((char *)NULL, " "),n++)
 	{
 	    int	digit = -1;
-	    numeral	*np;
+	    const numeral	*np;
 
 	    for (np = ick_numerals; np < ick_numerals + sizeof(ick_numerals)/sizeof(numeral); np++)
 		if (strcmp(np->name, cp) == 0)
@@ -240,7 +240,7 @@ static void butcher(unsigned long val, /*@out@*/ char *result)
     char res[MAXROMANS], ovb[MAXROMANS];
 
     /* We need FOUR columns because of the odd way that M and I interact. */
-    static char br_equiv[MAXDIGITS][4] =
+    static const char br_equiv[MAXDIGITS][4] =
     {
 	{'I', 'I', 'V', 'X'}, {'X', 'X', 'L', 'C'},
 	{'C', 'C', 'D', 'M'}, {'M', 'I', 'V', 'X'},
@@ -249,7 +249,7 @@ static void butcher(unsigned long val, /*@out@*/ char *result)
 	{'c', 'c', 'd', 'm'}, {'m', 'i', 'v', 'x'},
     };
 
-    static char br_overbar[MAXDIGITS][4] =
+    static const char br_overbar[MAXDIGITS][4] =
     {
 	{' ', ' ', ' ', ' '},
 	{' ', ' ', ' ', ' '},
@@ -865,7 +865,7 @@ int ick_multicome0(int errlineno, jmp_buf pc)
 
 struct ick_jictype
 {
-  /*@observer@*/ char* sig; /* a shallow copy of a constant string */
+  /*@observer@*/ const char* sig; /* a shallow copy of a constant string */
   unsigned long target;
   /*@null@*/ /*@only@*/ struct ick_jictype* next;
 };
@@ -874,7 +874,7 @@ struct ick_jictype
 
 /* Return a jic entry that matches the requested signature exactly,
    creating one if there isn't one yet. */
-static struct ick_jictype* jicextract(/*@observer@*/ char* sig)
+static struct ick_jictype* jicextract(/*@observer@*/ const char* sig)
 {
   struct ick_jictype* jicptr = jiclist;
   while(jicptr)
@@ -899,12 +899,12 @@ static struct ick_jictype* jicextract(/*@observer@*/ char* sig)
   return jicptr;
 }
 
-void ick_registercreation(char* sig, unsigned long target)
+void ick_registercreation(const char* sig, unsigned long target)
 {
   jicextract(sig)->target=target;
 }
 
-unsigned long ick_jicmatch(char* sig)
+unsigned long ick_jicmatch(const char* sig)
 {
   return jicextract(sig)->target;
 }

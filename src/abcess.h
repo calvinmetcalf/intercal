@@ -138,8 +138,8 @@ struct ick_tag_createdata
   ick_overop accessors;/* how to get and set this lvalue, or {0,0} */
   unsigned long value; /* current value of the var or expression */
 };
-extern void ick_registercreation(char*,unsigned long);
-extern unsigned long ick_jicmatch(char*);
+extern void ick_registercreation(const char*,unsigned long);
+extern unsigned long ick_jicmatch(const char*);
 
 /* AIS: Multithreading types and defines */
 #if MULTITHREAD != 0

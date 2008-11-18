@@ -38,12 +38,12 @@ LICENSE TERMS
 
 typedef struct
 {
-    char *name;
+    const char *name;
     int	value;
 }
 numeral;
 
-numeral ick_numerals[] =
+const numeral ick_numerals[] =
 {
 /* English */
     { "OH",		0 },

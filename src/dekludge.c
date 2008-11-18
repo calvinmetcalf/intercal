@@ -72,7 +72,7 @@ extern void prexpr(node *np, FILE* fp, int freenode); /* AIS */
 
 /* This function by AIS. Compares expressions. In C++, I'd call this
    node::operator== . */
-ick_bool nodessame(node* n1, node* n2)
+ick_bool nodessame(const node* n1, const node* n2)
 {
   if(!n1) return !n2;
   if(!n2) return 0;
@@ -101,7 +101,7 @@ ick_bool nodessame(node* n1, node* n2)
 }
 
 /* AIS: Checks if an abstention could affect a tuple. */
-int abstainmatch(int npconstant, int tptype)
+static int abstainmatch(int npconstant, int tptype)
 {
   if(npconstant == tptype) return 1;
   if(npconstant == ABSTAIN)
@@ -340,8 +340,8 @@ void optimizef(void)
  **************************************************************************/
 
 extern int optimize_pass1(node *np); /* Read from idiotism.c */
-static void checkforintercaloperators(node *np);
-static void checkW534(node *np);
+static void checkforintercaloperators(const node *np);
+static void checkW534(const node *np);
 
 node* optdebugnode;
 
@@ -397,7 +397,7 @@ void nodefree(/*@keep@*/ /*@null@*/ node *np)
 }
 
 /* By AIS. This checks W534. */
-static void checkW534(node *np)
+static void checkW534(const node *np)
 {
   if(!np) return;
   if(np->opcode == AND || np->opcode == OR || np->opcode == XOR)
@@ -415,7 +415,7 @@ static void checkW534(node *np)
 }
 
 /* By AIS. This checks W018. */
-static void checkforintercaloperators(node *np)
+static void checkforintercaloperators(const node *np)
 {
   if(!np) return;
   switch(np->opcode)

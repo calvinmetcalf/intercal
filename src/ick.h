@@ -114,7 +114,7 @@ atom;
 typedef struct
 {
     int	value;
-    char *name;
+    const char *name;
 }
 assoc;
 
@@ -128,9 +128,9 @@ extern int tuplecount;
 
 /*@dependent@*/ extern tuple *optuple; /* AIS: The tuple currently being optimized */
 
-extern char **enablers;
-extern char *enablersm1[MAXTYPES+1];
-extern assoc vartypes[];
+extern const char **enablers;
+extern const char *enablersm1[MAXTYPES+1];
+extern const assoc vartypes[];
 
 /* the lexical analyzer keeps copies of the source logical lines */
 /*@only@*/ extern char **textlines;

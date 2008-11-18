@@ -155,7 +155,7 @@ int tuplecount = 0;
 
 tuple *optuple = NULL; /* AIS: Tuple being optimized */
 
-extern assoc varstores[]; /* AIS: Need to know this for PIC compilation */
+extern const assoc varstores[]; /* AIS: Need to know this for PIC compilation */
 
 #ifndef HAVE_UNISTD_H
 /* AIS: We don't have unistd.h, so we can't use getopt. Write our own version

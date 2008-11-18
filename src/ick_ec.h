@@ -269,7 +269,7 @@ void ick_setonespot(unsigned short, uint16_t);
 uint32_t ick_gettwospot(unsigned short);
 void ick_settwospot(unsigned short, uint32_t);
 
-void ick_create(char*, unsigned long);
+void ick_create(const char*, unsigned long);
 
 /* For accessing the arguments to an ick_created command */
 int ick_c_i_width(int);
