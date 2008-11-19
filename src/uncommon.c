@@ -21,6 +21,8 @@ LICENSE TERMS
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
+#include <ick_lose.h>
 #include "uncommon.h"
 
 /* Options that might affect this */
@@ -160,4 +162,25 @@ int ick_printfopens=0;
     return freopen(s,mode,over);
   else
     return NULL;
+}
+
+/**
+ * Invoke snprintf(), if supported. Otherwise invoke sprintf() and abort
+ * if we did overflow.
+ */
+int ick_snprintf_or_die(char *str, size_t size, const char *format, ...)
+{
+  va_list ap;
+  int retval;
+  va_start(ap, format);
+#ifdef HAVE_SNPRINTF
+  retval = vsnprintf(str, size, format, ap);
+#else
+  retval = vsprintf(str, format, ap);
+  /* TODO: Replace with some nice ick_lose(). */
+  if (retval >= size)
+    abort();
+#endif
+  va_end(ap);
+  return retval;
 }
