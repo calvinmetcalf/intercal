@@ -974,9 +974,9 @@ int main(int argc, char *argv[])
 		   {
 		     if(!tp->abstainable) continue;
 		     if(tp->exechance > 0)
-		       (void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=0;\n",tp-tuples);
+		       (void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=0;\n",(int)(tp-tuples));
 		     else
-		       (void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=1;\n",tp-tuples);
+		       (void) fprintf(ofp, "ICK_INT1 ICKABSTAINED(%d)=1;\n",(int)(tp-tuples));
 		   }
 		 }
 		 if(!pickcompile) (void) fprintf(ofp, "}");
