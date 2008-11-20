@@ -168,12 +168,12 @@ int ick_printfopens=0;
  * Invoke snprintf(), if supported. Otherwise invoke sprintf() and abort
  * if we did overflow.
  */
-int ick_snprintf_or_die(char *str, size_t size, const char *format, ...)
+int ick_snprintf_or_die(/*@out@*/ char *str, size_t size, /*@observer@*/ const char *format, ...)
 {
   va_list ap;
   int retval;
   va_start(ap, format);
-#ifdef HAVE_SNPRINTF
+#ifdef HAVE_VSNPRINTF
   retval = vsnprintf(str, size, format, ap);
 #else
   retval = vsprintf(str, format, ap);
