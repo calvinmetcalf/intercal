@@ -536,11 +536,7 @@ int main(int argc, char *argv[])
 	  int c2;
 	fixexpansionlibrary:
 	  tempfn="%s.c";
-#ifndef HAVE_SNPRINTF
-	  (void) sprintf(buf2, "%s.c", argv[optind]);
-#else
-	  (void) snprintf(buf2, sizeof buf2, "%s.c", argv[optind]);
-#endif
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.c", argv[optind]);
 	  fromcopy = ick_findandfopen(buf2,ick_datadir,"rb",argv[0]);
 	  if(!fromcopy) /* same error as for syslib */
 	    ick_lose(IE127, 1, (const char*) NULL);
@@ -555,11 +551,7 @@ int main(int argc, char *argv[])
 	  tempfn="/tmp/%s.c"; /* always valid on POSIX */
 #endif
 	  /*@-formatconst@*/ /* all possibilities are fine */
-#ifndef HAVE_SNPRINTF
-	  (void) sprintf(buf2, tempfn, argv[optind]);
-#else
-	  (void) snprintf(buf2, sizeof buf2, tempfn, argv[optind]);
-#endif
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2, tempfn, argv[optind]);
 	  /*@=formatconst@*/
 	  if((tocopy = fopen(buf2,"wb")) == NULL)
 	    ick_lose(IE888, 1, (const char*) NULL);
@@ -603,19 +595,11 @@ int main(int argc, char *argv[])
 	   it instead adds a space and the filename to libbuf. */
 	if(argv[optind][0]=='l'&&argv[optind][1]=='i'&&
 	   argv[optind][2]=='b')
-#ifndef HAVE_SNPRINTF
-	  sprintf(libbuf+strlen(libbuf)," -l%s",argv[optind]+3);
-#else
-	  snprintf(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
+	  ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
 		   " -l%s",argv[optind]+3);
-#endif
 	else
-#ifndef HAVE_SNPRINTF
-	  sprintf(libbuf+strlen(libbuf)," %s.a",argv[optind]);
-#else
-	  snprintf(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
+	  ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
 		   " %s.a",argv[optind]);
-#endif
 	*argv[optind]=0;
 	continue;
       }
@@ -649,11 +633,7 @@ int main(int argc, char *argv[])
 	/* Compile the .b98 file into a .cio. It's open on stdin right now,
 	   so we just need to handle the output side of things. */
 
-#ifndef HAVE_SPRINTF
-	sprintf(buf2, "%s.cio", argv[optind]);
-#else
-	snprintf(buf2, sizeof buf2, "%s.cio", argv[optind]);
-#endif
+	ick_snprintf_or_die(buf2, sizeof buf2, "%s.cio", argv[optind]);
 
 	if(!((of = ick_debfopen(buf2,"w"))))
 	  ick_lose(IE888,-1,(const char *)NULL);
@@ -690,14 +670,7 @@ int main(int argc, char *argv[])
 	fclose(of);
 
 	/* Put the libraries and .cio file in the command line. */
-#ifndef HAVE_SNPRINTF
-	sprintf(libbuf+strlen(libbuf),
-#else
-		snprintf(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-#endif
-#if 0
-			 0) // to unconfuse Emacs
-#endif
+	ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
 		" %s.cio -lick_ecto_b98 -lm -lncurses", argv[optind]);
 	/* Sort out the ecto_b98 expansion library. */
 	argv[optind] = "ecto_b98";
@@ -813,17 +786,9 @@ int main(int argc, char *argv[])
       if (needsyslib)
       { /* AIS: modified to use ick_findandfreopen */
 	if (ick_Base == 2)    /* see code for opening the skeleton */
-#ifndef HAVE_SNPRINTF
-	  (void) sprintf(buf2, "%s.i", SYSLIB);
-#else
-	(void) snprintf(buf2, sizeof buf2, "%s.i", SYSLIB);
-#endif
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.i", SYSLIB);
 	else
-#ifndef HAVE_SNPRINTF
-	  (void) sprintf(buf2, "%s.%di", SYSLIB, ick_Base);
-#else
-	(void) snprintf(buf2, sizeof buf2, "%s.%di", SYSLIB, ick_Base);
-#endif
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.%di", SYSLIB, ick_Base);
 	if (ick_findandfreopen(buf2, ick_datadir, "r", argv[0], stdin) == NULL)
 	  ick_lose(IE127, 1, (const char*) NULL);
 #ifdef USE_YYRESTART
@@ -903,15 +868,9 @@ int main(int argc, char *argv[])
       /* AIS: Before changing argv[0], locate coopt.sh. */
       cooptsh = ick_findandtestopen("coopt.sh", ick_datadir, "rb", argv[0]);
       /* AIS: and calculate yukcmdstr. */
-#ifndef HAVE_SNPRINTF
-      (void) sprintf(yukcmdstr,"%s%s" EXEEXT " %s %s",
+      (void) ick_snprintf_or_die(yukcmdstr, sizeof yukcmdstr, "%s%s" EXEEXT " %s %s",
 		     strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
 		     "":"./",argv[optind],ick_datadir,argv[0]);
-#else
-      (void) snprintf(yukcmdstr, sizeof yukcmdstr, "%s%s" EXEEXT " %s %s",
-		     strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
-		     "":"./",argv[optind],ick_datadir,argv[0]);
-#endif
 
       /* AIS: Remove the filename from argv[0], leaving only a directory.
 	 If this would leave it blank, change argv[0] to '.'.
@@ -924,14 +883,7 @@ int main(int argc, char *argv[])
       if(strchr(path,'/')) *(strrchr(path,'/')) = '\0';
       else strcpy(path,".");
 
-#ifndef HAVE_SNPRINTF
-      (void) sprintf(buf2,
-#if 0
-		     0); /* unconfuse Emacs' autoindenter */
-#endif
-#else
-      (void) snprintf(buf2, sizeof buf2,
-#endif
+      (void) ick_snprintf_or_die(buf2, sizeof buf2,
 		      "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s"
 #ifdef __DJGPP__
 		      EXEEXT " -lick%s%s","",
@@ -1609,11 +1561,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_UNISTD_H
 	  dup2(oldstdin,0); /* restore stdin */
 #endif
-#ifndef HAVE_SNPRINTF
-	  sprintf(buf2,"%s" EXEEXT,argv[optind]);
-#else
-	  snprintf(buf2,"%s" EXEEXT,argv[optind]);
-#endif
+	  ick_snprintf_or_die(buf2, sizeof buf2, "%s" EXEEXT,argv[optind]);
 	  ICK_SYSTEM(yukcmdstr);
 	  remove(buf);
 	  remove(buf2);
@@ -1636,12 +1584,8 @@ int main(int argc, char *argv[])
 	   WRITE IN. Double-oh-sevens screw this up, too. */
 	if(cooptsh)
 	{
-#ifndef HAVE_SNPRINTF
-	  (void) sprintf(buf2,"sh %s %s", cooptsh, argv[optind]);
-#else
-	  (void) snprintf(buf2, sizeof buf2,
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2,
 			  "sh %s %s", cooptsh, argv[optind]);
-#endif
 	  ICK_SYSTEM(buf2); /* replaces the output executable if
 			       neccesary */
 	}
@@ -1681,14 +1625,7 @@ int main(int argc, char *argv[])
        executable. */
     for(optind=oldoptind; optind < argc; optind++)
     {
-#ifndef HAVE_SNPRINTF
-      (void) sprintf(buf2,
-#if 0
-	); /* for Emacs' autoindenter */
-#endif
-#else
-      (void) snprintf(buf2, sizeof buf2,
-#endif
+      (void) ick_snprintf_or_die(buf2, sizeof buf2,
 		      "%s --std=c%d -E -DICK_HAVE_STDINT_H=%d "
 		      "-I%s -I%s -I%s/../include "
 		      "-x c %s.c%c%c > %s.cio",
@@ -1797,11 +1734,7 @@ int main(int argc, char *argv[])
        main function in each .cio, but the .cios can be linked in any order,
        with the right main function foremost each time.)
     */
-#ifdef HAVE_SNPRINTF
-    (void) snprintf(buf2, sizeof buf2,
-#else
-		    (void) sprintf(buf2,
-#endif
+    (void) ick_snprintf_or_die(buf2, sizeof buf2,
 "%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT "%s "
 #ifndef __DJGPP__
 "-Wl,-z,muldefs "
@@ -1809,9 +1742,6 @@ int main(int argc, char *argv[])
 "-DICK_HAVE_STDINT_H=%d -x c --std=c%d %s", compiler, libdir,
 path, path, argv[oldoptind], cdebug?" -g":"", ICK_HAVE_STDINT_H+1==2?1:0,
 needc99?99:89,tempfn);
-#if 0
-      ); /* for Emacs' autoindenter */
-#endif
     remspace = (long)(sizeof buf2 - strlen(buf2) - 1);
     for(optind=oldoptind; optind < argc; optind++)
     {
