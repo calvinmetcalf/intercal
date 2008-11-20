@@ -60,6 +60,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `vsnprintf' function. */
+#undef HAVE_VSNPRINTF
+
 /* Define if yyrestart() is necessary to yyparse a new file. */
 #undef NEED_YYRESTART
 
