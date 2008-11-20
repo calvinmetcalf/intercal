@@ -596,10 +596,10 @@ int main(int argc, char *argv[])
 	if(argv[optind][0]=='l'&&argv[optind][1]=='i'&&
 	   argv[optind][2]=='b')
 	  ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-		   " -l%s",argv[optind]+3);
+			      " -l%s",argv[optind]+3);
 	else
 	  ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-		   " %s.a",argv[optind]);
+			      " %s.a",argv[optind]);
 	*argv[optind]=0;
 	continue;
       }
@@ -671,7 +671,7 @@ int main(int argc, char *argv[])
 
 	/* Put the libraries and .cio file in the command line. */
 	ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-		" %s.cio -lick_ecto_b98 -lm -lncurses", argv[optind]);
+			    " %s.cio -lick_ecto_b98 -lm -lncurses", argv[optind]);
 	/* Sort out the ecto_b98 expansion library. */
 	argv[optind] = "ecto_b98";
 	goto fixexpansionlibrary;
@@ -869,8 +869,8 @@ int main(int argc, char *argv[])
       cooptsh = ick_findandtestopen("coopt.sh", ick_datadir, "rb", argv[0]);
       /* AIS: and calculate yukcmdstr. */
       (void) ick_snprintf_or_die(yukcmdstr, sizeof yukcmdstr, "%s%s" EXEEXT " %s %s",
-		     strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
-		     "":"./",argv[optind],ick_datadir,argv[0]);
+				 strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
+				 "":"./",argv[optind],ick_datadir,argv[0]);
 
       /* AIS: Remove the filename from argv[0], leaving only a directory.
 	 If this would leave it blank, change argv[0] to '.'.
@@ -884,21 +884,21 @@ int main(int argc, char *argv[])
       else strcpy(path,".");
 
       (void) ick_snprintf_or_die(buf2, sizeof buf2,
-		      "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s"
+				 "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s"
 #ifdef __DJGPP__
-		      EXEEXT " -lick%s%s","",
+				 EXEEXT " -lick%s%s","",
 #else
-		      EXEEXT " -lick%s%s",compiler,
+				 EXEEXT " -lick%s%s",compiler,
 #endif
 #ifdef HAVE_CLOCK_GETTIME /* implies -lrt is available */
-		      buf, yukdebug||yukprofile?" -lyuk -lrt ":" ",
+				 buf, yukdebug||yukprofile?" -lyuk -lrt ":" ",
 #else
-		      buf, yukdebug||yukprofile?" -lyuk ":" ",
+				 buf, yukdebug||yukprofile?" -lyuk ":" ",
 #endif
-		      includedir, path, path, libdir, path, path,
-		      cdebug?'0':coopt?'3':'2', /* AIS: If coopting, optimize as much as possible
-                                                    JH: [d]on't optimise when compiling with debugger support */
-		      argv[optind], multithread?"mt":"", cdebug?" -g":"");
+				 includedir, path, path, libdir, path, path,
+				 cdebug?'0':coopt?'3':'2', /* AIS: If coopting, optimize as much as possible
+				                               JH: [d]on't optimise when compiling with debugger support */
+				 argv[optind], multithread?"mt":"", cdebug?" -g":"");
       /* AIS: Possibly link in the debugger yuk and/or libickmt.a here. */
       /* AIS: Added -g support. */
       /* AIS: Added argv[0] (now path) to the -I, -L settings. */
@@ -1585,7 +1585,7 @@ int main(int argc, char *argv[])
 	if(cooptsh)
 	{
 	  (void) ick_snprintf_or_die(buf2, sizeof buf2,
-			  "sh %s %s", cooptsh, argv[optind]);
+				     "sh %s %s", cooptsh, argv[optind]);
 	  ICK_SYSTEM(buf2); /* replaces the output executable if
 			       neccesary */
 	}
@@ -1626,16 +1626,16 @@ int main(int argc, char *argv[])
     for(optind=oldoptind; optind < argc; optind++)
     {
       (void) ick_snprintf_or_die(buf2, sizeof buf2,
-		      "%s --std=c%d -E -DICK_HAVE_STDINT_H=%d "
-		      "-I%s -I%s -I%s/../include "
-		      "-x c %s.c%c%c > %s.cio",
-		      compiler, argv[optind][strlen(argv[optind])+2]=='9'?99:89,
-		      ICK_HAVE_STDINT_H+1-1,
-		      includedir, path, path, argv[optind],
-		      argv[optind][strlen(argv[optind])+2]=='9'?
-		      (needc99=1),'9':' ',
-		      argv[optind][strlen(argv[optind])+2]=='9'?'9':' ',
-		      argv[optind]);
+				 "%s --std=c%d -E -DICK_HAVE_STDINT_H=%d "
+				 "-I%s -I%s -I%s/../include "
+				 "-x c %s.c%c%c > %s.cio",
+				 compiler, argv[optind][strlen(argv[optind])+2]=='9'?99:89,
+				 ICK_HAVE_STDINT_H+1-1,
+				 includedir, path, path, argv[optind],
+				 argv[optind][strlen(argv[optind])+2]=='9'?
+				 (needc99=1),'9':' ',
+				 argv[optind][strlen(argv[optind])+2]=='9'?'9':' ',
+				 argv[optind]);
       if(*(argv[optind]) && /* there is some file to compile */
 	 (argv[optind][strlen(argv[optind])+2]=='\0' /* a .c or .i file */
 	  ||argv[optind][strlen(argv[optind])+3]!='o')) /* not a .cio file */
