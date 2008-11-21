@@ -46,7 +46,7 @@ LICENSE TERMS
 
 /* Define strdup if it isn't available */
 #ifndef HAVE_STRDUP
-char* strdup(char* s)
+char* strdup(const char* s)
 {
   char* t=malloc(strlen(s)+1);
   if(t) strcpy(t,s);
