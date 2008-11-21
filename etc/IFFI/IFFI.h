@@ -34,6 +34,17 @@
 #error The C-INTERCAL/cfunge external calls interface cannot be used concurrently
 #endif
 
+// We need at least GCC 4.1 for this trick.
+#if defined(__GNUC__) && (__GNUC__ >= 4) && !defined(__INTEL_COMPILER)
+#  if (__GNUC_MINOR__ >= 1) || (__GNUC__ > 4)
+#    define PUBLIC __attribute__((visibility("protected"),externally_visible)) extern
+#  else
+#    define PUBLIC extern
+#  endif
+#else
+#  define PUBLIC extern
+#endif
+
 struct ick_ipposdeltatype {
 	long long ix, iy, dx, dy;
 };
@@ -45,10 +56,10 @@ bool finger_IFFI_load(instructionPointer * ip);
 // We export these for use by ecto_b98
 // Please remember to update the matching extern(s) over there
 // if you change here.
-void ick_save_ip_pos_delta(struct ick_ipposdeltatype* ippd);
-void ick_restore_ip_pos_delta(const struct ick_ipposdeltatype* ippd);
-void ick_interpreter_run(void);
-void ick_iffi_interpreter_one_iteration(void);
+PUBLIC void ick_save_ip_pos_delta(struct ick_ipposdeltatype* ippd);
+PUBLIC void ick_restore_ip_pos_delta(const struct ick_ipposdeltatype* ippd);
+PUBLIC void ick_interpreter_run(void);
+PUBLIC void ick_iffi_interpreter_one_iteration(void);
 
 // Implemented in ecto_b98
 extern void ick_interpreter_main_loop(void);
@@ -71,7 +82,7 @@ extern const unsigned char * ick_iffi_befungeString;
 extern int ick_printflow;
 
 // Accessors and mutators for INTERCAL storage
-extern void ick_create(char*, unsigned long);
+extern void ick_create(const char*, unsigned long);
 extern uint16_t ick_getonespot(unsigned short);
 extern void ick_setonespot(unsigned short, uint16_t);
 extern uint32_t ick_gettwospot(unsigned short);

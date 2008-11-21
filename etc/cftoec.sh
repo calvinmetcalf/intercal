@@ -8,8 +8,8 @@
 die() { echo "Error: $1"; exit 1; }
 
 if [ -z "$1" ] ||  [ -z "$2" ]; then
-	echo "Usage: $0 ick-source-path cfunge-path"
-	exit 1
+    echo "Usage: $0 ick-source-path cfunge-path"
+    exit 1
 fi
 
 # test x$1 != x || (
@@ -58,13 +58,38 @@ rm -rf temp || die "Failed to remove any old temp directory"
 mkdir -p temp || die "Failed to create temp directory"
 cd temp  || die "Failed to change directory to temp directory"
 
+# Select compiler
+if [ -z "$CC" ]; then
+    CC=cc
+fi
+
 CFLAGS="-std=c99 -DUSE32 -DDISABLE_GC -DFUNGE_EXTERNAL_LIBRARY -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -DFUNGE_OLD_HANDPRINT=0x43464649 '-DFUNGE_NEW_HANDPRINT=\"http://example.com/\"'"
+# If GCC 4.1 or later is used add:
+#   -O1 -combine -fwhole-program -fvisibility=hidden.
+# At least -O1 needed or -fwhole-program have no effect. Which is needed for
+# this trick.
+if "$CC" --version 2>&1 | grep -q GCC; then
+    GCC_VERSION="$("$CC" --version 2>&1 | awk '/[^ ]+ \(GCC\)/ {print $3}')"
+    GCC_MAJOR="$(echo "$GCC_VERSION" | cut -d. -f 1)"
+    GCC_MINOR="$(echo "$GCC_VERSION" | cut -d. -f 2)"
+    # We need GCC 4.1 or later.
+    if [ "$GCC_MAJOR" -eq 4 ]; then
+        if [ "$GCC_MINOR" -ge 1 ]; then
+            IS_GCC=yes
+        fi
+    elif [ "$GCC_MAJOR" -gt 4 ]; then
+        IS_GCC=yes
+    fi
+fi
+if [ "$IS_GCC" ]; then
+    CFLAGS="$CFLAGS -O1 -combine -fwhole-program -fvisibility=hidden"
+fi
 # Allow optional -O2 or such:
 if [ "$CFUNGE_CFLAGS" ]; then
-	CFLAGS="$CFLAGS $CFUNGE_CFLAGS"
+    CFLAGS="$CFLAGS $CFUNGE_CFLAGS"
 fi
 # Please enable this when making changes. Requested by the cfunge author.
-#CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wpointer-arith -Wimplicit -Wnested-externs -Wcast-align -Wcast-qual -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wparentheses -Wshadow -Wundef -Wpacked -Wredundant-decls -Wfloat-equal -Wstrict-aliasing=2 -Wformat=2 -Wdisabled-optimization -Wmissing-noreturn -Wmissing-format-attribute -Wdeclaration-after-statement -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wwrite-strings"
+#CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wpointer-arith -Wimplicit -Wnested-externs -Wcast-align -Wcast-qual -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wparentheses -Wshadow -Wundef -Wpacked -Wfloat-equal -Wstrict-aliasing=2 -Wformat=2 -Wdisabled-optimization -Wmissing-noreturn -Wmissing-format-attribute -Wdeclaration-after-statement -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wwrite-strings"
 
 echo "   " Duplicating cfunge source tree so that it can be modified...
 cp -r $CFUNGE_PATH/src $CFUNGE_PATH/lib .
@@ -85,7 +110,19 @@ $CFUNGE_PATH/tools/gen_fprint_list.sh > /dev/null || die "Failed to regen list."
 # I really can't be bothered to save them from themself. Dump all the resulting
 # object files in this temp directory.
 echo "   " Compiling source...
-find . -name '*.c' -printf "gcc $CFLAGS -c %p -o %f.o\n" | sh
+if [ "$IS_GCC" ]; then
+    FILES="$(find . -name '*.c' -printf "%p ")"
+    # Pipe needed due to messy double quoting.
+    # It is impossible to use -o -c and multiple files all at once. GCC errors
+    # if you try. However the *.o will be equal to one of the source filenames
+    # but placed in the current directory and with .c replaced with .o
+    echo "$CC $CFLAGS -c $FILES" | sh
+else
+    find . -name '*.c' -printf "$CC $CFLAGS -c %p -o %f.o\n" | sh
+fi
+
+# Remove any existing library or ar would just add to the existing one.
+rm -f ../libick_ecto_b98.a
 
 echo "   " Creating library...
 ar cr ../libick_ecto_b98.a *.o
