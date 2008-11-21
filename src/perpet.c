@@ -273,46 +273,17 @@ static int isenv(char* e)
 }
 #endif
 
-/*@-redef@*/
-int main(int argc, char *argv[])
-/*@=redef@*/
+extern int	optind;		/* set by getopt */
+
+/**
+ * This parses command line options.
+ * @param argc What do you think?
+ * @param argv Likewise.
+ * @note May (directly) call ick_lose() with IE111 and IE256.
+ */
+static void parse_options(int argc, char *argv[])
 {
-  /*@-nestedextern@*/
-  extern int	optind;		/* set by getopt */
-  /*@=nestedextern@*/
-  char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ], path[BUFSIZ],
-    libbuf[BUFSIZ];
-  tuple	*tp;
-  atom	*op;
-  int		c, i;
-  /*@-shadow@*/ /* no it doesn't, cesspool isn't linked to perpet */
-  const char	*includedir, *libdir, *ick_datadir;
-  /*@=shadow@*/
-  /* AIS: removed getenv(), added ick_datadir */
-  const char        *cooptsh; /* AIS */
-  FILE	*ifp, *ofp;
-  int		maxabstain, /* nextcount, AIS */ bugline;
-  ick_bool        needsyslib, firstfile;
-  int         oldoptind;
-#ifdef HAVE_UNISTD_H
-  int         oldstdin; /* AIS: for keeping track of where stdin was */
-#endif
-
-  if (!(includedir = getenv("ICKINCLUDEDIR")))
-    includedir = ICKINCLUDEDIR;
-  if (!(libdir = getenv("ICKLIBDIR")))
-    libdir = ICKLIBDIR;
-  if (!(ick_datadir = getenv("ICKDATADIR"))) /* AIS */
-    ick_datadir = ICKDATADIR;
-/*
-  AIS: nothing actually uses this at the moment,
-  commenting it out for future use
-
-  if (!(bindir = getenv("ICKBINDIR")))
-  bindir = ICKBINDIR;
-*/
-  if (!(compiler = getenv("CC")))
-    compiler = CC;
+  int		c;
 
   /* getopt is POSIX, and I provide my own version if the POSIX version
      isn't found, so the unrecog warning is a false positive. */
@@ -479,133 +450,49 @@ int main(int argc, char *argv[])
       /*@-unreachable@*/ break; /*@=unreachable@*/
     }
   }
+}
 
-  (void) signal(SIGSEGV, abend);
-#ifdef SIGBUS
-  (void) signal(SIGBUS, abend);
-#endif /* SIGBUS */
 
-  if (!nocompilerbug) {
-#ifdef USG
-    srand48(time(NULL) + getpid());
-#else
-    srand((unsigned)time(NULL));
-#endif /* UNIX */
-  }
-
-  /* AIS: New function for enhanced file-finding */
-  ifp = ick_findandfopen(pickcompile?PSKELETON:SKELETON,
-			 ick_datadir, "r", argv[0]);
-  if(!ifp) ick_lose(IE999, 1, (const char *)NULL);
-
-  /* now substitute in tokens in the skeleton */
-
-  /* AIS: This doesn't actually seem to do anything, and buf is
-     uninitialised at this point, so it's actually dangerous
-     because it's undefined behaviour.
-     buf[strlen(buf) - 2] = '\0'; */
-
-  /* AIS: Save the old stdin, if we can */
-#ifdef HAVE_UNISTD_H
-  oldstdin=dup(0);
-#endif
-
-  oldoptind=optind; /* AIS */
-  *libbuf = 0; /* AIS */
-  for (firstfile = ick_TRUE; optind < argc; optind++, firstfile = ick_FALSE)
-  {
-    /* AIS: Read as binary to pick up Latin-1 and UTF-8 better */
-    if (/* AIS */ strrchr(argv[optind],'.') != NULL &&
-	freopen(argv[optind], "rb", stdin) == (FILE *)NULL &&
-	/* AIS */ strcmp(strchr(argv[optind],'.')+1,"a"))
-	ick_lose(IE777, 1, (const char *)NULL);
-    else
-    {
-      /* strip off the file extension */
-      if(!(chp = strrchr(argv[optind],'.')))
-      {
-	if(useickec && firstfile == ick_FALSE) /* By AIS */
-	{
-	  /* the filename indicates a request for an expansion library,
-	     along the same lines as CLC-INTERCAL's preloads. Search for
-	     it in the usual places, then make a copy in a temp directory
-	     and substitute that on the command line. */
-	  const char* tempfn;
-	  FILE* fromcopy;
-	  FILE* tocopy;
-	  int c2;
-	fixexpansionlibrary:
-	  tempfn="%s.c";
-	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.c", argv[optind]);
-	  fromcopy = ick_findandfopen(buf2,ick_datadir,"rb",argv[0]);
-	  if(!fromcopy) /* same error as for syslib */
-	    ick_lose(IE127, 1, (const char*) NULL);
-#if __DJGPP__
-	  /* Look for a temp directory to store a copy of the C file,
-	     the resulting .cio, .o files, etc. */
-	  if(isenv("TMP")) tempfn="/dev/env/TMP/%s.c";
-	  if(isenv("TEMP")) tempfn="/dev/env/TEMP/%s.c";
-	  if(isenv("TMPDIR")) tempfn="/dev/env/TMPDIR/%s.c";
-	  if(isenv("ICKTEMP")) tempfn="/dev/env/ICKTEMP/%s.c";
-#else
-	  tempfn="/tmp/%s.c"; /* always valid on POSIX */
-#endif
-	  /*@-formatconst@*/ /* all possibilities are fine */
-	  (void) ick_snprintf_or_die(buf2, sizeof buf2, tempfn, argv[optind]);
-	  /*@=formatconst@*/
-	  if((tocopy = fopen(buf2,"wb")) == NULL)
-	    ick_lose(IE888, 1, (const char*) NULL);
-
-	  for(;;)
-	  {
-	    c2=fgetc(fromcopy);
-	    if(c2==EOF) break;
-	    (void) fputc(c2,tocopy);
-	  }
-	  (void) fclose(fromcopy); (void) fclose(tocopy);
-	  /*@+onlytrans@*/
-	  /* this is a memory leak that will need sorting out later,
-	     thus the explicit turn-warning-on */
-	  argv[optind]=malloc(sizeof(buf2)+1);
-	  /*@=onlytrans@*/
-	  if(!(argv[optind]))
-	    ick_lose(IE888, 1, (const char*) NULL);
-	  strcpy(argv[optind],buf2);
-	  *(strrchr(argv[optind],'.')) = '\0';
-	  continue;
-	}
-
-	ick_lose(IE998, 1, (const char *)NULL);
-      }
-      *chp++ = '\0';
-
-      if(useickec && (!strcmp(chp,"c") || !strcmp(chp,"cio") ||
-		      !strcmp(chp,"c99"))) /* AIS */
-      {
-	if(firstfile != ick_FALSE) /* need exactly 1 INTERCAL file */
-	  ick_lose(IE998, 1, (const char *)NULL);
-	continue; /* don't process C or cio files further yet */
-      }
-
-      if(useickec && !strcmp(chp,"a"))
-      {
+/**
+ * This code handles archives (for -e).
+ * @param libbuf Pointer to a buffer to which extra files to link in prelink()
+ *               will be added. Need to be initialized up to the first zero byte.
+ * @param libbuf_size Size of the buffer libbuf.
+ * @param library The cmd line argument used for the library (but without the
+ *                extension).
+ */
+static void handle_archive(char *libbuf, size_t libbuf_size,
+                           /*@observer@*/ const char* library)
+{
 	/* AIS: request for a library. Given a filename of the form
 	   libwhatever.a, it adds  -lwhatever to libbuf (that's with
 	   a preceding space). If the filename doesn't start with lib,
 	   it instead adds a space and the filename to libbuf. */
-	if(argv[optind][0]=='l'&&argv[optind][1]=='i'&&
-	   argv[optind][2]=='b')
-	  ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-			      " -l%s",argv[optind]+3);
+	if(library[0]=='l'&&library[1]=='i'&&
+	   library[2]=='b')
+	  ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
+			      " -l%s",library+3);
 	else
-	  ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-			      " %s.a",argv[optind]);
-	*argv[optind]=0;
-	continue;
-      }
+	  ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
+			      " %s.a",library);
+}
 
-      if(useickec && !strcmp(chp,"b98"))
-      {
+
+/**
+ * This handles Befunge 98 (for -e).
+ * @param libbuf Pointer to a buffer to which extra files to link in prelink()
+ *               will be added. Need to be initialized up to the first zero byte.
+ * @param libbuf_size Size of the buffer libbuf.
+ * @param libdir The ick library directory.
+ * @param argv0 Should be argv[0], which wasn't modified.
+ * @param filename The file name  of the Befunge file (but without the extension).
+ * @note May (directly) call ick_lose() with IE888 and IE899.
+ */
+static void handle_befunge98(char *libbuf, size_t libbuf_size,
+                             /*@observer@*/ const char* libdir,
+                             /*@observer@*/ const char* argv0,
+                             /*@observer@*/ const char* filename)
+{
 	/* AIS: Compile the .b98 file into a .cio so that it can be used
 	   later, and include the necessary libraries to use it, or error
 	   if the libraries aren't installed yet. I use a somewhat dubious
@@ -622,20 +509,21 @@ int main(int argc, char *argv[])
 
 	FILE* of;
 	int x,y,jlb;
+	char outputfilename[BUFSIZ];
 	int markerposns[MARKERMAX][2];
 	int markercount=0;
 
 	/* Error if libick_ecto_b98.a is missing. It might be, and not
 	   just due to installation problems. */
-	if(!ick_findandtestopen("libick_ecto_b98.a",libdir,"rb",argv[0]))
+	if(!ick_findandtestopen("libick_ecto_b98.a",libdir,"rb",argv0))
 	  ick_lose(IE899,-1,(const char *)NULL);
 
 	/* Compile the .b98 file into a .cio. It's open on stdin right now,
 	   so we just need to handle the output side of things. */
 
-	ick_snprintf_or_die(buf2, sizeof buf2, "%s.cio", argv[optind]);
+	ick_snprintf_or_die(outputfilename, sizeof outputfilename, "%s.cio", filename);
 
-	if(!((of = ick_debfopen(buf2,"w"))))
+	if(!((of = ick_debfopen(outputfilename,"w"))))
 	  ick_lose(IE888,-1,(const char *)NULL);
 
 	fprintf(of,"const char* ick_iffi_befungeString=\n\"");
@@ -670,16 +558,21 @@ int main(int argc, char *argv[])
 	fclose(of);
 
 	/* Put the libraries and .cio file in the command line. */
-	ick_snprintf_or_die(libbuf+strlen(libbuf),sizeof libbuf - strlen(libbuf),
-			    " %s.cio -lick_ecto_b98 -lm -lncurses", argv[optind]);
-	/* Sort out the ecto_b98 expansion library. */
-	argv[optind] = "ecto_b98";
-	goto fixexpansionlibrary;
-      }
+	ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
+			    " %s.cio -lick_ecto_b98 -lm -lncurses", filename);
+}
 
-      if(useickec && firstfile == ick_FALSE) /* AIS */
-	ick_lose(IE998, 1, (const char *)NULL);
 
+/**
+ * This computes what type the INTERCAL source file is.
+ * It will change various globals.
+ * @param chp A pointer to the first letter of the extension of the file. Note
+ *            that it won't be changed, but can't be const char* due to being
+ *            passed as the second parameter to strtol() as well.
+ * @note May (directly) call ick_lose() with IE111, IE256 and IE998.
+ */
+static void find_intercal_base(char* chp)
+{
       /* wwp: reset the base variables to defaults, because if the  */
       /* sourcefile has extension .i they will not be reset in the  */
       /* following chunk of code. but i don't want to modify the    */
@@ -710,55 +603,30 @@ int main(int argc, char *argv[])
 	else
 	  ick_Max_large = (ick_Max_small + 1) * (ick_Max_small + 1) - 1;
       }
-
-      /* zero out tuple and oblist storage */
-      treset();
-      politesse = 0;
-      /* JH: default to no op-overusage and no computed come from */
-      opoverused = 0;
-      compucomesused = compucomecount = 0;
-      gerucomesused = 0; /* AIS: you forgot this one */
-      /* AIS: ensure that at least one variable exists, to prevent
-	 NULL pointers later on */
-      (void) intern(ick_ONESPOT, 1); /* mention .1 */
-
-      /* reset the lex/yacc environment */
-      if (!firstfile)
-      {
-#ifdef NEED_YYRESTART
-	yyrestart(stdin);
-#endif /* NEED_YYRESTART */
-	iyylineno = 1;
-      }
-
-      /* compile tuples from current input source */
-      (void) yyparse();
-
-      if(variableconstants)
-      {
-	/* AIS: Up to 4 extra meshes may be needed by feh.c. */
-	(void) intern(MESH, 0xFFFFFFFFLU);
-	(void) intern(MESH, 0xFFFFLU);
-	(void) intern(MESH, 0xAAAAAAAALU);
-	(void) intern(MESH, 0x55555555LU);
-      }
+}
 
 
-      /*
-       * Miss Manners lives.
-       */
-      if (ick_lineno > 2)
-      {
-	if (politesse == 0 || (ick_lineno - 1) / politesse >= 5)
-	  ick_lose(IE079, iyylineno, (const char *)NULL);
-	else if (ick_lineno / politesse < 3)
-	  ick_lose(IE099, iyylineno, (const char *)NULL);
-      }
-
+/**
+ * This checks if we automagically need to include syslib
+ * @param buffer Output buffer that may be modified to contain the path of
+ *               syslib.i or syslib.Ni (where N is 3-7).
+ * @param size Size of buffer.
+ * @param needsyslib Pointer to the ick_bool needsyslib declared in main().
+ * @param argv0 Should be argv[0], which wasn't modified.
+ * @param ick_datadir The ick data directory.
+ * @note May (directly) call ick_lose() with IE127.
+ */
+static void check_syslib(/*@partial@*/ char *buffer,
+                         size_t size,
+                         /*@out@*/ ick_bool *needsyslib,
+                         /*@observer@*/ const char *argv0,
+                         /*@observer@*/ const char *ick_datadir)
+{
+  tuple *tp;
       /*
        * check if we need to magically include the system library
        */
-      needsyslib = ick_FALSE;
+      *needsyslib = ick_FALSE;
       if(!pickcompile) /* AIS: We never need syslib when compiling
 			  for PIC, because it's preoptimized. */
       {
@@ -770,7 +638,7 @@ int main(int argc, char *argv[])
 	   * can stop searching and won't need the syslib.
 	   */
 	  if (tp->label >= 1000 && tp->label <= 1999) {
-	    needsyslib = ick_FALSE;
+	    *needsyslib = ick_FALSE;
 	    break;
 	  }
 	  /*
@@ -779,17 +647,17 @@ int main(int argc, char *argv[])
 	   */
 	  if (tp->type == NEXT && tp->u.target >= 1000 &&
 	      tp->u.target <= 1999)
-	    needsyslib = ick_TRUE;
+	    *needsyslib = ick_TRUE;
 	}
       }
-      if(nosyslib) needsyslib = ick_FALSE; /* AIS */
-      if (needsyslib)
+      if(nosyslib) *needsyslib = ick_FALSE; /* AIS */
+      if (*needsyslib)
       { /* AIS: modified to use ick_findandfreopen */
 	if (ick_Base == 2)    /* see code for opening the skeleton */
-	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.i", SYSLIB);
+	  (void) ick_snprintf_or_die(buffer, size, "%s.i", SYSLIB);
 	else
-	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.%di", SYSLIB, ick_Base);
-	if (ick_findandfreopen(buf2, ick_datadir, "r", argv[0], stdin) == NULL)
+	  (void) ick_snprintf_or_die(buffer, size, "%s.%di", SYSLIB, ick_Base);
+	if (ick_findandfreopen(buffer, ick_datadir, "r", argv0, stdin) == NULL)
 	  ick_lose(IE127, 1, (const char*) NULL);
 #ifdef USE_YYRESTART
 	yyrestart(stdin);
@@ -797,7 +665,17 @@ int main(int argc, char *argv[])
 	(void) yyparse();
 	textlinecount=iyylineno;
       }
+}
 
+
+/**
+ * This code propagates type information up the expression tree.
+ * It also does some unrelated stuff such as checking for WRITE IN and disabling
+ * coopt if that is found.
+ */
+static void propagate_typeinfo(void)
+{
+  tuple *tp;
       /*
        * Now propagate type information up the expression tree.
        * We need to do this because the unary-logical operations
@@ -816,10 +694,15 @@ int main(int argc, char *argv[])
 	if (tp->type == WRITE_IN) coopt = 0; /* AIS: may as well do
 						this here */
       }
+}
 
-      codecheck();	/* check for compile-time errors */
-      /* AIS: And importantly, sort out line number references */
 
+/**
+ * This runs the optimiser.
+ */
+static void run_optimiser(void)
+{
+  tuple *tp;
       /* perform optimizations */
       if (dooptimize)
 	for (tp = tuples; tp->type; tp++)
@@ -839,79 +722,116 @@ int main(int argc, char *argv[])
 
       /* AIS: perform flow optimizations */
       if (flowoptimize) optimizef();
+}
 
+
+/**
+ * Generate random line number for E774.
+ * @returns A random line number, or -1 for no random bug generated.
+ */
+static int randomise_bugline(void)
+{
       /* decide if and where to place the compiler bug */
 #ifdef USG
       if (!nocompilerbug && lrand48() % 10 == 0)
-	bugline = (int)(lrand48() % ick_lineno);
+	return (int)(lrand48() % ick_lineno);
 #else
       if (!nocompilerbug && rand() % 10 == 0)
-	bugline = rand() % ick_lineno;
+	return rand() % ick_lineno;
 #endif
       else
-	bugline = -1;
+	return -1;
+}
 
-      /* set up the generated C output file name */
-      (void) strcpy(buf, argv[optind]);
-      (void) strcat(buf, ".c");
+
+/**
+ * This opens the outfile.
+ * @param filename The filename to open.
+ * @returns A pointer to a FILE for the filename. If the global outtostdout is
+ * set then it will return stdout.
+ * @note May (directly) call ick_lose() with IE888.
+ */
+static /*@dependent@*/ FILE* open_outfile(/*@observer@*/ const char * filename)
+{
+      FILE *ofp;
       /* AIS: ofp holds fopened storage if !outtostdout, and local-copy
 	 storage if outtostdout, and this is not a bug, although it
 	 confuses Splint. */
       /*@-branchstate@*/
       if(outtostdout) ofp=stdout; /* AIS */
-      else if((ofp = ick_debfopen(buf, "w")) == (FILE *)NULL)
+      else if((ofp = ick_debfopen(filename, "w")) == (FILE *)NULL)
 	ick_lose(IE888, 1, (const char *)NULL);
       /*@=branchstate@*/
+      return ofp;
+}
 
-      (void) fseek(ifp,0L,0);	/* rewind skeleton file */
 
-      /* AIS: Before changing argv[0], locate coopt.sh. */
-      cooptsh = ick_findandtestopen("coopt.sh", ick_datadir, "rb", argv[0]);
-      /* AIS: and calculate yukcmdstr. */
-      (void) ick_snprintf_or_die(yukcmdstr, sizeof yukcmdstr, "%s%s" EXEEXT " %s %s",
-				 strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
-				 "":"./",argv[optind],ick_datadir,argv[0]);
-
-      /* AIS: Remove the filename from argv[0], leaving only a directory.
-	 If this would leave it blank, change argv[0] to '.'.
-	 This is so gcc can find the includes/libraries the same way that
-	 ick_findandfreopen does. */
-      /* JH: use a copy of argv[0] for the path, to ensure argv[0] is
-       * available for the next round
-       */
-      strcpy(path,argv[0]);
-      if(strchr(path,'/')) *(strrchr(path,'/')) = '\0';
-      else strcpy(path,".");
-
-      (void) ick_snprintf_or_die(buf2, sizeof buf2,
-				 "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s"
+/**
+ * This generates the CC command line.
+ * @param buffer Output buffer.
+ * @param size Size of the output buffer.
+ * @param sourcefile The name of the C file.
+ * @param includedir The ick include directory.
+ * @param path The path of the ick binary (execuding filename).
+ * @param libdir The ick library directory.
+ * @param outputfile The name of the output file.
+ */
+static void gen_cc_command(char* buffer, size_t size,
+                           /*@observer@*/ const char* sourcefile,
+                           /*@observer@*/ const char* includedir,
+                           /*@observer@*/ const char* path,
+                           /*@observer@*/ const char* libdir,
+                           /*@observer@*/ const char* outputfile)
+{
+      (void) ick_snprintf_or_die(buffer, size,
+				 "%s %s%s-I%s -I%s -I%s/../include -L%s -L%s -L%s/../lib -O%c -o %s" EXEEXT " -lick%s%s",
 #ifdef __DJGPP__
-				 EXEEXT " -lick%s%s","",
+				 "",
 #else
-				 EXEEXT " -lick%s%s",compiler,
+				 compiler,
 #endif
 #ifdef HAVE_CLOCK_GETTIME /* implies -lrt is available */
-				 buf, yukdebug||yukprofile?" -lyuk -lrt ":" ",
+				 sourcefile, yukdebug||yukprofile?" -lyuk -lrt ":" ",
 #else
-				 buf, yukdebug||yukprofile?" -lyuk ":" ",
+				 sourcefile, yukdebug||yukprofile?" -lyuk ":" ",
 #endif
 				 includedir, path, path, libdir, path, path,
 				 cdebug?'0':coopt?'3':'2', /* AIS: If coopting, optimize as much as possible
 				                               JH: [d]on't optimise when compiling with debugger support */
-				 argv[optind], multithread?"mt":"", cdebug?" -g":"");
+				 outputfile, multithread?"mt":"", cdebug?" -g":"");
       /* AIS: Possibly link in the debugger yuk and/or libickmt.a here. */
       /* AIS: Added -g support. */
       /* AIS: Added argv[0] (now path) to the -I, -L settings. */
+}
 
-      textlinecount=0; /* AIS: If there are no files, there's
-			  no need to free any textlines */
+
+/**
+ * This generates the actual C code.
+ * @param ifp This should be opened to either ick-wrap.c or pickwrap.c.
+ * @param ofp The out file.
+ * @param source_name_stem Source name stem
+ * @param needsyslib Pointer to the needsyslib bool in main().
+ * @param bugline What line number to add a random bug to.
+ * @param compilercommand The compiler command line.
+ * @note May (directly) call ick_lose() with IE256.
+ */
+static void generate_code(FILE *ifp, FILE *ofp,
+                          /*@observer@*/  const char* source_name_stem,
+                          ick_bool *needsyslib,
+                          int bugline,
+                          /*@observer@*/ const char* compilercommand)
+{
+  int maxabstain;
+  int           c, i;
+  tuple   *tp;
+  atom    *op;
       while ((c = myfgetc(ifp)) != EOF)
 	if (c != (int)'$')
 	  (void) fputc(c, ofp);
 	else switch(myfgetc(ifp))
 	     {
 	     case 'A':	/* source name stem */
-	       (void) fputs(argv[optind], ofp);
+	       (void) fputs(source_name_stem, ofp);
 	       break;
 
 	     case 'B':	/* # of statements */
@@ -938,7 +858,7 @@ int main(int argc, char *argv[])
 			isn't referenced; if it isn't, we can allow
 			one double-oh-seven if syslib was
 			automagically inclulded. */
-		     if(needsyslib) needsyslib = 0; else coopt = 0;
+		     if(*needsyslib) *needsyslib = 0; else coopt = 0;
 		   }
 		   if(!pickcompile)
 		   {
@@ -1392,7 +1312,7 @@ int main(int argc, char *argv[])
 #else
 			      "","",
 #endif
-			      buf2);
+			      compilercommand);
 	       break;
 
 	     case 'M': /* AIS: place new features defines in program */
@@ -1507,28 +1427,42 @@ int main(int argc, char *argv[])
 		 emitslat(ofp);
 	       break;
 	     }
+}
 
-      if(!outtostdout) (void) fclose(ofp);
 
+/**
+ * This runs the C compiler, and may invoke yuk.
+ * @param cc_command The compiler command line to use. Constructed by gen_cc_command().
+ * @param oldstdin The previous stdin, used for yuk.
+ * @param yukcmdstr The command line to use for running yuk.
+ * @param sourcefile The output filename.
+ * @param binaryname The name of the binary.
+ */
+static void run_cc_and_maybe_debugger(/*@observer@*/ const char *cc_command,
+                                      int oldstdin,
+                                      /*@observer@*/ const char *yukcmdstr,
+                                      /*@observer@*/ const char *sourcefile,
+                                      /*@observer@*/ const char *binaryname)
+{
 #ifndef __DJGPP__
       /* OK, now sic the C compiler on the results */
       if (!compile_only&&!yukdebug&&!yukprofile&&!useickec)
       {
 	/* AIS: buf2 now assigned elsewhere so $L works */
-	ICK_SYSTEM(buf2);
-	/* AIS: no unlink if cdebug */ if(!cdebug) (void) unlink(buf);
+	ICK_SYSTEM(cc_command);
+	/* AIS: no unlink if cdebug */ if(!cdebug) (void) unlink(sourcefile);
       }
       else if(!compile_only&&!useickec)
       { /* AIS: run, then delete all output but yuk.out */
 	/* Note that the output must be deleted for copyright
 	   reasons (so as not to GPL a non-GPL file automatically) */
-	ICK_SYSTEM(buf2);
+	ICK_SYSTEM(cc_command);
 #ifdef HAVE_UNISTD_H
 	(void) dup2(oldstdin,0); /* restore stdin */
 #endif
 	ICK_SYSTEM(yukcmdstr);
-	(void) unlink(buf);
-	(void) unlink(argv[optind]);
+	(void) unlink(sourcefile);
+	(void) unlink(binaryname);
       }
 #else /* we are using DJGPP */
       /* OK, now sic the C compiler on the results */
@@ -1540,7 +1474,7 @@ int main(int argc, char *argv[])
 	   with the arguments needed to give gcc. */
 	FILE* rsp;
 	/* Use current dir as temp if needed */
-	char* tempfn="gcc @ickgcc.rsp";
+	const char* tempfn="gcc @ickgcc.rsp";
 	/* Four tries are used to find a temp directory.
 	   ICKTEMP is the preferred environment variable to check;
 	   if, as expected, this isn't set, try TMPDIR (which DJGPP
@@ -1552,52 +1486,82 @@ int main(int argc, char *argv[])
 	if(isenv("TMPDIR")) tempfn="gcc @/dev/env/TMPDIR/ickgcc.rsp";
 	if(isenv("ICKTEMP")) tempfn="gcc @/dev/env/ICKTEMP/ickgcc.rsp";
 	rsp=ick_debfopen(tempfn+5,"w");
-	fprintf(rsp,"%s\n",buf2);
+	fprintf(rsp,"%s\n",cc_command);
 	fclose(rsp);
 	ICK_SYSTEM(tempfn);
 	remove(tempfn+5);
 	if(yukdebug || yukprofile)
 	{
+	  char buffer[BUFSIZ];
 #ifdef HAVE_UNISTD_H
 	  dup2(oldstdin,0); /* restore stdin */
 #endif
-	  ick_snprintf_or_die(buf2, sizeof buf2, "%s" EXEEXT,argv[optind]);
+/* FIXME: This looks broken (the buf2 usage and such). */
+	  ick_snprintf_or_die(buffer, sizeof(buffer), "%s" EXEEXT,binaryname);
 	  ICK_SYSTEM(yukcmdstr);
-	  remove(buf);
-	  remove(buf2);
+	  remove(sourcefile);
+	  remove(buffer);
 	}
 	else if(!cdebug)
 	{
-	  remove(buf);
+	  remove(sourcefile);
 	}
       }
 #endif
+
+}
+
+
+/**
+ * This runs coopt.sh if -F is given and the program can be "coopted".
+ * @param cooptsh Path to coopt.sh
+ * @param binaryname The output binary filename.
+ */
+static void run_coopt(/*@observer@*/ /*@null@*/ const char* cooptsh,
+                      /*@observer@*/ const char* binaryname)
+{
+  char commandlinebuf[BUFSIZ];
 #ifdef HAVE_PROG_SH
 # ifdef HAVE_SYS_INTERPRETER
-      if(coopt) /* AIS */
-      {
-	/* The constant-output optimizer is a form of post-processor.
-	   IMPORTANT NOTE: This MUST NOT be run if the input program
-	   takes any input or is affected in any way by the state of
-	   the system, as the degenerated program may be wrong. At the
-	   moment, the only INTERCAL command that takes input is
-	   WRITE IN. Double-oh-sevens screw this up, too. */
-	if(cooptsh)
-	{
-	  (void) ick_snprintf_or_die(buf2, sizeof buf2,
-				     "sh %s %s", cooptsh, argv[optind]);
-	  ICK_SYSTEM(buf2); /* replaces the output executable if
-			       neccesary */
-	}
-      }
-# endif
-#endif
+  if(coopt) /* AIS */
+  {
+    /* The constant-output optimizer is a form of post-processor.
+       IMPORTANT NOTE: This MUST NOT be run if the input program
+       takes any input or is affected in any way by the state of
+       the system, as the degenerated program may be wrong. At the
+       moment, the only INTERCAL command that takes input is
+       WRITE IN. Double-oh-sevens screw this up, too. */
+    if(cooptsh)
+    {
+      (void) ick_snprintf_or_die(commandlinebuf, sizeof commandlinebuf,
+	                         "sh %s %s", cooptsh, binaryname);
+      ICK_SYSTEM(commandlinebuf); /* replaces the output executable if
+	                             neccesary */
     }
   }
-  (void) fclose(ifp);
+# endif
+#endif
+}
 
-  if(!compile_only && useickec) /* AIS */
-  {
+
+/**
+ * This is for -e, runs prelinking.
+ * @param argc Exactly what you think.
+ * @param argv Also what you think.
+ * @param oldoptind The original optind.
+ * @param libdir The ick library directory.
+ * @param includedir The ick include directory.
+ * @param path The path of the ick binary (execuding filename).
+ * @param libbuf A string with -lfoo to add to compiler command line.
+ * @note May (directly) call ick_lose() with IE666. IE778 and IE888.
+ */
+static void prelink(int argc, char *argv[], int oldoptind,
+                    /*@observer@*/ const char* libdir,
+                    /*@observer@*/ const char *includedir,
+                    /*@observer@*/ const char* path,
+                    /*@observer@*/ const char* libbuf)
+{
+    char buffer[BUFSIZ];
     FILE* cioin;
     FILE* cioallec;
     char* buf2ptr;
@@ -1625,7 +1589,7 @@ int main(int argc, char *argv[])
        executable. */
     for(optind=oldoptind; optind < argc; optind++)
     {
-      (void) ick_snprintf_or_die(buf2, sizeof buf2,
+      (void) ick_snprintf_or_die(buffer, sizeof buffer,
 				 "%s --std=c%d -E -DICK_HAVE_STDINT_H=%d "
 				 "-I%s -I%s -I%s/../include "
 				 "-x c %s.c%c%c > %s.cio",
@@ -1639,8 +1603,8 @@ int main(int argc, char *argv[])
       if(*(argv[optind]) && /* there is some file to compile */
 	 (argv[optind][strlen(argv[optind])+2]=='\0' /* a .c or .i file */
 	  ||argv[optind][strlen(argv[optind])+3]!='o')) /* not a .cio file */
-	ICK_SYSTEM(buf2); /* run the C preprocessor */
-      buf2ptr = strrchr(buf2,'>'); /* get the .cio's filename */
+	ICK_SYSTEM(buffer); /* run the C preprocessor */
+      buf2ptr = strrchr(buffer,'>'); /* get the .cio's filename */
       cioin=NULL;
       /* Do our preprocessing, by editing the file in place using rb+. */
       if(buf2ptr != NULL && buf2ptr[1] != '\0' && buf2ptr[2] != '\0')
@@ -1727,43 +1691,342 @@ int main(int argc, char *argv[])
     fprintf(cioallec,"};\n");
     (void) fclose(cioallec);
 
+    /* NOTE: buffer changes use around here. */
+
     /* This command line needs some explanation, and is specific to gcc and
        GNU ld. The -x causes gcc to interpret the .cio files as C; the
        -Wl,-z,muldefs is an instruction to GNU ld, telling it to link in the
        first main found and ignore the others.  (That way, there can be a
        main function in each .cio, but the .cios can be linked in any order,
        with the right main function foremost each time.)
-    */
-    (void) ick_snprintf_or_die(buf2, sizeof buf2,
-"%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT "%s "
+     */
+    (void) ick_snprintf_or_die(buffer, sizeof buffer,
+			       "%s -L%s -L%s -L%s/../lib -O2 -o %s" EXEEXT "%s "
 #ifndef __DJGPP__
-"-Wl,-z,muldefs "
+			       "-Wl,-z,muldefs "
 #endif
-"-DICK_HAVE_STDINT_H=%d -x c --std=c%d %s", compiler, libdir,
-path, path, argv[oldoptind], cdebug?" -g":"", ICK_HAVE_STDINT_H+1==2?1:0,
-needc99?99:89,tempfn);
-    remspace = (long)(sizeof buf2 - strlen(buf2) - 1);
+			       "-DICK_HAVE_STDINT_H=%d -x c --std=c%d %s", compiler, libdir,
+			       path, path, argv[oldoptind], cdebug?" -g":"", ICK_HAVE_STDINT_H+1==2?1:0,
+			       needc99?99:89,tempfn);
+    remspace = (long)(sizeof buffer - strlen(buffer) - 1);
     for(optind=oldoptind; optind < argc; optind++)
     {
       if(!*(argv[optind])) continue;
       remspace -= strlen(argv[optind]) - 5; /* 5 for <space>.cio */
       if(remspace <= 0)
 	ick_lose(IE666, -1, (const char*)NULL);
-      strcat(buf2," ");
-      strcat(buf2,argv[optind]);
-      strcat(buf2,".cio");
+      strcat(buffer," ");
+      strcat(buffer,argv[optind]);
+      strcat(buffer,".cio");
     }
     remspace -= strlen(libbuf);
     if(remspace <= 0)
       ick_lose(IE666, -1, (const char*)NULL);
-    strcat(buf2,libbuf);
+    strcat(buffer,libbuf);
     remspace -= strlen(" -lickec");
     if(remspace <= 0)
       ick_lose(IE666, -1, (const char*)NULL);
-    strcat(buf2," -lickec");
-    ICK_SYSTEM(buf2);
+    strcat(buffer," -lickec");
+    ICK_SYSTEM(buffer);
     (void) remove(tempfn);
+}
+
+
+/*@-redef@*/
+int main(int argc, char *argv[])
+/*@=redef@*/
+{
+  char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ], path[BUFSIZ],
+    libbuf[BUFSIZ];
+  /*@-shadow@*/ /* no it doesn't, cesspool isn't linked to perpet */
+  const char	*includedir, *libdir, *ick_datadir;
+  /*@=shadow@*/
+  /* AIS: removed getenv(), added ick_datadir */
+  const char        *cooptsh; /* AIS */
+  FILE	*ifp, *ofp;
+  int		/* nextcount, AIS */ bugline;
+  ick_bool        needsyslib, firstfile;
+  int         oldoptind;
+#ifdef HAVE_UNISTD_H
+  int         oldstdin; /* AIS: for keeping track of where stdin was */
+#endif
+  if (!(includedir = getenv("ICKINCLUDEDIR")))
+    includedir = ICKINCLUDEDIR;
+  if (!(libdir = getenv("ICKLIBDIR")))
+    libdir = ICKLIBDIR;
+  if (!(ick_datadir = getenv("ICKDATADIR"))) /* AIS */
+    ick_datadir = ICKDATADIR;
+/*
+  AIS: nothing actually uses this at the moment,
+  commenting it out for future use
+
+  if (!(bindir = getenv("ICKBINDIR")))
+  bindir = ICKBINDIR;
+*/
+  if (!(compiler = getenv("CC")))
+    compiler = CC;
+
+  /* Parse the options. */
+  parse_options(argc, argv);
+
+  (void) signal(SIGSEGV, abend);
+#ifdef SIGBUS
+  (void) signal(SIGBUS, abend);
+#endif /* SIGBUS */
+
+  if (!nocompilerbug) {
+#ifdef USG
+    srand48(time(NULL) + getpid());
+#else
+    srand((unsigned)time(NULL));
+#endif /* UNIX */
   }
+
+  /* AIS: New function for enhanced file-finding */
+  ifp = ick_findandfopen(pickcompile?PSKELETON:SKELETON,
+			 ick_datadir, "r", argv[0]);
+  if(!ifp) ick_lose(IE999, 1, (const char *)NULL);
+
+  /* now substitute in tokens in the skeleton */
+
+  /* AIS: This doesn't actually seem to do anything, and buf is
+     uninitialised at this point, so it's actually dangerous
+     because it's undefined behaviour.
+     buf[strlen(buf) - 2] = '\0'; */
+
+  /* AIS: Save the old stdin, if we can */
+#ifdef HAVE_UNISTD_H
+  oldstdin=dup(0);
+#endif
+
+  oldoptind=optind; /* AIS */
+  *libbuf = 0; /* AIS */
+  /* Begin file loop */
+  for (firstfile = ick_TRUE; optind < argc; optind++, firstfile = ick_FALSE)
+  {
+    /* AIS: Read as binary to pick up Latin-1 and UTF-8 better */
+    if (/* AIS */ strrchr(argv[optind],'.') != NULL &&
+	freopen(argv[optind], "rb", stdin) == (FILE *)NULL &&
+	/* AIS */ strcmp(strchr(argv[optind],'.')+1,"a"))
+	ick_lose(IE777, 1, (const char *)NULL);
+    else
+    {
+      /* strip off the file extension */
+      if(!(chp = strrchr(argv[optind],'.')))
+      {
+	if(useickec && firstfile == ick_FALSE) /* By AIS */
+	{
+	  /* the filename indicates a request for an expansion library,
+	     along the same lines as CLC-INTERCAL's preloads. Search for
+	     it in the usual places, then make a copy in a temp directory
+	     and substitute that on the command line. */
+	  const char* tempfn;
+	  FILE* fromcopy;
+	  FILE* tocopy;
+	  int c2;
+	fixexpansionlibrary:
+	  tempfn="%s.c";
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.c", argv[optind]);
+	  fromcopy = ick_findandfopen(buf2,ick_datadir,"rb",argv[0]);
+	  if(!fromcopy) /* same error as for syslib */
+	    ick_lose(IE127, 1, (const char*) NULL);
+#if __DJGPP__
+	  /* Look for a temp directory to store a copy of the C file,
+	     the resulting .cio, .o files, etc. */
+	  if(isenv("TMP")) tempfn="/dev/env/TMP/%s.c";
+	  if(isenv("TEMP")) tempfn="/dev/env/TEMP/%s.c";
+	  if(isenv("TMPDIR")) tempfn="/dev/env/TMPDIR/%s.c";
+	  if(isenv("ICKTEMP")) tempfn="/dev/env/ICKTEMP/%s.c";
+#else
+	  tempfn="/tmp/%s.c"; /* always valid on POSIX */
+#endif
+	  /*@-formatconst@*/ /* all possibilities are fine */
+	  (void) ick_snprintf_or_die(buf2, sizeof buf2, tempfn, argv[optind]);
+	  /*@=formatconst@*/
+	  if((tocopy = fopen(buf2,"wb")) == NULL)
+	    ick_lose(IE888, 1, (const char*) NULL);
+
+	  for(;;)
+	  {
+	    c2=fgetc(fromcopy);
+	    if(c2==EOF) break;
+	    (void) fputc(c2,tocopy);
+	  }
+	  (void) fclose(fromcopy); (void) fclose(tocopy);
+	  /*@+onlytrans@*/
+	  /* this is a memory leak that will need sorting out later,
+	     thus the explicit turn-warning-on */
+	  argv[optind]=malloc(sizeof(buf2)+1);
+	  /*@=onlytrans@*/
+	  if(!(argv[optind]))
+	    ick_lose(IE888, 1, (const char*) NULL);
+	  strcpy(argv[optind],buf2);
+	  *(strrchr(argv[optind],'.')) = '\0';
+	  continue;
+	}
+
+	ick_lose(IE998, 1, (const char *)NULL);
+      }
+      *chp++ = '\0';
+
+      /* Beginning of block that figures out file type from extension. */
+      if(useickec && (!strcmp(chp,"c") || !strcmp(chp,"cio") ||
+		      !strcmp(chp,"c99"))) /* AIS */
+      {
+	if(firstfile != ick_FALSE) /* need exactly 1 INTERCAL file */
+	  ick_lose(IE998, 1, (const char *)NULL);
+	continue; /* don't process C or cio files further yet */
+      }
+
+      if(useickec && !strcmp(chp,"a"))
+      {
+	/* AIS: request for a library. Given a filename of the form
+	   libwhatever.a, it adds  -lwhatever to libbuf (that's with
+	   a preceding space). If the filename doesn't start with lib,
+	   it instead adds a space and the filename to libbuf. */
+	handle_archive(libbuf, sizeof libbuf,
+	               argv[optind] /* Archive name without extension. */);
+	*argv[optind]=0;
+	continue;
+      }
+
+      if(useickec && !strcmp(chp,"b98"))
+      {
+	handle_befunge98(libbuf, sizeof libbuf, libdir, argv[0],
+	                 argv[optind] /* Filename without extension. */);
+	/* Sort out the ecto_b98 expansion library. */
+	argv[optind] = "ecto_b98";
+	goto fixexpansionlibrary;
+      }
+
+      if(useickec && firstfile == ick_FALSE) /* AIS */
+	ick_lose(IE998, 1, (const char *)NULL);
+
+      /* determine the file type from the extension */
+      /* AN: chp isn't used again after this it seems? */
+      find_intercal_base(chp);
+
+      /* End of block that figures out file type from extension. */
+
+      /* zero out tuple and oblist storage */
+      treset();
+      politesse = 0;
+      /* JH: default to no op-overusage and no computed come from */
+      opoverused = 0;
+      compucomesused = compucomecount = 0;
+      gerucomesused = 0; /* AIS: you forgot this one */
+      /* AIS: ensure that at least one variable exists, to prevent
+	 NULL pointers later on */
+      (void) intern(ick_ONESPOT, 1); /* mention .1 */
+
+      /* reset the lex/yacc environment */
+      if (!firstfile)
+      {
+#ifdef NEED_YYRESTART
+	yyrestart(stdin);
+#endif /* NEED_YYRESTART */
+	iyylineno = 1;
+      }
+
+      /* compile tuples from current input source */
+      (void) yyparse();
+
+      if(variableconstants)
+      {
+	/* AIS: Up to 4 extra meshes may be needed by feh.c. */
+	(void) intern(MESH, 0xFFFFFFFFLU);
+	(void) intern(MESH, 0xFFFFLU);
+	(void) intern(MESH, 0xAAAAAAAALU);
+	(void) intern(MESH, 0x55555555LU);
+      }
+
+
+      /*
+       * Miss Manners lives.
+       */
+      if (ick_lineno > 2)
+      {
+	if (politesse == 0 || (ick_lineno - 1) / politesse >= 5)
+	  ick_lose(IE079, iyylineno, (const char *)NULL);
+	else if (ick_lineno / politesse < 3)
+	  ick_lose(IE099, iyylineno, (const char *)NULL);
+      }
+
+      /* Check if we should auto add the system library. */
+      check_syslib(buf2, sizeof buf2, &needsyslib, argv[0], ick_datadir);
+
+      /*
+       * Now propagate type information up the expression tree.
+       * We need to do this because the unary-logical operations
+       * are sensitive to the type widths of their operands, so
+       * we have to generate different code depending on the
+       * deducible type of the operand.
+       */
+      propagate_typeinfo();
+
+      codecheck();	/* check for compile-time errors */
+      /* AIS: And importantly, sort out line number references */
+      run_optimiser();
+
+      /* decide if and where to place the compiler bug */
+      bugline = randomise_bugline();
+
+      /* set up the generated C output file name */
+      (void) ick_snprintf_or_die(buf, sizeof buf, "%s.c", argv[optind]);
+      /* Open output file. */
+      ofp = open_outfile(buf /* Output filename */);
+
+      (void) fseek(ifp,0L,0);	/* rewind skeleton file */
+
+      /* AIS: Before changing argv[0], locate coopt.sh. */
+      /* AN: Even though argv[0] isn't changed any more this breaks if moved out
+       * of the per-file loop since ick_findandtestopen() returns a pointer to a
+       * static buffer. Should be fixed.
+       */
+      cooptsh = ick_findandtestopen("coopt.sh", ick_datadir, "rb", argv[0]);
+      /* AIS: and calculate yukcmdstr. */
+      (void) ick_snprintf_or_die(yukcmdstr, sizeof yukcmdstr, "%s%s" EXEEXT " %s %s",
+				 strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
+				 "":"./",argv[optind],ick_datadir,argv[0]);
+
+      /* AIS: Remove the filename from argv[0], leaving only a directory.
+	 If this would leave it blank, change argv[0] to '.'.
+	 This is so gcc can find the includes/libraries the same way that
+	 ick_findandfreopen does. */
+      /* JH: use a copy of argv[0] for the path, to ensure argv[0] is
+       * available for the next round
+       */
+      strcpy(path,argv[0]);
+      if(strchr(path,'/')) *(strrchr(path,'/')) = '\0';
+      else strcpy(path,".");
+
+      /* Generate the compiler command. */
+      gen_cc_command(buf2 /* output */, sizeof buf2, buf /* Source filename. */,
+		     includedir, path, libdir, argv[optind] /* Output binary filename. */);
+
+      textlinecount=0; /* AIS: If there are no files, there's
+			  no need to free any textlines */
+      /* Generate code using ick-wrap.c (or pickwrap.c) */
+      generate_code(ifp, ofp, argv[optind] /* Source file name stem. */,
+                    &needsyslib, bugline, buf2 /* CC command. */);
+
+      if(!outtostdout) (void) fclose(ofp);
+
+      /* OK, now sic the C compiler on the results */
+      /* Also: if -y was given, run debugger */
+      run_cc_and_maybe_debugger(buf2, oldstdin, yukcmdstr, buf /* C file name */,
+                                argv[optind] /* Binary filename */);
+
+      /* Run the constant-output optimizer (a form of post-processor). */
+      run_coopt(cooptsh, argv[optind]);
+
+    }
+  }
+  /* Here ends the per-file loop. */
+  (void) fclose(ifp);
+
+  if(!compile_only && useickec) /* AIS */
+    prelink(argc, argv, oldoptind, libdir, includedir, path, libbuf);
 
   /* AIS: Free malloc'd memory. */
   if(textlines)
