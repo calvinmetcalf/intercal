@@ -87,7 +87,7 @@ uint32_t ick_iffi_linelabel=0;
 int ick_iffi_breakloop=0; /* becomes 1 when IFFI's loaded or mark-mode ends */
 int ick_iffi_inmarkmode=0;
 
-extern const char* ick_iffi_befungeString;
+extern const unsigned char* ick_iffi_befungeString;
 extern long long ick_iffi_markerposns[][2];
 extern int ick_iffi_markercount;
 

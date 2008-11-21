@@ -65,7 +65,7 @@ extern int ick_iffi_breakloop;
 extern int ick_iffi_inmarkmode;
 
 // Communication variables with the compiled .cio file
-extern const char * ick_iffi_befungeString;
+extern const unsigned char * ick_iffi_befungeString;
 
 // Communication variables with the runtime library
 extern int ick_printflow;

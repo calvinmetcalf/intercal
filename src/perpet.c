@@ -526,7 +526,7 @@ static void handle_befunge98(char *libbuf, size_t libbuf_size,
   if(!((of = ick_debfopen(outputfilename,"w"))))
     ick_lose(IE888,-1,(const char *)NULL);
 
-  fprintf(of,"const char* ick_iffi_befungeString=\n\"");
+  fprintf(of,"const unsigned char* ick_iffi_befungeString=\n\"");
 
   x=0; y=0; jlb=0;
   for(;;)
