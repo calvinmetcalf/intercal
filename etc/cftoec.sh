@@ -92,7 +92,7 @@ fi
 #CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wpointer-arith -Wimplicit -Wnested-externs -Wcast-align -Wcast-qual -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wparentheses -Wshadow -Wundef -Wpacked -Wfloat-equal -Wstrict-aliasing=2 -Wformat=2 -Wdisabled-optimization -Wmissing-noreturn -Wmissing-format-attribute -Wdeclaration-after-statement -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wwrite-strings"
 
 echo "   " Duplicating cfunge source tree so that it can be modified...
-cp -r $CFUNGE_PATH/src $CFUNGE_PATH/lib .
+cp -r $CFUNGE_PATH/src $CFUNGE_PATH/lib $CFUNGE_PATH/tools .
 
 # Comment these lines back in if patching is needed
 # echo "   " Patching cfunge source tree for use with C-INTERCAL...
