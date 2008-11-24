@@ -1686,6 +1686,18 @@ mingle operation).  No values above twospot are allowed at any point
 during an @ical{} program; if you want to process higher numbers, you
 have to figure out a different way of storing them.
 
+@ieanchor E553
+@cindex buffer overflow
+@quotation
+BETTER LATE THAN NEVER
+@end quotation
+Oops!  The compiler just noticed that it had a buffer overflow.
+(Normally programs catch buffer overflows before they happen;
+C-INTERCAL catches them just afterwards instead.)  This only happens
+on systems which don't have a modern C standard library. Try using
+shorter or fewer filenames on the command line, to reduce the risk of
+such an overflow.
+
 @ieanchor E555
 @cindex @code{COME FROM}, ambiguity
 @quotation

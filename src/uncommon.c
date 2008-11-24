@@ -177,9 +177,8 @@ int ick_snprintf_or_die(/*@out@*/ char *str, size_t size, /*@observer@*/ const c
   retval = vsnprintf(str, size, format, ap);
 #else
   retval = vsprintf(str, format, ap);
-  /* TODO: Replace with some nice ick_lose(). */
   if (retval >= size)
-    abort();
+    ick_lose(IE553, iyylineno, (const char*)NULL);
 #endif
   va_end(ap);
   return retval;

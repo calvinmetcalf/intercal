@@ -544,7 +544,7 @@ static void handle_befunge98(char *libbuf, size_t libbuf_size,
     else if(c=='\n' && jlb) {jlb = 0; continue;}
     else if(c=='\n') {x=0; y++; jlb = 0;}
     else x++;
-    fprintf(of,"\\x%x",c);
+    fprintf(of,"\\x%x",(unsigned int)c);
     if(!x) fprintf(of,"\"\n\"");
   }
   fprintf(of,"\";\n\nint ick_iffi_markercount=%d;\n"
@@ -555,7 +555,7 @@ static void handle_befunge98(char *libbuf, size_t libbuf_size,
 			       markerposns[markercount][1]);
   fprintf(of,"};\n");
 
-  fclose(of);
+  (void) fclose(of);
 
   /* Put the libraries and .cio file in the command line. */
   ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
@@ -1516,10 +1516,10 @@ static void run_cc_and_maybe_debugger(/*@observer@*/ const char *cc_command,
  * @param cooptsh Path to coopt.sh
  * @param binaryname The output binary filename.
  */
-static void run_coopt(/*@observer@*/ /*@null@*/ const char* cooptsh,
-                      /*@observer@*/ const char* binaryname)
+static void run_coopt(/*@observer@*/ /*@null@*/ /*@unused@*/ const char* cooptsh,
+                      /*@observer@*/ /*@unused@*/ const char* binaryname)
 {
-  char commandlinebuf[BUFSIZ];
+  /* Note: Params are marked unused because they may not be used if sh isn't supported. */
 #ifdef HAVE_PROG_SH
 # ifdef HAVE_SYS_INTERPRETER
   if(coopt) /* AIS */
@@ -1532,6 +1532,7 @@ static void run_coopt(/*@observer@*/ /*@null@*/ const char* cooptsh,
        WRITE IN. Double-oh-sevens screw this up, too. */
     if(cooptsh)
     {
+      char commandlinebuf[BUFSIZ];
       (void) ick_snprintf_or_die(commandlinebuf, sizeof commandlinebuf,
 	                         "sh %s %s", cooptsh, binaryname);
       ICK_SYSTEM(commandlinebuf); /* replaces the output executable if
@@ -1799,7 +1800,7 @@ int main(int argc, char *argv[])
 #endif
 
   oldoptind=optind; /* AIS */
-  *libbuf = 0; /* AIS */
+  *libbuf = '\0'; /* AIS */
   /* Begin file loop */
   for (firstfile = ick_TRUE; optind < argc; optind++, firstfile = ick_FALSE)
   {
@@ -1885,7 +1886,7 @@ int main(int argc, char *argv[])
 	   it instead adds a space and the filename to libbuf. */
 	handle_archive(libbuf, sizeof libbuf,
 	               argv[optind] /* Archive name without extension. */);
-	*argv[optind]=0;
+	*argv[optind]='\0';
 	continue;
       }
 

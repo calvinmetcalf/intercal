@@ -60,6 +60,9 @@ AIS = Alex Smith
    to pass command-line arguments like -x and -E to it), and fails
    when mixed with come-from-gerund and next-from-gerund.
 
+7) (AIS) Something is seriously wrong with the profiler. Figure out
+   what it is.
+
 			TO DO
 
 1. (ESR) Add more optimization templates, esp. idioms for +, -, *, /.

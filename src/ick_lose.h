@@ -118,6 +118,12 @@
 /* A COME FROM statement references a non-existent line label. */
 #define IE444 "444 IT CAME FROM BEYOND SPACE\n\
 	ON THE WAY TO %d\n"
+/* (AIS) We just buffer-overflowed. (Detecting this /before/ the overflow
+   happens is probably more secure, but harder and less fun. As long as we
+   don't return from any functions, it's probably safe in theory, but don't
+   rely on this. */
+#define IE553 "553 BETTER LATE THAN NEVER\n\
+	ON THE WAY TO %d\n"
 /* More than one COME FROM references the same label. */
 #define IE555 "555 FLOW DIAGRAM IS EXCESSIVELY CONNECTED\n\
 	ON THE WAY TO %d\n"
