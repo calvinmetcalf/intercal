@@ -38,8 +38,8 @@ LICENSE TERMS
 
 typedef struct
 {
-    const char *name;
-    int	value;
+    /*@observer@*/ const char *name;
+    const int	value;
 }
 numeral;
 
