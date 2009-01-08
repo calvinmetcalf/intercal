@@ -81,7 +81,6 @@ prebuilt/lexer.c        -- Prebuilt lexer (for systems without flex)
 prebuilt/oil-oil.c      -- Prebuilt OIL compiler (again, for bisonless systems)
 
 etc/intercal.el         -- elisp for editing INTERCAL code under GNU Emacs
-etc/intercal.vim        -- INTERCAL syntax higlighting information for vim
 etc/cftoec.sh         	-- script to convert cfunge to a library (see below)
 etc/IFFI*               -- input to that script
 etc/cfunge.patch        -- more input to that script
