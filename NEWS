@@ -70,7 +70,12 @@ Changes reported or patched by Joris Huizer
     algorithm in the patch Joris provided, but with different code, to make it
     easier to maintain.)
 
-Bugs reported by the Debian autobuilders and Joey Hess
+Changes by Stefan O'Rear
+
+17. Added INTERCAL syntax highlighting information for vim. Why should Emacs
+    have all the fun?
+
+Changes reported by the Debian autobuilders and Joey Hess
 
 18. The build of the optimiser idioms is now split over many files, to reduce
     the memory usage of gcc when it tries to compile the giant output C file.
