@@ -58,7 +58,7 @@ extern void prexpr(node *np, FILE* fp, int freenode); /* AIS */
    just with extra arrows in. The annotations here show that nulls are allowed
    when called recursively, but not otherwise. */
 /*@-incondefs@*/
-/*@null@*/ node *nodecopy(/*@null@*/ node* n)
+/*@null@*/ node *nodecopy(/*@null@*/ const node* n)
 /*@=incondefs@*/
 {
   node* np;
@@ -72,7 +72,7 @@ extern void prexpr(node *np, FILE* fp, int freenode); /* AIS */
 
 /* This function by AIS. Compares expressions. In C++, I'd call this
    node::operator== . */
-ick_bool nodessame(const node* n1, const node* n2)
+ick_bool nodessame(/*@observer@*/ const node* n1, /*@observer@*/ const node* n2)
 {
   if(!n1) return !n2;
   if(!n2) return 0;
