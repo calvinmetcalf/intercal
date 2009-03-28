@@ -23,8 +23,8 @@ extern void checknodeactbits(node *np); /* AIS */
 extern void optimizef(void); /* AIS */
 extern void nodefree(/*@keep@*/ /*@null@*/ node* np); /* AIS */
 extern unsigned long varextern(unsigned long intern, int vartype); /* AIS */
-extern node *nodecopy(const node*); /* AIS */
-extern ick_bool nodessame(/*@observer@*/ const node*, /*@observer@*/ const node*); /* AIS */
+extern node *nodecopy(node*); /* AIS */
+extern ick_bool nodessame(const node*, const node*); /* AIS */
 
 extern node *optdebugnode; /* AIS */
 extern const char **enablers; /* AIS: so that there can be an element before the

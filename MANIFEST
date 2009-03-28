@@ -38,7 +38,6 @@
 ./etc/IFFI/IFFI.h
 ./etc/IFFI.spec
 ./etc/intercal.el
-./etc/intercal.vim
 ./etc/temp
 ./MANIFEST
 ./NEWS

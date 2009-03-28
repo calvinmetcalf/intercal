@@ -460,7 +460,7 @@ static void clcbinout(unsigned int type, const ick_array* a)
   while(i--) if(tempcp[i] == '\0') tempcp[i]='\x1a';
   if(!ick_cesspoolout) ick_cesspoolout=stdout;
   fprintf(ick_cesspoolout,"%s\n",tempcp);
-  (void) fflush(ick_cesspoolout);
+  fflush(ick_cesspoolout);
   free(tempcp);
   free(buf);
 }

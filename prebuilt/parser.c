@@ -306,7 +306,7 @@
 #include "feh.h"
 #include "ick_lose.h"
 
-extern int yyerror(const char*);
+extern int yyerror(char*);
 
 /* Intervene our ick_first-stage lexer. */
 extern int lexer(void);

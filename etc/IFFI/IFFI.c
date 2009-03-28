@@ -120,7 +120,7 @@ static void finger_IFFI_create(instructionPointer * ip)
 {
     // arguments: line number on TOS, signature as 0gnirts beneath it
 	fungeCell l = stack_pop(ip->stack);
-	unsigned char * restrict str = stack_pop_string(ip->stack, NULL);
+	unsigned char * restrict str = stack_pop_string(ip->stack);
 	ick_create((const char*)str, l);
 }
 

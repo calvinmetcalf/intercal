@@ -8,7 +8,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 34
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -53,6 +53,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -82,8 +83,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -178,6 +177,13 @@ extern FILE *yyin, *yyout;
 	while ( 0 )
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
+
+/* The following is because we cannot portably get our hands on size_t
+ * (without autoconf's help, which isn't available because we want
+ * flex-generated scanners to compile on their own).
+ * Given that the standard has decreed that size_t exists since 1989,
+ * I guess we can afford to depend on it. Manoj.
+ */
 
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
@@ -971,8 +977,7 @@ static char *lineptr = linebuf;
 ick_bool re_send_token = ick_FALSE;
 
 int lexer(void);
-static int myatoi(const char *text);
-void yyerror(const char *errtype);
+static int myatoi(char *text);
 
 #define SETLINENO					\
     {if (stbeginline == 0)	stbeginline = iyylineno;\
@@ -1107,7 +1112,7 @@ int getc(FILE *fp)
 	  } \
 	}
 
-#line 1111 "lexer.c"
+#line 1116 "lexer.c"
 
 #define INITIAL 0
 
@@ -1124,35 +1129,6 @@ int getc(FILE *fp)
 #endif
 
 static int yy_init_globals (void );
-
-/* Accessor methods to globals.
-   These are made visible to non-reentrant scanners for convenience. */
-
-int yylex_destroy (void );
-
-int yyget_debug (void );
-
-void yyset_debug (int debug_flag  );
-
-YY_EXTRA_TYPE yyget_extra (void );
-
-void yyset_extra (YY_EXTRA_TYPE user_defined  );
-
-FILE *yyget_in (void );
-
-void yyset_in  (FILE * in_str  );
-
-FILE *yyget_out (void );
-
-void yyset_out  (FILE * out_str  );
-
-int yyget_leng (void );
-
-char *yyget_text (void );
-
-int yyget_lineno (void );
-
-void yyset_lineno (int line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1196,7 +1172,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -1207,7 +1183,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -1289,10 +1265,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 226 "lexer.l"
+#line 225 "lexer.l"
 
 
-#line 1296 "lexer.c"
+#line 1272 "lexer.c"
 
 	if ( !(yy_init) )
 		{
@@ -1378,132 +1354,132 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 228 "lexer.l"
+#line 227 "lexer.l"
 {yylval.numval = myatoi(yytext); return(NUMBER);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 229 "lexer.l"
+#line 228 "lexer.l"
 {return(NOSPOT);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 230 "lexer.l"
+#line 229 "lexer.l"
 {return(ick_ONESPOT);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 231 "lexer.l"
+#line 230 "lexer.l"
 {return(ick_TWOSPOT);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 232 "lexer.l"
+#line 231 "lexer.l"
 {return(ick_TAIL);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 233 "lexer.l"
+#line 232 "lexer.l"
 {return(ick_HYBRID);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 234 "lexer.l"
+#line 233 "lexer.l"
 {return(MESH);}
 	YY_BREAK
 case 8:
-#line 237 "lexer.l"
+#line 236 "lexer.l"
 case 9:
-#line 238 "lexer.l"
+#line 237 "lexer.l"
 case 10:
 YY_RULE_SETUP
-#line 238 "lexer.l"
+#line 237 "lexer.l"
 {return(MINGLE); /* AIS: CLC-INTERCAL ick_mingle symbols.
 				    The \xBD is ISO-8859-1 for cent. */}
 	YY_BREAK
 case 11:
-#line 241 "lexer.l"
+#line 240 "lexer.l"
 case 12:
-#line 242 "lexer.l"
+#line 241 "lexer.l"
 case 13:
-#line 243 "lexer.l"
+#line 242 "lexer.l"
 case 14:
-#line 244 "lexer.l"
+#line 243 "lexer.l"
 case 15:
-#line 245 "lexer.l"
+#line 244 "lexer.l"
 case 16:
-#line 246 "lexer.l"
+#line 245 "lexer.l"
 case 17:
-#line 247 "lexer.l"
+#line 246 "lexer.l"
 case 18:
-#line 248 "lexer.l"
+#line 247 "lexer.l"
 case 19:
-#line 249 "lexer.l"
+#line 248 "lexer.l"
 case 20:
-#line 250 "lexer.l"
+#line 249 "lexer.l"
 case 21:
-#line 251 "lexer.l"
+#line 250 "lexer.l"
 case 22:
-#line 252 "lexer.l"
+#line 251 "lexer.l"
 case 23:
-#line 253 "lexer.l"
+#line 252 "lexer.l"
 case 24:
-#line 254 "lexer.l"
+#line 253 "lexer.l"
 case 25:
-#line 255 "lexer.l"
+#line 254 "lexer.l"
 case 26:
-#line 256 "lexer.l"
+#line 255 "lexer.l"
 case 27:
-#line 257 "lexer.l"
+#line 256 "lexer.l"
 case 28:
-#line 258 "lexer.l"
+#line 257 "lexer.l"
 case 29:
-#line 259 "lexer.l"
+#line 258 "lexer.l"
 case 30:
-#line 260 "lexer.l"
+#line 259 "lexer.l"
 case 31:
-#line 261 "lexer.l"
+#line 260 "lexer.l"
 case 32:
-#line 262 "lexer.l"
+#line 261 "lexer.l"
 case 33:
 YY_RULE_SETUP
-#line 262 "lexer.l"
+#line 261 "lexer.l"
 {return(MINGLE);}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 264 "lexer.l"
+#line 263 "lexer.l"
 {return(SELECT);}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 266 "lexer.l"
+#line 265 "lexer.l"
 {return(SLAT); /* AIS: Operand overloading */}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 267 "lexer.l"
+#line 266 "lexer.l"
 {return(BACKSLAT); /* ditto */}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 269 "lexer.l"
+#line 268 "lexer.l"
 {yylval.numval = AND; return(UNARY);}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 270 "lexer.l"
+#line 269 "lexer.l"
 {yylval.numval = OR; return(UNARY);}
 	YY_BREAK
 case 39:
-#line 272 "lexer.l"
+#line 271 "lexer.l"
 case 40:
-#line 273 "lexer.l"
+#line 272 "lexer.l"
 case 41:
-#line 274 "lexer.l"
+#line 273 "lexer.l"
 case 42:
 YY_RULE_SETUP
-#line 274 "lexer.l"
+#line 273 "lexer.l"
 {yylval.numval = XOR; return(UNARY);
                  /* AIS: CLC-INTERCAL uses \xBE, ISO-8859-1 for yen;
                     for some reason, \xA5 is what was detected by the compiler
@@ -1511,34 +1487,34 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 278 "lexer.l"
+#line 277 "lexer.l"
 {if(clclex) yylval.numval = WHIRL;
                  else yylval.numval = XOR; return(UNARY);
                  /* AIS: ? is a unary operator in both C-INTERCAL and
 		    CLC-INTERCAL, but with different meanings. */}
 	YY_BREAK
 case 44:
-#line 283 "lexer.l"
+#line 282 "lexer.l"
 case 45:
 YY_RULE_SETUP
-#line 283 "lexer.l"
+#line 282 "lexer.l"
 {yylval.numval = FIN; return(UNARY); /* AIS: | is CLC */}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 284 "lexer.l"
+#line 283 "lexer.l"
 {if(clclex) return(NOSPOT); /* AIS: a C/CLC ambiguity */
                  else {yylval.numval = WHIRL; return(UNARY);}}
 	YY_BREAK
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 286 "lexer.l"
+#line 285 "lexer.l"
 {yylval.numval = WHIRL + myatoi(yytext) - 1; return(UNARY);}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 288 "lexer.l"
+#line 287 "lexer.l"
 {char temp = sparkearsstack[sparkearslev/32]&1;
                  STACKSPARKEARS(0); /* AIS: I added all mentions of
 				       STACKSPARKEARS, OPEN\(SPARK\|EARS\),
@@ -1548,7 +1524,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 294 "lexer.l"
+#line 293 "lexer.l"
 {char temp = sparkearsstack[sparkearslev/32]&1;
                  STACKSPARKEARS(1);
                  return(temp?CLOSEEARS:OPENEARS);}
@@ -1556,116 +1532,116 @@ YY_RULE_SETUP
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 298 "lexer.l"
+#line 297 "lexer.l"
 {SETLINENO; yylval.numval = myatoi(yytext); return(LABEL);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 300 "lexer.l"
+#line 299 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; return(DO);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 301 "lexer.l"
+#line 300 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; return(DO);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 302 "lexer.l"
+#line 301 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 303 "lexer.l"
+#line 302 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 304 "lexer.l"
+#line 303 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
 	YY_BREAK
 case 56:
 /* rule 56 can match eol */
 YY_RULE_SETUP
-#line 305 "lexer.l"
+#line 304 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(DO);}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 306 "lexer.l"
+#line 305 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; return(MAYBE);}
 	YY_BREAK
 case 58:
 /* rule 58 can match eol */
 YY_RULE_SETUP
-#line 307 "lexer.l"
+#line 306 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; return(MAYBE);}
 	YY_BREAK
 case 59:
 /* rule 59 can match eol */
 YY_RULE_SETUP
-#line 308 "lexer.l"
+#line 307 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(MAYBE);}
 	YY_BREAK
 case 60:
 /* rule 60 can match eol */
 YY_RULE_SETUP
-#line 309 "lexer.l"
+#line 308 "lexer.l"
 {SETLINENO; CLEARSPARKEARSTACK; politesse++; return(MAYBE);
                      /* AIS: I added all the MAYBE cases. It seems that MAYBE
                              has no simple Latin synonym. */}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 313 "lexer.l"
+#line 312 "lexer.l"
 {return(NOT);}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 314 "lexer.l"
+#line 313 "lexer.l"
 {return(NOT);}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 315 "lexer.l"
+#line 314 "lexer.l"
 {return(NOT);}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 316 "lexer.l"
+#line 315 "lexer.l"
 {return(NOT); /* AIS: CLC-INTERCAL again, this time it's
 				 ISO-8859-1 for the logical NOT symbol... */}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 318 "lexer.l"
+#line 317 "lexer.l"
 {return(NOT); /* ... but my computer translates it to \xAC */}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 320 "lexer.l"
+#line 319 "lexer.l"
 {return(ONCE);}
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 321 "lexer.l"
+#line 320 "lexer.l"
 {return(ONCE);}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 322 "lexer.l"
+#line 321 "lexer.l"
 {return(AGAIN);}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 323 "lexer.l"
+#line 322 "lexer.l"
 {return(AGAIN);}
 	YY_BREAK
 case 70:
 /* rule 70 can match eol */
 YY_RULE_SETUP
-#line 325 "lexer.l"
+#line 324 "lexer.l"
 {yylval.numval = myatoi(yytext);
                  if (yylval.numval && yylval.numval < 100)
 		   return(OHOHSEVEN);
@@ -1674,343 +1650,343 @@ YY_RULE_SETUP
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 330 "lexer.l"
+#line 329 "lexer.l"
 {return(SUB);}
 	YY_BREAK
 case 72:
 /* rule 72 can match eol */
-#line 332 "lexer.l"
+#line 331 "lexer.l"
 case 73:
 /* rule 73 can match eol */
 YY_RULE_SETUP
-#line 332 "lexer.l"
+#line 331 "lexer.l"
 {return(BY);}
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 334 "lexer.l"
+#line 333 "lexer.l"
 {return(GETS);}
 	YY_BREAK
 case 75:
-#line 336 "lexer.l"
+#line 335 "lexer.l"
 case 76:
 YY_RULE_SETUP
-#line 336 "lexer.l"
+#line 335 "lexer.l"
 {yylval.numval = GETS; return(GERUND);}
 	YY_BREAK
 case 77:
-#line 339 "lexer.l"
+#line 338 "lexer.l"
 case 78:
 YY_RULE_SETUP
-#line 339 "lexer.l"
+#line 338 "lexer.l"
 {return(FORGET);}
 	YY_BREAK
 case 79:
-#line 341 "lexer.l"
+#line 340 "lexer.l"
 case 80:
 YY_RULE_SETUP
-#line 341 "lexer.l"
+#line 340 "lexer.l"
 {yylval.numval = FORGET; return(GERUND);}
 	YY_BREAK
 case 81:
-#line 343 "lexer.l"
+#line 342 "lexer.l"
 case 82:
 YY_RULE_SETUP
-#line 343 "lexer.l"
+#line 342 "lexer.l"
 {return(RESUME);}
 	YY_BREAK
 case 83:
-#line 345 "lexer.l"
+#line 344 "lexer.l"
 case 84:
 YY_RULE_SETUP
-#line 345 "lexer.l"
+#line 344 "lexer.l"
 {yylval.numval = RESUME; return(GERUND);}
 	YY_BREAK
 case 85:
-#line 347 "lexer.l"
+#line 346 "lexer.l"
 case 86:
 YY_RULE_SETUP
-#line 347 "lexer.l"
+#line 346 "lexer.l"
 {return(STASH);}
 	YY_BREAK
 case 87:
-#line 349 "lexer.l"
+#line 348 "lexer.l"
 case 88:
 YY_RULE_SETUP
-#line 349 "lexer.l"
+#line 348 "lexer.l"
 {yylval.numval = STASH; return(GERUND);}
 	YY_BREAK
 case 89:
-#line 351 "lexer.l"
+#line 350 "lexer.l"
 case 90:
 YY_RULE_SETUP
-#line 351 "lexer.l"
+#line 350 "lexer.l"
 {return(RETRIEVE);}
 	YY_BREAK
 case 91:
-#line 353 "lexer.l"
+#line 352 "lexer.l"
 case 92:
 YY_RULE_SETUP
-#line 353 "lexer.l"
+#line 352 "lexer.l"
 {yylval.numval = RETRIEVE; return(GERUND);}
 	YY_BREAK
 case 93:
-#line 355 "lexer.l"
+#line 354 "lexer.l"
 case 94:
 YY_RULE_SETUP
-#line 355 "lexer.l"
+#line 354 "lexer.l"
 {return(IGNORE);}
 	YY_BREAK
 case 95:
-#line 357 "lexer.l"
+#line 356 "lexer.l"
 case 96:
 YY_RULE_SETUP
-#line 357 "lexer.l"
+#line 356 "lexer.l"
 {yylval.numval = IGNORE; return(GERUND);}
 	YY_BREAK
 case 97:
-#line 359 "lexer.l"
+#line 358 "lexer.l"
 case 98:
 YY_RULE_SETUP
-#line 359 "lexer.l"
+#line 358 "lexer.l"
 {return(REMEMBER);}
 	YY_BREAK
 case 99:
-#line 361 "lexer.l"
+#line 360 "lexer.l"
 case 100:
 YY_RULE_SETUP
-#line 361 "lexer.l"
+#line 360 "lexer.l"
 {yylval.numval = REMEMBER; return(GERUND);}
 	YY_BREAK
 case 101:
-#line 363 "lexer.l"
+#line 362 "lexer.l"
 case 102:
 YY_RULE_SETUP
-#line 363 "lexer.l"
+#line 362 "lexer.l"
 {return(ABSTAIN);}
 	YY_BREAK
 case 103:
-#line 365 "lexer.l"
+#line 364 "lexer.l"
 case 104:
 YY_RULE_SETUP
-#line 365 "lexer.l"
+#line 364 "lexer.l"
 {yylval.numval = ABSTAIN; return(GERUND);}
 	YY_BREAK
 case 105:
-#line 367 "lexer.l"
+#line 366 "lexer.l"
 case 106:
 YY_RULE_SETUP
-#line 367 "lexer.l"
+#line 366 "lexer.l"
 {return(REINSTATE);}
 	YY_BREAK
 case 107:
-#line 369 "lexer.l"
+#line 368 "lexer.l"
 case 108:
 YY_RULE_SETUP
-#line 369 "lexer.l"
+#line 368 "lexer.l"
 {yylval.numval = REINSTATE; return(GERUND);}
 	YY_BREAK
 case 109:
 /* rule 109 can match eol */
-#line 371 "lexer.l"
+#line 370 "lexer.l"
 case 110:
 /* rule 110 can match eol */
 YY_RULE_SETUP
-#line 371 "lexer.l"
+#line 370 "lexer.l"
 {return(READ_OUT);}
 	YY_BREAK
 case 111:
-#line 373 "lexer.l"
+#line 372 "lexer.l"
 case 112:
 /* rule 112 can match eol */
 YY_RULE_SETUP
-#line 373 "lexer.l"
+#line 372 "lexer.l"
 {yylval.numval = READ_OUT; return(GERUND);}
 	YY_BREAK
 case 113:
 /* rule 113 can match eol */
-#line 375 "lexer.l"
+#line 374 "lexer.l"
 case 114:
 /* rule 114 can match eol */
 YY_RULE_SETUP
-#line 375 "lexer.l"
+#line 374 "lexer.l"
 {return(WRITE_IN);}
 	YY_BREAK
 case 115:
-#line 377 "lexer.l"
+#line 376 "lexer.l"
 case 116:
 /* rule 116 can match eol */
 YY_RULE_SETUP
-#line 377 "lexer.l"
+#line 376 "lexer.l"
 {yylval.numval = WRITE_IN; return(GERUND);}
 	YY_BREAK
 case 117:
-#line 379 "lexer.l"
+#line 378 "lexer.l"
 case 118:
-#line 380 "lexer.l"
+#line 379 "lexer.l"
 case 119:
-#line 381 "lexer.l"
+#line 380 "lexer.l"
 case 120:
 YY_RULE_SETUP
-#line 381 "lexer.l"
+#line 380 "lexer.l"
 {yylval.numval = UNKNOWN; return(GERUND);
                  /* AIS: An idea stolen from CLC-INTERCAL.
 		    The Latin means literally 'remind' or 'mention'. */}
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 384 "lexer.l"
+#line 383 "lexer.l"
 {/* By AIS. I can't find a Latin translation for this. */
                  return(PIN);}
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 386 "lexer.l"
+#line 385 "lexer.l"
 {/* By AIS */ yylval.numval = PIN; return(GERUND);}
 	YY_BREAK
 case 123:
 /* rule 123 can match eol */
-#line 388 "lexer.l"
+#line 387 "lexer.l"
 case 124:
 /* rule 124 can match eol */
 YY_RULE_SETUP
-#line 388 "lexer.l"
+#line 387 "lexer.l"
 {/* AIS */ yylval.numval = myatoi(yytext);
 			  return(NEXTFROMLABEL);}
 	YY_BREAK
 case 125:
 /* rule 125 can match eol */
-#line 391 "lexer.l"
+#line 390 "lexer.l"
 case 126:
 /* rule 126 can match eol */
 YY_RULE_SETUP
-#line 391 "lexer.l"
+#line 390 "lexer.l"
 {/* AIS: 'next' is not a verb, so the Latin is invented */
                  return(NEXTFROMEXPR);}
 	YY_BREAK
 case 127:
-#line 394 "lexer.l"
+#line 393 "lexer.l"
 case 128:
 /* rule 128 can match eol */
 YY_RULE_SETUP
-#line 394 "lexer.l"
+#line 393 "lexer.l"
 {/* AIS */ yylval.numval = NEXTFROMLABEL; return(GERUND);}
 	YY_BREAK
 case 129:
 /* rule 129 can match eol */
-#line 396 "lexer.l"
+#line 395 "lexer.l"
 case 130:
 /* rule 130 can match eol */
 YY_RULE_SETUP
-#line 396 "lexer.l"
+#line 395 "lexer.l"
 {/* AIS */ yylval.numval = myatoi(yytext);
 			  return(COME_FROM);}
 	YY_BREAK
 case 131:
 /* rule 131 can match eol */
-#line 399 "lexer.l"
+#line 398 "lexer.l"
 case 132:
 /* rule 132 can match eol */
 YY_RULE_SETUP
-#line 399 "lexer.l"
+#line 398 "lexer.l"
 {/* AIS */ return(COMPUCOME);}
 	YY_BREAK
 case 133:
-#line 401 "lexer.l"
+#line 400 "lexer.l"
 case 134:
 /* rule 134 can match eol */
 YY_RULE_SETUP
-#line 401 "lexer.l"
+#line 400 "lexer.l"
 {yylval.numval = COME_FROM; return(GERUND);}
 	YY_BREAK
 case 135:
-#line 403 "lexer.l"
+#line 402 "lexer.l"
 case 136:
 YY_RULE_SETUP
-#line 403 "lexer.l"
+#line 402 "lexer.l"
 {stbeginline = 0; return(NEXT);}
 	YY_BREAK
 case 137:
-#line 405 "lexer.l"
+#line 404 "lexer.l"
 case 138:
 YY_RULE_SETUP
-#line 405 "lexer.l"
+#line 404 "lexer.l"
 {yylval.numval = NEXT; return(GERUND);}
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 406 "lexer.l"
+#line 405 "lexer.l"
 {return(FROM); /* AIS: Latin is 'A', which confuses the rest
                                   of the parser */}
 	YY_BREAK
 case 140:
-#line 409 "lexer.l"
+#line 408 "lexer.l"
 case 141:
-#line 410 "lexer.l"
+#line 409 "lexer.l"
 case 142:
 /* rule 142 can match eol */
 YY_RULE_SETUP
-#line 410 "lexer.l"
+#line 409 "lexer.l"
 {return(GIVE_UP);}
 	YY_BREAK
 case 143:
 /* rule 143 can match eol */
-#line 412 "lexer.l"
+#line 411 "lexer.l"
 case 144:
 /* rule 144 can match eol */
 YY_RULE_SETUP
-#line 412 "lexer.l"
+#line 411 "lexer.l"
 {return(TRY_AGAIN);}
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 413 "lexer.l"
+#line 412 "lexer.l"
 {return(WHILE); /* AIS. Latin for this is needed. */}
 	YY_BREAK
 case 146:
-#line 415 "lexer.l"
+#line 414 "lexer.l"
 case 147:
 YY_RULE_SETUP
-#line 415 "lexer.l"
+#line 414 "lexer.l"
 {yylval.numval = WHILE; return(GERUND);}
 	YY_BREAK
 case 148:
 /* rule 148 can match eol */
 YY_RULE_SETUP
-#line 416 "lexer.l"
+#line 415 "lexer.l"
 {yylval.numval = TRY_AGAIN; return(GERUND);}
 	YY_BREAK
 case 149:
 /* rule 149 can match eol */
-#line 418 "lexer.l"
+#line 417 "lexer.l"
 case 150:
 /* rule 150 can match eol */
 YY_RULE_SETUP
-#line 418 "lexer.l"
+#line 417 "lexer.l"
 {return(GO_BACK);}
 	YY_BREAK
 case 151:
 /* rule 151 can match eol */
-#line 420 "lexer.l"
+#line 419 "lexer.l"
 case 152:
 /* rule 152 can match eol */
 YY_RULE_SETUP
-#line 420 "lexer.l"
+#line 419 "lexer.l"
 {yylval.numval = GO_BACK; return(GERUND);}
 	YY_BREAK
 case 153:
 /* rule 153 can match eol */
-#line 422 "lexer.l"
+#line 421 "lexer.l"
 case 154:
 /* rule 154 can match eol */
 YY_RULE_SETUP
-#line 422 "lexer.l"
+#line 421 "lexer.l"
 {return(GO_AHEAD);}
 	YY_BREAK
 case 155:
 /* rule 155 can match eol */
 YY_RULE_SETUP
-#line 423 "lexer.l"
+#line 422 "lexer.l"
 {yylval.numval = GO_AHEAD; return(GERUND);
 		 /* AIS: I'm having a few deponent troubles with the Latin, so
 		    there are no Latin gerunds around here. Besides, the Latin
@@ -2019,48 +1995,48 @@ YY_RULE_SETUP
 	YY_BREAK
 case 156:
 /* rule 156 can match eol */
-#line 429 "lexer.l"
+#line 428 "lexer.l"
 case 157:
 /* rule 157 can match eol */
 YY_RULE_SETUP
-#line 429 "lexer.l"
+#line 428 "lexer.l"
 {yylval.numval = myatoi(yytext); return(CREATE);}
 	YY_BREAK
 case 158:
-#line 431 "lexer.l"
+#line 430 "lexer.l"
 case 159:
 YY_RULE_SETUP
-#line 431 "lexer.l"
+#line 430 "lexer.l"
 {return(COMPUCREATE);}
 	YY_BREAK
 case 160:
-#line 433 "lexer.l"
+#line 432 "lexer.l"
 case 161:
-#line 434 "lexer.l"
+#line 433 "lexer.l"
 case 162:
 YY_RULE_SETUP
-#line 434 "lexer.l"
+#line 433 "lexer.l"
 {yylval.numval = CREATE; return(GERUND);}
 	YY_BREAK
 case 163:
 YY_RULE_SETUP
-#line 436 "lexer.l"
+#line 435 "lexer.l"
 {return(INTERSECTION);}
 	YY_BREAK
 case 164:
 /* rule 164 can match eol */
 YY_RULE_SETUP
-#line 438 "lexer.l"
+#line 437 "lexer.l"
 ;
 	YY_BREAK
 case 165:
 YY_RULE_SETUP
-#line 439 "lexer.l"
+#line 438 "lexer.l"
 {/* AIS */ yylval.numval = *yytext; return(UNKNOWNID);}
 	YY_BREAK
 case 166:
 YY_RULE_SETUP
-#line 440 "lexer.l"
+#line 439 "lexer.l"
 {/* AIS */ yylval.numval = yytext[0]*256 + yytext[3];
 		 if(yytext[0] > yytext[3])
 		   yylval.numval = yytext[0] + yytext[3]*256;
@@ -2068,17 +2044,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 167:
 YY_RULE_SETUP
-#line 444 "lexer.l"
+#line 443 "lexer.l"
 {yylval.numval = yytext[0]; /* AIS: The line below for debug */
  if(yydebug) fprintf(stdout, "yylex: bad char %#x\n",(unsigned char)yytext[0]);
                  return(BADCHAR);}
 	YY_BREAK
 case 168:
 YY_RULE_SETUP
-#line 449 "lexer.l"
+#line 448 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 2082 "lexer.c"
+#line 2058 "lexer.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -3076,7 +3052,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 449 "lexer.l"
+#line 448 "lexer.l"
 
 
 
@@ -3102,7 +3078,7 @@ int lexer(void)
     return(tok);
 }
 
-static int myatoi(const char *text) /* AIS */
+static int myatoi(char *text) /* AIS */
 {
 #define MAXTEXT 100
     static char buf[MAXTEXT];
@@ -3125,7 +3101,7 @@ static int myatoi(const char *text) /* AIS */
     return atoi(thinbuf);
 }
 
-void yyerror(const char *errtype)
+void yyerror(char *errtype)
 {
 #ifdef MAIN
     (void) printf("lextest: lexer error: %s.\n", errtype);

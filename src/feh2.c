@@ -459,7 +459,7 @@ void prexpr(node *np, FILE *fp, int freenode);
  * If the order of statement-token defines in parser.y ever changes,
  * this will need to be reordered.
  */
-/*@observer@*/ const char *enablersm1[MAXTYPES+1] =
+const char *enablersm1[MAXTYPES+1] =
 {
     "UNKNOWN", /* AIS: so comments can be ABSTAINED/REINSTATED */
     "GETS",
@@ -1594,10 +1594,10 @@ static int prunknownstr(node *np, FILE* fp)
   case BADCHAR:
     if (np->constant > 256)
       (void) fprintf(fp, "o%xx%x",
-		     (unsigned int)(np->constant / 256),
-		     (unsigned int)(np->constant % 256));
+		     (int)(np->constant / 256),
+		     (int)(np->constant % 256));
     else
-      (void) fprintf(fp, "u%x", (unsigned int)np->constant);
+      (void) fprintf(fp, "u%x", (int)np->constant);
     return 2;
   case US_ID: (void) fputc((char)np->constant, fp); return 0;
   case US_ELEM: (void) fputc(';', fp); return 1;

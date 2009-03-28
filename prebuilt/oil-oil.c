@@ -101,7 +101,7 @@
 
 /* Define strdup if it isn't available */
 #ifndef HAVE_STRDUP
-char* strdup(const char* s)
+char* strdup(char* s)
 {
   char* t=malloc(strlen(s)+1);
   if(t) strcpy(t,s);
@@ -124,12 +124,12 @@ struct ickstype
 			 sequence of lvals (=0) or rvals (=1) this is from the
 			 root; depth bits from the end are relevant, and the
 			 bit nearest the root is least significant */
-  const char* condition; /* Points to a constant string; the condition to generate
+  char* condition;    /* Points to a constant string; the condition to generate
 			 on that node. Could also point to something the lexer
 			 mallocs, but then the lexer has to keep track of being
 			 able to free it again. If this is NULL, it means that
 			 there isn't a condition other than maybe mustbemesh */
-  const char* nodetypename; /* The name of the type of node this condition matches,
+  char* nodetypename; /* The name of the type of node this condition matches,
 		         or NULL for a LEXERLEAF */
   mybool usec;        /* Whether to append the value of c to the condition */
   mybool mustbemesh;  /* Must this node be a mesh or mesh32? */
@@ -153,8 +153,8 @@ char optname[MAXOPTNAMELEN]="undefined";
 
 typedef struct ickstype *YYSTYPE;
 
-void splitend(void);
-void splitstart(void);
+void splitend();
+void splitstart();
 
 void treedepthup(YYSTYPE, mybool);
 void treefree(YYSTYPE);
@@ -2689,7 +2689,7 @@ int countungetc(int c, FILE* f)
   return c;
 }
 
-void splitstart(void)
+void splitstart()
 {
   static char fname[]="oilout00.c";
   if(filenumber>255)
@@ -2711,7 +2711,7 @@ void splitstart(void)
 	 "  node *tp;\n", filenumber);
 }
 
-void splitend(void)
+void splitend()
 {
   /* Disabling warnings about unused variables. gcc will optimize this right
      out, and in any case the raise(SIGSEGV) will be unreachable (but will
