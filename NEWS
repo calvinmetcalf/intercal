@@ -2,7 +2,7 @@
 
   Release 0.29 (by Alex Smith)
 
-Changes reported or patched by Arvid Norlander
+Bugs reported and changes patched by Arvid Norlander
 
 1.  Fixed a typo in the perpet.c version of the help information.
 
@@ -28,7 +28,7 @@ Changes reported or patched by Arvid Norlander
 
 7.  Refactored main(). It neeeded it, badly.
 
-Changes reported by Elliott Hird
+Bugs reported by Elliott Hird
 
 8.  Fixed the configure script to work with the default Debian shell dash.
     (also reported independently by Debian)
@@ -46,7 +46,7 @@ Changes reported by Elliott Hird
     the prebuilt versions; see change 11 of version 0.26, this is finishing
     what that started.)
 
-Changes reported or patched by Joris Huizer
+Bugs reported, changes requested, and patches by Joris Huizer
 
 12. The [xoritself] optimiser idiom has been generalised to handle some
     situations where the redundant XOR operands are on different grouping
