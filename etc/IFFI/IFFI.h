@@ -30,8 +30,12 @@
 #include "../../global.h"
 #include "../manager.h"
 
+#if !defined(CFUNGE_API_VERSION) || (CFUNGE_API_VERSION != 1)
+#  error "This version of IFFI isn't compatible with this cfunge version."
+#endif
+
 #ifdef CONCURRENT_FUNGE
-#error The C-INTERCAL/cfunge external calls interface cannot be used concurrently
+#  error "The C-INTERCAL/cfunge external calls interface cannot be used concurrently."
 #endif
 
 // We need at least GCC 4.1 for this trick.

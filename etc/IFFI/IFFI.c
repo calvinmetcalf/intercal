@@ -93,7 +93,7 @@ void ick_interpreter_run(void)
 
 void ick_iffi_interpreter_one_iteration(void)
 {
-	fungeCell opcode;
+	funge_cell opcode;
 	opcode = fungespace_get(&iffiIP->position);
 
 	if (setting_trace_level > 8) {
@@ -110,7 +110,7 @@ void ick_iffi_interpreter_one_iteration(void)
 
 	execute_instruction(opcode, iffiIP);
 	if (iffiIP->needMove)
-		ip_forward(iffiIP, 1);
+		ip_forward(iffiIP);
 	else
 		iffiIP->needMove = true;
 }
@@ -119,15 +119,15 @@ void ick_iffi_interpreter_one_iteration(void)
 static void finger_IFFI_create(instructionPointer * ip)
 {
     // arguments: line number on TOS, signature as 0gnirts beneath it
-	fungeCell l = stack_pop(ip->stack);
-	unsigned char * restrict str = stack_pop_string(ip->stack);
+	funge_cell l = stack_pop(ip->stack);
+	unsigned char * restrict str = stack_pop_string(ip->stack, NULL);
 	ick_create((const char*)str, l);
 }
 
 // C - In markmode COME FROM the top of stack
 static void finger_IFFI_come_from(instructionPointer * ip)
 {
-	fungeCell l;
+	funge_cell l;
 
 	l = stack_pop(ip->stack);
 
@@ -148,7 +148,7 @@ static void finger_IFFI_create_data(instructionPointer * ip)
 	// 0 if the argument is not a variable, or its number if it is
 	// The argument's value at the time the CREATED instruction was called
 	// The argument's value now (same as previous if -a was not used)
-	fungeCell i;
+	funge_cell i;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -167,7 +167,7 @@ static void finger_IFFI_create_data(instructionPointer * ip)
 // F - FORGET NEXT stack entries equal to top of stack
 static void finger_IFFI_forget(instructionPointer * ip)
 {
-	fungeCell f;
+	funge_cell f;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -193,7 +193,7 @@ static void finger_IFFI_var_get(instructionPointer * ip)
 	// var numbers are positive for onespot, negative for twospot
 	// return: the value of the variable
 
-	fungeCell v;
+	funge_cell v;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -214,7 +214,7 @@ static void finger_IFFI_var_get(instructionPointer * ip)
 // L - Use top of stack as a line label for this point
 static void finger_IFFI_label(instructionPointer * ip)
 {
-	fungeCell l;
+	funge_cell l;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -238,7 +238,7 @@ static void finger_IFFI_marker(instructionPointer * ip)
 // N - Try to NEXT to the line labelled with the top of stack
 static void finger_IFFI_next(instructionPointer * ip)
 {
-	fungeCell l;
+	funge_cell l;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -260,7 +260,7 @@ static void finger_IFFI_next(instructionPointer * ip)
 // R - RESUME to the top-of-stackth NEXT stack entry
 static void finger_IFFI_resume(instructionPointer * ip)
 {
-	fungeCell f;
+	funge_cell f;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -290,7 +290,7 @@ static void finger_IFFI_var_set(instructionPointer * ip)
 	// var numbers are positive for onespot, negative for twospot
 	// return: the value of the variable
 
-	fungeCell v, d;
+	funge_cell v, d;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -314,7 +314,7 @@ static void finger_IFFI_arg_set(instructionPointer * ip)
 {
 	// arguments: 0-based argument index on TOS, new value beneath it
 	// note that this is a NOP unless -a was used when compiling
-	fungeCell i, d;
+	funge_cell i, d;
 
 	if (firstload) {
 		ip_reverse(ip);
@@ -330,7 +330,7 @@ static void finger_IFFI_arg_set(instructionPointer * ip)
 // X - In markmode NEXT FROM the top of stack
 static void finger_IFFI_next_from(instructionPointer * ip)
 {
-	fungeCell l;
+	funge_cell l;
 
 	l = stack_pop(ip->stack);
 

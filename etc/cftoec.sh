@@ -102,7 +102,7 @@ echo "   " Adding the IFFI fingerprint...
 cp -r "$ICKSRC_PATH/etc/IFFI" "$ICKSRC_PATH/etc/IFFI.spec" src/fingerprints
 
 echo "   " Regenerating fingerprint lists...
-$CFUNGE_PATH/tools/gen_fprint_list.sh > /dev/null || die "Failed to regen list."
+tools/gen_fprint_list.sh > /dev/null || die "Failed to regen list."
 
 # Trust the filenames that are in the cfunge directory tree; if the user's
 # trying to trick themselves into running this on something that looks like
