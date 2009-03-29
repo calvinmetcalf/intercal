@@ -144,7 +144,7 @@ static yptimer yukclock_gettime()
 #endif
   /*@=unrecog@*/
   temp=(yptimer)ts.tv_nsec +
-    (yptimer)ts.tv_sec * (yptimer)1000000LU;
+    (yptimer)ts.tv_sec * (yptimer)1000000000LU;
   /* using wraparound as with gettimeofday */
   return temp;
 }
@@ -205,7 +205,7 @@ void yukline(int aboff,int emitlineno)
   if(yukopts & 1)
   { /* profile */
     temptick=YPGETTIME;
-    if(lastaboff) ypexectime[lastaboff]+=temptick-tickcount;
+    if(lastaboff) ypexectime[lastaboff]+=(yptimer)(temptick-tickcount);
     tickcount=temptick;
     if(ick_abstained[aboff]) ypabscount[aboff]++;
     else ypexecount[aboff]++;
