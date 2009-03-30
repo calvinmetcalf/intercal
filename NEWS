@@ -83,7 +83,7 @@ Changes reported by the Debian autobuilders and Joey Hess
     been removed, as this method works better; likewise, the optimiser
     optimisation now works again.)
 
-Changes patched by Alex Smith
+Changes by Alex Smith
 
 19. The build system has been completely redone, again; it now uses automake
     as well as a much newer version of autoconf. This means that there is now
@@ -111,6 +111,10 @@ Changes patched by Alex Smith
 22. The function clock_gettime is now supported by the yuk profiler as an
     alternative method of getting a high-resolution clock for profiling (it
     is available on at least Linux).
+
+23. The profiler now autodetects the same profiling mechanism at compile
+    time and at run time. (It was getting confused as to what mechanism it was
+    using, causing some really weird bugs.)
 
 23. Added support for computed CREATE (the computation is done at create-time,
     rather than when the unknown statement is encountered); partly because

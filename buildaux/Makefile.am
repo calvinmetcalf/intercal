@@ -68,6 +68,7 @@ latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
 
 ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/abcess.h src/ick_lose.h \
                      src/yuk.h
+nodist_ickinclude_HEADERS = config.h
 dist_ickdata_DATA = src/atari.bin src/baudot.bin src/ebcdic.bin src/latin1.bin \
                     src/ick-wrap.c src/pickwrap.c COPYING
 # These necessary pit files are in nodist_ here because they're in EXTRA_DIST

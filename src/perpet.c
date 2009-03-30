@@ -1272,6 +1272,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	 case 'K':       /* AIS: yuk information (or not) */
 	   if(yukdebug||yukprofile)
 	   {
+	     (void) fprintf(ofp, "#include \"config.h\"\n\n");
 	     (void) fprintf(ofp, "#include \"yuk.h\"\n\n");
 	     (void) fprintf(ofp, "char* textlines[] = {\n");
 	     emittextlines(ofp); /* from feh.c */
