@@ -61,7 +61,7 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)" \
 	"$(DESTDIR)$(ickdatadir)" "$(DESTDIR)$(ickdatadir)" \
-	"$(DESTDIR)$(ickincludedir)"
+	"$(DESTDIR)$(ickincludedir)" "$(DESTDIR)$(ickincludedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES) $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -147,7 +147,8 @@ dist_ickdataDATA_INSTALL = $(INSTALL_DATA)
 nodist_ickdataDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_ickdata_DATA) $(nodist_ickdata_DATA)
 ickincludeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(ickinclude_HEADERS)
+nodist_ickincludeHEADERS_INSTALL = $(INSTALL_HEADER)
+HEADERS = $(ickinclude_HEADERS) $(nodist_ickinclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -295,6 +296,7 @@ libyuk_a_SOURCES = src/yuk.c
 ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/abcess.h src/ick_lose.h \
                      src/yuk.h
 
+nodist_ickinclude_HEADERS = config.h
 dist_ickdata_DATA = src/atari.bin src/baudot.bin src/ebcdic.bin src/latin1.bin \
                     src/ick-wrap.c src/pickwrap.c COPYING
 
@@ -970,6 +972,23 @@ uninstall-ickincludeHEADERS:
 	  echo " rm -f '$(DESTDIR)$(ickincludedir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(ickincludedir)/$$f"; \
 	done
+install-nodist_ickincludeHEADERS: $(nodist_ickinclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(ickincludedir)" || $(MKDIR_P) "$(DESTDIR)$(ickincludedir)"
+	@list='$(nodist_ickinclude_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_ickincludeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(ickincludedir)/$$f'"; \
+	  $(nodist_ickincludeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(ickincludedir)/$$f"; \
+	done
+
+uninstall-nodist_ickincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_ickinclude_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(ickincludedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(ickincludedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -1164,7 +1183,7 @@ check: $(BUILT_SOURCES)
 all-am: Makefile $(INFO_DEPS) $(LIBRARIES) $(PROGRAMS) $(MANS) $(DATA) \
 		$(HEADERS) config.h
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(ickdatadir)" "$(DESTDIR)$(ickdatadir)" "$(DESTDIR)$(ickincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(ickdatadir)" "$(DESTDIR)$(ickdatadir)" "$(DESTDIR)$(ickincludedir)" "$(DESTDIR)$(ickincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -1225,7 +1244,8 @@ info: info-am
 info-am: $(INFO_DEPS)
 
 install-data-am: install-dist_ickdataDATA install-ickincludeHEADERS \
-	install-info-am install-man install-nodist_ickdataDATA
+	install-info-am install-man install-nodist_ickdataDATA \
+	install-nodist_ickincludeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -1340,7 +1360,9 @@ ps-am: $(PSS)
 uninstall-am: uninstall-binPROGRAMS uninstall-dist_ickdataDATA \
 	uninstall-dvi-am uninstall-html-am uninstall-ickincludeHEADERS \
 	uninstall-info-am uninstall-libLIBRARIES uninstall-man \
-	uninstall-nodist_ickdataDATA uninstall-pdf-am uninstall-ps-am
+	uninstall-nodist_ickdataDATA \
+	uninstall-nodist_ickincludeHEADERS uninstall-pdf-am \
+	uninstall-ps-am
 
 uninstall-man: uninstall-man1
 
@@ -1358,16 +1380,18 @@ uninstall-man: uninstall-man1
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-ickincludeHEADERS install-info \
 	install-info-am install-libLIBRARIES install-man install-man1 \
-	install-nodist_ickdataDATA install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
-	mostlyclean-aminfo mostlyclean-compile mostlyclean-generic pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-dist_ickdataDATA \
-	uninstall-dvi-am uninstall-html-am uninstall-ickincludeHEADERS \
-	uninstall-info-am uninstall-libLIBRARIES uninstall-man \
-	uninstall-man1 uninstall-nodist_ickdataDATA uninstall-pdf-am \
+	install-nodist_ickdataDATA install-nodist_ickincludeHEADERS \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-aminfo \
+	maintainer-clean-generic mostlyclean mostlyclean-aminfo \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-dist_ickdataDATA uninstall-dvi-am uninstall-html-am \
+	uninstall-ickincludeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-man uninstall-man1 \
+	uninstall-nodist_ickdataDATA \
+	uninstall-nodist_ickincludeHEADERS uninstall-pdf-am \
 	uninstall-ps-am
 
 parser.y : src/parser.y
