@@ -1420,6 +1420,8 @@ bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
 oil:
 bin2c:
 libick_ecto_b98.a:
+libick_ecto_b98.o:
+libick_ecto_b98.c:
 atari.o: bin2c$(EXEEXT_FOR_BUILD) src/atari.bin
 	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
 	$(COMPILE) -c atari.c
