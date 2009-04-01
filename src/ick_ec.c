@@ -74,9 +74,14 @@ extern ick_overop* ick_oo_twospots;
   st = ick_jicmatch(unopstr);
   if(st)
   {
-    ick_createdata icd[3]={{16,0,1601,{og1,os1},arg1},
-			   {16,0,1602,{og2,os2},arg2},
-			   {16,0,1603,{og3,os3},0}};
+    ick_createdata icd[3];
+    icd[0].width=16;         icd[1].width=16;         icd[2].width=16;
+    icd[0].isarray=0;        icd[1].isarray=0;        icd[2].isarray=0;
+    icd[0].varnumber=1601;   icd[1].varnumber=1602;   icd[2].varnumber=1603;
+    icd[0].accessors.get=og1;icd[1].accessors.get=og2;icd[2].accessors.get=og3;
+    icd[0].accessors.set=os1;icd[1].accessors.set=os2;icd[2].accessors.set=os3;
+    icd[0].value=arg1;       icd[1].value=arg2;       icd[2].value=0;
+
     ick_stash(ick_TWOSPOT, vi1, ick_twospots+vi1, ick_oo_twospots);
     ick_stash(ick_TWOSPOT, vi2, ick_twospots+vi2, ick_oo_twospots);
     ick_stash(ick_TWOSPOT, vi3, ick_twospots+vi3, ick_oo_twospots);

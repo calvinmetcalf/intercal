@@ -407,10 +407,10 @@ static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
   if(!forget) while(i--)
 		if(type==ick_TAIL)
 		  a->data.tail[i]=(ick_type16)tempcp[i]+
-		    (ick_type16)((rand()/(RAND_MAX/256))*256);
+		    (ick_type16)((rand()%256)*256);
 		else
 		  a->data.hybrid[i]=(ick_type32)tempcp[i]+
-		    (ick_type32)((rand()/(RAND_MAX/256))*256);
+		    (ick_type32)((rand()%256)*256);
   free(tempcp);
   free(buf);
 }
@@ -722,10 +722,13 @@ void ick_stash(unsigned int type, unsigned int index, void *from, ick_overop* oo
 /* stash away the variable's value */
 {
   /*@-nullassign@*/
-  ick_overop dummyoo = {NULL, NULL};
+  ick_overop dummyoo;
   /*@=nullassign@*/
   /* create a new ick_stashbox and push it onto the stack */
-  ick_stashbox *sp = (ick_stashbox*)malloc(sizeof(ick_stashbox));
+  ick_stashbox *sp;
+  dummyoo.get = (ick_type32 (*)(ick_type32))NULL;
+  dummyoo.set = (void (*)(ick_type32, void(*)()))NULL;
+  sp = (ick_stashbox*)malloc(sizeof(ick_stashbox));
   if (sp == NULL) ick_lose(IE222, ick_lineno, (const char *)NULL);
   sp->ick_next = ick_first;
   ick_first = sp;

@@ -49,6 +49,10 @@ LICENSE TERMS
 #if ICK_HAVE_STDINT_H+1 == 2
 #include <stdint.h>
 #else
+/* Ensure that uint32_t, etc, aren't implemented as compatibility macros
+   so that we can implement them as typedefs. */
+#undef uint32_t
+#undef uint16_t
 typedef unsigned int   uint32_t;
 typedef unsigned short uint16_t;
 #endif

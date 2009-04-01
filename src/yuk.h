@@ -144,3 +144,11 @@ extern yukvar yukvars[];
 extern char** globalargv;
 extern int globalargc;
 /*@=exportlocal@*/
+
+/* Give our own definition of sig_atomic_t for systems that don't have
+   it. char ought to be atomic, on most systems (especially as we don't
+   touch anything but the bottom byte). */
+#if SIZEOF_SIG_ATOMIC_T + 0 == 0
+#undef sig_atomic_t
+typedef char sig_atomic_t
+#endif

@@ -36,6 +36,8 @@ LICENSE TERMS
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "config.h"
+
 typedef struct
 {
     /*@observer@*/ const char *name;

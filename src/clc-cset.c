@@ -192,7 +192,7 @@ static void ick_bitencout(char** pop, const struct cset* co,
     if(co->bitorder[i]>'l')
     {
       if((padstyle==1&&(i==1||i==9) && !(outword&(1<<(co->nbytes*8-i)))) ||
-	 (padstyle==2&&(rand()>RAND_MAX/2||!outword)))
+	 (padstyle==2&&(rand()%2||!outword)))
 	outword |= 1<<(co->nbytes*8-i-1);
     }
     /* Copy the appropriate bit from val to outword. */
