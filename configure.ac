@@ -38,6 +38,7 @@ AC_C_CONST
 AC_C_VOLATILE
 AC_CHECK_SIZEOF([long long int],[0])
 AC_CHECK_SIZEOF([_Bool],[0])
+AC_CHECK_SIZEOF([sig_atomic_t],[0],[[#include <signal.h>]])
 AC_HEADER_TIME
 AC_EXEEXT
 AC_OBJEXT

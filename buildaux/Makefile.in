@@ -71,6 +71,10 @@ am_libick_a_OBJECTS = cesspool.$(OBJEXT) numerals.$(OBJEXT) \
 	ick_lose.$(OBJEXT) fiddle.$(OBJEXT) arrgghh.$(OBJEXT) \
 	clc-cset.$(OBJEXT) uncommon.$(OBJEXT)
 libick_a_OBJECTS = $(am_libick_a_OBJECTS)
+libick_ecto_b98_a_AR = $(AR) $(ARFLAGS)
+libick_ecto_b98_a_LIBADD =
+libick_ecto_b98_a_SOURCES = libick_ecto_b98.c
+libick_ecto_b98_a_OBJECTS = libick_ecto_b98.$(OBJEXT)
 libickec_a_AR = $(AR) $(ARFLAGS)
 libickec_a_DEPENDENCIES = atari.o baudot.o ebcdic.o latin1.o
 am_libickec_a_OBJECTS = cesspool.$(OBJEXT) numerals.$(OBJEXT) \
@@ -118,14 +122,14 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 YLWRAP = $(top_srcdir)/buildaux/ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-SOURCES = $(libick_a_SOURCES) $(libickec_a_SOURCES) \
+SOURCES = $(libick_a_SOURCES) libick_ecto_b98.c $(libickec_a_SOURCES) \
 	$(libickmt_a_SOURCES) $(libidiot_a_SOURCES) \
 	$(libyuk_a_SOURCES) $(bin2c_SOURCES) $(convickt_SOURCES) \
 	$(ick_SOURCES) $(nodist_ick_SOURCES) $(oil_SOURCES)
-DIST_SOURCES = $(libick_a_SOURCES) $(libickec_a_SOURCES) \
-	$(libickmt_a_SOURCES) $(libidiot_a_SOURCES) \
-	$(libyuk_a_SOURCES) $(bin2c_SOURCES) $(convickt_SOURCES) \
-	$(ick_SOURCES) $(oil_SOURCES)
+DIST_SOURCES = $(libick_a_SOURCES) libick_ecto_b98.c \
+	$(libickec_a_SOURCES) $(libickmt_a_SOURCES) \
+	$(libidiot_a_SOURCES) $(libyuk_a_SOURCES) $(bin2c_SOURCES) \
+	$(convickt_SOURCES) $(ick_SOURCES) $(oil_SOURCES)
 am__dirstamp = $(am__leading_dot)dirstamp
 INFO_DEPS = $(srcdir)/doc/ick.info
 TEXINFO_TEX = $(top_srcdir)/buildaux/texinfo.tex
@@ -279,7 +283,9 @@ convickt_SOURCES = src/convickt.c src/clc-cset.c src/uncommon.c
 oil_SOURCES = src/oil.y
 oil_YFLAGS = 
 bin2c_SOURCES = src/bin2c.c
-lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a
+
+# Optional libraries are in lib_LIBRARIES, but with a null build rule.
+lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a libick_ecto_b98.a
 libick_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
                    src/arrgghh.c src/clc-cset.c src/uncommon.c
 
@@ -492,6 +498,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ick_ec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ick_lose.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libick_ecto_b98.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numerals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oil-oil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Po@am__quote@
@@ -1407,11 +1414,12 @@ libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
 
 @INCLUDE_HIDDEN_FROM_AUTOMAKE@ ./host.mak
 oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
-	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c $(LIBS_FOR_BUILD)
 bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
-	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS_FOR_BUILD)
 oil:
 bin2c:
+libick_ecto_b98.a:
 atari.o: bin2c$(EXEEXT_FOR_BUILD) src/atari.bin
 	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
 	$(COMPILE) -c atari.c

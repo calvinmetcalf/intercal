@@ -36,13 +36,15 @@ oil_SOURCES = src/oil.y
 oil_YFLAGS =
 bin2c_SOURCES = src/bin2c.c
 oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
-	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c $(LIBS_FOR_BUILD)
 bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
-	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c
+	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS_FOR_BUILD)
 oil:
 bin2c:
 
-lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a
+# Optional libraries are in lib_LIBRARIES, but with a null build rule.
+lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a libick_ecto_b98.a
+libick_ecto_b98.a:
 libick_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
                    src/arrgghh.c src/clc-cset.c src/uncommon.c
 libick_a_LIBADD = atari.o baudot.o ebcdic.o latin1.o

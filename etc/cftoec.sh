@@ -54,9 +54,9 @@ test -f "$ICKSRC_PATH/etc/IFFI.spec" || (
 
 echo Compiling cfunge into a library suitable for use with C-INTERCAL:
 
-rm -rf temp || die "Failed to remove any old temp directory"
-mkdir -p temp || die "Failed to create temp directory"
-cd temp  || die "Failed to change directory to temp directory"
+rm -rf cftoec_temp || die "Failed to remove any old temp directory"
+mkdir -p cftoec_temp || die "Failed to create temp directory"
+cd cftoec_temp  || die "Failed to change directory to temp directory"
 
 # Select compiler
 if [ -z "$CC" ]; then
@@ -131,5 +131,6 @@ ranlib ../libick_ecto_b98.a
 echo "   " Cleaning up...
 rm -rf *
 cd ..
+rm -rf cftoec_temp
 
 echo Finished, unless there were errors.
