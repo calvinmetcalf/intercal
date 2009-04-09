@@ -16,9 +16,40 @@ parser.y : src/parser.y
 	$(LN_S) `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y parser.y
 lexer.l : src/lexer.l
 	$(LN_S) `test -f 'src/lexer.l' || echo '$(srcdir)/'`src/lexer.l lexer.l
+ick-wrap.c : src/ick-wrap.c
+	$(LN_S) `test -f 'src/ick-wrap.c' || echo '$(srcdir)/'`src/ick-wrap.c ick-wrap.c
+pickwrap.c : src/pickwrap.c
+	$(LN_S) `test -f 'src/pickwrap.c' || echo '$(srcdir)/'`src/pickwrap.c pickwrap.c
+syslib.i : pit/lib/syslib.i
+	$(LN_S) `test -f 'pit/lib/syslib.i' || echo '$(srcdir)/'`pit/lib/syslib.i syslib.i
+syslib.3i : pit/lib/syslib.3i
+	$(LN_S) `test -f 'pit/lib/syslib.3i' || echo '$(srcdir)/'`pit/lib/syslib.3i syslib.3i
+syslib.4i : pit/lib/syslib.4i
+	$(LN_S) `test -f 'pit/lib/syslib.4i' || echo '$(srcdir)/'`pit/lib/syslib.4i syslib.4i
+syslib.5i : pit/lib/syslib.5i
+	$(LN_S) `test -f 'pit/lib/syslib.5i' || echo '$(srcdir)/'`pit/lib/syslib.5i syslib.5i
+syslib.6i : pit/lib/syslib.6i
+	$(LN_S) `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib.6i syslib.6i
+syslib.7i : pit/lib/syslib.7i
+	$(LN_S) `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib.7i syslib.7i
+ick_ec.h : src/ick_ec.h
+	$(LN_S) `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
+ick_lose.h : src/ick_lose.h
+	$(LN_S) `test -f 'src/ick_lose.h' || echo '$(srcdir)/'`src/ick_lose.h ick_lose.h
+fiddle.h : src/fiddle.h
+	$(LN_S) `test -f 'src/fiddle.h' || echo '$(srcdir)/'`src/fiddle.h fiddle.h
+abcess.h : src/abcess.h
+	$(LN_S) `test -f 'src/abcess.h' || echo '$(srcdir)/'`src/abcess.h abcess.h
+yuk.h : src/yuk.h
+	$(LN_S) `test -f 'src/ick-ec.h' || echo '$(srcdir)/'`src/yuk.h yuk.h
 ick_LDADD = libidiot.a
 AM_YFLAGS = -d
-BUILT_SOURCES = parser.h
+# BUILT_SOURCES is used both to make sure parser.h is built early, and to
+# create symlinks used by ick to find files if it's run without first being
+# installed.
+BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib.3i syslib.4i \
+                syslib.5i syslib.6i syslib.7i ick_ec.h fiddle.h abcess.h \
+                ick_lose.h yuk.h
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
 libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
@@ -120,10 +151,13 @@ $(srcdir)/MANIFEST: distdir
 	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
 	$(am__remove_distdir)
 
-# N.B. the parser.y and lexer.l are the links made to simplify the
-# build, not the originals
-CLEANFILES = oilout*.c parser.y lexer.l \
-             atari.c baudot.c ebcdic.c latin1.c ick.dvi
+# N.B. the parser.y, lexer.l, syslib, headers and skeletons are the
+# links made to simplify the build, not the originals
+CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
+             atari.c baudot.c ebcdic.c latin1.c ick.dvi \
+             syslib.i syslib.3i syslib.4i syslib.5i \
+             syslib.6i syslib.7i ick_ec.h fiddle.h abcess.h \
+             ick_lose.h yuk.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
 # versions of the prebuilt files. (The source tree versions will
