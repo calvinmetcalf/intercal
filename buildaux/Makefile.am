@@ -75,9 +75,8 @@ bin2c:
 
 # Optional libraries are in lib_LIBRARIES, but with a null build rule.
 lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a libick_ecto_b98.a
+libick_ecto_b98_a_SOURCES =
 libick_ecto_b98.a:
-libick_ecto_b98.o:
-libick_ecto_b98.c:
 libick_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
                    src/arrgghh.c src/clc-cset.c src/uncommon.c
 libick_a_LIBADD = atari.o baudot.o ebcdic.o latin1.o
