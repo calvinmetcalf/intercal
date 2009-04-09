@@ -89,7 +89,7 @@ if [ "$CFUNGE_CFLAGS" ]; then
     CFLAGS="$CFLAGS $CFUNGE_CFLAGS"
 fi
 # Please enable this when making changes. Requested by the cfunge author.
-#CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wpointer-arith -Wimplicit -Wnested-externs -Wcast-align -Wcast-qual -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wparentheses -Wshadow -Wundef -Wpacked -Wfloat-equal -Wstrict-aliasing=2 -Wformat=2 -Wdisabled-optimization -Wmissing-noreturn -Wmissing-format-attribute -Wdeclaration-after-statement -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wwrite-strings"
+#CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wpointer-arith -Wimplicit -Wnested-externs -Wcast-align -Wcast-qual -Wbad-function-cast -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wparentheses -Wshadow -Wundef -Wpacked -Wfloat-equal -Wstrict-aliasing=2 -Wformat=2 -Wmissing-noreturn -Wmissing-format-attribute -Wdeclaration-after-statement -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wwrite-strings"
 
 echo "   " Duplicating cfunge source tree so that it can be modified...
 cp -r $CFUNGE_PATH/src $CFUNGE_PATH/lib $CFUNGE_PATH/tools .

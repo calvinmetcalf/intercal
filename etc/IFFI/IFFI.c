@@ -62,7 +62,11 @@ void ick_interpreter_run(void)
 		perror("Couldn't create funge space!?");
 		exit(EXIT_FAILURE);
 	}
+#if (CFUNGE_API_VERSION < 2)
 	fungespace_load_string(ick_iffi_befungeString);
+#else
+	fungespace_load_string(ick_iffi_befungeString, strlen((const char*)ick_iffi_befungeString));
+#endif
 	iffiIP = ip_create();
 	if (iffiIP == NULL) {
 		perror("Couldn't create instruction pointer!?");
