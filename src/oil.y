@@ -762,6 +762,7 @@ int main(void)
   freopen("oilout-m.c","w",stdout);
   puts("/* Automatically generated output, edit source and recompile to "
        "change */");
+  puts("#include \"config.h\"");
   puts("#include \"ick.h\"");
   i=filenumber+1;
   while(i--) printf("extern int optimize_pass1_%x(node*);\n",i);

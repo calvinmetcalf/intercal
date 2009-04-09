@@ -47,6 +47,15 @@ extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const c
 #define ICKDATADIR "/usr/local/share/ick-0.27"
 #endif
 
+/* In case we don't have vsnprintf. */
+void /*@noreturn@*/ ick_lose(const char *m, int n, /*@null@*/ const char *s)
+{
+  (void) m;
+  (void) n;
+  (void) s;
+  abort();
+}
+
 /*@-redef@*/ /* because only one main is used at a time */
 int main(int argc, char** argv)
 /*@=redef@*/

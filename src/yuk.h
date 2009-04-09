@@ -150,5 +150,5 @@ extern int globalargc;
    touch anything but the bottom byte). */
 #if SIZEOF_SIG_ATOMIC_T + 0 == 0
 #undef sig_atomic_t
-typedef char sig_atomic_t
+typedef char sig_atomic_t;
 #endif
