@@ -63,7 +63,7 @@ if [ -z "$CC" ]; then
     CC=cc
 fi
 
-CFLAGS="-std=c99 -DUSE32 -DDISABLE_GC -DFUNGE_EXTERNAL_LIBRARY -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -DFUNGE_OLD_HANDPRINT=0x43464649 '-DFUNGE_NEW_HANDPRINT=\"http://example.com/\"'"
+CFLAGS="-std=c99 -DUSE32 -DDISABLE_GC -DFUNGE_EXTERNAL_LIBRARY -DCFUN_IS_IFFI -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED -DFUNGE_OLD_HANDPRINT=0x43464649 '-DFUNGE_NEW_HANDPRINT=\"http://example.com/\"'"
 # If GCC 4.1 or later is used add:
 #   -O1 -combine -fwhole-program -fvisibility=hidden.
 # At least -O1 needed or -fwhole-program have no effect. Which is needed for
