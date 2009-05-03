@@ -30,7 +30,7 @@
 #include "../../global.h"
 #include "../manager.h"
 
-#if !defined(CFUNGE_API_VERSION) || (CFUNGE_API_VERSION > 2)
+#if !defined(CFUNGE_API_VERSION) || (CFUNGE_API_VERSION > 3)
 #  error "This version of IFFI isn't compatible with this cfunge version."
 #endif
 
