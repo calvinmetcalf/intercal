@@ -2292,6 +2292,7 @@ void emit(tuple *tn, FILE *fp)
 	}
 	switch(npc)
 	{
+	case GETS:          npc=RESIZE;         goto anothertype;
 	case ABSTAIN:       npc=DISABLE;        goto anothertype;
 	case DISABLE:       npc=FROM;           goto anothertype;
 	case FROM:          npc=MANYFROM;       goto anothertype;
