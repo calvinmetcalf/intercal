@@ -52,7 +52,7 @@ AC_MSG_RESULT(yes)])
 rm -f ${LEX_OUTPUT_ROOT}.c
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul snprintf)
+AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul snprintf isatty)
 
 if test "$interpval" != "no"; then
 AC_DEFINE([HAVE_SYS_INTERPRETER], [], [Define if #! works on your system.])
