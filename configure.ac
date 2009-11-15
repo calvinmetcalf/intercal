@@ -65,7 +65,7 @@ fi
 AC_DEFINE_UNQUOTED([EXEEXT],"$EXEEXT",[Extension to use on executable files.])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul snprintf vsnprintf)
+AC_CHECK_FUNCS(gettimeofday gethrtime strdup strtol strtoul snprintf vsnprintf isatty)
 ICK_SAVECFLAGS=$CFLAGS
 CFLAGS="$CFLAGS -lrt"
 AC_CHECK_FUNCS(clock_gettime)
