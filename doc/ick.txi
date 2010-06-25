@@ -284,7 +284,7 @@ This has not always been the case, though.)
 @cindex ick-@value{VERSIONDASH}.pax.*
 
 @cic{} is distributed in compressed pax format; for instance, you may
-find as a @samp{.pax.lzma} file if you have the @command{unlzma}
+find it as a @samp{.pax.lzma} file if you have the @command{unlzma}
 decompression program (this is advised, as it's the smallest);
 @samp{.pax.bz2} is larger and @samp{.pax.gz} is larger still.  Most
 computers can decompress files in this format, even if they don't
@@ -1839,7 +1839,7 @@ made a typo specifying the file.
 @ieanchor E778
 @cindex internal errors
 @quotation
-UNEXPLANED COMPILER BUG
+UNEXPLAINED COMPILER BUG
 @end quotation
 
 This should never come up, either at compile time or at run time.  It
@@ -2829,7 +2829,7 @@ significant bit, which is the least significant bit of its second
 argument.
 
 One of the most common uses of interleaving is to create a constant with
-a value greater than 65535; for instance, 65536 is @code{#256$#0}.  It
+a value greater than 65535; for instance, 65536 is @code{#0$#256}.  It
 is also commonly used in expressions that need to produce 32-bit
 results; except in some simple cases, this is usually coded by
 calculating separately the odd-numbered and even-numbered bits of the

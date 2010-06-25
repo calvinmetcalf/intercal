@@ -75,9 +75,13 @@ Changes by Stefan O'Rear
 17. Added INTERCAL syntax highlighting information for vim. Why should Emacs
     have all the fun?
 
+Changes reported by Phantom Hoover
+
+18. Fixed a nasty documentation typo.
+
 Changes reported by the Debian autobuilders and Joey Hess
 
-18. The build of the optimiser idioms is now split over many files, to reduce
+19. The build of the optimiser idioms is now split over many files, to reduce
     the memory usage of gcc when it tries to compile the giant output C file.
     This was a problem on ia64. (The ulimit method of preventing thrashing has
     been removed, as this method works better; likewise, the optimiser
@@ -85,7 +89,7 @@ Changes reported by the Debian autobuilders and Joey Hess
 
 Changes by Alex Smith
 
-19. The build system has been completely redone, again; it now uses automake
+20. The build system has been completely redone, again; it now uses automake
     as well as a much newer version of autoconf. This means that there is now
     one build system that works the same way on all systems, and that all
     sorts of clever tricks like out-of-tree builds, a self-rebuilding build
@@ -95,7 +99,7 @@ Changes by Alex Smith
     still there, but now there's prebuilt instead of temp, an extra directory
     buildaux, and bin, lib and include have disappeared.
 
-20. The distribution now comes in compressed pax format. (Before anyone
+21. The distribution now comes in compressed pax format. (Before anyone
     complains that they have no idea what that is, or that I'm using something
     strange and nonstandard, I'd like to point out that tar is no longer part
     of POSIX, but that pax is. (See man 5 tar on a recent Linux system for
@@ -103,20 +107,20 @@ Changes by Alex Smith
     so tar readers should be able to read it just fine, if you can't get your
     hands on a pax reader.)
 
-21. convickt can now produce its output as INTERCAL initialisation of a tail
+22. convickt can now produce its output as INTERCAL initialisation of a tail
     array. (This doesn't auto-offset between the different characters; it is
     therefore mostly useful for producing Baudot arrays for CLC-INTERCAL-style
     IO.)
 
-22. The function clock_gettime is now supported by the yuk profiler as an
+23. The function clock_gettime is now supported by the yuk profiler as an
     alternative method of getting a high-resolution clock for profiling (it
     is available on at least Linux).
 
-23. The profiler now autodetects the same profiling mechanism at compile
+24. The profiler now autodetects the same profiling mechanism at compile
     time and at run time. (It was getting confused as to what mechanism it was
     using, causing some really weird bugs.)
 
-23. Added support for computed CREATE (the computation is done at create-time,
+25. Added support for computed CREATE (the computation is done at create-time,
     rather than when the unknown statement is encountered); partly because
     this was rather easy, but mostly because it can be used to simulate a
     computed NEXT, thus making the example expansion library compunex (which I
@@ -128,13 +132,13 @@ Changes by Alex Smith
     features of NEXT, anyway, rather than the small subset COMPUNEX could
     manage.)
 
-24. Plugged a couple of small memory leaks; however, there are still several
+26. Plugged a couple of small memory leaks; however, there are still several
     much bigger memory leaks that could do with being fixed.
 
-25. Added support for CREATING operators, with similar syntax to the CREATION
+27. Added support for CREATING operators, with similar syntax to the CREATION
     of commands.  This requires the -ea options to be set to work properly.
 
-26. More file extensions are now supported by the external calls system. The
+28. More file extensions are now supported by the external calls system. The
     .c99 extension indicates a C99 (rather than C89) file; all .c99 files are
     preprocessed as C99, and if any C99 files are used the final compilation
     which compiles and links everything will be done as C99 rather than C89
@@ -146,24 +150,24 @@ Changes by Alex Smith
     locations instead of the current directory.) Other .a files can be linked
     in from the current directory.
 
-27. Fixed the handling of division by zero in the syslibc expansion library.
+29. Fixed the handling of division by zero in the syslibc expansion library.
     (The Revamped Manual states 'In all cases, division by 0 returns 0'.)
 
-28. Made several changes to the documentation, including fixes for some rather
+30. Made several changes to the documentation, including fixes for some rather
     nasty typos (two of the worst were specifying variables as IGNORED by
     default, and stating that select acts like OR in TriIntercal!).
 
-29. Fixed a bug in the external calls system that made it impossible to write
+31. Fixed a bug in the external calls system that made it impossible to write
     a COME FROM in more than one file at a time whilst still having the
     resulting program work reliably.
 
-30. Added support for external calls to Befunge-98 programs; however, this
+32. Added support for external calls to Befunge-98 programs; however, this
     distribution does not ship with a Funge-98 interpreter, so in order to use
     this feature you will first have to compile a Funge-98 interpreter into a
     library for use with C-INTERCAL (see README.txt or the Revamped Manual for
     information on this). Also added a test program for this to the pit.
 
-31. Fixed some bugs in the go-away command in interfunge.i.
+33. Fixed some bugs in the go-away command in interfunge.i.
 
   Release 0.28 (by Alex Smith) 1 Apr 2008
 
