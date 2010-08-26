@@ -4,97 +4,61 @@
 
 ICK = ../ick -b
 
-SOURCES = \
-	./sample.i \
+BASE2SOURCES = \
 	./beer.i \
 	./bubble.i \
-	./count.3i \
-	./hail_mary.3i \
+	./change.i \
+	./guess.i \
 	./icat.i \
-	./tests/test1.i \
-	./tests/limits.i \
-	./tests/limits.3i \
-	./tests/test16bit.i \
-	./tests/testarray.i \
-	./tests/testcf.i \
-	./tests/testlib2.i \
-	./tests/test2.i \
-	./tests/testops.3i \
-	./tests/testops.5i \
-	./tests/testsplat.i \
-	./pow.i \
-	./random.i \
-	./random2.i \
-	./rot13.i \
-	./rot13b.i \
-	./iogerunds.i \
-	./pi.i \
+	./iching1.i \
+	./iching2.i \
+	./ins.i \
 	./lib/lib2.i \
 	./lib/numio.i \
+	./lib/plus.i \
 	./lib/syslib.i \
 	./lib/syslib3.i \
 	./lib/syslib4.i \
 	./lib/syslib5.i \
 	./lib/syslib6.i \
 	./lib/syslib7.i \
-	./lib/plus.i \
-	./primes.i \
 	./life.i \
 	./life2.i \
-	./sink.i \
-	./change.i \
-	./iching1.i \
-	./iching2.i \
-	./hello.i \
-	./ins.i \
-	./guess. i \
+	./pi.i \
+	./pow.i \
+	./primes.i \
+	./random.i \
+	./random2.i \
+	./rot13.i \
+	./rot13b.i \
+	./sample.i \
+	./tests/hello.i \
+	./tests/iogerunds.i \
+	./tests/test1.i \
+	./tests/limits.i \
+	./tests/test16bit.i \
+	./tests/testarray.i \
+	./tests/testcf.i \
+	./tests/testlib2.i \
+	./tests/test2.i \
+	./tests/testsplat.i \
 	./yapp.i
 
-TARGETS = \
-	./sample \
-	./beer \
-	./bubble \
-	./count \
+BASENSOURCES = \
+	./hail_mary.3i \
+	./tests/count.3i \
+	./tests/limits.3i \
+	./tests/testops.3i \
+	./tests/testops.5i
+
+SOURCES = $(BASE2SOURCES) $(BASENSOURCES)
+
+TARGETS = $(BASE2SOURCES:.i=) \
 	./hail_mary \
-	./icat \
-	./tests/test1 \
-	./tests/limits \
+	./tests/count \
 	./tests/limits3 \
-	./tests/test16bit \
-	./tests/testarray \
-	./tests/testcf \
-	./tests/testlib2 \
-	./tests/test2 \
-	./tests/testops \
-	./tests/testops \
-	./tests/testsplat \
-	./pow \
-	./random \
-	./random2 \
-	./rot13 \
-	./rot13b \
-	./iogerunds \
-	./pi \
-	./lib/lib2 \
-	./lib/numio \
-	./lib/syslib \
-	./lib/syslib3 \
-	./lib/syslib4 \
-	./lib/syslib5 \
-	./lib/syslib6 \
-	./lib/syslib7 \
-	./lib/plus \
-	./primes \
-	./life \
-	./life2 \
-	./sink \
-	./change \
-	./iching1 \
-	./iching2 \
-	./hello \
-	./ins \
-	./guess
-	./yapp
+	./tests/testops3 \
+	./tests/testops5
 
 .SUFFIXES:	.i .3i .4i .5i .6i .7i
 
@@ -142,8 +106,17 @@ test: $(TARGETS)
 	cp ./tests/limits.3i ./tests/limits3.3i
 	$(ICK) ./tests/limits3.3i
 
+./tests/testops3: ./tests/testops.3i
+	cp ./tests/testops.3i ./tests/testops3.3i
+	$(ICK) ./tests/testops3.3i
+
+./tests/testops5: ./tests/testops.5i
+	cp ./tests/testops.5i ./tests/testops5.5i
+	$(ICK) ./tests/testops5.5i
+
 lines:
 	wc -l $(SOURCES)
 
 clean:
-	rm -f $(TARGETS) *.c *.o *~ lib/syslib?.?i tests/limits3.3i
+	rm -f $(TARGETS) *.c *.o *~ lib/syslib?.?i 
+	rm tests/limits3.3i tests/testops3.3i tests/testops5.5i
