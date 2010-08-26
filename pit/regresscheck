@@ -19,28 +19,28 @@
 # This pattern doesn't handle well the case where one program has multiple
 # tests, so options are provided to override the test file name 
 
-chkfile=""
 while getopts cp opt
 do
     case $opt in
-	c) chkfile=$OPTARG ;;	# Override the location of the checkfile
-	p) prog=$OPTARG ;;	# Override the name used in reporting
+	c) checkfile=$OPTARG ;;	# Override the location of the checkfile
+	p) progname=$OPTARG ;;	# Override the name used in reporting
     esac
 done
 shift $(($OPTIND - 1))
+arg=$1
 
-if [ -z "$chkfile" ]
+if [ -z "$progname" ]
 then
-    chkfile=${1}.chk
+    progname=`basename ${arg}`
 fi
-if [ -z "$prog" ]
+if [ -z "$checkfile" ]
 then
-    prog=`basename $chkfile`
+    checkfile=${arg}.chk
 fi
 
-if diff - ${chkfile}
+if diff - ${checkfile}
 then 
-     echo "Regression test of $prog succeeded."; 
+     echo "Regression test of $progname succeeded."; 
 else 
-     echo "Regression test of $prog FAILED."; 
+     echo "Regression test of $progname FAILED."; 
 fi

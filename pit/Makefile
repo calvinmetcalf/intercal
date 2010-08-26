@@ -89,6 +89,8 @@ TARGETS = $(BASE2SOURCES:.i=) \
 # For instructions on test conventions, see the header comment of regresscheck
 test: $(TARGETS)
 	@./beer | ./regresscheck beer 
+	@cat fft-delta.tst | fft | ./regresscheck fft-delta
+	@cat fft-tophat.tst | fft | ./regresscheck fft-tophat
 	@echo 'Hello, sailor!' | ./regresscheck icat 
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13 | ./regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13b | ./regresscheck rot13b
