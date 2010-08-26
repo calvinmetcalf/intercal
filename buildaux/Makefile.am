@@ -22,16 +22,16 @@ pickwrap.c : src/pickwrap.c
 	$(LN_S) `test -f 'src/pickwrap.c' || echo '$(srcdir)/'`src/pickwrap.c pickwrap.c
 syslib.i : pit/lib/syslib.i
 	$(LN_S) `test -f 'pit/lib/syslib.i' || echo '$(srcdir)/'`pit/lib/syslib.i syslib.i
-syslib.3i : pit/lib/syslib.3i
-	$(LN_S) `test -f 'pit/lib/syslib.3i' || echo '$(srcdir)/'`pit/lib/syslib.3i syslib.3i
-syslib.4i : pit/lib/syslib.4i
-	$(LN_S) `test -f 'pit/lib/syslib.4i' || echo '$(srcdir)/'`pit/lib/syslib.4i syslib.4i
-syslib.5i : pit/lib/syslib.5i
-	$(LN_S) `test -f 'pit/lib/syslib.5i' || echo '$(srcdir)/'`pit/lib/syslib.5i syslib.5i
-syslib.6i : pit/lib/syslib.6i
-	$(LN_S) `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib.6i syslib.6i
-syslib.7i : pit/lib/syslib.7i
-	$(LN_S) `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib.7i syslib.7i
+syslib3.3i : pit/lib/syslib3.3i
+	$(LN_S) `test -f 'pit/lib/syslib.3i' || echo '$(srcdir)/'`pit/lib/syslib3.3i syslib3.3i
+syslib4.4i : pit/lib/syslib4.4i
+	$(LN_S) `test -f 'pit/lib/syslib.4i' || echo '$(srcdir)/'`pit/lib/syslib4.4i syslib4.4i
+syslib5.5i : pit/lib/syslib5.5i
+	$(LN_S) `test -f 'pit/lib/syslib.5i' || echo '$(srcdir)/'`pit/lib/syslib5.5i syslib5.5i
+syslib6.6i : pit/lib/syslib6.6i
+	$(LN_S) `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib6.6i syslib6.6i
+syslib7.7i : pit/lib/syslib7.7i
+	$(LN_S) `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib7.7i syslib7.7i
 ick_ec.h : src/ick_ec.h
 	$(LN_S) `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
 ick_lose.h : src/ick_lose.h
@@ -47,8 +47,8 @@ AM_YFLAGS = -d
 # BUILT_SOURCES is used both to make sure parser.h is built early, and to
 # create symlinks used by ick to find files if it's run without first being
 # installed.
-BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib.3i syslib.4i \
-                syslib.5i syslib.6i syslib.7i ick_ec.h fiddle.h abcess.h \
+BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib3.3i syslib4.4i \
+                syslib5.5i syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
                 ick_lose.h yuk.h
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
@@ -107,8 +107,8 @@ dist_ickdata_DATA = src/atari.bin src/baudot.bin src/ebcdic.bin src/latin1.bin \
                     src/ick-wrap.c src/pickwrap.c COPYING
 # These necessary pit files are in nodist_ here because they're in EXTRA_DIST
 # later along with the rest of the pit.
-nodist_ickdata_DATA = pit/lib/syslib.i pit/lib/syslib.3i pit/lib/syslib.4i \
-                      pit/lib/syslib.5i pit/lib/syslib.6i pit/lib/syslib.7i \
+nodist_ickdata_DATA = pit/lib/syslib.i pit/lib/syslib3.3i pit/lib/syslib4.4i \
+                      pit/lib/syslib5.5i pit/lib/syslib6.6i pit/lib/syslib7.7i \
                       coopt.sh pit/explib/syslibc.c pit/explib/compunex.c \
                       pit/explib/ecto_b98.c
 dist_man1_MANS = doc/ick.1 doc/convickt.1
@@ -154,8 +154,8 @@ $(srcdir)/MANIFEST: distdir
 # links made to simplify the build, not the originals
 CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
-             syslib.i syslib.3i syslib.4i syslib.5i \
-             syslib.6i syslib.7i ick_ec.h fiddle.h abcess.h \
+             syslib.i syslib3.3i syslib4.4i syslib5.5i \
+             syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
              ick_lose.h yuk.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree

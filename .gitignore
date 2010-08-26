@@ -18,12 +18,12 @@ oil
 # C source files and includes in the top directory were copied there, ignore
 *.[chyl]
 # So were any copies of the INTERCAL libraries we might find here
-syslib.3i
-syslib.4i
-syslib.5i
-syslib.6i
-syslib.7i
 syslib.i
+syslib3.3i
+syslib4.4i
+syslib5.5i
+syslib6.6i
+syslib7.7i
 # Other generated stuff
 doc/*info*
 doc/*.htm

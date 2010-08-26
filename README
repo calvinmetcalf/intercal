@@ -97,7 +97,7 @@ aclocal.m4              -- helper file needed to build the build system itself
 
 pit/*                   -- sample INTERCAL code; see pit/CATALOG
 pit/explib/*            -- source code for expansion libraries
-pit/lib/syslib.*i       -- source code for the system libraries
+pit/lib/syslib*.*i      -- source code for the system libraries
 
                               HOW TO GET STARTED
 

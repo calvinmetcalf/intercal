@@ -656,7 +656,7 @@ static void check_syslib(/*@partial@*/ char *buffer,
     if (ick_Base == 2)    /* see code for opening the skeleton */
       (void) ick_snprintf_or_die(buffer, size, "%s.i", SYSLIB);
     else
-      (void) ick_snprintf_or_die(buffer, size, "%s.%di", SYSLIB, ick_Base);
+      (void) ick_snprintf_or_die(buffer, size, "%s%d.%di", SYSLIB, ick_Base, ick_Base);
     if (ick_findandfreopen(buffer, ick_datadir, "r", argv0, stdin) == NULL)
       ick_lose(IE127, 1, (const char*) NULL);
 #ifdef USE_YYRESTART

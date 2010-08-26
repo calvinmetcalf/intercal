@@ -101,26 +101,6 @@ test: $(TARGETS)
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
 
-./lib/syslib3: ./lib/syslib.3i
-	cp ./lib/syslib.3i ./lib/syslib3.3i
-	$(ICK) ./lib/syslib3.3i
-
-./lib/syslib4: ./lib/syslib.4i
-	cp ./lib/syslib.4i ./lib/syslib4.4i
-	$(ICK) ./lib/syslib4.4i
-
-./lib/syslib5: ./lib/syslib.5i
-	cp ./lib/syslib.5i ./lib/syslib5.5i
-	$(ICK) ./lib/syslib5.5i
-
-./lib/syslib6: ./lib/syslib.6i
-	cp ./lib/syslib.6i ./lib/syslib6.6i
-	$(ICK) ./lib/syslib6.6i
-
-./lib/syslib7: ./lib/syslib.7i
-	cp ./lib/syslib.7i ./lib/syslib7.7i
-	$(ICK) ./lib/syslib7.7i
-
 ./tests/limits3: ./tests/limits.3i
 	cp ./tests/limits.3i ./tests/limits3.3i
 	$(ICK) ./tests/limits3.3i
@@ -137,5 +117,5 @@ lines:
 	wc -l $(SOURCES)
 
 clean:
-	rm -f $(TARGETS) *.c *.o *~ lib/syslib?.?i 
+	rm -f $(TARGETS) *.c *.o *~
 	rm tests/limits3.3i tests/testops3.3i tests/testops5.5i

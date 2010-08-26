@@ -3784,7 +3784,8 @@ expression.)
 
 @portability{yes, all versions, no, all versions}
 
-@ical{} has a system library, called @samp{syslib}.  It is included
+@ical{} has a system library, called @samp{syslib} (versions for bases
+other than 2 will have a numeric suffix on the name).  It is included
 automatically at the end of your program by the compiler whenever your
 program refers to a line from (1000) to (1999) without defining any
 line in that range in the program.  (Although it is not added
@@ -3814,7 +3815,7 @@ aiming at them.
 The system library is currently available in all bases from 2 to 7
 (@pxref{TriINTERCAL}), but not every command is available in every
 base, and @cic{} is the only one of the three compilers listed above
-that use the system library to ship with a version in bases other than
+that has the system library to ship with a version in bases other than
 2.  (This table was originally based on the @icst{} manual, but has
 had extra information added for bases other than 2.) Here, ``overflow
 checked'' means that #1 is assigned to .4 if there is not an overflow,

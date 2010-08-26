@@ -74,11 +74,11 @@ by Clemens Meier <clmeier@lili.uni-bielefeld.de>
 By Brian Raiter <breadbox@muppetlabs.com>
   lib/numio.i	    I/O routines
   lib/numio.doc	    Description of the I/O routines
-  lib/syslib.3i
-  lib/syslib.4i
-  lib/syslib.5i
-  lib/syslib.6i     Translations of the standard library to
-  lib/syslib.7i     C-INTERCAL's other bases.
+  lib/syslib3.3i
+  lib/syslib4.4i
+  lib/syslib5.5i
+  lib/syslib6.6i    Translations of the standard library to
+  lib/syslib7.7i    C-INTERCAL's other bases.
   lib/syslib3-7.doc Documentation for same
   tests/hello.i     + The traditional hello world program
   ins.i             Intersections & Splats, a Mastermind-style game
