@@ -91,6 +91,7 @@ test: $(TARGETS)
 	@tests/count | regresscheck tests/count 
 	@tests/hello | regresscheck tests/hello 
 	@tests/permute | regresscheck tests/permute 
+	@cp quine.i quine.chk; quine | regresscheck quine; rm quine.chk 
 	@tests/sink 2>&1 | regresscheck tests/sink
 	@echo "Tests complete."
 
