@@ -86,6 +86,7 @@ TARGETS = $(BASE2SOURCES:.i=) \
 .7i:
 	$(ICK) $<
 
+# For instructions on test conventions, see the header comment of regresscheck
 test: $(TARGETS)
 	@./beer | ./regresscheck beer 
 	@echo 'Hello, sailor!' | ./regresscheck icat 
