@@ -103,6 +103,9 @@ by Oerjan Johansen
 by Jeffrey Lee
   interfunge.i  A Befunge-93 interpreter in INTERCAL
 
+by Brendan Gregg
+  guess.i	Guessing game implementation in INTERCAL
+
 The subdirectory tests contains some programs written only to test the
 compiler.
 

@@ -47,6 +47,7 @@ SOURCES = \
 	./iching2.i \
 	./hello.i \
 	./ins.i \
+	./guess. i \
 	./yapp.i
 
 TARGETS = \
@@ -92,6 +93,7 @@ TARGETS = \
 	./iching2 \
 	./hello \
 	./ins \
+	./guess
 	./yapp
 
 .SUFFIXES:	.i .3i .4i .5i .6i .7i
