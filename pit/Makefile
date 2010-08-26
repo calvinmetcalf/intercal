@@ -1,6 +1,7 @@
 #
 # Torture-tester for the INTERCAL compiler
 #
+# Type 'make' to test-compile the pit programs and run a regression check
 
 ICK = ../ick -b
 
@@ -26,6 +27,7 @@ BASE2SOURCES = \
 	./life2.i \
 	./pi.i \
 	./pow.i \
+	./quine \
 	./primes.i \
 	./random.i \
 	./random2.i \
