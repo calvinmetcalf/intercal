@@ -159,6 +159,10 @@
 /* (AIS) Unimplemented feature used. This should never come up, hopefully. */
 #define IE995 "995 DO YOU REALLY EXPECT ME TO HAVE IMPLEMENTED THAT?\n\
 	ON THE WAY TO %d\n"
+/* Unknown invocation flag */
+#define IE990 "990 FLAG ETIQUETTE FAILURE BAD SCOUT NO BISCUIT.\n\
+	ON THE WAY TO %d\n"
+
 /*
  *  AIS: These errors are specific to PIC-INTERCAL
  */
