@@ -1,0 +1,11 @@
+#!/bin/sh
+
+chkfile=$1
+prog=`basename $chkfile`
+
+if diff - ${chkfile}.chk
+then 
+     echo "Regression test of $prog succeeded."; 
+else 
+     echo "Regression test of $prog FAILED."; 
+fi

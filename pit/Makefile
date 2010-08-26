@@ -34,6 +34,7 @@ BASE2SOURCES = \
 	./sample.i \
 	./tests/hello.i \
 	./tests/iogerunds.i \
+	./tests/sink.i \
 	./tests/test1.i \
 	./tests/limits.i \
 	./tests/test16bit.i \
@@ -81,6 +82,15 @@ TARGETS = $(BASE2SOURCES:.i=) \
 	$(ICK) $<
 
 test: $(TARGETS)
+	@beer | regresscheck beer 
+	@tests/count | regresscheck tests/count 
+	@tests/hello | regresscheck tests/hello 
+	@echo 'Hello, sailor!' | regresscheck icat 
+	@echo 'A man, a plan, a canal, Panama.' | rot13 | regresscheck rot13
+	@echo 'A man, a plan, a canal, Panama.' | rot13b | regresscheck rot13b
+	@echo "FIVE" | pi | regresscheck pi
+	@tests/sink 2>&1 | regresscheck tests/sink
+	@echo "Tests complete."
 
 ./lib/syslib3: ./lib/syslib.3i
 	cp ./lib/syslib.3i ./lib/syslib3.3i
