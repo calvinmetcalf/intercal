@@ -90,7 +90,7 @@ By Brian Raiter <breadbox@muppetlabs.com>
   lib/floatlib.doc  Documentation for the floating-point routines
   flonck.i          An RPN calculator
   flonck.doc        Documentation for flonck.i
-  fft.i             Fast Fourier Transform
+  fft.i             Fast Fourier Transform (requires floatlib)
   fft.doc           Description of fft.i
     delta.fft
     tophat.fft      Sample input for FFT
