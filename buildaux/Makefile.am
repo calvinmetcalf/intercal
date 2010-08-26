@@ -164,6 +164,11 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
 # about.)
 DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.status.build
 
+# If a documentation file is needed but not available, invoke the doc
+# makefile to build it.
+doc/ick.txt: doc/ick.txi
+	cd $(top_srcdir)/doc && make ick.txt
+
 # The build system itself is included in the makefile; tell Automake
 # about my tweaking.
 $(top_srcdir)/configure:  $(am__configure_deps)

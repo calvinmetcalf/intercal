@@ -1589,6 +1589,11 @@ $(srcdir)/MANIFEST: distdir
 	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
 	$(am__remove_distdir)
 
+# If a documentation file is needed but not available, invoke the doc
+# makefile to build it.
+doc/ick.txt: doc/ick.txi
+	cd $(top_srcdir)/doc && make ick.txt
+
 # The build system itself is included in the makefile; tell Automake
 # about my tweaking.
 $(top_srcdir)/configure:  $(am__configure_deps)
