@@ -87,19 +87,19 @@ TARGETS = $(BASE2SOURCES:.i=) \
 	$(ICK) $<
 
 test: $(TARGETS)
-	@beer | regresscheck beer 
-	@echo 'Hello, sailor!' | regresscheck icat 
-	@echo 'A man, a plan, a canal, Panama.' | rot13 | regresscheck rot13
-	@echo 'A man, a plan, a canal, Panama.' | rot13b | regresscheck rot13b
-	@echo "FIVE" | pi | regresscheck pi
-	@cp quine.i quine.chk; quine | regresscheck quine; rm quine.chk 
-	@cat sort.tst | sort | regresscheck sort
-	@tests/count | regresscheck tests/count 
-	@tests/hello | regresscheck tests/hello 
-	@tests/permute | regresscheck tests/permute 
-	@tests/sink 2>&1 | regresscheck tests/sink
-	@tests/test1 2>&1 | regresscheck tests/test1 
-	@cat tests/test2.tst | tests/test2 | regresscheck tests/test2
+	@./beer | ./regresscheck beer 
+	@echo 'Hello, sailor!' | ./regresscheck icat 
+	@echo 'A man, a plan, a canal, Panama.' | ./rot13 | ./regresscheck rot13
+	@echo 'A man, a plan, a canal, Panama.' | ./rot13b | ./regresscheck rot13b
+	@echo "FIVE" | ./pi | ./regresscheck pi
+	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
+	@cat sort.tst | ./sort | ./regresscheck sort
+	@./tests/count | ./regresscheck tests/count 
+	@./tests/hello | ./regresscheck tests/hello 
+	@./tests/permute | ./regresscheck tests/permute 
+	@./tests/sink 2>&1 | ./regresscheck tests/sink
+	@./tests/test1 2>&1 | ./regresscheck tests/test1 
+	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
 	@echo "Tests complete."
 
 # Needs special handling because the -m option is required
