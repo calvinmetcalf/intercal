@@ -111,8 +111,8 @@ dist_ickdata_DATA = src/atari.bin src/baudot.bin src/ebcdic.bin src/latin1.bin \
 # later along with the rest of the pit.
 nodist_ickdata_DATA = pit/lib/syslib.i pit/lib/syslib3.3i pit/lib/syslib4.4i \
                       pit/lib/syslib5.5i pit/lib/syslib6.6i pit/lib/syslib7.7i \
-                      coopt.sh pit/explib/syslibc.c pit/explib/compunex.c \
-                      pit/explib/ecto_b98.c
+                      pit/lib/floatlib.i coopt.sh pit/explib/syslibc.c \
+                      pit/explib/compunex.c pit/explib/ecto_b98.c
 dist_man1_MANS = doc/ick.1 doc/convickt.1
 info_TEXINFOS = doc/ick.txi
 
