@@ -17,13 +17,15 @@ ick
 oil
 # C source files and includes in the top directory were copied there, ignore
 *.[chyl]
-# So were any copies of the INTERCAL libraries we might find here
+# So were any copies of the INTERCAL libraries and buld cruft we might find here
 syslib.i
 syslib3.3i
 syslib4.4i
 syslib5.5i
 syslib6.6i
 syslib7.7i
+coopt.sh
+host.mak
 # Other generated stuff
 doc/*info*
 doc/*.htm
