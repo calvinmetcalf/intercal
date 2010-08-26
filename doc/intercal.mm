@@ -3004,6 +3004,7 @@ This footnote intentionally unreferenced.
 .\".nr * \n*-1
 .ps \n[@ps]
 .ie '\*c'n' \{\
+.\" CORRECTION: "exclusive or" was typoed as "exlusive or"
 .TS
 box;
 c c c
@@ -3018,7 +3019,7 @@ Character	Name	Use (if any)
 \'	spark	grouper
 `	backspark
 !	wow	equivalent to spark-spot
-?	what	\fIunary exlusive OR (ASCII)\fR
+?	what	\fIunary exclusive OR (ASCII)\fR
 "	rabbit-ears	grouper
 \o'".'	rabbit	equivalent to ears-spot
 |	spike
