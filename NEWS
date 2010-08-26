@@ -35,7 +35,7 @@ Bugs reported and changes patched by Arvid Norlander
 6.  Added consts and statics in the code, hopefully to make bugs easier to
     notice.
 
-7.  Refactored main(). It neeeded it, badly.
+7.  Refactored main(). It needed it, badly.
 
 Bugs reported by Elliott Hird
 
@@ -215,7 +215,7 @@ Changes by Alex Smith
 10. Added doc/THEORY.txt back in. (It seems that it went missing some time
     between 1.26 and 0.27.) Updated it to describe the current compiler.
 
-11. Turned off optimsation of the optimiser, and also placed a 128MB limit on
+11. Turned off optimisation of the optimiser, and also placed a 128MB limit on
     the data segment and virtual memory it was allowed to use. This is to
     prevent Linux thrashing and/or invoking the dreaded oom-killer when
     recompiling idiotism.c. (This happened only rarely, but it happened to me
