@@ -1942,6 +1942,17 @@ at all; you can't even follow it by comments, not even if you know in
 advance that they won't be @code{REINSTATE}d.  This error happens at
 compile time if a command is found after a @code{TRY AGAIN}.
 
+@ieanchor E994
+@cindex illegal opcode
+@quotation
+NOCTURNAL EMISSION, PLEASE LAUNDER SHEETS IMMEDIATELY
+@end quotation
+
+This error should never happen, and if it dies indicates a compiler
+bug. It means the emitter function in the code degenerator has
+encountered an unknown opcode. Please send a copy of the program
+that triggered it to the INTERCAL maintainers.
+
 @ieanchor E995
 @quotation
 DO YOU REALLY EXPECT ME TO HAVE IMPLEMENTED THAT?

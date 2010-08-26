@@ -2288,7 +2288,7 @@ void emit(tuple *tn, FILE *fp)
 	case DISABLE: (void) fprintf(fp,"\t    if(!ick_abstained[revlinetype[i]])"
 				    "\t\tick_abstained[revlinetype[i]]=1;\n"); break;
 	case MANYFROM:(void) fprintf(fp,"\tick_abstained[revlinetype[i]]+=j;\n"); break;
-	default:      ick_lose(IE778, emitlineno, (const char *)NULL);
+	default:      ick_lose(IE994, emitlineno, (const char *)NULL);
 	}
 	switch(npc)
 	{
@@ -2570,7 +2570,7 @@ void emit(tuple *tn, FILE *fp)
     case WHILE: /* AIS: fall through to the error, because this shouldn't
 		   come up yet. */
     default:
-	ick_lose(IE778, emitlineno, (const char *)NULL);
+	ick_lose(IE994, emitlineno, (const char *)NULL);
 	/*@-unreachable@*/ break; /*@=unreachable@*/
     }
 
@@ -2739,7 +2739,7 @@ void emitslat(FILE* fp)
   {
     fprintf(fp,
 	    "void ick_os%lx(%s a, void(*f)())\n{\n  static int l=0;\n"
-	    "  if(l)\n  {\n    if(!f) ick_lose(IE778, ick_lineno, (const char *)NULL);\n"
+	    "  if(l)\n  {\n    if(!f) ick_lose(IE994, ick_lineno, (const char *)NULL);\n"
 	    "    f(a,0);\n    return;\n  }\n  l=1;\n",
 	    (unsigned long)np,t);
     temp=cons(C_A, 0, 0);

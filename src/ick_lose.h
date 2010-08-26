@@ -162,7 +162,9 @@
 /* Unknown invocation flag */
 #define IE990 "990 FLAG ETIQUETTE FAILURE BAD SCOUT NO BISCUIT.\n\
 	ON THE WAY TO %d\n"
-
+/* Code generator encountered an unknown opcode in a tuple */
+#define IE994 "994 NOCTURNAL EMISSION, PLEASE LAUNDER SHEETS IMMEDIATELY.\n\
+	ON THE WAY TO %d\n"
 /*
  *  AIS: These errors are specific to PIC-INTERCAL
  */
