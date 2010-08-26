@@ -24,6 +24,7 @@ syslib4.4i
 syslib5.5i
 syslib6.6i
 syslib7.7i
+floatlib.i
 coopt.sh
 host.mak
 # Other generated stuff
@@ -36,6 +37,7 @@ oilout*.c
 pit/beer
 pit/bubble
 pit/change
+pit/fft
 pit/guess
 pit/icat
 pit/iching1
@@ -61,6 +63,7 @@ pit/random2
 pit/rot13
 pit/rot13b
 pit/sample
+pit/sort
 pit/tests/hello
 pit/tests/iogerunds
 pit/tests/permute
