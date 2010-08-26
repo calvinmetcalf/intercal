@@ -296,7 +296,7 @@ AM_YFLAGS = -d
 # create symlinks used by ick to find files if it's run without first being
 # installed.
 BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib3.3i syslib4.4i \
-                syslib5.5i syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
+                syslib5.5i syslib6.6i syslib7.7i floatlib.i ick_ec.h fiddle.h abcess.h \
                 ick_lose.h yuk.h
 
 noinst_LIBRARIES = libidiot.a
@@ -1526,6 +1526,8 @@ syslib6.6i : pit/lib/syslib6.6i
 	$(LN_S) `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib6.6i syslib6.6i
 syslib7.7i : pit/lib/syslib7.7i
 	$(LN_S) `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib7.7i syslib7.7i
+floatlib.i : pit/lib/floatlib.i
+	$(LN_S) `test -f 'pit/lib/floatlib.i' || echo '$(srcdir)/'`pit/lib/floatlib.i floatlib.i
 ick_ec.h : src/ick_ec.h
 	$(LN_S) `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
 ick_lose.h : src/ick_lose.h

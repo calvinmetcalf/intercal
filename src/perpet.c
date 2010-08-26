@@ -155,6 +155,20 @@ int tuplecount = 0;
 
 tuple *optuple = NULL; /* AIS: Tuple being optimized */
 
+/*
+ * mappings from magic line ranges to system library components are
+ * declared here.
+ */
+struct linerange_t {
+    int start, end;
+    char *libname;
+};
+struct linerange_t lineranges[] = {
+    {1000, 1999, "syslib"},    /* the system library */
+    {5000, 5699, "floatlib"},  /* the floating-point support */
+    {0, 0, NULL},
+};
+
 extern const assoc varstores[]; /* AIS: Need to know this for PIC compilation */
 
 #ifndef HAVE_UNISTD_H
@@ -622,51 +636,57 @@ static void check_syslib(/*@partial@*/ char *buffer,
                          /*@observer@*/ const char *argv0,
                          /*@observer@*/ const char *ick_datadir)
 {
-  tuple *tp;
-  /*
-   * check if we need to magically include the system library
-   */
-  *needsyslib = ick_FALSE;
-  if(!pickcompile) /* AIS: We never need syslib when compiling
-		      for PIC, because it's preoptimized. */
-  {
-    for (tp = tuples; tp->type; tp++)
-    {
-      /*
-       * If some label in the (1000)-(2000) range is defined,
-       * then clearly the syslib is already there, so we
-       * can stop searching and won't need the syslib.
-       */
-      if (tp->label >= 1000 && tp->label <= 1999) {
-	*needsyslib = ick_FALSE;
-	break;
-      }
-      /*
-       * If some label in the (1000)-(2000) range is being
-       * called, we might need the system library.
-       */
-      if (tp->type == NEXT && tp->u.target >= 1000 &&
-	  tp->u.target <= 1999)
-	*needsyslib = ick_TRUE;
-    }
-  }
-  if(nosyslib) *needsyslib = ick_FALSE; /* AIS */
-  if (*needsyslib)
-  { /* AIS: modified to use ick_findandfreopen */
-    if (ick_Base == 2)    /* see code for opening the skeleton */
-      (void) ick_snprintf_or_die(buffer, size, "%s.i", SYSLIB);
-    else
-      (void) ick_snprintf_or_die(buffer, size, "%s%d.%di", SYSLIB, ick_Base, ick_Base);
-    if (ick_findandfreopen(buffer, ick_datadir, "r", argv0, stdin) == NULL)
-      ick_lose(IE127, 1, (const char*) NULL);
-#ifdef USE_YYRESTART
-    yyrestart(stdin);
-#endif /* USE_YYRESTART */
-    (void) yyparse();
-    textlinecount=iyylineno;
-  }
-}
+    tuple *tp;
+    struct linerange_t *lp;
 
+    if (nosyslib || pickcompile) { 
+	*needsyslib = ick_FALSE;
+	return;
+    }
+
+    /*
+     * magical inclusion of system libraries is done here
+     */
+    for (lp = lineranges; lp->start; lp++)
+    {
+	*needsyslib = ick_FALSE;
+	for (tp = tuples; tp->type; tp++) {
+	    /*
+	     * If some label in the specified range is defined,
+	     * then assume the library we seek is already there, so we
+	     * can stop searching.
+	     */
+	    if (tp->label >= lp->start && tp->label <= lp->end) {
+		*needsyslib = ick_FALSE;
+		goto breakout;
+	    }
+	    /*
+	     * If some label in the specified range is being
+	     * called, we might need the library.
+	     */
+	    if (tp->type == NEXT &&
+		tp->u.target >= lp->start && tp->u.target <= lp->end)
+		*needsyslib = ick_TRUE;
+	}
+	if (*needsyslib) {
+	    if (ick_Base == 2)
+		(void) ick_snprintf_or_die(buffer, size,
+					   "%s.i", lp->libname);
+	    else
+		(void) ick_snprintf_or_die(buffer, size,
+					   "%s%d.%di", lp->libname, ick_Base, ick_Base);
+	    if (ick_findandfreopen(buffer, ick_datadir, "r", argv0, stdin) == NULL)
+		ick_lose(IE127, 1, (const char*) NULL);
+#ifdef USE_YYRESTART
+	    yyrestart(stdin);
+#endif /* USE_YYRESTART */
+	    (void) yyparse();
+	    textlinecount=iyylineno;
+	}
+    breakout:
+	;
+    }
+}
 
 /**
  * This code propagates type information up the expression tree.

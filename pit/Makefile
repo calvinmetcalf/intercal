@@ -9,6 +9,7 @@ BASE2SOURCES = \
 	./beer.i \
 	./bubble.i \
 	./change.i \
+	./fft.i \
 	./guess.i \
 	./icat.i \
 	./iching1.i \
@@ -34,17 +35,18 @@ BASE2SOURCES = \
 	./rot13.i \
 	./rot13b.i \
 	./sample.i \
+	./sort.i \
 	./tests/hello.i \
 	./tests/iogerunds.i \
+	./tests/limits.i \
 	./tests/permute.i \
 	./tests/sink.i \
 	./tests/test1.i \
-	./tests/limits.i \
 	./tests/test16bit.i \
+	./tests/test2.i \
 	./tests/testarray.i \
 	./tests/testcf.i \
 	./tests/testlib2.i \
-	./tests/test2.i \
 	./tests/testsplat.i \
 	./yapp.i
 
@@ -90,16 +92,21 @@ test: $(TARGETS)
 	@echo 'A man, a plan, a canal, Panama.' | rot13 | regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | rot13b | regresscheck rot13b
 	@echo "FIVE" | pi | regresscheck pi
+	@cp quine.i quine.chk; quine | regresscheck quine; rm quine.chk 
+	@cat sort.tst | sort | regresscheck sort
 	@tests/count | regresscheck tests/count 
 	@tests/hello | regresscheck tests/hello 
 	@tests/permute | regresscheck tests/permute 
-	@cp quine.i quine.chk; quine | regresscheck quine; rm quine.chk 
 	@tests/sink 2>&1 | regresscheck tests/sink
+	@tests/test1 2>&1 | regresscheck tests/test1 
+	@cat tests/test2.tst | tests/test2 | regresscheck tests/test2
 	@echo "Tests complete."
 
 # Needs special handling because the -m option is required
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
+fft: fft.i
+	$(ICK) -m fft.i
 
 lines:
 	wc -l $(SOURCES)

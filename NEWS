@@ -11,6 +11,12 @@ Changes by Eric S. Raymond
 
 3. A new program for the pit: Brendan Gregg's guess game.
 
+4. The floating-point library is now automatically included if
+   a program NEXTs to labels in the range 5000-5999.  Internally,
+   line-range to system library mappings are no longer hardcoded but
+   rather declared as an array of associations that can be easily
+   modified.
+
 Bugs reported and changes patched by Arvid Norlander
 
 1.  Fixed a typo in the perpet.c version of the help information.
