@@ -51,9 +51,9 @@ BASE2SOURCES = \
 BASENSOURCES = \
 	./hail_mary.3i \
 	./tests/count.3i \
-	./tests/limits.3i \
-	./tests/testops.3i \
-	./tests/testops.5i
+	./tests/limits3.3i \
+	./tests/testops3.3i \
+	./tests/testops5.5i
 
 SOURCES = $(BASE2SOURCES) $(BASENSOURCES)
 
@@ -101,21 +101,8 @@ test: $(TARGETS)
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
 
-./tests/limits3: ./tests/limits.3i
-	cp ./tests/limits.3i ./tests/limits3.3i
-	$(ICK) ./tests/limits3.3i
-
-./tests/testops3: ./tests/testops.3i
-	cp ./tests/testops.3i ./tests/testops3.3i
-	$(ICK) ./tests/testops3.3i
-
-./tests/testops5: ./tests/testops.5i
-	cp ./tests/testops.5i ./tests/testops5.5i
-	$(ICK) ./tests/testops5.5i
-
 lines:
 	wc -l $(SOURCES)
 
 clean:
 	rm -f $(TARGETS) *.c *.o *~
-	rm tests/limits3.3i tests/testops3.3i tests/testops5.5i

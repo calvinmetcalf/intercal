@@ -149,7 +149,7 @@ by Jeffrey Lee
   interfunge.i        A Befunge-93 interpreter written in INTERCAL
 
 The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
-limits.{i,3i}, testops.{3i,5i}, testsplat.i, were all written by Louis
+limits.*, testops*i, testsplat.i, were all written by Louis
 Howell.  Of these, testcf.i might be considered an interesting
 puzzle---try to figure out what it's doing.  The others are pretty
 boring, but are included as diagnostics and because so few other
