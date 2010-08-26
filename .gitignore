@@ -1,0 +1,19 @@
+*.o
+*.a
+*~
+Makefile
+autom4te.cache/
+config.h
+config.log
+config.status
+stamp-h1
+.deps
+# Executables produced by standard build
+bin2c
+convickt
+ick
+oil
+# Other generated stuff
+ick.c
+lexer.c
+doc/*info*

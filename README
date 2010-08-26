@@ -2,9 +2,9 @@
 
                                   DISCREDITS
 
-This package is an implementation of the language INTERCAL designed by Don
-Woods and James Lyon, who have since spent more than twenty years trying to
-live it down.
+This package is an implementation of the language INTERCAL designed by
+Don Woods and James Lyon, who have since spent decades trying to live
+it down.
 
 This implementation was created by Eric S. Raymond <esr@snark.thyrsus.com>
 during a fit of lunacy from which he has since mostly recovered.  It has been
@@ -144,22 +144,10 @@ use it... the default is -wimpmode (i.e. NOT wimp mode)."
 
                               SPREADING THE BLAME
 
-There is an INTERCAL Resource Page at http://www.catb.org/intercal
-
-The latest version of INTERCAL is also kept available at the Retrocomputing
-Museun, http://www.catb.org/retro.
-
-(The above two paragraphs are somewhat out of date, but I kept them there,
-including the typos, for historical purposes. Looking through the
-alt.lang.intercal archives is usually the best way to find out what the latest
-version of C-INTERCAL (and you'll find out how to get its rival too, for that
-matter) is nowadays; they tend to pop up in various unusual places, so giving
-a URL might be misleading.  Note also that contact details, and even who to
-contact, often end up out of date; the newsgroup is also a good way to find
-out who to contact.
-
-As of when I wrote this, the current homepage for C-INTERCAL and CLC-INTERCAL
-is http://intercal.freeshell.org.)
+There is an INTERCAL Resource Page at http://www.catb.org/intercal, and
+another at http://intercal.freeshell.org.  Both point at the same C-INTERCAL
+repository, which lives at git://gitorious.org/intercal/intercal.git; 
+the freeshell page also distributes CLC-INTERCAL, a variant implementation.
 
 There is, in addition, an occasionally active USENET newsgroup devoted to the
 language: alt.lang.intercal. (It is a somewhat unusual newsgroup, as although

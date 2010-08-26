@@ -1,0 +1,46 @@
+This is a multibranch repository that captures as much as we can find
+and reconstruct of the history of C-INTERCAL. The history is not complete
+because the project (begun in 1990) predates systematic use of version
+control (and, indeed, any but the most primitive version-control systems). 
+
+This repository stitches together some early RCS history up to 2003
+kept by Eric S. Raymond (esr), a large collection of release tarballs, and
+some snapshots and darcs history after 2003 kept by Alex Smith (ais523).
+
+The main branch begins with the first public release, 0.3, from 1990.
+Then it includes 0.5, 0.12, 0.13 and all of esr's mainline work up
+to 0.24 in 2003.  The main branch continues with ais523's 0.25 
+and later releases until 2010.  After the release 29 beta, the
+main branch is esr's and ais523's merged code.
+
+The resolution of preserved history between releases varies a great
+deal.  In the original mainline, esr gradually began putting the
+project under RCS control in mid-1996, just before 0.14.  All changes
+in the website directory were being tracked between about 0.18 and
+0.24, but some source files had not yet been RCSed.  Development from
+0.24 through 0.28 is recorded only by public release tarballs and
+sporadic backups.  Development after 0.28 to the 0.29 beta and after
+that until the creation of this unified repo was recorded in a darcs
+archive.
+
+In August 2010 esr stitched all this information together into a
+unified repository, which you are looking at now.  Metainformation
+such as commit dates and authorship has been preserved. Both esr and
+ais23 will be using this repository as a basis for further development.
+
+There is a 'dos' branch that holds William W. Patterson's DOS port of 0.15.
+
+There is a 'thick' branch that contains Malcolm Ryan's Threaded
+INTERCAL version forked from 0.17. The language extensions in Threaded
+INTERCAL were merged into the mainline after 0.24, so the thick code 
+itself is only of historical interest.
+
+We are missing early mainline releases 0.4, 0.6-0.11, and 0.14; so
+far, diligent searches of even the mustiest web and FTP archives have
+failed to turn these up.  If you can supply these, please inform the
+maintainers.
+
+				Eric S. Raymond <esr@thyrsus.com>
+				Alex Smith <ais523@bham.ac.uk>
+				August 2010
+
