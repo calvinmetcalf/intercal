@@ -8,6 +8,8 @@ config.log
 config.status
 stamp-h1
 .deps
+# Uploading the web page lands a copy here
+index.html
 # Executables produced by standard build
 bin2c
 convickt
@@ -16,4 +18,6 @@ oil
 # Other generated stuff
 ick.c
 lexer.c
+parser.[ch]
 doc/*info*
+oilout*.c
