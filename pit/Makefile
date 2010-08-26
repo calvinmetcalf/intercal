@@ -34,6 +34,7 @@ BASE2SOURCES = \
 	./rot13.i \
 	./rot13b.i \
 	./sample.i \
+	./sort.i \
 	./tests/hello.i \
 	./tests/iogerunds.i \
 	./tests/permute.i \
@@ -90,10 +91,11 @@ test: $(TARGETS)
 	@echo 'A man, a plan, a canal, Panama.' | rot13 | regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | rot13b | regresscheck rot13b
 	@echo "FIVE" | pi | regresscheck pi
+	@cp quine.i quine.chk; quine | regresscheck quine; rm quine.chk 
+	@cat sort.tst | sort | regresscheck sort
 	@tests/count | regresscheck tests/count 
 	@tests/hello | regresscheck tests/hello 
 	@tests/permute | regresscheck tests/permute 
-	@cp quine.i quine.chk; quine | regresscheck quine; rm quine.chk 
 	@tests/sink 2>&1 | regresscheck tests/sink
 	@echo "Tests complete."
 
