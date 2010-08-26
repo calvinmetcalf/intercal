@@ -37,15 +37,15 @@ BASE2SOURCES = \
 	./sort.i \
 	./tests/hello.i \
 	./tests/iogerunds.i \
+	./tests/limits.i \
 	./tests/permute.i \
 	./tests/sink.i \
 	./tests/test1.i \
-	./tests/limits.i \
 	./tests/test16bit.i \
+	./tests/test2.i \
 	./tests/testarray.i \
 	./tests/testcf.i \
 	./tests/testlib2.i \
-	./tests/test2.i \
 	./tests/testsplat.i \
 	./yapp.i
 
@@ -97,6 +97,8 @@ test: $(TARGETS)
 	@tests/hello | regresscheck tests/hello 
 	@tests/permute | regresscheck tests/permute 
 	@tests/sink 2>&1 | regresscheck tests/sink
+	@tests/test1 2>&1 | regresscheck tests/test1 
+	@cat tests/test2.tst | tests/test2 | regresscheck tests/test2
 	@echo "Tests complete."
 
 # Needs special handling because the -m option is required
