@@ -2,6 +2,15 @@
 
   Release 0.29 (by Alex Smith)
 
+Changes by Eric S. Raymond
+
+1. There is now a compiler regression-test suite, invoked through the test 
+   production in the pit makefile
+
+2. There are two new compiler error messages, E990 and E994.
+
+3. A new program for the pit: Brendan Gregg's guess game.
+
 Bugs reported and changes patched by Arvid Norlander
 
 1.  Fixed a typo in the perpet.c version of the help information.
