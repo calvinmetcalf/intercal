@@ -1,6 +1,18 @@
 permute.i prints the permutations of the set {1,2,3,4,5,6}, using
 backtracking (and therefore must be compiled with the -m compiler
-option). The following is the program translated into a mix of Prolog
+option).  In the output, numbers in a permutation are given one per line,
+with each digit list followed by XXX.
+
+This program is an excellent regression test because it uses a large
+crossection of INTERCAL control structures; computed COME FROM,
+ordinary COME FROM, ABSTAIN/REINSTATE, AGAIN, NEXT, and MAYBE/GO
+AHEAD/GO BACK are all used. Only ONCE (which is implied in the program
+due to the abstention/reinstatement of an AGAIN line) and IGNORE are
+left unused (at least until someone invents a new even nastier control
+structure). Unusually, it only contains three nontrivial expressions
+(those other than a single constant or a single variable).
+
+The following is the program translated into a mix of Prolog
 and C, with some INTERCAL operations (gets, stash, retrieve, giveup)
 scattered throughout the program.
 
@@ -95,12 +107,3 @@ to track in the INTERCAL, and also prevents the user using 0$label as
 a line number, without any obvious clue to this effect in the source
 code. while() can often be transformed into do..while(), and even in
 situations where it can't, an extra COME FROM does the trick.
-
-This program uses a large crosssection of INTERCAL control structures;
-computed COME FROM, ordinary COME FROM, ABSTAIN/REINSTATE, AGAIN,
-NEXT, and MAYBE/GO AHEAD/GO BACK are all used. Only ONCE (which is
-implied in the program due to the abstention/reinstatement of an AGAIN
-line) and IGNORE are left unused (at least until someone invents a new
-even nastier control structure). Unusually, it only contains three
-nontrivial expressions (those other than a single constant or a single
-variable).

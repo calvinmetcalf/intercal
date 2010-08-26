@@ -34,6 +34,7 @@ BASE2SOURCES = \
 	./sample.i \
 	./tests/hello.i \
 	./tests/iogerunds.i \
+	./tests/permute.i \
 	./tests/sink.i \
 	./tests/test1.i \
 	./tests/limits.i \
@@ -83,14 +84,19 @@ TARGETS = $(BASE2SOURCES:.i=) \
 
 test: $(TARGETS)
 	@beer | regresscheck beer 
-	@tests/count | regresscheck tests/count 
-	@tests/hello | regresscheck tests/hello 
 	@echo 'Hello, sailor!' | regresscheck icat 
 	@echo 'A man, a plan, a canal, Panama.' | rot13 | regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | rot13b | regresscheck rot13b
 	@echo "FIVE" | pi | regresscheck pi
+	@tests/count | regresscheck tests/count 
+	@tests/hello | regresscheck tests/hello 
+	@tests/permute | regresscheck tests/permute 
 	@tests/sink 2>&1 | regresscheck tests/sink
 	@echo "Tests complete."
+
+# Needs special handling because the -m option is required
+tests/permute: tests/permute.i
+	$(ICK) -m tests/permute.i
 
 ./lib/syslib3: ./lib/syslib.3i
 	cp ./lib/syslib.3i ./lib/syslib3.3i
