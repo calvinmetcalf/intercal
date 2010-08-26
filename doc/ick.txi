@@ -6718,10 +6718,8 @@ particular @ical{} expression works.
 Make sure that the optimizer doesn't change a statement from a run-time
 error into something that silently succeeds@!  Checking which bits can
 and can't be 1 is one good way to avoid this, especially with mingles.
-(At present, there are some idioms that can turn run-time errors into
-compile-time errors, such as with the expression
-@code{''#65535$#65535'$#0'}; this could be avoided, but for the time
-being it isn't.)
+Likewise, don't optimise a run-time error into a compile-time error
+(although creating a compile-time warning in this situation is fine).
 
 @item
 You can help@!  If you find an idiom that the optimizer isn't optimizing
