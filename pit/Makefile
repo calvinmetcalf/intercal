@@ -9,6 +9,7 @@ BASE2SOURCES = \
 	./beer.i \
 	./bubble.i \
 	./change.i \
+	./fft.i \
 	./guess.i \
 	./icat.i \
 	./iching1.i \
@@ -104,6 +105,8 @@ test: $(TARGETS)
 # Needs special handling because the -m option is required
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
+fft: fft.i
+	$(ICK) -m fft.i
 
 lines:
 	wc -l $(SOURCES)
