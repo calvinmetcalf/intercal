@@ -94,7 +94,7 @@ By Brian Raiter <breadbox@muppetlabs.com>
   fft.doc           + Description of fft.i
 
 by Donald Knuth
-  tpk.i             Don Knuth's implementation of the TPK algorithm
+  tpk.i             + Don Knuth's implementation of the TPK algorithm
   tpk.doc           Don's note about the algorithm
 
 by Oerjan Johansen

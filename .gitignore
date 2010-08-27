@@ -64,6 +64,7 @@ pit/rot13
 pit/rot13b
 pit/sample
 pit/sort
+pit/tpk
 pit/tests/hello
 pit/tests/iogerunds
 pit/tests/permute

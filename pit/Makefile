@@ -97,6 +97,7 @@ test: $(TARGETS)
 	@echo "FIVE" | ./pi | ./regresscheck pi
 	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
 	@cat sort.tst | ./sort | ./regresscheck sort
+	@cat tpk.tst | ./tpk | ./regresscheck tpk
 	@./tests/count | ./regresscheck tests/count 
 	@./tests/hello | ./regresscheck tests/hello 
 	@./tests/permute | ./regresscheck tests/permute 
