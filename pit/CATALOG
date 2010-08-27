@@ -90,8 +90,8 @@ By Brian Raiter <breadbox@muppetlabs.com>
   lib/floatlib.doc  Documentation for the floating-point routines
   flonck.i          An RPN calculator
   flonck.doc        Documentation for flonck.i
-  fft.i             Fast Fourier Transform (requires syslib and floatlib)
-  fft.doc           + Description of fft.i
+  fft.i             + Fast Fourier Transform (requires syslib and floatlib)
+  fft.doc           Description of fft.i
 
 by Donald Knuth
   tpk.i             + Don Knuth's implementation of the TPK algorithm
