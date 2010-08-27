@@ -19,7 +19,7 @@
 # This pattern doesn't handle well the case where one program has multiple
 # tests, so options are provided to override the test file name 
 
-while getopts cp opt
+while getopts c:p: opt
 do
     case $opt in
 	c) checkfile=$OPTARG ;;	# Override the location of the checkfile
