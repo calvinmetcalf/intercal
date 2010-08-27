@@ -83,7 +83,7 @@ By Brian Raiter <breadbox@muppetlabs.com>
   tests/hello.i     + The traditional hello world program
   ins.i             Intersections & Splats, a Mastermind-style game
   ins.doc           Documentation for I&S
-  yapp.i            Prints an INTERCAL program that prints
+  yapp.i            + Prints an INTERCAL program that prints
   yapp.doc          Description of yapp.i
   quine.i           + Prints itself
   lib/floatlib.i    Floating-point routines

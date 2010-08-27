@@ -36,7 +36,6 @@ BASE2SOURCES = \
 	./rot13b.i \
 	./sample.i \
 	./sort.i \
-	./tpk.i \
 	./tests/hello.i \
 	./tests/iogerunds.i \
 	./tests/limits.i \
@@ -49,6 +48,7 @@ BASE2SOURCES = \
 	./tests/testcf.i \
 	./tests/testlib2.i \
 	./tests/testsplat.i \
+	./tpk.i \
 	./yapp.i
 
 BASENSOURCES = \
@@ -99,6 +99,7 @@ test: $(TARGETS)
 	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
 	@cat sort.tst | ./sort | ./regresscheck sort
 	@cat tpk.tst | ./tpk | ./regresscheck tpk
+	@cat yapp.tst | yapp >yapptest.i && $(ICK) yapptest.i && yapptest | regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
 	@./tests/count | ./regresscheck tests/count 
 	@./tests/hello | ./regresscheck tests/hello 
 	@./tests/permute | ./regresscheck tests/permute 
@@ -106,6 +107,7 @@ test: $(TARGETS)
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 
 	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
 	@echo "Tests complete."
+
 
 # Needs special handling because the -m option is required
 tests/permute: tests/permute.i
