@@ -52,6 +52,7 @@ BASE2SOURCES = \
 	./tests/testlib2.i \
 	./tests/testonce \
 	./tests/testsplat.i \
+	./tests/whileadd.i \
 	./tpk.i \
 	./unlambda.i \
 	./yapp.i
@@ -114,14 +115,17 @@ test: $(TARGETS)
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 
 	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
 	@./tests/testonce | ./regresscheck tests/testonce 
+	@cat tests/whileadd.tst | ./tests/whileadd | ./regresscheck tests/whileadd
 	@echo "Tests complete."
 
 
 # Needs special handling because the -m option is required
-tests/permute: tests/permute.i
-	$(ICK) -m tests/permute.i
 fft: fft.i
 	$(ICK) -m fft.i
+tests/permute: tests/permute.i
+	$(ICK) -m tests/permute.i
+tests/whileadd: tests/whileadd.i
+	$(ICK) -m tests/whileadd.i
 
 lines:
 	wc -l $(SOURCES)

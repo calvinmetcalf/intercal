@@ -85,6 +85,7 @@ pit/tests/testonce
 pit/tests/testops3
 pit/tests/testops5
 pit/tests/testsplat
+pit/tests/whileadd
 pit/tpk
 pit/unlambda
 pit/yapp
