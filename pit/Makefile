@@ -47,6 +47,7 @@ BASE2SOURCES = \
 	./tests/testarray.i \
 	./tests/testcf.i \
 	./tests/testlib2.i \
+	./tests/testonce \
 	./tests/testsplat.i \
 	./tpk.i \
 	./yapp.i
@@ -105,8 +106,8 @@ test: $(TARGETS)
 	@./tests/permute | ./regresscheck tests/permute 
 	@./tests/sink 2>&1 | ./regresscheck tests/sink
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 
-	@./tests/testonce | ./regresscheck tests/testonce 
 	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
+	@./tests/testonce | ./regresscheck tests/testonce 
 	@echo "Tests complete."
 
 
