@@ -39,6 +39,7 @@ BASE2SOURCES = \
 	./sample.i \
 	./sort.i \
 	./tests/hello.i \
+	./tests/ignorret \
 	./tests/iogerunds.i \
 	./tests/limits.i \
 	./tests/permute.i \
@@ -111,6 +112,7 @@ test: $(TARGETS)
 	@cat yapp.tst | yapp >yapptest.i && $(ICK) yapptest.i && yapptest | regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
 	@./tests/count | ./regresscheck tests/count 
 	@./tests/hello | ./regresscheck tests/hello 
+	@./tests/ignorret | ./regresscheck tests/ignorret 
 	@./tests/permute | ./regresscheck tests/permute 
 	@./tests/sink 2>&1 | ./regresscheck tests/sink
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 

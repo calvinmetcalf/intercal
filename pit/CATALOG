@@ -129,7 +129,7 @@ by Alex Smith
   tests/permute.i	+ A permutation-printing program to test backtracking
   tests/permute.doc	Information about the permutation-printer
   tests/whileadd.i	+ Adds two input numbers with a single WHILE statement
-  tests/ignorret.i	Testing interactions of IGNORE and RETRIEVE
+  tests/ignorret.i	+ Testing interactions of IGNORE and RETRIEVE
   tests/ignorret.doc	What ignorret does on several compilers
   tests/normaldist.i	Checking the standard deviation of (1910)
   tests/testcreate.i	A test for the CREATE statement

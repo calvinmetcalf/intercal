@@ -69,6 +69,7 @@ pit/sample
 pit/sort
 pit/tests/count
 pit/tests/hello
+pit/tests/ignorret
 pit/tests/iogerunds
 pit/tests/limits
 pit/tests/limits3
