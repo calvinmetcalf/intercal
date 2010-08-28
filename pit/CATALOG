@@ -147,9 +147,6 @@ by Malcom Ryan
   pass.i		A multithread program illustrating communications
   			between threads
 
-by Jeffrey Lee
-  interfunge.i		A Befunge-93 interpreter written in INTERCAL
-
 The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
 limits.*, testops*i, testsplat.i, were all written by Louis
 Howell.  Of these, testcf.i might be considered an interesting
