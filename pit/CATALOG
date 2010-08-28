@@ -41,7 +41,8 @@ by Louis Howell <nazgul@netcom.com>
     t_tet
     glider
     gun			Input files for both Life programs
-  bubble.i		Bubble sort
+  bubble.i		+ Bubble sort. List of numbers to be sorted must
+  			be preceded with the length of the list.
   icat.i		+ Sends input to output
   lib/lib2.i		New library routines: decrement, decrement and branch 
   			on 0, add bit, 16-bit division with remainder, 
