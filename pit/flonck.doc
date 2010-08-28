@@ -7,7 +7,7 @@ and replace it/them with the result. Besides the main stack, flonck
 also includes two separate "registers".
 
 Note that this program requires the floating-point library in
-lib/floatlib.i, which should be appended to flonck.i before compiling.
+lib/floatlib.i.  C-INTERCAL will detect this and include it.
 
 Here is the quick-reference chart of available operations:
 

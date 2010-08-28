@@ -1,7 +1,8 @@
 The program fft.i provides a basic complex Fast Fourier Transform,
 along with a simple write-in-read-out wrapper. This program requires
-the floating-point library in lib/floatlib.i, which should be appended
-to fft.i before compiling.
+the floating-point library in lib/floatlib.i; C-INTERCAL will detect
+this and include it.
+
 
 The first number to enter specifies the direction of the transform.
 Enter ONE to transform from time to frequency, or TWO for the inverse

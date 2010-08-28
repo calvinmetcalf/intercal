@@ -93,7 +93,7 @@ By Brian Raiter <breadbox@muppetlabs.com>
   lib/floatlib.i	Floating-point routines
   lib/floatlib.doc	Documentation for the floating-point routines
   flonck.i		An RPN calculator
-  flonck.doc		Documentation for flonck.i
+  flonck.doc		Documentation for flonck.i (requires floatlib)
   fft.i			+ Fast Fourier Transform (requires syslib and floatlib)
   fft.doc		Description of fft.i
 
