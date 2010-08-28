@@ -139,7 +139,7 @@ by Alex Smith
   continuation.doc    About usage and internals of the continuation library
 
 by Malcom Ryan
-  tests/testonce.i    A single-threaded program testing ONCE and AGAIN
+  tests/testonce.i    + A single-threaded program testing ONCE and AGAIN
   pass.i              A multithread program illustrating communications
 	              between threads
 

@@ -105,6 +105,7 @@ test: $(TARGETS)
 	@./tests/permute | ./regresscheck tests/permute 
 	@./tests/sink 2>&1 | ./regresscheck tests/sink
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 
+	@./tests/testonce | ./regresscheck tests/testonce 
 	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
 	@echo "Tests complete."
 
