@@ -106,7 +106,7 @@ by Oerjan Johansen
   unlambda.doc		Better-commented version of the above
 
 by Jeffrey Lee
-  interfunge.i		A Befunge-93 interpreter in INTERCAL
+  interfunge.i		+ A Befunge-93 interpreter in INTERCAL
 
 by Brendan Gregg
   guess.i		Guessing game implementation in INTERCAL

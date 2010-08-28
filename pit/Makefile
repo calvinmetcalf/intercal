@@ -16,6 +16,7 @@ BASE2SOURCES = \
 	./iching1.i \
 	./iching2.i \
 	./ins.i \
+	./interfunge \
 	./lib/lib2.i \
 	./lib/numio.i \
 	./lib/plus.i \
@@ -97,6 +98,7 @@ test: $(TARGETS)
 	@cat fft-delta.tst | ./fft | ./regresscheck fft-delta
 	@cat fft-tophat.tst | ./fft | ./regresscheck fft-tophat
 	@echo 'Hello, sailor!' | ./regresscheck icat 
+	@cat interfunge.tst | ./interfunge | ./regresscheck interfunge
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13 | ./regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13b | ./regresscheck rot13b
 	@echo "FIVE" | ./pi | ./regresscheck pi
