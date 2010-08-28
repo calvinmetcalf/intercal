@@ -102,7 +102,7 @@ by Donald Knuth
   tpk.doc		Don's note about the algorithm
 
 by Oerjan Johansen
-  unlambda.i		An Unlambda interpreter in INTERCAL
+  unlambda.i		+ An Unlambda interpreter in INTERCAL
   unlambda.doc		Better-commented version of the above
 
 by Jeffrey Lee
@@ -122,7 +122,7 @@ by Alex Smith
   tests/ais1.i		A very simple test program
   tests/ais2.i		A demonstration of computed ABSTAIN's power
   tests/compucome.i	A program to test computed COME FROM
-  tests/onceagain.i	A single-threaded program testing ONCE and AGAIN
+  tests/onceagain.i	+ A single-threaded program testing ONCE and AGAIN
   tests/arrtest.i	A program to test some changes I made to the grammar
   tests/arrtest.doc	The history behind those changes
   tests/permute.i	+ A permutation-printing program to test backtracking

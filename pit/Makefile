@@ -42,6 +42,7 @@ BASE2SOURCES = \
 	./tests/limits.i \
 	./tests/permute.i \
 	./tests/sink.i \
+	./tests/onceagain.i \
 	./tests/test1.i \
 	./tests/test16bit.i \
 	./tests/test2.i \
@@ -51,6 +52,7 @@ BASE2SOURCES = \
 	./tests/testonce \
 	./tests/testsplat.i \
 	./tpk.i \
+	./unlambda.i \
 	./yapp.i
 
 BASENSOURCES = \
@@ -101,6 +103,7 @@ test: $(TARGETS)
 	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
 	@cat sort.tst | ./sort | ./regresscheck sort
 	@cat tpk.tst | ./tpk | ./regresscheck tpk
+	@cat unlambda.tst | ./unlambda | ./regresscheck unlambda
 	@cat yapp.tst | yapp >yapptest.i && $(ICK) yapptest.i && yapptest | regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
 	@./tests/count | ./regresscheck tests/count 
 	@./tests/hello | ./regresscheck tests/hello 
