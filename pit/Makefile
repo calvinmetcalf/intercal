@@ -9,6 +9,7 @@ BASE2SOURCES = \
 	./beer.i \
 	./bubble.i \
 	./change.i \
+	./flonck.i \
 	./fft.i \
 	./guess.i \
 	./icat.i \
