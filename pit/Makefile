@@ -106,6 +106,7 @@ test: $(TARGETS)
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13 | ./regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13b | ./regresscheck rot13b
 	@echo "FIVE" | ./pi | ./regresscheck pi
+	@cat pow.tst | ./pow 2>&1 | ./regresscheck pow
 	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
 	@cat sort.tst | ./sort | ./regresscheck sort
 	@cat tpk.tst | ./tpk | ./regresscheck tpk

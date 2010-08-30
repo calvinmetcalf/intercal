@@ -49,8 +49,8 @@ by Louis Howell <nazgul@netcom.com>
 			exponentiation
   pi.i			+ Calculate pi to a specified number of digits
   primes.i		Find prime numbers
-  pow.i			Prints a list of nth powers using old exponentiation 
-  			routine
+  pow.i			+ Prints a list of nth powers using old exponentiation 
+  			routine. Exprctt this to fail with overflow.
   lib/syslib.i		Corrected version of system library
   iching1.i     	Generates I Ching hexagrams
   iching2.i     	This version uses a lookup table to find the sequence 
