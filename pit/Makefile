@@ -100,6 +100,7 @@ test: $(TARGETS)
 	@cat bubble.tst | ./bubble | ./regresscheck bubble
 	@cat fft-delta.tst | ./fft | ./regresscheck fft-delta
 	@cat fft-tophat.tst | ./fft | ./regresscheck fft-tophat
+	@cat flonck.tst | ./flonck | ./regresscheck flonck
 	@echo 'Hello, sailor!' | ./regresscheck icat 
 	@cat interfunge.tst | ./interfunge | ./regresscheck interfunge
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13 | ./regresscheck rot13
