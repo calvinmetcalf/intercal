@@ -145,9 +145,12 @@ by Alex Smith
   continuation.doc	About usage and internals of the continuation library
 
 by Malcom Ryan
-  tests/testonce.i	+ A single-threaded program testing ONCE and AGAIN
-  pass.i		A multithread program illustrating communications
-  			between threads
+  tests/testonce.i	+ A single-threaded program that tests all permutations
+			of the ONCE modifier; the output is simply to verify 
+			that the program flow follows the sequence expected.
+  pass.i		+ A multithread program illustrating communications
+  			between threads.  Simply reads in a list of
+			numbers (terminated by ZERO) and writes them out.
 
 The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
 limits.*, testops*i, testsplat.i, were all written by Louis

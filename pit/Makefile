@@ -31,6 +31,7 @@ BASE2SOURCES = \
 	./pi.i \
 	./pow.i \
 	./quine \
+	./pass.i \
 	./primes.i \
 	./random.i \
 	./random2.i \
@@ -108,6 +109,7 @@ test: $(TARGETS)
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13b | ./regresscheck rot13b
 	@echo "FIVE" | ./pi | ./regresscheck pi
 	@cat pow.tst | ./pow 2>&1 | ./regresscheck pow
+	@cat pass.tst | ./pass | ./regresscheck pass
 	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
 	@cat sort.tst | ./sort | ./regresscheck sort
 	@cat tpk.tst | ./tpk | ./regresscheck tpk
@@ -128,6 +130,8 @@ test: $(TARGETS)
 # Some tests need options to compile extensions.
 fft: fft.i
 	$(ICK) -m fft.i
+pass: pass.i
+	$(ICK) -m pass.i
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
 tests/whileadd: tests/whileadd.i
