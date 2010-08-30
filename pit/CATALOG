@@ -120,8 +120,12 @@ by David Moews
   tests/test2.i		+ Reads in two numbers and reports their product
 
 by Alex Smith
-  tests/ais1.i		A very simple test program
-  tests/ais2.i		A demonstration of computed ABSTAIN's power
+  tests/ais1.i		+ Reads in numbers terminated with zero and
+  			writes them back out, testing COME FROM/NEXT
+			interaction.
+  tests/ais2.i		+ A demonstration of computed ABSTAIN's power.
+  			Computes the Fibinacci sequence; in the innput file,
+			ONE means compute the nextvterm and ZERO means stop.
   tests/compucome.i	A program to test computed COME FROM
   tests/onceagain.i	+ A single-threaded program testing ONCE and AGAIN
   tests/arrtest.i	A program to test some changes I made to the grammar.

@@ -68,6 +68,8 @@ pit/rot13
 pit/rot13b
 pit/sample
 pit/sort
+pit/tests/ais1
+pit/tests/ais2
 pit/tests/count
 pit/tests/hello
 pit/tests/ignorret

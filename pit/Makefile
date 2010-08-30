@@ -39,6 +39,8 @@ BASE2SOURCES = \
 	./rot13b.i \
 	./sample.i \
 	./sort.i \
+	./tests/ais1.i \
+	./tests/ais2.i \
 	./tests/hello.i \
 	./tests/ignorret \
 	./tests/iogerunds.i \
@@ -115,6 +117,8 @@ test: $(TARGETS)
 	@cat tpk.tst | ./tpk | ./regresscheck tpk
 	@cat unlambda.tst | ./unlambda | ./regresscheck unlambda
 	@cat yapp.tst | yapp >yapptest.i && $(ICK) yapptest.i && yapptest | regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
+	@cat tests/ais1.tst | ./tests/ais1 | ./regresscheck tests/ais1 
+	@cat tests/ais2.tst | ./tests/ais2 | ./regresscheck tests/ais2 
 	@./tests/count | ./regresscheck tests/count 
 	@./tests/hello | ./regresscheck tests/hello 
 	@./tests/ignorret | ./regresscheck tests/ignorret 
