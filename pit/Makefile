@@ -127,6 +127,7 @@ test: $(TARGETS)
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 
 	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
 	@./tests/testonce | ./regresscheck tests/testonce 
+	@./tests/testsplat 2>&1 | ./regresscheck tests/testsplat 
 	@cat tests/whileadd.tst | ./tests/whileadd | ./regresscheck tests/whileadd
 	@echo "Tests complete."
 
