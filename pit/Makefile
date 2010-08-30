@@ -50,6 +50,7 @@ BASE2SOURCES = \
 	./tests/test2.i \
 	./tests/testarray.i \
 	./tests/testcf.i \
+	./tests/testcreate .i \
 	./tests/testlib2.i \
 	./tests/testonce \
 	./tests/testsplat.i \
@@ -124,13 +125,15 @@ test: $(TARGETS)
 	@echo "Tests complete."
 
 
-# Needs special handling because the -m option is required
+# Some tests need options to compile extensions.
 fft: fft.i
 	$(ICK) -m fft.i
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
 tests/whileadd: tests/whileadd.i
 	$(ICK) -m tests/whileadd.i
+tests/testcreate: tests/testcreate.i
+	$(ICK) -a tests/testcreate.i
 
 lines:
 	wc -l $(SOURCES)

@@ -81,6 +81,7 @@ pit/tests/test16bit
 pit/tests/test2
 pit/tests/testarray
 pit/tests/testcf
+pit/tests/testcreate
 pit/tests/testlib2
 pit/tests/testonce
 pit/tests/testops3

@@ -124,7 +124,8 @@ by Alex Smith
   tests/ais2.i		A demonstration of computed ABSTAIN's power
   tests/compucome.i	A program to test computed COME FROM
   tests/onceagain.i	+ A single-threaded program testing ONCE and AGAIN
-  tests/arrtest.i	A program to test some changes I made to the grammar
+  tests/arrtest.i	A program to test some changes I made to the grammar.
+  			No output expected as it's just a parser test.
   tests/arrtest.doc	The history behind those changes
   tests/permute.i	+ A permutation-printing program to test backtracking
   tests/permute.doc	Information about the permutation-printer
@@ -132,7 +133,7 @@ by Alex Smith
   tests/ignorret.i	+ Testing interactions of IGNORE and RETRIEVE
   tests/ignorret.doc	What ignorret does on several compilers
   tests/normaldist.i	Checking the standard deviation of (1910)
-  tests/testcreate.i	A test for the CREATE statement
+  tests/testcreate.i	+ A test for the CREATE statement
   tests/iffit1.i	The INTERCAL side of the INTERCAL/Funge-98 test
   tests/iffit2.b98	The Funge side of the INTERCAL/Funge-98 test
   tests/iffit.doc	Documentation for the INTERCAL/Funge-98 test
