@@ -98,6 +98,12 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
              lexer.c doc/ick.txi doc/ick.txt NEWS README yylwrap autogen.sh
 
+# How to run splint on this code
+SPLINTOPTS = -I. -Isrc +quiet -warnposix -boolops -predboolint
+splint:
+	@echo "Running splint on ick..."
+	-splint $(SPLINTOPTS) -exportlocal -redef $(ick_SOURCES) 
+
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
 # root of the /build tree/, which makes a lot more sense than putting
