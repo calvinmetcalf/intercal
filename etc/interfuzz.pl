@@ -26,6 +26,51 @@ use File::Temp qw/tempdir/;
 use File::Spec;
 
 use constant fuzzamount => 1000;
+use constant ickpath => '../build/ick';
+use constant idiompath => '../src/idiotism.oil';
+
+# Before getting to the main program, we need to read in idiom LHSes.
+print STDERR "Loading idioms...\n";
+my $idioms = '';
+my %idiomlist = ();
+my %idiomnames = ();
+open my $idiomfh, '<', idiompath;
+while(defined ($_=<$idiomfh>)) {
+    # OIL is whitespace-insensitive, except that comments go from
+    # semicolons to newlines.
+    s/;.*$//;
+    # Square brackets indicate idiom names.
+    s/\[(\w+)\]/($idiomnames{$1}=1),''/eg;
+    $idioms .= $_;
+}
+close $idiomfh;
+# Remove whitespace.
+$idioms =~ s/\s//g;
+# Eliminate C from the testbench, leaving only OIL.
+# Constants with a condition are changed to ,n rather than #n, to tell
+# them apart from constants with a stated value.
+$idioms =~ s/#\{[^{}]*\}/,/g;
+$idioms =~ s/([.:_])\{[^{}]*\}/$1/g;
+# Remove bitwidths.
+$idioms =~ s/([^#\d])(?:16|32)/$1/g;
+# Remove reference numbers. For idioms that need numbers to be equal, we
+# have to rely on the random chance of getting a duplication due to a
+# random duplication of operand or of variable.
+$idioms =~ s/([.:_,])\d+/$1/g;
+# Replace overlarge constants with mingles.
+$idioms =~ s/#(\d+)/$1 > 65535 ? mingle_constant($1) : "#$1"/eg;
+# Change _ ("allow any value") to . ("force 16-bit"); because the
+# optimiser is free to optimise errors into errors, but we want to
+# generate known non-erroring code.
+$idioms =~ s/_/./g;
+# To find idiom LHSes, we look for balanced paren groups on the LHS of a
+# ->. (This will miss idioms that use sparkears for the outermost group,
+# but nobody does that anyway, and it doesn't change the correctness of
+# this testbench, just makes it randomize in a slightly worse way.)
+# We ignore idioms containing the following characters: +-*/%<> because
+# they can't easily be translated into INTERCAL, and so there's no
+# direct way to cause the idiom to happen.
+$idioms =~ s/(\((?:[^-()+*\/\%<>]|(?1))+\))->/($idiomlist{$1}=1),"$1->"/eg;
 
 # We generate random INTERCAL expressions as follows: start with a
 # placeholder _1, then repeatedly replace the placeholder with a more
@@ -69,45 +114,95 @@ sub random_operand {
 sub oil_expression {
     my $expr = ':[1]';
     local $_;
+    my $idiomsused = 0;
     while ((rand) < 0.9 || $expr eq ':[1]') {
         my @placeholders = ($expr =~ /[.:]\[\d+\]/g);
+        last unless @placeholders;
         my $unused_placeholder = 1;
         /[.:]\[(\d+)\]/ and $1 >= $unused_placeholder
             and $unused_placeholder = $1 + 1 for @placeholders;
         my $replaced_placeholder = $placeholders[int(rand(@placeholders))];
-        my $whichexpr = (rand) * 0.35; # todo: idioms from file
-        my $newexpr;
+        my $whichexpr = (rand);
+        my $newexpr = "*";
         if ($replaced_placeholder =~ /:/) {{
-            $whichexpr < 0.08  and $newexpr = '(:~:)', last;
+            $idiomsused > 0 and $whichexpr *= 0.4;
+            $whichexpr < 0.1  and $newexpr = '(:~:)', last;
             $whichexpr < 0.2  and $newexpr = '(.$.)', last;
             $whichexpr < 0.25 and $newexpr = '?:', last;
             $whichexpr < 0.3  and $newexpr = 'V:', last;
             $whichexpr < 0.35 and $newexpr = '&:', last;
+            if ($whichexpr < 0.4) {
+                $newexpr = $placeholders[int(rand(@placeholders))]
+                    while $newexpr !~ /^\:/;
+                last;
+            }
+            # Grab an idiom from the list.
+            $newexpr = (keys %idiomlist)[int(rand(keys %idiomlist))];
+            $idiomsused++;
         }} else {{
-            $whichexpr < 0.08 and $newexpr = '(.~.)', last;
-            $whichexpr < 0.2  and $newexpr = '(:~.)', last;
-            $whichexpr < 0.25 and $newexpr = '?.', last;
-            $whichexpr < 0.3  and $newexpr = 'V.', last;
-            $whichexpr < 0.35 and $newexpr = '&.', last;
+            $whichexpr < 0.2 and $newexpr = '(.~.)', last;
+            $whichexpr < 0.6 and $newexpr = '(:~.)', last;
+            $whichexpr < 0.7 and $newexpr = '?.', last;
+            $whichexpr < 0.8 and $newexpr = 'V.', last;
+            $whichexpr < 0.9 and $newexpr = '&.', last;
+            $newexpr = $placeholders[int(rand(@placeholders))]
+                while $newexpr !~ /^\./;
         }}
-        $newexpr =~ s/([.:])/$1."[".($unused_placeholder++)."]"/eg;
+        $newexpr =~ /[.,:]\[\d+\]/ or
+            $newexpr =~ s/([.,:])/$1."[".($unused_placeholder++)."]"/eg;
         # Use {} as maybe-brackets; we don't know if $newexpr needs parens yet.
         $expr =~ s/\Q$replaced_placeholder\E/{$newexpr}/g;
         $expr =~ s/([?&V])\{([?&V][^{}]+)\}/$1($2)/g;
         $expr =~ s/[{}]//g;
     }
     my $newop;
+    # Replace random operands
     $newop = random_operand(16), $expr =~ s/\Q$_\E/$newop/g
         for ($expr =~ /.\[\d+\]/g);
     $newop = random_operand(32), $expr =~ s/\Q$_\E/$newop/g
         for ($expr =~ /:\[\d+\]/g);
+    # and random constants
+    $newop = random_constant, $expr =~ s/\Q$_\E/$newop/g
+        for ($expr =~ /,\[\d+\]/g);
     $expr =~ /[.:]/ or goto &oil_expression;
     return $expr;
 }
 
+# A utility function for creating 32-bit C logical operations, to help
+# create code needed to trigger various idioms.
+sub clogop {
+    my $op = shift;
+    my $a = shift;
+    my $b = shift;
+    return "($op(($a~(#65535\$#0))\$($b~(#65535\$#0)))~(#0\$#65535))\$".
+           "($op(($a~(#0\$#65535))\$($b~(#0\$#65535)))~(#0\$#65535))";
+}
+
 sub intercal_expression {
     my $expr = oil_expression;
-    # TODO: Translate C to INTERCAL
+
+    # C that came from idioms must be translated into INTERCAL.
+    my $intercal_operand = qr/[?\&V]?[#.:]\d+|[?\&V]?(\((?:[^()]|(?-1))+\))/;
+    {
+        $expr =~ s/(?'a'$intercal_operand)==(?'b'$intercal_operand)/!($+{a}^$+{b})/g
+            and redo;
+        $expr =~ s/(?'a'$intercal_operand)!=(?'b'$intercal_operand)/(($+{a}^$+{b})~($+{a}^$+{b}))~#1/g
+            and redo;
+        $expr =~ s/!(?'a'$intercal_operand)/?((($+{a}~$+{a})~#1)\$#1)~#1/g
+            and redo;
+        $expr =~ s/(?'a'$intercal_operand)\^(?'b'$intercal_operand)/clogop('?',$+{a},$+{b})/ge
+            and redo;
+        $expr =~ s/(?'a'$intercal_operand)\|(?'b'$intercal_operand)/clogop('V',$+{a},$+{b})/ge
+            and redo;
+        $expr =~ s/(?'a'$intercal_operand)\&(?'b'$intercal_operand)/clogop('&',$+{a},$+{b})/ge
+            and redo;
+        # C bitwise complement is tricky as there's a clash with INTERCAL
+        # binary select. So we check specifically for the ( before the ~.
+        # The other problem is guessing the bitwidth - 4294967295^x may
+        # overflow if x is actually 16-bit - so we instead just take a
+        # 16-bit complement.
+        $expr =~ s/\(~(?'a'$intercal_operand)/'('.clogop('?','#65535',$+{a})/ge and redo;
+    }
 
     # Two changes are needed to allow for INTERCAL's insane syntax:
     # move all unaries forwards one character, and change parens into
@@ -120,10 +215,27 @@ sub intercal_expression {
     return $expr;
 }
 
-# The main program: create a temporary directory, and an INTERCAL program
-# in it. We run 1000 expressions, each on 1000 sets of variable values.
+# A utility function for creating 32-bit constants.
 
-print "Generating test data...\n";
+sub mingle_constant {
+    my $c = shift;
+    my $a = 0;
+    my $b = 0;
+    for (0..15) {
+        $c & 1 and $b |= 65536;
+        $c & 2 and $a |= 65536;
+        $a >>= 1;
+        $b >>= 1;
+        $c >>= 2;
+    }
+    return "(#$a\$#$b)";
+}
+
+# The main program: create a temporary directory, and an INTERCAL
+# program in it. We run fuzzamount expressions, each on fuzzamount
+# sets of variable values.
+
+print STDERR "Generating test data...\n";
 my $dir = tempdir( CLEANUP => 1 );
 my $fn = File::Spec->catfile($dir,"fuzz");
 open my $fh, '>', "$fn.i";
@@ -136,13 +248,15 @@ for (0..(fuzzamount-1)) {
     print $fh " DO STASH .1 + .2 + .3\n";
 }
 # The computed ABSTAIN is used as a loop counter.
-print $fh "PLEASE ABSTAIN #1000 FROM (3) (1) DO COME FROM (2)\n";
+print $fh "PLEASE ABSTAIN #".fuzzamount." FROM (3) (1) DO COME FROM (2)\n";
 print $fh "DO RETRIEVE .1 + .2 + .3\n";
 
-print "Generating test program...\n";
+print STDERR "Generating test program...\n";
 my $pleaseflop = 0;
 my @expressions = ();
+$|=1;
 for (0..(fuzzamount-1)) {
+    print STDERR "$_/",fuzzamount,"\r";
     $expressions[$_] = intercal_expression;
     $pleaseflop && print $fh "PLEASE ";
     $pleaseflop = !$pleaseflop;
@@ -151,15 +265,18 @@ for (0..(fuzzamount-1)) {
 print $fh "(2) DO REINSTATE (3) (3) DO COME FROM (1) PLEASE GIVE UP\n";
 close $fh;
 
-print "Running optimiser and compiling to C...\n";
-my $optimiser_output = `../build/ick -bOch $fn.i 2>&1`;
+print STDERR "Running optimiser and compiling to C...\n";
+my $ickpath = ickpath;
+my $optimiser_output = `$ickpath -bOch $fn.i 2>&1`;
 my %usedopts = ();
 $usedopts{$_}++ for $optimiser_output =~ m/\[(\w+)\]/g;
+# These prints are sent to stdout.
 print "Optimisations seen:\n";
-printf '%8d %s'."\n", $usedopts{$_}, $_
+(printf '%8d %s'."\n", $usedopts{$_}, $_), delete $idiomnames{scalar (/^([^_]+)/,$1)}
     for sort {$usedopts{$b} <=> $usedopts{$a}} keys %usedopts;
+print "       0 $_\n" for sort keys %idiomnames;
 
-print "Compiling optimised program to executable...\n";
+print STDERR "Compiling optimised program to executable...\n";
 open my $prog, '<', "$fn.c";
 my $line1 = <$prog>;
 close $prog;
@@ -170,20 +287,22 @@ my ($compilecommand) = $line1 =~ /compile-command:"([^"]+)"/;
 $compilecommand =~ s/-O\d//;
 system $compilecommand;
 
-print "Running optimised program...\n";
+print STDERR "Running optimised program...\n";
 my $optimised_output = `$fn`;
 
-print "Compiling program unoptimised...\n";
-system "../build/ick -b $fn.i";
+print STDERR "Compiling program unoptimised...\n";
+system "$ickpath -b $fn.i";
 
-print "Running unoptimised program...\n";
+print STDERR "Running unoptimised program...\n";
 my $unoptimised_output = `$fn`;
 
 if ($optimised_output eq $unoptimised_output) {
-    print "No errors found!\n";
+    print STDERR "No errors found!\n";
     exit(0);
 }
 
+print STDERR "Errors were found...\n";
+# The remaining output is the error report, sent to stdout.
 print "Errors found:\n";
 my @o1 = split $/, $unoptimised_output;
 my @o2 = split $/, $optimised_output;
@@ -191,13 +310,24 @@ my %problemindices = ();
 my %problemlines = ();
 for my $index (0..$#o1) {
     $o1[$index] eq $o2[$index] and next;
-    $problemindices{int($index/2)}=1;
+    $problemindices{int($index/2)} = 1;
+    $problemlines{(int($index/2) % fuzzamount) + 1}++;
 }
 for my $index (sort {$a%fuzzamount <=> $b%fuzzamount} keys %problemindices) {
-    my $dataline = fuzzamount - 1 - int($index/1000);
-    my $ickline = ($index % 1000) + 1;
-    $problemlines{$ickline} = 1;
+    my $dataline = fuzzamount - 1 - int($index/fuzzamount);
+    my $ickline = ($index % fuzzamount) + 1;
+    $problemlines{$ickline} == -1 and next;
     my $line2 = "Line $ickline (.1 = ". $dot1[$dataline];
+    if ($problemlines{$ickline} > 500) {
+        $problemlines{$ickline} = -1;
+        $line2 = "Line $ickline fails on most input, e.g. (.1 = ".
+            $dot1[$dataline];
+    }
+    if ($problemlines{$ickline} > 100) {
+        $problemlines{$ickline} = -1;
+        $line2 = "Line $ickline fails on many inputs, e.g. (.1 = ".
+            $dot1[$dataline];
+    }
     $line2 .= ", .2 = #". $dot2[$dataline];
     $line2 .= ", .3 = ". $dot3[$dataline] . "): u = ";
     my $line1 = ' ' x length $line2;
