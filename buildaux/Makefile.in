@@ -44,8 +44,7 @@ DIST_COMMON = README $(am__configure_deps) $(dist_ickdata_DATA) \
 	$(top_srcdir)/buildaux/Makefile.in \
 	$(top_srcdir)/buildaux/hostmak.in $(top_srcdir)/configure \
 	$(top_srcdir)/src/configh.in $(top_srcdir)/src/cooptsh.in \
-	COPYING NEWS config.guess config.sub depcomp install-sh \
-	ltmain.sh missing oil-oil.c
+	COPYING NEWS oil-oil.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -339,6 +338,9 @@ nodist_ickdata_DATA = pit/lib/syslib.i pit/lib/syslib3.3i pit/lib/syslib4.4i \
 
 dist_man1_MANS = doc/ick.1 doc/convickt.1
 info_TEXINFOS = doc/ick.txi
+
+# How to run splint on this code
+SPLINTOPTS = -I. -Isrc +quiet -warnposix -boolops -predboolint
 EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              src/ick.h src/ick_lose.h src/oil.h src/pick1.h src/pick2.h \
              src/sizes.h src/uncommon.h src/yuk.h src/parser.y src/lexer.l \
@@ -1320,8 +1322,8 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-aminfo clean-binPROGRAMS clean-generic \
-	clean-libLIBRARIES clean-noinstLIBRARIES clean-noinstPROGRAMS \
-	mostlyclean-am
+	clean-libLIBRARIES clean-local clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1482,17 +1484,17 @@ uninstall-man: uninstall-man1
 
 .PHONY: CTAGS GTAGS all all-am am--refresh check check-am clean \
 	clean-aminfo clean-binPROGRAMS clean-generic \
-	clean-libLIBRARIES clean-noinstLIBRARIES clean-noinstPROGRAMS \
-	ctags dist dist-all dist-bzip2 dist-gzip dist-hook dist-info \
-	dist-lzma dist-shar dist-tarZ dist-xz dist-zip distcheck \
-	distclean distclean-compile distclean-generic distclean-hdr \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am \
-	install-dist_ickdataDATA install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-ickincludeHEADERS install-info install-info-am \
-	install-libLIBRARIES install-man install-man1 \
+	clean-libLIBRARIES clean-local clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS ctags dist dist-all dist-bzip2 dist-gzip \
+	dist-hook dist-info dist-lzma dist-shar dist-tarZ dist-xz \
+	dist-zip distcheck distclean distclean-compile \
+	distclean-generic distclean-hdr distclean-tags distcleancheck \
+	distdir distuninstallcheck dvi dvi-am html html-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-dist_ickdataDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-ickincludeHEADERS install-info \
+	install-info-am install-libLIBRARIES install-man install-man1 \
 	install-nodist_ickdataDATA install-nodist_ickincludeHEADERS \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
@@ -1566,6 +1568,9 @@ ebcdic.o: bin2c$(EXEEXT_FOR_BUILD) src/ebcdic.bin
 latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
 	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
 	$(COMPILE) -c latin1.c
+splint:
+	@echo "Running splint on ick..."
+	-splint $(SPLINTOPTS) -exportlocal -redef $(ick_SOURCES) 
 
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
@@ -1591,6 +1596,10 @@ repoupdate: parser.c parser.h lexer.c oil-oil.c $(srcdir)/MANIFEST
 $(srcdir)/MANIFEST: distdir
 	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
 	$(am__remove_distdir)
+
+# Clean the pit test binaries on toplevel make clean
+clean-local:
+	cd pit; make clean
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.

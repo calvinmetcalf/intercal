@@ -116,6 +116,12 @@ nodist_ickdata_DATA = pit/lib/syslib.i pit/lib/syslib3.3i pit/lib/syslib4.4i \
 dist_man1_MANS = doc/ick.1 doc/convickt.1
 info_TEXINFOS = doc/ick.txi
 
+# How to run splint on this code
+SPLINTOPTS = -I. -Isrc +quiet -warnposix -boolops -predboolint
+splint:
+	@echo "Running splint on ick..."
+	-splint $(SPLINTOPTS) -exportlocal -redef $(ick_SOURCES) 
+
 EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              src/ick.h src/ick_lose.h src/oil.h src/pick1.h src/pick2.h \
              src/sizes.h src/uncommon.h src/yuk.h src/parser.y src/lexer.l \
@@ -165,6 +171,10 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
 # be safe in the prebuilt dir, which Automake doesn't even know
 # about.)
 DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.status.build
+
+# Clean the pit test binaries on toplevel make clean
+clean-local:
+	cd pit; make clean
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
