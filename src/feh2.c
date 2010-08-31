@@ -228,9 +228,9 @@ void treset(void)
   {
     tuplecount += ALLOC_CHUNK;
     if (tuples)
-      tuples = realloc(tuples, tuplecount * sizeof(tuple));
+	tuples = (tuple *)realloc(tuples, tuplecount * sizeof(tuple));
     else
-      tuples = malloc(tuplecount * sizeof(tuple));
+	tuples = (tuple *)malloc(tuplecount * sizeof(tuple));
     if (!tuples)
       ick_lose(IE666, iyylineno, (const char *)NULL);
     memset(tuples + ick_lineno, 0, (tuplecount - ick_lineno) * sizeof(tuple));
@@ -544,7 +544,7 @@ static const assoc typedefs[] =
     { 0,	(const char *)NULL }
 };
 
-/*@observer@*/ const char *nameof(int value, const assoc table[])
+/*@observer@*/ /*@null@*/ const char *nameof(int value, const assoc table[])
 /* return string corresponding to value in table */
 {
     const assoc	*ap;
@@ -1006,6 +1006,7 @@ static unsigned long meshval(unsigned long x)
    are so many false positives, disabling the true positives doesn't make them
    any harder to find by eye. */
 /*@-temptrans@*/ /*@-kepttrans@*/ /*@-compdestroy@*/ /*@-branchstate@*/
+ /*@-nullpass@*/
 static void revprexpr(node *np, FILE *fp, node *target)
 {
   node* temp;
@@ -1257,7 +1258,7 @@ void prexpr(node *np, FILE *fp, int freenode)
       /* We need to do the same as UNKNOWN statements, but as an expression.
 	 This is achieved with the helper function ick_dounop in ick_ec.c. */
       (void) fprintf(fp, "ick_dounop(\"");
-      prunknownstr(np->lval, fp);
+      (void) prunknownstr(np->lval, fp);
       if(freenode) free(np->lval);
       (void) fprintf(fp, "\", ");
       prexpr(np->rval->lval, fp, 0);
@@ -1662,8 +1663,8 @@ static void prunknown(node *np, FILE* fp)
       (void) fprintf(fp, "\t\t""ICKSTASH(ick_TWOSPOT, %lu, "
 		     "ick_twospots, ick_oo_twospots);\n"
 		     "\t\t""ick_oo_twospots[%lu]=icd[%d].accessors;\n",
-		     intern(ick_TWOSPOT,1601+j),
-		     intern(ick_TWOSPOT,1601+j),j);
+		     intern(ick_TWOSPOT,(unsigned long)(1601+j)),
+		     intern(ick_TWOSPOT,(unsigned long)(1601+j)),j);
   }
   if(useickec)
   {
@@ -1682,7 +1683,7 @@ static void prunknown(node *np, FILE* fp)
     while(j--)
       (void) fprintf(fp, "\t\t""ICKRETRIEVE(ick_twospots, %lu, "
 		     "ick_TWOSPOT, ick_twoforget, ick_oo_twospots);\n",
-		     intern(ick_TWOSPOT,1601+j));
+		     intern(ick_TWOSPOT,(unsigned long)(1601+j)));
 
   }
   fprintf(fp, "\t} else\n");
