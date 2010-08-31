@@ -127,6 +127,9 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
 # about.)
 DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c config.h coopt.sh
 
+clean-local:
+	cd pit; make clean
+
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
 doc/ick.txt: doc/ick.txi
