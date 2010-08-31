@@ -117,15 +117,13 @@ $(srcdir)/MANIFEST: distdir
 # links made to simplify the build, not the originals
 CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
-             syslib.i syslib3.3i syslib4.4i syslib5.5i \
-             syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
-             ick_lose.h yuk.h
+             ick_ec.h fiddle.h abcess.h ick_lose.h yuk.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
 # versions of the prebuilt files. (The source tree versions will
 # be safe in the prebuilt dir, which Automake doesn't even know
 # about.)
-DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak config.h config.status.build
+DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c config.h
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
