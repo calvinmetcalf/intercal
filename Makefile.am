@@ -101,14 +101,6 @@ dist-hook:
 	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
 
-# Update the prebuilt directory in the original source from the built
-# versions; this is for the repository version of C-INTERCAL, so it's
-# up to date the same way that distributed versions are.
-repoupdate: parser.c parser.h lexer.c oil-oil.c $(srcdir)/MANIFEST
-	cp parser.c $(srcdir)/prebuilt/parser.c
-	cp parser.h $(srcdir)/prebuilt/parser.h
-	cp lexer.c $(srcdir)/prebuilt/lexer.c
-	cp oil-oil.c $(srcdir)/prebuilt/oil-oil.c
 $(srcdir)/MANIFEST: distdir
 	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
 	$(am__remove_distdir)
@@ -123,7 +115,7 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
 # versions of the prebuilt files. (The source tree versions will
 # be safe in the prebuilt dir, which Automake doesn't even know
 # about.)
-DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c config.h
+DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c config.h coopt.sh
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
