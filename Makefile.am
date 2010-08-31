@@ -1,23 +1,29 @@
+# Template makerfile for C-INTERCAL
+
 ICK_SPECIFIC_SUBDIR = ick-@PACKAGE_VERSION@
 ickincludedir = $(includedir)/$(ICK_SPECIFIC_SUBDIR)
 ickdatadir = $(datadir)/$(ICK_SPECIFIC_SUBDIR)
 
 ACLOCAL_AMFLAGS = -I m4
 
+AM_YFLAGS = -d
 AM_CFLAGS = -DICKINCLUDEDIR=\"$(ickincludedir)\" \
             -DICKDATADIR=\"$(ickdatadir)\" \
             -DICKBINDIR=\"$(bindir)\" -DICKLIBDIR=\"$(libdir)\" \
             -DYYDEBUG -DICK_HAVE_STDINT_H=@HAVE_STDINT_H@
 AM_CPPFLAGS = -I$(srcdir)/src
 
+# Our build targets
 bin_PROGRAMS = ick convickt
+noinst_PROGRAMS = oil bin2c
+
+# How to build the compiler
 ick_SOURCES = src/feh2.c src/dekludge.c src/ick_lose.c \
               src/fiddle.c src/perpet.c src/uncommon.c
 ick_LDADD = libidiot.a
 nodist_ick_SOURCES = src/parser.y src/lexer.l
 
-AM_YFLAGS = -d
-
+# How to byuild the optimizer library
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
 libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
@@ -26,17 +32,21 @@ libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
 	for oo in oilout*.c; do echo $$oo; $(COMPILE) -c $$oo; done
 	$(AR) $(ARFLAGS) libidiot.a oilout*.o
 	$(RANLIB) libidiot.a
+
+# How to build the character-set converter
 convickt_SOURCES = src/convickt.c src/clc-cset.c src/uncommon.c
 
-noinst_PROGRAMS = oil bin2c
+# How to build the optimizer generator
 oil_SOURCES = src/oil.y
 oil_YFLAGS =
-bin2c_SOURCES = src/bin2c.c
 oil$(EXEEXT): oil-oil.c config.h
 	$(CC) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o oil$(EXEEXT) oil-oil.c $(LIBS)
+oil:
+
+# How to build the character-set compiler
+bin2c_SOURCES = src/bin2c.c
 bin2c$(EXEEXT): src/bin2c.c config.h
 	$(CC) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o bin2c$(EXEEXT) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS)
-oil:
 bin2c:
 
 # Optional libraries are in lib_LIBRARIES, but with a null build rule.
@@ -105,12 +115,12 @@ $(srcdir)/MANIFEST: distdir
 	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
 	$(am__remove_distdir)
 
-# N.B. the parser.y, lexer.l, syslib, headers and skeletons are the
+# N.B. the parser.y, lexer.l, headers and skeletons are the
 # links made to simplify the build, not the originals
 CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
              ick_ec.h fiddle.h abcess.h ick_lose.h yuk.h
-# Distclean deletes the Makefile and thus requires reconfiguring,
+# distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
 # versions of the prebuilt files. (The source tree versions will
 # be safe in the prebuilt dir, which Automake doesn't even know
