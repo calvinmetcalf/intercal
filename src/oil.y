@@ -713,13 +713,14 @@ int countungetc(int c, FILE* f)
 void splitstart(void)
 {
   static char fname[]="oilout00.c";
+  FILE *dummy;     /* GCC 4 un-suppressable warning suck */
   if(filenumber>255)
   {
     filenumber=255;
     fprintf(stdout,"Input file too long.\n");
   }
   sprintf(fname,"oilout%02x.c",filenumber);
-  freopen(fname,"w",stdout);
+  dummy = freopen(fname,"w",stdout);
   puts("/* Automatically generated output, edit source and recompile to "
        "change */");
   printf("#include \"oil.h\"\n"
@@ -750,6 +751,7 @@ void splitend(void)
 int main(void)
 {
   int e,i;
+  FILE *dummy;    /* GCC 4 un-suppressible warnings suck */
   /*
     "  if(!np) return 0;\n"
     "  if(np->lval) opted|=optimize_pass1(np->lval);\n"
@@ -761,7 +763,7 @@ int main(void)
   e=yyparse();
   while(tfi--) free(tofree[tfi]);
   splitend();
-  freopen("oilout-m.c","w",stdout);
+  dummy = freopen("oilout-m.c","w",stdout);
   puts("/* Automatically generated output, edit source and recompile to "
        "change */");
   puts("#include \"config.h\"");

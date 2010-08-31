@@ -57,6 +57,7 @@ pit/lib/syslib6
 pit/lib/syslib7
 pit/life
 pit/life2
+pit/pass
 pit/pi
 pit/pow
 pit/primes
@@ -67,6 +68,8 @@ pit/rot13
 pit/rot13b
 pit/sample
 pit/sort
+pit/tests/ais1
+pit/tests/ais2
 pit/tests/count
 pit/tests/hello
 pit/tests/ignorret
@@ -81,6 +84,7 @@ pit/tests/test16bit
 pit/tests/test2
 pit/tests/testarray
 pit/tests/testcf
+pit/tests/testcreate
 pit/tests/testlib2
 pit/tests/testonce
 pit/tests/testops3

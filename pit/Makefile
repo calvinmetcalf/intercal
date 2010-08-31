@@ -31,6 +31,7 @@ BASE2SOURCES = \
 	./pi.i \
 	./pow.i \
 	./quine \
+	./pass.i \
 	./primes.i \
 	./random.i \
 	./random2.i \
@@ -38,6 +39,8 @@ BASE2SOURCES = \
 	./rot13b.i \
 	./sample.i \
 	./sort.i \
+	./tests/ais1.i \
+	./tests/ais2.i \
 	./tests/hello.i \
 	./tests/ignorret \
 	./tests/iogerunds.i \
@@ -50,6 +53,7 @@ BASE2SOURCES = \
 	./tests/test2.i \
 	./tests/testarray.i \
 	./tests/testcf.i \
+	./tests/testcreate .i \
 	./tests/testlib2.i \
 	./tests/testonce \
 	./tests/testsplat.i \
@@ -100,16 +104,21 @@ test: $(TARGETS)
 	@cat bubble.tst | ./bubble | ./regresscheck bubble
 	@cat fft-delta.tst | ./fft | ./regresscheck fft-delta
 	@cat fft-tophat.tst | ./fft | ./regresscheck fft-tophat
+	@cat flonck.tst | ./flonck | ./regresscheck flonck
 	@echo 'Hello, sailor!' | ./regresscheck icat 
 	@cat interfunge.tst | ./interfunge | ./regresscheck interfunge
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13 | ./regresscheck rot13
 	@echo 'A man, a plan, a canal, Panama.' | ./rot13b | ./regresscheck rot13b
 	@echo "FIVE" | ./pi | ./regresscheck pi
+	@cat pow.tst | ./pow 2>&1 | ./regresscheck pow
+	@cat pass.tst | ./pass | ./regresscheck pass
 	@cp quine.i quine.chk; ./quine | ./regresscheck quine; rm quine.chk 
 	@cat sort.tst | ./sort | ./regresscheck sort
 	@cat tpk.tst | ./tpk | ./regresscheck tpk
 	@cat unlambda.tst | ./unlambda | ./regresscheck unlambda
 	@cat yapp.tst | ./yapp >yapptest.i && $(ICK) yapptest.i && ./yapptest | ./regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
+	@cat tests/ais1.tst | ./tests/ais1 | ./regresscheck tests/ais1 
+	@cat tests/ais2.tst | ./tests/ais2 | ./regresscheck tests/ais2 
 	@./tests/count | ./regresscheck tests/count 
 	@./tests/hello | ./regresscheck tests/hello 
 	@./tests/ignorret | ./regresscheck tests/ignorret 
@@ -118,17 +127,22 @@ test: $(TARGETS)
 	@./tests/test1 2>&1 | ./regresscheck tests/test1 
 	@cat tests/test2.tst | ./tests/test2 | ./regresscheck tests/test2
 	@./tests/testonce | ./regresscheck tests/testonce 
+	@./tests/testsplat 2>&1 | ./regresscheck tests/testsplat 
 	@cat tests/whileadd.tst | ./tests/whileadd | ./regresscheck tests/whileadd
 	@echo "Tests complete."
 
 
-# Needs special handling because the -m option is required
+# Some tests need options to compile extensions.
 fft: fft.i
 	$(ICK) -m fft.i
+pass: pass.i
+	$(ICK) -m pass.i
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
 tests/whileadd: tests/whileadd.i
 	$(ICK) -m tests/whileadd.i
+tests/testcreate: tests/testcreate.i
+	$(ICK) -a tests/testcreate.i
 
 lines:
 	wc -l $(SOURCES)

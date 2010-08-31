@@ -49,8 +49,8 @@ by Louis Howell <nazgul@netcom.com>
 			exponentiation
   pi.i			+ Calculate pi to a specified number of digits
   primes.i		Find prime numbers
-  pow.i			Prints a list of nth powers using old exponentiation 
-  			routine
+  pow.i			+ Prints a list of nth powers using old exponentiation 
+  			routine. Expect this to fail with overflow.
   lib/syslib.i		Corrected version of system library
   iching1.i     	Generates I Ching hexagrams
   iching2.i     	This version uses a lookup table to find the sequence 
@@ -58,6 +58,8 @@ by Louis Howell <nazgul@netcom.com>
   iching.doc   		Description of the two I Ching programs
   change.i      	Count up different ways to make change
   change.doc    	Description of change.i
+  tests/testsplat.i	+ Tests behavior of comments and things resembling
+			comments.
 
 by Matt Dimeo <mdimeo@brooktree.com>
   beer.i		+ Print out lyrics to "99 Bottles of Beer On The Wall"
@@ -93,7 +95,7 @@ By Brian Raiter <breadbox@muppetlabs.com>
   quine.i		+ Prints itself
   lib/floatlib.i	Floating-point routines
   lib/floatlib.doc	Documentation for the floating-point routines
-  flonck.i		An RPN calculator
+  flonck.i		+ An RPN calculator
   flonck.doc		Documentation for flonck.i (requires floatlib)
   fft.i			+ Fast Fourier Transform (requires syslib and floatlib)
   fft.doc		Description of fft.i
@@ -120,11 +122,16 @@ by David Moews
   tests/test2.i		+ Reads in two numbers and reports their product
 
 by Alex Smith
-  tests/ais1.i		A very simple test program
-  tests/ais2.i		A demonstration of computed ABSTAIN's power
+  tests/ais1.i		+ Reads in numbers terminated with zero and
+  			writes them back out, testing COME FROM/NEXT
+			interaction.
+  tests/ais2.i		+ A demonstration of computed ABSTAIN's power.
+  			Computes the Fibinacci sequence; in the innput file,
+			ONE means compute the nextvterm and ZERO means stop.
   tests/compucome.i	A program to test computed COME FROM
   tests/onceagain.i	+ A single-threaded program testing ONCE and AGAIN
-  tests/arrtest.i	A program to test some changes I made to the grammar
+  tests/arrtest.i	A program to test some changes I made to the grammar.
+  			No output expected as it's just a parser test.
   tests/arrtest.doc	The history behind those changes
   tests/permute.i	+ A permutation-printing program to test backtracking
   tests/permute.doc	Information about the permutation-printer
@@ -132,7 +139,7 @@ by Alex Smith
   tests/ignorret.i	+ Testing interactions of IGNORE and RETRIEVE
   tests/ignorret.doc	What ignorret does on several compilers
   tests/normaldist.i	Checking the standard deviation of (1910)
-  tests/testcreate.i	A test for the CREATE statement
+  tests/testcreate.i	+ A test for the CREATE statement
   tests/iffit1.i	The INTERCAL side of the INTERCAL/Funge-98 test
   tests/iffit2.b98	The Funge side of the INTERCAL/Funge-98 test
   tests/iffit.doc	Documentation for the INTERCAL/Funge-98 test
@@ -144,18 +151,21 @@ by Alex Smith
   continuation.doc	About usage and internals of the continuation library
 
 by Malcom Ryan
-  tests/testonce.i	+ A single-threaded program testing ONCE and AGAIN
-  pass.i		A multithread program illustrating communications
-  			between threads
+  tests/testonce.i	+ A single-threaded program that tests all permutations
+			of the ONCE modifier; the output is simply to verify 
+			that the program flow follows the sequence expected.
+  pass.i		+ A multithread program illustrating communications
+  			between threads.  Simply reads in a list of
+			numbers (terminated by ZERO) and writes them out.
 
-The programs test16bit.i, testarray.i, testcf.i, testlib2.i, mult.i,
-limits.*, testops*i, testsplat.i, were all written by Louis
-Howell.  Of these, testcf.i might be considered an interesting
-puzzle---try to figure out what it's doing.  The others are pretty
-boring, but are included as diagnostics and because so few other
-example programs exist.  Not all of these even produce interesting
-diagnostic output; it may be necessary to look at the degenerated C
-code to determine if the compiler is doing the right thing.
+The programs test16bit.i, testarray.i, testcf.i, testlib2.i, limits.*,
+testops*i, were all written by Louis Howell.  Of these, testcf.i might
+be considered an interesting puzzle---try to figure out what it's
+doing.  The others are pretty boring, but are included as diagnostics
+and because so few other example programs exist.  Not all of these
+even produce interesting diagnostic output; it may be necessary to
+look at the degenerated C code to determine if the compiler is doing
+the right thing.
 
 End of file CATALOG
 -------------------

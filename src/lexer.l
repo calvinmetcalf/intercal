@@ -135,14 +135,15 @@ int getc(FILE *fp)
     {
       int c;
       char c_char;
+      size_t dummy;
       /*fprintf(stderr,"about to fgetc(\045p)",(void*)fp);*/
 
       c_char=0; /* AIS */
-      (void)fread(&c_char,1,1,fp);
+      dummy = fread(&c_char,1,1,fp);
       /* AIS: ignore the first \r in a row to deal with DOS newlines. The
 	 second in a row is definitely an error, though, and will be caught
 	 later on. */
-      if(c_char=='\r') (void)fread(&c_char,1,1,fp);
+      if(c_char=='\r') dummy = fread(&c_char,1,1,fp);
       c = c_char;
 
       if(feof(fp)) c=EOF;
