@@ -87,28 +87,17 @@ etc/IFFI*               -- input to that script
 etc/cfunge.patch        -- more input to that script
 etc/temp                -- temporary directory used by that script
 
-autogen.sh              -- for bootstrapping a build from the repository
-aclocal.m4              -- helper file needed to build the build system itself
-configure               -- autoconf script that generates a Makefile (generated)
+configure               -- GNU Autoconf script that generates a Makefile
 configure.ac            -- autoconf source for configure
-Makefile.am             -- automake source for the Makefile
-Makefile.in             -- template Makefile for building (generated)
+Makefile.in             -- template Makefile for compiling C-INTERCAL
+Makefile.am             -- automake source for Makefile.in
+
+buildaux/*              -- helper scripts for the build provided by automake
+aclocal.m4              -- helper file needed to build the build system itself
 
 pit/*                   -- sample INTERCAL code; see pit/CATALOG
 pit/explib/*            -- source code for expansion libraries
 pit/lib/syslib*.*i      -- source code for the system libraries
-
-			      BUILDING THE COMPILER AND TOOLS
-
-If you are building from a distribution tarball: 
-
-   configure
-   make
-
-If you are building direct from a repository checkout:
-
-   autogen.sh
-   make
 
                               HOW TO GET STARTED
 
