@@ -6,7 +6,7 @@ dnl comments, then get a better mailer.
 AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[ick])
 AC_CONFIG_SRCDIR([src/abcess.h])
 AC_CONFIG_HEADER([config.h:src/configh.in])
-AC_CONFIG_AUX_DIR([buildaux])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-lzma tar-pax check-news
 		  no-texinfo.tex])
 
@@ -76,11 +76,6 @@ INCLUDE_HIDDEN_FROM_AUTOMAKE="include"
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(INCLUDE_HIDDEN_FROM_AUTOMAKE)
 
-AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in host.mak:buildaux/hostmak.in])
-AC_OUTPUT
-# After the output, chmod coopt.sh to be executable.
-chmod a+x coopt.sh
-
 # Use prebuilt files if necessary, after config.h is generated.
 # Automake is capable of handling the files in question, but they need to
 # be in the directory configure was run in.
@@ -97,14 +92,6 @@ if test ! -n "$YACC"; then
   AC_MSG_WARN([Changes to src/parser.y and src/oil.y will be ingored.])
 fi
 
-# Configure again, for the build system, if necessary.
-# It's simpler the second time round as we don't care about things like
-# installation dirs, just about how to do things like run the compiler.
-if test "$cross_compiling" != yes; then
-  cp config.h bconfig.h
-  exit 0
-fi
-
 cd $ac_pwd;
 
 # This trick for unsetting variables comes from the autoconf manual
@@ -116,31 +103,10 @@ else
   unset=false
 fi
 
-AC_DEFUN([GEN_BUILD_CMD_LINE],[
-BUILD_$1_ARG="FOO=BAR"
-if test ! "x$[]$1_FOR_BUILD" == x;
-then
-  BUILD_$1_ARG="$1=$[]$1_FOR_BUILD";
-fi
-$1=foo
-$unset $1 || $1=''])
-
-GEN_BUILD_CMD_LINE(CC)
-GEN_BUILD_CMD_LINE(CFLAGS)
-GEN_BUILD_CMD_LINE(LDFLAGS)
-GEN_BUILD_CMD_LINE(LIBS)
-GEN_BUILD_CMD_LINE(CPPFLAGS)
-GEN_BUILD_CMD_LINE(CPP)
-
 BUILD_MACHINE_ARG="FOO=BAR"
 if test ! "x$build_alias" == x;
 then
   BUILD_MACHINE_ARG="--build=$build_alias"
 fi
 
-# Run the new configure script.
-mv config.status config.status.save
-(env -i "PATH=$PATH" $srcdir/buildaux/buildconfig "$BUILD_MACHINE_ARG" "$BUILD_CC_ARG" "$BUILD_CFLAGS_ARG" "$BUILD_LDFLAGS_ARG" "$BUILD_LIBS_ARG" "$BUILD_CPPFLAGS_ARG" "$BUILD_CPP_ARG")
-mv config.status config.status.build
-mv config.status.save config.status
-
+AC_OUTPUT(Makefile coopt.sh:src/cooptsh.in, [chmod a+x coopt.sh])

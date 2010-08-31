@@ -1,13 +1,25 @@
 *.o
 *.a
 *~
+# autoconf cruft
+.deps
 Makefile
+Makefile.in
+aclocal.m4
 autom4te.cache/
+config.guess
 config.h
 config.log
 config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4/
+missing
 stamp-h1
-.deps
 # Uploading the web page lands a copy here
 index.html
 # Executables produced by standard build
@@ -15,8 +27,6 @@ bin2c
 convickt
 ick
 oil
-# C source files and includes in the top directory were copied there, ignore
-*.[chyl]
 # So were any copies of the INTERCAL libraries and buld cruft we might find here
 syslib.i
 syslib3.3i

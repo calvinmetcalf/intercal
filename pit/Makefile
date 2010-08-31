@@ -3,7 +3,7 @@
 #
 # Type 'make' to test-compile the pit programs and run a regression check
 
-ICK = ../ick -b
+ICK = ICKINCLUDEDIR=../src ICKCSKELDIR=../src ICKSYSDIR=lib ICKLIBDIR=.. ../ick -b
 
 BASE2SOURCES = \
 	./beer.i \

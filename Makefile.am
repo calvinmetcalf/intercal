@@ -2,6 +2,8 @@ ICK_SPECIFIC_SUBDIR = ick-@PACKAGE_VERSION@
 ickincludedir = $(includedir)/$(ICK_SPECIFIC_SUBDIR)
 ickdatadir = $(datadir)/$(ICK_SPECIFIC_SUBDIR)
 
+ACLOCAL_AMFLAGS = -I m4
+
 AM_CFLAGS = -DICKINCLUDEDIR=\"$(ickincludedir)\" \
             -DICKDATADIR=\"$(ickdatadir)\" \
             -DICKBINDIR=\"$(bindir)\" -DICKLIBDIR=\"$(libdir)\" \
@@ -11,47 +13,11 @@ AM_CPPFLAGS = -I$(srcdir)/src
 bin_PROGRAMS = ick convickt
 ick_SOURCES = src/feh2.c src/dekludge.c src/ick_lose.c \
               src/fiddle.c src/perpet.c src/uncommon.c
-nodist_ick_SOURCES = parser.y lexer.l
-parser.y : src/parser.y
-	$(LN_S) `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y parser.y
-lexer.l : src/lexer.l
-	$(LN_S) `test -f 'src/lexer.l' || echo '$(srcdir)/'`src/lexer.l lexer.l
-ick-wrap.c : src/ick-wrap.c
-	$(LN_S) `test -f 'src/ick-wrap.c' || echo '$(srcdir)/'`src/ick-wrap.c ick-wrap.c
-pickwrap.c : src/pickwrap.c
-	$(LN_S) `test -f 'src/pickwrap.c' || echo '$(srcdir)/'`src/pickwrap.c pickwrap.c
-syslib.i : pit/lib/syslib.i
-	$(LN_S) `test -f 'pit/lib/syslib.i' || echo '$(srcdir)/'`pit/lib/syslib.i syslib.i
-syslib3.3i : pit/lib/syslib3.3i
-	$(LN_S) `test -f 'pit/lib/syslib.3i' || echo '$(srcdir)/'`pit/lib/syslib3.3i syslib3.3i
-syslib4.4i : pit/lib/syslib4.4i
-	$(LN_S) `test -f 'pit/lib/syslib.4i' || echo '$(srcdir)/'`pit/lib/syslib4.4i syslib4.4i
-syslib5.5i : pit/lib/syslib5.5i
-	$(LN_S) `test -f 'pit/lib/syslib.5i' || echo '$(srcdir)/'`pit/lib/syslib5.5i syslib5.5i
-syslib6.6i : pit/lib/syslib6.6i
-	$(LN_S) `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib6.6i syslib6.6i
-syslib7.7i : pit/lib/syslib7.7i
-	$(LN_S) `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib7.7i syslib7.7i
-floatlib.i : pit/lib/floatlib.i
-	$(LN_S) `test -f 'pit/lib/floatlib.i' || echo '$(srcdir)/'`pit/lib/floatlib.i floatlib.i
-ick_ec.h : src/ick_ec.h
-	$(LN_S) `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
-ick_lose.h : src/ick_lose.h
-	$(LN_S) `test -f 'src/ick_lose.h' || echo '$(srcdir)/'`src/ick_lose.h ick_lose.h
-fiddle.h : src/fiddle.h
-	$(LN_S) `test -f 'src/fiddle.h' || echo '$(srcdir)/'`src/fiddle.h fiddle.h
-abcess.h : src/abcess.h
-	$(LN_S) `test -f 'src/abcess.h' || echo '$(srcdir)/'`src/abcess.h abcess.h
-yuk.h : src/yuk.h
-	$(LN_S) `test -f 'src/ick-ec.h' || echo '$(srcdir)/'`src/yuk.h yuk.h
 ick_LDADD = libidiot.a
+nodist_ick_SOURCES = src/parser.y src/lexer.l
+
 AM_YFLAGS = -d
-# BUILT_SOURCES is used both to make sure parser.h is built early, and to
-# create symlinks used by ick to find files if it's run without first being
-# installed.
-BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib3.3i syslib4.4i \
-                syslib5.5i syslib6.6i syslib7.7i floatlib.i ick_ec.h fiddle.h abcess.h \
-                ick_lose.h yuk.h
+
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
 libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
@@ -62,16 +28,14 @@ libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
 	$(RANLIB) libidiot.a
 convickt_SOURCES = src/convickt.c src/clc-cset.c src/uncommon.c
 
-@INCLUDE_HIDDEN_FROM_AUTOMAKE@ ./host.mak
-
 noinst_PROGRAMS = oil bin2c
 oil_SOURCES = src/oil.y
 oil_YFLAGS =
 bin2c_SOURCES = src/bin2c.c
-oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
-	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c $(LIBS_FOR_BUILD)
-bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
-	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS_FOR_BUILD)
+oil$(EXEEXT): oil-oil.c config.h
+	$(CC) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o oil$(EXEEXT) oil-oil.c $(LIBS)
+bin2c$(EXEEXT): src/bin2c.c config.h
+	$(CC) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o bin2c$(EXEEXT) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS)
 oil:
 bin2c:
 
@@ -89,17 +53,17 @@ libickec_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
                      src/arrgghh.c src/clc-cset.c src/uncommon.c src/ick_ec.c
 libickec_a_LIBADD = atari.o baudot.o ebcdic.o latin1.o
 libyuk_a_SOURCES = src/yuk.c
-atari.o: bin2c$(EXEEXT_FOR_BUILD) src/atari.bin
-	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
+atari.o: bin2c$(EXEEXT) src/atari.bin
+	./bin2c$(EXEEXT) ick_clc_cset_atari < `test -f 'src/atari.bin' || echo '$(srcdir)/'`src/atari.bin > atari.c
 	$(COMPILE) -c atari.c
-baudot.o: bin2c$(EXEEXT_FOR_BUILD) src/baudot.bin
-	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_baudot < `test -f 'src/baudot.bin' || echo '$(srcdir)/'`src/baudot.bin > baudot.c
+baudot.o: bin2c$(EXEEXT) src/baudot.bin
+	./bin2c$(EXEEXT) ick_clc_cset_baudot < `test -f 'src/baudot.bin' || echo '$(srcdir)/'`src/baudot.bin > baudot.c
 	$(COMPILE) -c baudot.c
-ebcdic.o: bin2c$(EXEEXT_FOR_BUILD) src/ebcdic.bin
-	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_ebcdic < `test -f 'src/ebcdic.bin' || echo '$(srcdir)/'`src/ebcdic.bin > ebcdic.c
+ebcdic.o: bin2c$(EXEEXT) src/ebcdic.bin
+	./bin2c$(EXEEXT) ick_clc_cset_ebcdic < `test -f 'src/ebcdic.bin' || echo '$(srcdir)/'`src/ebcdic.bin > ebcdic.c
 	$(COMPILE) -c ebcdic.c
-latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
-	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
+latin1.o: bin2c$(EXEEXT) src/latin1.bin
+	./bin2c$(EXEEXT) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
 	$(COMPILE) -c latin1.c
 
 ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/abcess.h src/ick_lose.h \
@@ -122,10 +86,7 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
              doc/ickstyle.css doc/ick.txt doc/intercal.mm doc/READ.ME \
              doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
-             lexer.c doc/ick.txi doc/ick.txt NEWS README \
-             buildaux/buildconfig buildaux/buildconfig.ac \
-             buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
-             buildaux/missing buildaux/ylwrap src/bconfigh.in
+             lexer.c doc/ick.txi doc/ick.txt NEWS README yylwrap autogen.sh
 
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
@@ -164,22 +125,9 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
 # versions of the prebuilt files. (The source tree versions will
 # be safe in the prebuilt dir, which Automake doesn't even know
 # about.)
-DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.status.build
+DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak config.h config.status.build
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
 doc/ick.txt: doc/ick.txi
 	cd $(top_srcdir)/doc && make ick.txt
-
-# The build system itself is included in the makefile; tell Automake
-# about my tweaking.
-$(top_srcdir)/configure:  $(am__configure_deps)
-	cd $(top_srcdir) && $(AUTOCONF)
-$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/src/bconfigh.in
-	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
-	chmod a+x $(top_srcdir)/buildaux/buildconfig
-$(top_srcdir)/src/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
-	cd $(top_srcdir)/buildaux && $(AUTOHEADER) buildconfig.ac
-	rm -f stamp-h1
-	touch $@
-CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/src/bconfigh.in
