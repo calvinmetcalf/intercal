@@ -116,7 +116,7 @@ test: $(TARGETS)
 	@cat sort.tst | ./sort | ./regresscheck sort
 	@cat tpk.tst | ./tpk | ./regresscheck tpk
 	@cat unlambda.tst | ./unlambda | ./regresscheck unlambda
-	@cat yapp.tst | yapp >yapptest.i && $(ICK) yapptest.i && yapptest | regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
+	@cat yapp.tst | ./yapp >yapptest.i && $(ICK) yapptest.i && ./yapptest | ./regresscheck -c yapp.tst yapp; rm -f yapptest.i yapptest
 	@cat tests/ais1.tst | ./tests/ais1 | ./regresscheck tests/ais1 
 	@cat tests/ais2.tst | ./tests/ais2 | ./regresscheck tests/ais2 
 	@./tests/count | ./regresscheck tests/count 
