@@ -61,8 +61,9 @@ LICENSE TERMS
 
 #define ARGSTRING "abcdefghlmoptuvwxyCEFHOPUYX@"
 
-#define ICK_SYSTEM(x) do{if(showsystem)fprintf(stderr,"%s\n",x); \
-    (void) system(x);}while(0)
+/* unused st variable quiets a GCC4 warning */
+#define ICK_SYSTEM(x) do{int st;if(showsystem)fprintf(stderr,"%s\n",x); \
+    st=system(x);}while(0)
 
 #ifdef USE_YYRESTART
 /* function supplied by lex */
@@ -197,7 +198,8 @@ int getopt(int argc, char * const *argv, const char *options)
 static int myfgetc(FILE* in)
 {
   char c;
-  (void) fread(&c,1,1,in);
+  size_t dummy;
+  dummy = fread(&c,1,1,in);
   if(feof(in)) return EOF;
   return (int)c;
 }

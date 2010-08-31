@@ -154,11 +154,13 @@ void yukterm(void)
 {
   int i,lastline,thisline,inrow=0;
   yptimer avgtime,avgtime2;
+  FILE *dummy;
   if(yukopts==2) (void) puts("Program ended without error.");
   if(!(yukopts&1)) return;
   /* Print profiling information */
   (void) puts("Profiling information saved to \"yuk.out\".");
-  (void) freopen("yuk.out","w",stdout);
+  /* Bletch.  GCC's unsuppressible warning forces us to this */
+  dummy = freopen("yuk.out","w",stdout);
   i=-1;
   lastline=-1;
   while(++i<yukcommands)
@@ -334,7 +336,8 @@ void yukline(int aboff,int emitlineno)
       {
 	printf("yuk007 "); /* this is our prompt, a sort of reverse
 			      INTERCAL version of % */
-	(void) fgets(buf,20,stdin);
+	if (fgets(buf,20,stdin) == NULL)
+	    break;;
 	if(!strchr(buf,'\n'))
 	{
 	  ick_lose(IE810,emitlineno,(const char*)NULL);
@@ -818,7 +821,8 @@ void yukline(int aboff,int emitlineno)
 #else
 	    (void) snprintf(copyloc,sizeof copyloc,"more < %s",tempcharp);
 #endif
-	    (void) system(copyloc); /* display the GNU GPL copyright */
+	    if (system(copyloc) != 0) /* display the GNU GPL copyright */
+		(void) puts("Your system is more confused.");
 	  }
 	  else
 	    (void) puts("Couldn't find license file. See the file COPYING.txt that\n"
