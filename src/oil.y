@@ -95,6 +95,7 @@ struct ickstype
 
 #define MAXOPTNAMELEN 64
 char optname[MAXOPTNAMELEN]="undefined";
+int optnumber = 0;
 
 typedef struct ickstype *YYSTYPE;
 
@@ -236,7 +237,7 @@ optimization: template '-' '>' replacement
   }
   /* If we reach this point in the generated code, we have an optimizer
      template match. */
-  printf("    OPTING(%s);\n",optname);
+  printf("    OPTING(%s_%d);\n",optname,++optnumber);
 
   /* We now need to replace np with its replacement. This is done by creating
      a new nodetree, copying across tempmem'd nodes where necessary, and then
@@ -394,6 +395,7 @@ int yylex(void)
 	c=countgetchar();
 	if(i==MAXOPTNAMELEN-1) {i=0; yyerror("optimization name too long");}
       }
+      optnumber=0;
       optname[i]=0;
       c=countgetchar();
       while(isspace(c)) c=countgetchar();
