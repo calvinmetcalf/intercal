@@ -78,7 +78,7 @@ static char linebuf[YYLMAX];
 
 static char *lineptr = linebuf;
 
-ick_bool re_send_token = ick_FALSE;
+bool re_send_token = false;
 
 int lexer(void);
 static int myatoi(const char *text);
@@ -111,23 +111,23 @@ int getc(FILE *fp)
 {
     extern FILE* yyin;
 
-    static ick_bool bangflag = ick_FALSE;
-    static ick_bool backflag = ick_FALSE;
+    static bool bangflag = false;
+    static bool backflag = false;
 
-    static ick_bool eolflag = ick_FALSE;
+    static bool eolflag = false;
 
     if ((size_t)(lineptr - linebuf) > sizeof linebuf)
       ick_lose(IE666, iyylineno, (char *)NULL);
 
     if (bangflag)
     {
-	bangflag = ick_FALSE;
+	bangflag = false;
 	/*	*lineptr++ = '!'; */
 	return('.');
     }
     else if (backflag)	/* converting ctrl-H (backspace) to two chars "^H" */
     {
-	backflag = ick_FALSE;
+	backflag = false;
 	/*	*lineptr++ = '\b'; */
 	return('H');
     }
@@ -158,19 +158,19 @@ int getc(FILE *fp)
 	if(c=='\0' || c==EOF) c='\n';
       }
 
-      eolflag = ick_FALSE;
+      eolflag = false;
 
       if (c == '!')
       {
 	*lineptr++ = '!';
-	bangflag = ick_TRUE;
+	bangflag = true;
 	return(c = '\'');
       }
       else if (c == '\b')	/* convert ctrl-H (backspace) to
 				   two chars "^" and "H" so lex can take it */
       {
 	*lineptr++ = '\b';
-	backflag = ick_TRUE;
+	backflag = true;
 	return(c = '^');
       }
       else if (c == '\n')
@@ -193,7 +193,7 @@ int getc(FILE *fp)
 	  ick_lose(IE666, iyylineno, (char *)NULL);
 	strcpy(textlines[iyylineno], linebuf);
 	iyylineno++;
-	eolflag=ick_TRUE;
+	eolflag=true;
 	return('\n');
       }
       else
@@ -454,7 +454,7 @@ int lexer(void)
     static int tok = BADCHAR;
 
     if (re_send_token)
-	re_send_token = ick_FALSE;
+	re_send_token = false;
     else 
     {
 	tok = yylex();

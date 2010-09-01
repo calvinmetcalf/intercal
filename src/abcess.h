@@ -10,17 +10,25 @@
 #include <stdio.h>
 #include <setjmp.h>
 
-#ifndef ICKBOOL_DEFINED
+/*
+ * Duplicates contents of ick_bool.h.  Someday maybe we'll install this
+ * and avoid such grottiness.
+ */
 /*@-redef@*/
-typedef int ick_bool;
-/*@=redef@*/
-#define ICKBOOL_DEFINED
+#ifdef __STDC_VERSION__
+#if __STDC_VERSION__ >= 199901L
+#include <stdbool.h>
 #endif
+#endif
+#ifndef __bool_true_false_are_defined
+typedef int bool;
+#define true 1
+#define false 0
+#define __bool_true_false_are_defined 1
+#endif
+/*@=redef@*/
 
 #define ICK_ABCESS_H_INCLUDED
-
-#define ick_TRUE	1
-#define ick_FALSE	0
 
 #define ick_ONESPOT	0
 #define ick_TWOSPOT	1
@@ -78,12 +86,12 @@ extern void ick_pushnext(unsigned n);
 extern unsigned int ick_popnext(unsigned n);
 extern unsigned int ick_resume(unsigned n);
 extern unsigned int ick_pin(void);
-extern void ick_clockface(ick_bool mode);
-extern void ick_setclcsemantics(ick_bool mode); /* AIS */
+extern void ick_clockface(bool mode);
+extern void ick_setclcsemantics(bool mode); /* AIS */
 extern void ick_pout(unsigned int val);
-extern void ick_binin(unsigned int type, ick_array *a, ick_bool forget);
+extern void ick_binin(unsigned int type, ick_array *a, bool forget);
 extern void ick_binout(unsigned int type, const ick_array *a);
-extern unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
+extern unsigned int ick_assign(char *dest, unsigned int type, bool forget,
 			   unsigned int value);
 
 /* AIS: yuk, unravel and ick_ec need these */
@@ -116,7 +124,7 @@ extern void ick_stashinit(void);
 /* AIS: Added mentions of oo. This is set to 0 in a non-overloaded program. */
 extern void ick_stash(unsigned int type, unsigned int index, void *from, ick_overop* oo);
 extern void ick_retrieve(void *to, unsigned int type, unsigned int index,
-			 ick_bool forget, ick_overop* oo);
+			 bool forget, ick_overop* oo);
 extern unsigned int ick_roll(unsigned int n);
 
 /* AIS: Lose with IE277 */
@@ -209,13 +217,13 @@ extern jmp_buf ick_cjb;
 /* AIS: Used by the debugger, multithread code, external calls */
 #if (MULTITHREAD != 0) || (YUKDEBUG != 0) || defined(ICK_EC)
 extern ick_type16* ick_onespots;
-extern ick_bool* ick_oneforget;
+extern bool* ick_oneforget;
 extern ick_type32* ick_twospots;
-extern ick_bool* ick_twoforget;
+extern bool* ick_twoforget;
 extern ick_array* ick_tails;
-extern ick_bool* ick_tailforget;
+extern bool* ick_tailforget;
 extern ick_array* ick_hybrids;
-extern ick_bool* ick_hyforget;
+extern bool* ick_hyforget;
 #if (MULTITHREAD != 0) || defined(ICK_EC)
 /*@null@*/ extern ick_overop* ick_oo_onespots;
 /*@null@*/ extern ick_overop* ick_oo_twospots;

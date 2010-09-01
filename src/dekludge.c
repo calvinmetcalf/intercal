@@ -72,7 +72,7 @@ extern void prexpr(node *np, FILE* fp, int freenode); /* AIS */
 
 /* This function by AIS. Compares expressions. In C++, I'd call this
    node::operator== . */
-ick_bool nodessame(/*@observer@*/ const node* n1, /*@observer@*/ const node* n2)
+bool nodessame(/*@observer@*/ const node* n1, /*@observer@*/ const node* n2)
 {
   if(!n1) return !n2;
   if(!n2) return 0;
@@ -96,7 +96,7 @@ ick_bool nodessame(/*@observer@*/ const node* n1, /*@observer@*/ const node* n2)
   case XOR:
     return n1->width == n2->width;
   default:
-    return 1;
+    return true;
   }
 }
 
@@ -155,19 +155,19 @@ void optimizef(void)
     /*@-onlytrans@*/
     optuple = tp;
     /*@=onlytrans@*/
-    if(tp->maybe) tp->abstainable = 1;
-    if(tp->exechance < 0) tp->initabstain = 1;
-    if(tp->exechance != 100 && tp->exechance != -100) tp->abstainable = 1;
-    if(tp->onceagainflag != onceagain_NORMAL) tp->abstainable = 1;
+    if(tp->maybe) tp->abstainable = true;
+    if(tp->exechance < 0) tp->initabstain = true;
+    if(tp->exechance != 100 && tp->exechance != -100) tp->abstainable = true;
+    if(tp->onceagainflag != onceagain_NORMAL) tp->abstainable = true;
     if(tp->type == ABSTAIN || tp->type == FROM)
     {
       tpa = tp->u.target - 1 + tuples;
-      if(tpa->exechance >= 0) tpa->abstainable = 1;
+      if(tpa->exechance >= 0) tpa->abstainable = true;
     }
     if(tp->type == REINSTATE)
     {
       tpa = tp->u.target - 1 + tuples;
-      if(tpa->exechance < 0) tpa->abstainable = 1;
+      if(tpa->exechance < 0) tpa->abstainable = true;
     }
     if(tp->type == DISABLE || tp->type == MANYFROM)
     {
@@ -177,7 +177,7 @@ void optimizef(void)
 	if(tp->type == MANYFROM) np = np->rval;
 	for(; np; np = np -> rval)
 	  if(abstainmatch((int)np->constant, (int)tpa->type))
-	    if(tpa->exechance >= 0) tpa->abstainable = 1;
+	    if(tpa->exechance >= 0) tpa->abstainable = true;
       }
     }
     if(tp->type == ENABLE)
@@ -187,7 +187,7 @@ void optimizef(void)
 	np = tp->u.node;
 	for(; np; np = np -> rval)
 	  if(abstainmatch((int)np->constant, (int)tpa->type))
-	    if(tpa->exechance < 0) tpa->abstainable = 1;
+	    if(tpa->exechance < 0) tpa->abstainable = true;
       }
     }
     if(tp->type == GETS && ick_Base == 2 && !opoverused)
@@ -303,7 +303,7 @@ void optimizef(void)
 				    !tpb->abstainable)
 	  /* No COMING FROM a nonabstainable RESUME line! */
 	{
-	  tp->optversion = ick_TRUE;
+	  tp->optversion = true;
 	  free(tp->u.node);
 	  tp->u.node = nodecopy(tpb->u.node);
 	  /* If tp->u.node is 2, then the statement should translate to a
@@ -377,7 +377,7 @@ void optimize(node *np)
   if(optdebug) fprintf(stderr,"\n");
   if(optdebug >= 2) fprintf(stderr,"-----\n");
   checkforintercaloperators(np);
-  if(optuple->type == RESUME && !np->optdata) optuple->warn622 = 1;
+  if(optuple->type == RESUME && !np->optdata) optuple->warn622 = true;
 }
 
 /* By AIS. This relies on free'd pointers being NULLed. The annotations
@@ -407,7 +407,7 @@ static void checkW534(const node *np)
     {
       /* This looks suspicious, in that C-INTERCAL will do an op32,
 	 but INTERCAL-72 would have done an op16. */
-      optuple->warn534=1;
+      optuple->warn534=true;
     }
   }
   checkW534(np->lval);
@@ -421,7 +421,7 @@ static void checkforintercaloperators(const node *np)
   switch(np->opcode)
   { /* This only comes up in binary. */
   case AND: case OR: case XOR: case MINGLE: case SELECT:
-    optuple->warn018 = 1;
+    optuple->warn018 = true;
     break;
   default:
     checkforintercaloperators(np->lval);
@@ -446,8 +446,8 @@ void checknodeactbits(node *np)
   {
   case MINGLE:
     /*@-nullderef@*/ /* mingle has two nonnull arguments */
-    if(np->lval->optdata & 0xffff0000LU) optuple->warn276 = 1;
-    if(np->rval->optdata & 0xffff0000LU) optuple->warn276 = 1;
+    if(np->lval->optdata & 0xffff0000LU) optuple->warn276 = true;
+    if(np->rval->optdata & 0xffff0000LU) optuple->warn276 = true;
     np->optdata = ick_mingle((unsigned)(np->lval->optdata & 0xffff),
 			     (unsigned)(np->rval->optdata & 0xffff));
     /*@=nullderef@*/
@@ -614,14 +614,14 @@ void checknodeactbits(node *np)
        has its own case so that W276 can be given on an assignment. */
     /*@-nullderef@*/
     if(np->lval->optdata == 0xffff &&
-       np->rval->optdata & 0xffff0000lu) optuple->warn276 = 1;
+       np->rval->optdata & 0xffff0000lu) optuple->warn276 = true;
     /*@=nullderef@*/
     /*@fallthrough@*/
 
   case UNKNOWNOP:
   default:
     /*@-nullderef@*/
-    if(np->opcode == BY && !np->lval->optdata) optuple->warn239 = 1;
+    if(np->opcode == BY && !np->lval->optdata) optuple->warn239 = true;
     /*@=nullderef@*/
     np->optdata = (np->width == 16 ? 0xffffLU : 0xffffffffLU);
     /* Some values of opcode are used as placeholders, to save more than 1

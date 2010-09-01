@@ -668,7 +668,7 @@ static tuple *splat(int gentuple)
 {
     tuple *sp;
     int tok, i;
-    extern ick_bool re_send_token;
+    extern bool re_send_token;
 
     /*
      * The idea
@@ -676,7 +676,7 @@ static tuple *splat(int gentuple)
      * which we can do with a tricky flag on the lexer (re_send_token).
      */
 
-    if(re_send_token == ick_TRUE) /* By AIS */
+    if(re_send_token == true) /* By AIS */
     {
       /* We're still cleaning up from the previous error. */
       return prevtuple;
@@ -686,17 +686,17 @@ static tuple *splat(int gentuple)
     /* AIS: Set the flag to true the first time round, false for subsequent
        iterations. That way, if the error was triggered on a DO or label,
        we use that token as the start of the next statement. */
-    for(i = 0,re_send_token = ick_TRUE;;i++,re_send_token = ick_FALSE) {
+    for(i = 0,re_send_token = true;;i++,re_send_token = false) {
 	tok = lexer();
 	if (!tok)
 	{
-	    re_send_token = ick_TRUE;
+	    re_send_token = true;
 	    tok = ' ';		/* scanner must not see a NUL */
 	    break;
 	}
 	else if (tok == DO || tok == PLEASE || tok == LABEL
 		 /* AIS */ || tok == MAYBE) {
-	    re_send_token = ick_TRUE;
+	    re_send_token = true;
 	    break;
 	}
     }

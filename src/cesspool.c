@@ -302,7 +302,7 @@ static void butcher(unsigned long val, /*@out@*/ char *result)
     }
 }
 
-void ick_clockface(ick_bool mode)
+void ick_clockface(bool mode)
 /* enable or disable ick_clockface mode (output IIII instead of IV) */
 {
     if (mode)
@@ -321,7 +321,7 @@ void ick_clockface(ick_bool mode)
     }
 }
 
-void ick_setclcsemantics(ick_bool mode) /* AIS: CLC-INTERCAL semantics mode? */
+void ick_setclcsemantics(bool mode) /* AIS: CLC-INTERCAL semantics mode? */
 {
   ick_clcsem=mode;
 }
@@ -361,7 +361,7 @@ extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const c
 				const char* outcset, int padstyle, size_t outsize,
 				/*@null@*/ FILE* errsto);
 
-static void clcbinin(unsigned int type, ick_array *a, ick_bool forget)
+static void clcbinin(unsigned int type, ick_array *a, bool forget)
 {
   size_t i;
   int ti;
@@ -473,7 +473,7 @@ static void clcbinout(unsigned int type, const ick_array* a)
  *
  *********************************************************************/
 
-void ick_binin(unsigned int type, ick_array *a, ick_bool forget)
+void ick_binin(unsigned int type, ick_array *a, bool forget)
 {
   static int lastin = 0;
   int c, v;
@@ -533,7 +533,7 @@ void ick_binout(unsigned int type, const ick_array *a)
  *
  *********************************************************************/
 
-unsigned int ick_assign(char *dest, unsigned int type, ick_bool forget,
+unsigned int ick_assign(char *dest, unsigned int type, bool forget,
 		    unsigned int value)
 {
   unsigned int retval = 0;
@@ -619,7 +619,7 @@ void ick_resize(va_alist) va_dcl
   unsigned int type;
 #endif
   ick_array *a;
-  ick_bool forget;
+  bool forget;
   unsigned int i, r;
   size_t v;
   va_list ap;
@@ -632,7 +632,7 @@ void ick_resize(va_alist) va_dcl
   type = va_arg(ap, unsigned int);
 #endif
   a = va_arg(ap, ick_array*);
-  forget = va_arg(ap, ick_bool);
+  forget = va_arg(ap, bool);
 
   /* AIS: a->dims is no longer initialised. So initialise it here if
      it isn't already initialised, with an annotation to explain that
@@ -778,7 +778,7 @@ void ick_stash(unsigned int type, unsigned int index, void *from, ick_overop* oo
 }
 
 void ick_retrieve(void *to, unsigned int type, unsigned int index,
-		  ick_bool forget, ick_overop* oo)
+		  bool forget, ick_overop* oo)
 /* restore the value of a variable from the save stack */
 {
   ick_stashbox *sp;
@@ -831,7 +831,7 @@ void ick_retrieve(void *to, unsigned int type, unsigned int index,
  *********************************************************************/
 
 unsigned int ick_roll(unsigned int n)
-/* return ick_TRUE on n% chance, ick_FALSE otherwise */
+/* return true on n% chance, false otherwise */
 {
 #ifdef USG
    return((unsigned int)(lrand48() % 100) < n);

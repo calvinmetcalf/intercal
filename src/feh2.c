@@ -43,12 +43,12 @@ LICENSE TERMS
 int emitlineno;   /* line number for errors encountered during emit */
 
 /*@-exportlocal@*/ /* the parser uses this */
-int mark112 = 0; /* AIS: Mark the ick_next generated tuple for W112 */
+bool mark112 = 0; /* AIS: Mark the ick_next generated tuple for W112 */
 /*@=exportlocal@*/
 
 /* AIS: From perpet.c */
-extern int pickcompile;
-extern int ick_clcsemantics;
+extern bool pickcompile;
+extern bool ick_clcsemantics;
 
 /*************************************************************************
  *
@@ -235,7 +235,7 @@ void treset(void)
       ick_lose(IE666, iyylineno, (const char *)NULL);
     memset(tuples + ick_lineno, 0, (tuplecount - ick_lineno) * sizeof(tuple));
   }
-  if(mark112) tuples[ick_lineno].warn112 = 1; mark112 = 0; /* AIS */
+  if(mark112) tuples[ick_lineno].warn112 = true; mark112 = false; /* AIS */
   /* Yes, tuples is strictly speaking 'partial' at this point, but it's going
      to be filled in later, and isn't marked as partial due to it not being
      partial through most of the code, and you can't write out on a global.
@@ -358,16 +358,16 @@ void codecheck(void)
      * Check that every NEXT, ABSTAIN, REINSTATE and COME_FROM actually has a
      * legitimate target label.
      */
-    notpast1900 = ick_TRUE;
+    notpast1900 = 1;
     for (tp = tuples; tp < tuples + ick_lineno; tp++)
     {
-      if (tp->label == 1900) notpast1900 = ick_FALSE; /* AIS */
+      if (tp->label == 1900) notpast1900 = false; /* AIS */
         if (tp->type == NEXT
 	    || tp->type == ABSTAIN || tp->type == REINSTATE
 	    || tp->type == COME_FROM || tp->type == FROM
 	    || tp->type == NEXTFROMLABEL) /* AIS: added FROM, NEXTFROMLABEL. */
 	{
-	    ick_bool	foundit = ick_FALSE;
+	    bool	foundit = false;
 
 	    if (tp->u.target >= 1900 && tp->u.target <= 1998)
 	    {
@@ -382,7 +382,7 @@ void codecheck(void)
 	    for (up = tuples; up < tuples + ick_lineno; up++)
 		if (tp->u.target == up->label)
 		{
-		    foundit = ick_TRUE;
+		    foundit = true;
 		    break;
 		}
 
@@ -429,7 +429,7 @@ void codecheck(void)
 	    else /* AIS */
 	    {
 	      tp->nexttarget = (unsigned)(up - tuples + 1);
-	      up->nextable = ick_TRUE;
+	      up->nextable = true;
 	    }
 	}
     }
@@ -1150,7 +1150,7 @@ static void revprexpr(node *np, FILE *fp, node *target)
       (void) fprintf(fp,".set(");
       prexpr(target, fp, 0);
       (void) fprintf(fp,",os%dspot%lu);\n",
-		     (np->opcode==ick_TWOSPOT)+1, np->constant);
+		     ((np->opcode==ick_TWOSPOT)?1:0)+1, np->constant);
     }
     else if(!pickcompile)
     {
@@ -1794,6 +1794,7 @@ void emittextlines(FILE *fp)
   (void) fprintf(fp, "\"\"\n");
 }
 
+/*@-nestedextern@*/
 void emit(tuple *tn, FILE *fp)
 /* emit code for the given tuple */
 {
@@ -1865,7 +1866,7 @@ void emit(tuple *tn, FILE *fp)
 
     /* AIS: set weaving status if necessary */
     if(tn->setweave)
-      (void) fprintf(fp, "    weaving = %d;\n", tn->setweave>0);
+	(void) fprintf(fp, "    weaving = %d;\n", (tn->setweave>0)?1:0);
 
     /* AIS: print warnings on -l */
     if(ick_checkforbugs)
@@ -2056,7 +2057,7 @@ void emit(tuple *tn, FILE *fp)
 	  (void) fprintf(fp,".set(");
 	  prexpr(tn->u.node->rval, fp, 1);
 	  (void) fprintf(fp,",os%dspot%lu);\n",
-			 (tn->u.node->lval->opcode==ick_TWOSPOT)+1,
+			 ((tn->u.node->lval->opcode==ick_TWOSPOT)?1:0)+1,
 			 tn->u.node->lval->constant);
 	}
 	else if(!pickcompile)
@@ -2207,7 +2208,7 @@ void emit(tuple *tn, FILE *fp)
 
     case IGNORE:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp,"\t""ICKIGNORE(%s,%lu,%s) = ick_TRUE;\n",
+	    (void) fprintf(fp,"\t""ICKIGNORE(%s,%lu,%s) = true;\n",
 			   nameof(np->opcode, forgetbits),
 			   np->constant,
 			   nameof(np->opcode, varstores));
@@ -2215,7 +2216,7 @@ void emit(tuple *tn, FILE *fp)
 
     case REMEMBER:
 	for (np = tn->u.node; np; np = np->rval)
-	    (void) fprintf(fp,"\t""ICKIGNORE(%s,%lu,%s) = ick_FALSE;\n",
+	    (void) fprintf(fp,"\t""ICKIGNORE(%s,%lu,%s) = false;\n",
 			   nameof(np->opcode, forgetbits),
 			   np->constant,
 			   nameof(np->opcode, varstores));
@@ -2246,7 +2247,7 @@ void emit(tuple *tn, FILE *fp)
 	break;
 
     case REINSTATE:
-        /* (Joris Huizer) ensure it is not an GIVE UP statement */
+        /* (Joris Huizer) ensure it is not a GIVE UP statement */
         if ((tuples + tn->u.target - 1)->type != GIVE_UP)
         {
           if(!pickcompile)
@@ -2494,14 +2495,14 @@ void emit(tuple *tn, FILE *fp)
     case CREATE: /* By AIS */
       if(createsused == 0) goto splatme;
       (void) fprintf(fp,"\t""ick_registercreation(\"");
-      prunknownstr(tn->u.node, fp);
+      (void) prunknownstr(tn->u.node, fp);
       (void) fprintf(fp,"\",%uU);\n",tn->u.target);
       break;
 
     case COMPUCREATE: /* By AIS */
       if(createsused == 0) goto splatme;
       (void) fprintf(fp,"\t""ick_registercreation(\"");
-      prunknownstr(tn->u.node->rval, fp);
+      (void) prunknownstr(tn->u.node->rval, fp);
       (void) fprintf(fp,"\",");
       prexpr(tn->u.node->lval, fp, 1);
       (void) fprintf(fp,");\n");
@@ -2716,6 +2717,7 @@ void emit(tuple *tn, FILE *fp)
       (void) fputs("    if(ick_printflow) fprintf(stderr,"
 		   "\"[%d]\",ick_lineno);\n",fp);
 }
+/*@=nestedextern@*/
 
 /* AIS: Generate prototypes for slat expressions, args to UNKNOWN */
 void emitslatproto(FILE* fp)

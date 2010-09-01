@@ -26,7 +26,7 @@ LICENSE TERMS
 #include "uncommon.h"
 
 /* Options that might affect this */
-int ick_printfopens=0;
+bool ick_printfopens=0;
 
 /*@dependent@*/ /*@null@*/ FILE* ick_debfopen(/*@observer@*/ const char* fname,
 					      /*@observer@*/ const char* mode)

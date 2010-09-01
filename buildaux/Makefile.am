@@ -42,6 +42,8 @@ fiddle.h : src/fiddle.h
 	$(LN_S) `test -f 'src/fiddle.h' || echo '$(srcdir)/'`src/fiddle.h fiddle.h
 abcess.h : src/abcess.h
 	$(LN_S) `test -f 'src/abcess.h' || echo '$(srcdir)/'`src/abcess.h abcess.h
+ick_bool.h : src/ick_bool.h
+	$(LN_S) `test -f 'src/ick_bool.h' || echo '$(srcdir)/'`src/ick_bool.h ick_bool.h
 yuk.h : src/yuk.h
 	$(LN_S) `test -f 'src/ick-ec.h' || echo '$(srcdir)/'`src/yuk.h yuk.h
 ick_LDADD = libidiot.a
@@ -50,8 +52,8 @@ AM_YFLAGS = -d
 # create symlinks used by ick to find files if it's run without first being
 # installed.
 BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib3.3i syslib4.4i \
-                syslib5.5i syslib6.6i syslib7.7i floatlib.i ick_ec.h fiddle.h abcess.h \
-                ick_lose.h yuk.h
+                syslib5.5i syslib6.6i syslib7.7i floatlib.i \
+		ick_ec.h fiddle.h abcess.h ick_bool.h ick_lose.h yuk.h
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
 libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
@@ -103,7 +105,7 @@ latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
 	$(COMPILE) -c latin1.c
 
 ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/abcess.h src/ick_lose.h \
-                     src/yuk.h
+                     src/yuk.h src/ick_bool.h
 nodist_ickinclude_HEADERS = config.h
 dist_ickdata_DATA = src/atari.bin src/baudot.bin src/ebcdic.bin src/latin1.bin \
                     src/ick-wrap.c src/pickwrap.c COPYING

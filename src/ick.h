@@ -1,5 +1,7 @@
 /* ick.h -- compilation types for intercal parser */
 
+#include "ick_bool.h"
+
 #ifdef ICKNOSEARCH
 #define ICKINCLUDEDIR "."
 #define ICKLIBDIR "."
@@ -14,16 +16,6 @@
 #endif
 
 #define YY_NO_UNPUT
-
-#ifndef ICKBOOL_DEFINED
-/*@-redef@*/
-typedef int ick_bool;
-/*@=redef@*/
-#define ICKBOOL_DEFINED
-#endif
-
-#define ick_TRUE	1
-#define ick_FALSE	0
 
 #define ALLOC_CHUNK	256
 
@@ -63,23 +55,23 @@ typedef struct tuple_t
 					   have this line as a suck-point */
     int         	exechance;	/* chance of execution, initial abstain,
 					   (AIS) MAYBE details */
-    ick_bool                maybe;          /* AIS: Where MAYBE details go when
+    bool                maybe;          /* AIS: Where MAYBE details go when
 					   exechance has been parsed */
-    ick_bool                abstainable;    /* AIS: Is it possible for this line to
+    bool                abstainable;    /* AIS: Is it possible for this line to
 					   be abstained from? */
-    ick_bool                initabstain;    /* AIS: Is this line initially
+    bool                initabstain;    /* AIS: Is this line initially
 					   abstained from? */
-    ick_bool                nextable;       /* AIS: Can this line be a NEXT
+    bool                nextable;       /* AIS: Can this line be a NEXT
 					   target? */
-    ick_bool                optversion;     /* AIS: Use an optimized version? (Only
+    bool                optversion;     /* AIS: Use an optimized version? (Only
 					   set if the optimizer thinks that
 					   it's safe.) */
-    ick_bool                preproc;        /* AIS: Is this line a nonexistent one
+    bool                preproc;        /* AIS: Is this line a nonexistent one
 					   that was added to implement a
 					   command in the parser? */
-    ick_bool                warn112:1;      /* AIS: Should this line produce warning
+    bool                warn112:1;      /* AIS: Should this line produce warning
 					   112 during degeneration? */
-    ick_bool warn128:1, warn534:1, warn018:1, warn016:1, warn276:1, warn239:1,
+    bool warn128:1, warn534:1, warn018:1, warn016:1, warn276:1, warn239:1,
       warn622:1; /* AIS: As warn112. The warnings are a bitfield to save space. */
     unsigned int	type;		/* statement type */
     struct
@@ -90,7 +82,7 @@ typedef struct tuple_t
     unsigned int        nexttarget;     /* AIS: The target tuple of a NEXT must
 					   also be recorded for optimizef */
     int ick_lineno; 			/* source line for error messages */
-    ick_bool sharedline;			/* if NZ, two statements on a line */
+    bool sharedline;			/* if NZ, two statements on a line */
     enum onceagain onceagainflag;       /* AIS: ONCE / AGAIN */
     int ppnewtype;                      /* AIS: 'real' type of this line when
 					   the preprocessor is used; 0 on all
@@ -142,32 +134,32 @@ extern unsigned long sparkearsstack[SENESTMAX];
 extern int sparkearslev;
 
 /* compilation options */
-extern ick_bool compile_only;  /* just compile into C, don't run the linker */
-extern ick_bool nocompilerbug; /* set possibility of IE774 to zero */
-extern int ick_traditional;    /* compile as INTERCAL-72 */
+extern bool compile_only;  /* just compile into C, don't run the linker */
+extern bool nocompilerbug; /* set possibility of IE774 to zero */
+extern bool ick_traditional;    /* compile as INTERCAL-72 */
 extern int yydebug;        /* print debugging information while parsing */
 
 extern int politesse;
 
 
 /* AIS: I added these */
-extern int yukdebug;       /* debug the code with yuk */
-extern int yukprofile;     /* profile the code with yuk */
+extern bool yukdebug;       /* debug the code with yuk */
+extern bool yukprofile;     /* profile the code with yuk */
 extern int compucomecount; /* number of computed COME FROMs */
-extern int compucomesused; /* are computed COME FROMs used? */
-extern int nextfromsused;  /* is NEXT FROM used? */
-extern int gerucomesused;  /* is COME FROM gerund used? */
-extern int opoverused;     /* is operand overloading used? */
-extern int useickec;       /* are external calls used? */
-extern int createsused;    /* are CREATEs used? */
+extern bool compucomesused; /* are computed COME FROMs used? */
+extern bool nextfromsused;  /* is NEXT FROM used? */
+extern bool gerucomesused;  /* is COME FROM gerund used? */
+extern bool opoverused;     /* is operand overloading used? */
+extern bool useickec;       /* are external calls used? */
+extern bool createsused;    /* are CREATEs used? */
 /*@null@*/ extern node* firstslat;    /* the ick_first node with a slat */
 /*@null@*/ extern node* prevslat;     /* the last node so far with a slat */
-extern int multithread;    /* is the program multithreaded? */
-extern int variableconstants; /* is any assignment allowed? */
-extern int ick_coreonerr;      /* dump core on IE778? */
-extern int optdebug;       /* debug the optimizer */
-extern int flowoptimize;   /* optimize program flow */
-extern int ick_checkforbugs;   /* check for bugs */
-extern int coopt;          /* constant-output optimizer */
+extern bool multithread;    /* is the program multithreaded? */
+extern bool variableconstants; /* is any assignment allowed? */
+extern bool ick_coreonerr;     /* dump core on IE778? */
+extern int optdebug;        /* debug the optimizer */
+extern bool flowoptimize;   /* optimize program flow */
+extern bool ick_checkforbugs;   /* check for bugs */
+extern bool coopt;          /* constant-output optimizer */
 
 /* ick.h ends here */

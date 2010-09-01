@@ -25,11 +25,11 @@ LICENSE TERMS
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include "ick.h"        /* ugh, just for bool */
 #include "ick_lose.h"
 
-int ick_coreonerr = 0; /* AIS */
-
-int ick_checkforbugs; /* AIS */
+bool ick_coreonerr; /* AIS */
+bool ick_checkforbugs; /* AIS */
 
 /*@-formatconst@*/
 void ick_lose(const char *m, int n, const char *s)

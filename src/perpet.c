@@ -80,46 +80,46 @@ extern int yyparse(void);
 int yydebug;
 
 /* compilation options */
-ick_bool compile_only; 	/* just compile into C, don't run the linker */
-ick_bool ick_traditional;	/* insist on strict INTERCAL-72 conformance */
-ick_bool nocompilerbug;	/* disable error IE774 */
-int yukdebug;           /* AIS: Use the yuk debugger. */
-int yukprofile;         /* AIS: Use the yuk profiler. */
-int useprintflow=0;     /* AIS: Add +printflow support. */
-extern int ick_coreonerr;   /* AIS: Dump core on IE778. (defined in ick_lose.c) */
-int multithread;        /* AIS: Allow multithreading and backtracking. */
-int variableconstants;  /* AIS: Allow anything on the left of an assignment. */
-int createsused=0;      /* AIS: Allow the use of CREATE. */
-int useickec;           /* AIS: Link together INTERCAL and C. */
-static int nosyslib=0;  /* AIS: Don't link syslib under any circumstances. */
-static int showsystem=0;/* AIS: Show the command lines in system() calls */
-int cdebug;      /* AIS: Pass -g to our C compiler, and leave C code. */
+bool compile_only; 	/* just compile into C, don't run the linker */
+bool ick_traditional;	/* insist on strict INTERCAL-72 conformance */
+bool nocompilerbug;	/* disable error IE774 */
+bool yukdebug;          /* AIS: Use the yuk debugger. */
+bool yukprofile;        /* AIS: Use the yuk profiler. */
+bool useprintflow;      /* AIS: Add +printflow support. */
+extern bool ick_coreonerr;   /* AIS: Dump core on IE778. (defined in ick_lose.c) */
+bool multithread;       /* AIS: Allow multithreading and backtracking. */
+bool variableconstants; /* AIS: Allow anything on the left of an assignment. */
+bool createsused;       /* AIS: Allow the use of CREATE. */
+bool useickec;          /* AIS: Link together INTERCAL and C. */
+static bool nosyslib;   /* AIS: Don't link syslib under any circumstances. */
+static bool showsystem; /* AIS: Show the command lines in system() calls */
+bool cdebug;            /* AIS: Pass -g to our C compiler, and leave C code. */
 int optdebug;           /* AIS: Debug the optimizer. Value is 0, 1, 2, or 3. */
-int flowoptimize;       /* AIS: Do flow optimizations (in INTERCAL!). */
-int coopt;              /* AIS: The constant-output optimization. This should
+bool flowoptimize;      /* AIS: Do flow optimizations (in INTERCAL!). */
+bool coopt;             /* AIS: The constant-output optimization. This should
 			   mean that INTERCAL will beat any other language at
 			   many benchmark programs (!) */
-extern int ick_printfopens; /* AIS: Print messages whenever attempting to open a
+extern bool ick_printfopens; /* AIS: Print messages whenever attempting to open a
 			       file: from uncommon.c */
-extern int ick_checkforbugs;/* AIS: Try to find possible bugs in the source code */
-int pickcompile;        /* AIS: Compile for PIC? */
+extern bool ick_checkforbugs;/* AIS: Try to find possible bugs in the source code */
+bool pickcompile;       /* AIS: Compile for PIC? */
 /*@-exportlocal@*/      /* AIS: relevant to the lexer */
-int clclex;             /* AIS: 1 means use CLC-INTERCAL meanings for @, ? */
+bool clclex;            /* AIS: 1 means use CLC-INTERCAL meanings for @, ? */
 /*@=exportlocal@*/
-int ick_clcsemantics;       /* AIS: CLC semantics for I/O, abstaining GIVE UP, &c*/
-static int outtostdout;        /* AIS: Output on stdout rather than the output file */
+bool ick_clcsemantics;       /* AIS: CLC semantics for I/O, abstaining GIVE UP, &c*/
+static bool outtostdout;     /* AIS: Output on stdout rather than the output file */
 
 /* AIS: Autodetected compilation options */
-int compucomecount=0;   /* Computed COME FROM count */
-int compucomesused=0;   /* Are computed COME FROMs used? */
-int gerucomesused=0;    /* Is COME FROM gerund used? */
-int nextfromsused=0;    /* Is NEXT FROM used? */
-int opoverused=0;       /* Is operand overloading used? */
+int compucomecount;    /* Computed COME FROM count */
+bool compucomesused;   /* Are computed COME FROMs used? */
+bool gerucomesused;    /* Is COME FROM gerund used? */
+bool nextfromsused;    /* Is NEXT FROM used? */
+bool opoverused;       /* Is operand overloading used? */
 /*@null@*/ node* firstslat=0;      /* The first slat expression in the program */
 /*@null@*/ node* prevslat=0;       /* The last slat expression used so far */
 
-static ick_bool dooptimize;	/* do optimizations? (controlled by -O) */
-static ick_bool ick_clockface;	/* set up output to do IIII for IV */
+static bool dooptimize;	/* do optimizations? (controlled by -O) */
+static bool ick_clockface;	/* set up output to do IIII for IV */
 
 #define SKELETON  "ick-wrap.c"
 #define PSKELETON "pickwrap.c"
@@ -313,152 +313,153 @@ static void parse_options(int argc, char *argv[])
     switch (c)
     {
     case 'b':
-      nocompilerbug = ick_TRUE;
+      nocompilerbug = true;
       break;
 
     case 'c':
-      compile_only = ick_TRUE;
-      /* AIS */ coopt = ick_FALSE;
+      compile_only = true;
+      /* AIS */ coopt = false;
       break;
 
     case 'o': /* AIS */
-      compile_only = ick_TRUE;
-      outtostdout = ick_TRUE;
-      coopt = ick_FALSE;
+      compile_only = true;
+      outtostdout = true;
+      coopt = false;
       break;
 
     case 'd':
-      yydebug = compile_only = ick_TRUE;
-      /* AIS */ coopt = ick_FALSE;
+	yydebug = 1;
+	compile_only = true;
+      /* AIS */ coopt = false;
       break;
 
     case 'e': /* AIS */
-      useickec = ick_TRUE;
-      multithread = pickcompile = coopt = yukdebug = yukprofile = ick_FALSE;
+      useickec = true;
+      multithread = pickcompile = coopt = yukdebug = yukprofile = false;
       break;
 
     case 'E': /* AIS */
-      nosyslib = ick_TRUE;
-      pickcompile = ick_FALSE;
+      nosyslib = true;
+      pickcompile = false;
       break;
 
     case 'C':
-      ick_clockface = ick_TRUE;
+      ick_clockface = true;
       break;
 
     case 't':
-      ick_traditional = ick_TRUE;
+      ick_traditional = true;
       if(multithread) ick_lose(IE111, 1, (const char*) NULL); /* AIS */
       if(pickcompile) ick_lose(IE111, 1, (const char*) NULL); /* AIS */
       break;
 
     case 'O':
-      dooptimize = ick_TRUE;
-      variableconstants = ick_FALSE; /* AIS */
+      dooptimize = true;
+      variableconstants = false; /* AIS */
       break;
 
     case 'f': /* By AIS */
-      flowoptimize = ick_TRUE;
-      yukdebug = yukprofile = ick_FALSE;
-      variableconstants = ick_FALSE;
+      flowoptimize = true;
+      yukdebug = yukprofile = false;
+      variableconstants = false;
       break;
 
     case 'F': /* By AIS */
-      coopt = flowoptimize = dooptimize = ick_TRUE;
-      variableconstants = useickec = ick_FALSE;
-      yukdebug = yukprofile = yydebug = outtostdout =
-	compile_only = cdebug = ick_FALSE;
+      coopt = flowoptimize = dooptimize = true;
+      variableconstants = useickec = false;
+      yukdebug = yukprofile = outtostdout = compile_only = cdebug = false;
+      yydebug = 0;
       if(pickcompile) ick_lose(IE256, 1, (const char*) NULL);
       break;
 
     case 'h': /* By AIS */
       optdebug|=1;
-      compile_only=dooptimize=ick_TRUE;
-      coopt=ick_FALSE;
+      compile_only=dooptimize=true;
+      coopt=false;
       break;
 
     case 'H': /* By AIS */
       optdebug|=2;
-      compile_only=dooptimize=ick_TRUE;
-      coopt=ick_FALSE;
+      compile_only=dooptimize=true;
+      coopt=false;
       break;
 
     case 'y': /* By AIS */
 #ifdef HAVE_UNISTD_H
-      yukdebug=ick_TRUE;
-      multithread=flowoptimize=coopt=useickec=ick_FALSE;
+      yukdebug=true;
+      multithread=flowoptimize=coopt=useickec=false;
 #endif
       break;
 
     case 'p': /* By AIS */
 #ifdef HAVE_UNISTD_H
-      yukprofile=ick_TRUE;
-      multithread=flowoptimize=coopt=useickec=ick_FALSE;
+      yukprofile=true;
+      multithread=flowoptimize=coopt=useickec=false;
 #endif
       break;
 
     case 'w': /* By AIS */
-      useprintflow = ick_TRUE;
+      useprintflow = true;
       break;
 
     case 'm': /* By AIS */
-      multithread=ick_TRUE;
-      yukprofile=ick_FALSE;
-      yukdebug=ick_FALSE;
-      useickec=ick_FALSE;
+      multithread=true;
+      yukprofile=false;
+      yukdebug=false;
+      useickec=false;
       if(ick_traditional) ick_lose(IE111, 1, (const char*) NULL);
       break;
 
     case 'a': /* By AIS */
-      createsused=ick_TRUE;
-      pickcompile=ick_FALSE;
+      createsused=true;
+      pickcompile=false;
       break;
 
     case 'v': /* By AIS */
-      variableconstants=ick_TRUE;
-      dooptimize=ick_FALSE;
-      flowoptimize=ick_FALSE;
-      coopt=ick_FALSE;
-      pickcompile=ick_FALSE;
+      variableconstants=true;
+      dooptimize=false;
+      flowoptimize=false;
+      coopt=false;
+      pickcompile=false;
       break;
 
     case 'l': /* By AIS */
-      ick_checkforbugs=ick_TRUE;
-      dooptimize=ick_TRUE;
+      ick_checkforbugs=true;
+      dooptimize=true;
       break;
 
     case 'U': /* By AIS */
-      ick_coreonerr=ick_TRUE;
+      ick_coreonerr=true;
       break;
 
     case 'u': /* By AIS */
-      ick_printfopens=ick_TRUE;
+      ick_printfopens=true;
       break;
 
     case 'Y': /* By AIS */
-      showsystem=ick_TRUE;
+      showsystem=true;
       break;
 
     case 'P': /* By AIS */
-      pickcompile=ick_TRUE;
-      multithread=coopt=variableconstants=createsused=ick_FALSE;
-      ick_clcsemantics=useickec=nosyslib=ick_FALSE;
-      compile_only=ick_TRUE;
-      dooptimize=flowoptimize=ick_TRUE; /* needed for PICs */
+      pickcompile=true;
+      multithread=coopt=variableconstants=createsused=false;
+      ick_clcsemantics=useickec=nosyslib=false;
+      compile_only=true;
+      dooptimize=flowoptimize=true; /* needed for PICs */
       break;
 
     case 'X': /* By AIS */
-      clclex=ick_TRUE;
+      clclex=true;
       break;
 
     case 'x': /* By AIS */
-      ick_clcsemantics=ick_TRUE;
-      pickcompile=ick_FALSE;
+      ick_clcsemantics=true;
+      pickcompile=false;
       break;
 
     case 'g': /* By AIS */
-      cdebug=ick_TRUE;
-      coopt=ick_FALSE;
+      cdebug=true;
+      coopt=false;
       break;
 
     case '?':
@@ -489,10 +490,10 @@ static void handle_archive(char *libbuf, size_t libbuf_size,
      it instead adds a space and the filename to libbuf. */
   if(library[0]=='l'&&library[1]=='i'&&
       library[2]=='b')
-    ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
+      (void) ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
 			" -l%s",library+3);
   else
-    ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
+      (void) ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
 			" %s.a",library);
 }
 
@@ -540,7 +541,7 @@ static void handle_befunge98(char *libbuf, size_t libbuf_size,
   /* Compile the .b98 file into a .cio. It's open on stdin right now,
      so we just need to handle the output side of things. */
 
-  ick_snprintf_or_die(outputfilename, sizeof outputfilename, "%s.cio", filename);
+  (void) ick_snprintf_or_die(outputfilename, sizeof outputfilename, "%s.cio", filename);
 
   if(!((of = ick_debfopen(outputfilename,"w"))))
     ick_lose(IE888,-1,(const char *)NULL);
@@ -577,7 +578,7 @@ static void handle_befunge98(char *libbuf, size_t libbuf_size,
   (void) fclose(of);
 
   /* Put the libraries and .cio file in the command line. */
-  ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
+  (void) ick_snprintf_or_die(libbuf+strlen(libbuf),libbuf_size - strlen(libbuf),
 		      " %s.cio -lick_ecto_b98 -lm -lncurses", filename);
 }
 
@@ -630,14 +631,14 @@ static void find_intercal_base(char* chp)
  * @param buffer Output buffer that may be modified to contain the path of
  *               syslib.i or syslib.Ni (where N is 3-7).
  * @param size Size of buffer.
- * @param needsyslib Pointer to the ick_bool needsyslib declared in main().
+ * @param needsyslib Pointer to the bool needsyslib declared in main().
  * @param argv0 Should be argv[0], which wasn't modified.
  * @param ick_sysdir The ick data directory.
  * @note May (directly) call ick_lose() with IE127.
  */
 static void check_syslib(/*@partial@*/ char *buffer,
                          size_t size,
-                         /*@out@*/ ick_bool *needsyslib,
+                         /*@out@*/ bool *needsyslib,
                          /*@observer@*/ const char *argv0,
                          /*@observer@*/ const char *ick_sysdir)
 {
@@ -645,7 +646,7 @@ static void check_syslib(/*@partial@*/ char *buffer,
     struct linerange_t *lp;
 
     if (nosyslib || pickcompile) { 
-	*needsyslib = ick_FALSE;
+	*needsyslib = false;
 	return;
     }
 
@@ -654,7 +655,7 @@ static void check_syslib(/*@partial@*/ char *buffer,
      */
     for (lp = lineranges; lp->start; lp++)
     {
-	*needsyslib = ick_FALSE;
+	*needsyslib = false;
 	for (tp = tuples; tp->type; tp++) {
 	    /*
 	     * If some label in the specified range is defined,
@@ -662,7 +663,7 @@ static void check_syslib(/*@partial@*/ char *buffer,
 	     * can stop searching.
 	     */
 	    if (tp->label >= lp->start && tp->label <= lp->end) {
-		*needsyslib = ick_FALSE;
+		*needsyslib = false;
 		goto breakout;
 	    }
 	    /*
@@ -671,7 +672,7 @@ static void check_syslib(/*@partial@*/ char *buffer,
 	     */
 	    if (tp->type == NEXT &&
 		tp->u.target >= lp->start && tp->u.target <= lp->end)
-		*needsyslib = ick_TRUE;
+		*needsyslib = true;
 	}
 	if (*needsyslib) {
 	    if (ick_Base == 2)
@@ -716,8 +717,8 @@ static void propagate_typeinfo(void)
 	|| tp->type == FORGET || tp->type == RESUME
 	|| tp->type == COMPUCOME || tp->type == UNKNOWN)
       typecast(tp->type == MANYFROM ? tp->u.node->lval : tp->u.node);
-    if (tp->type == WRITE_IN) coopt = 0; /* AIS: may as well do
-					    this here */
+    if (tp->type == WRITE_IN) coopt = false; /* AIS: may as well do
+					        this here */
   }
 }
 
@@ -842,7 +843,7 @@ static void gen_cc_command(char* buffer, size_t size,
  */
 static void generate_code(FILE *ifp, FILE *ofp,
                           /*@observer@*/  const char* source_name_stem,
-                          ick_bool *needsyslib,
+                          bool *needsyslib,
                           int bugline,
                           /*@observer@*/ const char* compilercommand)
 {
@@ -883,7 +884,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 		    isn't referenced; if it isn't, we can allow
 		    one double-oh-seven if syslib was
 		    automagically inclulded. */
-		 if(*needsyslib) *needsyslib = 0; else coopt = 0;
+		 if(*needsyslib) *needsyslib = false; else coopt = false;
 	       }
 	       if(!pickcompile)
 	       {
@@ -898,7 +899,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 		 else {
 		   (void) fprintf(ofp, "1, ");
 		   tp->exechance = -tp->exechance;
-		   tp->initabstain=1; /* AIS: As above */
+		   tp->initabstain=true; /* AIS: As above */
 		   /* AIS: If the line was ick_abstained, we need to
 		      swap ONCEs and AGAINs on it round, to suit
 		      the code degenerator. */
@@ -910,10 +911,10 @@ static void generate_code(FILE *ifp, FILE *ofp,
 		 if(tp->exechance >= 101)
 		 {
 		   /* AIS: This line has a MAYBE */
-		   tp->maybe = 1;
+		   tp->maybe = true;
 		   tp->exechance /= 100;
 		 }
-		 else tp->maybe = 0;
+		 else tp->maybe = false;
 	       }
 	       else /* AIS: hardcoded abstain bits for PICs */
 	       {
@@ -1067,7 +1068,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	       (void) fprintf(ofp,
 			      "ick_type16* ick_onespots;\n");
 	       (void) fprintf(ofp,
-			      "ick_bool* ick_oneforget;\n");
+			      "bool* ick_oneforget;\n");
 	       if(yukprofile || yukdebug)
 	       {
 		 (void) fprintf(ofp,
@@ -1101,7 +1102,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	       (void) fprintf(ofp,
 			      "ick_type32* ick_twospots;\n");
 	       (void) fprintf(ofp,
-			      "ick_bool* ick_twoforget;\n");
+			      "bool* ick_twoforget;\n");
 	       if(yukprofile || yukdebug)
 	       {
 		 (void) fprintf(ofp,
@@ -1135,7 +1136,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	       (void) fprintf(ofp,
 			      "ick_array* ick_tails;\n");
 	       (void) fprintf(ofp,
-			      "ick_bool* ick_tailforget;\n");
+			      "bool* ick_tailforget;\n");
 	       if(multithread)
 	       {
 		 (void) fprintf(ofp,
@@ -1148,7 +1149,7 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	       (void) fprintf(ofp,
 			      "ick_array* ick_hybrids;\n");
 	       (void) fprintf(ofp,
-			      "ick_bool* ick_hyforget;\n");
+			      "bool* ick_hyforget;\n");
 	       if(multithread)
 	       {
 		 (void) fprintf(ofp,
@@ -1260,9 +1261,9 @@ static void generate_code(FILE *ifp, FILE *ofp,
 
 	 case 'F':	/* set options from command line */
 	   if (ick_clockface)
-	     (void) fprintf(ofp, "ick_clockface(ick_TRUE);\n");
+	     (void) fprintf(ofp, "ick_clockface(true);\n");
 	   if (ick_clcsemantics) /* AIS */
-	     (void) fprintf(ofp, "ick_setclcsemantics(ick_TRUE);\n");
+	     (void) fprintf(ofp, "ick_setclcsemantics(true);\n");
 	   break;
 
 	 case 'G':	/* degenerated code */
@@ -1323,7 +1324,9 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	       fprintf(ofp,"%d,",tp->ick_lineno);
 	     }
 	     (void) fprintf(ofp, "-1};\n\n");
+	     /*@+boolint@*/
 	     (void) fprintf(ofp, "int yukopts = %d;\n", yukprofile+yukdebug*2);
+	     /*@=boolint@*/
 	     (void) fprintf(ofp, "yptimer ypexectime[%d];\n", ick_lineno);
 	     (void) fprintf(ofp, "ypcounter ypexecount[%d];\n",ick_lineno);
 	     (void) fprintf(ofp, "ypcounter ypabscount[%d];\n",ick_lineno);
@@ -1344,11 +1347,11 @@ static void generate_code(FILE *ifp, FILE *ofp,
 	 case 'M': /* AIS: place new features defines in program */
 	   /* This is needed even in a non-multithread program, to let
 	      the header files know it's non-multithread */
-	   (void) fprintf(ofp, "#define MULTITHREAD %d\n", multithread);
+	     (void) fprintf(ofp, "#define MULTITHREAD %d\n", multithread?1:0);
 	   /* Likewise, to let the header files know whether it
 	      overloads operands (I don't think this is used at
 	      the moment, though) */
-	   (void) fprintf(ofp, "#define OPOVERUSED %d\n",opoverused);
+	   (void) fprintf(ofp, "#define OPOVERUSED %d\n",opoverused?1:0);
 	   /* and whether to use the ICK_EC code */
 	   if(useickec)
 	     (void) fprintf(ofp, "#define ICK_EC 1\n");
@@ -1771,7 +1774,7 @@ int main(int argc, char *argv[])
   const char        *cooptsh; /* AIS */
   FILE	*ifp, *ofp;
   int		/* nextcount, AIS */ bugline;
-  ick_bool        needsyslib, firstfile;
+  bool        needsyslib, firstfile;
   int         oldoptind;
 #ifdef HAVE_UNISTD_H
   int         oldstdin; /* AIS: for keeping track of where stdin was */
@@ -1830,7 +1833,7 @@ int main(int argc, char *argv[])
   oldoptind=optind; /* AIS */
   *libbuf = '\0'; /* AIS */
   /* Begin file loop */
-  for (firstfile = ick_TRUE; optind < argc; optind++, firstfile = ick_FALSE)
+  for (firstfile = true; optind < argc; optind++, firstfile = false)
   {
     /* AIS: Read as binary to pick up Latin-1 and UTF-8 better */
     if (/* AIS */ strrchr(argv[optind],'.') != NULL &&
@@ -1842,7 +1845,7 @@ int main(int argc, char *argv[])
       /* strip off the file extension */
       if(!(chp = strrchr(argv[optind],'.')))
       {
-	if(useickec && firstfile == ick_FALSE) /* By AIS */
+	if(useickec && firstfile == false) /* By AIS */
 	{
 	  /* the filename indicates a request for an expansion library,
 	     along the same lines as CLC-INTERCAL's preloads. Search for
@@ -1901,7 +1904,7 @@ int main(int argc, char *argv[])
       if(useickec && (!strcmp(chp,"c") || !strcmp(chp,"cio") ||
 		      !strcmp(chp,"c99"))) /* AIS */
       {
-	if(firstfile != ick_FALSE) /* need exactly 1 INTERCAL file */
+	if(firstfile != false) /* need exactly 1 INTERCAL file */
 	  ick_lose(IE998, 1, (const char *)NULL);
 	continue; /* don't process C or cio files further yet */
       }
@@ -1927,7 +1930,7 @@ int main(int argc, char *argv[])
 	goto fixexpansionlibrary;
       }
 
-      if(useickec && firstfile == ick_FALSE) /* AIS */
+      if(useickec && firstfile == false) /* AIS */
 	ick_lose(IE998, 1, (const char *)NULL);
 
       /* determine the file type from the extension */
@@ -1940,9 +1943,10 @@ int main(int argc, char *argv[])
       treset();
       politesse = 0;
       /* JH: default to no op-overusage and no computed come from */
-      opoverused = 0;
-      compucomesused = compucomecount = 0;
-      gerucomesused = 0; /* AIS: you forgot this one */
+      opoverused = false;
+      compucomesused = false;
+      compucomecount = 0;
+      gerucomesused = false; /* AIS: you forgot this one */
       /* AIS: ensure that at least one variable exists, to prevent
 	 NULL pointers later on */
       (void) intern(ick_ONESPOT, 1); /* mention .1 */

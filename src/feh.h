@@ -24,7 +24,7 @@ extern void optimizef(void); /* AIS */
 extern void nodefree(/*@keep@*/ /*@null@*/ node* np); /* AIS */
 extern unsigned long varextern(unsigned long intern, int vartype); /* AIS */
 extern node *nodecopy(const node*); /* AIS */
-extern ick_bool nodessame(/*@observer@*/ const node*, /*@observer@*/ const node*); /* AIS */
+extern bool nodessame(/*@observer@*/ const node*, /*@observer@*/ const node*); /* AIS */
 
 extern node *optdebugnode; /* AIS */
 extern const char **enablers; /* AIS: so that there can be an element before the
@@ -32,6 +32,6 @@ extern const char **enablers; /* AIS: so that there can be an element before the
 			         -1, just to cause a bit more confusion) */
 extern const assoc vartypes[];
 
-extern int useprintflow; /* AIS */
+extern bool useprintflow; /* AIS */
 
 /* feh.h ends here */
