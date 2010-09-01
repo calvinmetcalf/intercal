@@ -32,6 +32,7 @@ doc/*info*
 doc/*.htm
 doc/*.ps
 doc/*.odt
+doc/*.txt
 oilout*.c
 # Test binaries in the pit
 pit/beer
