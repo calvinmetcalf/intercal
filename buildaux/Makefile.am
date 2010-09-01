@@ -176,6 +176,10 @@ DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.s
 clean-local:
 	if [ -d pit ]; then cd pit; make clean; fi
 
+# Make self-tests available in the standard way
+check-am:
+	cd pit; make test
+
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
 doc/ick.txt: doc/ick.txi
