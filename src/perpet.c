@@ -46,8 +46,11 @@ LICENSE TERMS
 #ifndef ICKINCLUDEDIR
 #define ICKINCLUDEDIR "/usr/local/include"
 #endif
-#ifndef ICKDATADIR
-#define ICKDATADIR "/usr/local/share"
+#ifndef ICKSYSDIR
+#define ICKSYSDIR "/usr/local/share"
+#endif
+#ifndef ICKCSKELDIR
+#define ICKCSKELDIR "/usr/local/share"
 #endif
 #ifndef ICKLIBDIR
 #define ICKLIBDIR "/usr/local/lib"
@@ -629,14 +632,14 @@ static void find_intercal_base(char* chp)
  * @param size Size of buffer.
  * @param needsyslib Pointer to the ick_bool needsyslib declared in main().
  * @param argv0 Should be argv[0], which wasn't modified.
- * @param ick_datadir The ick data directory.
+ * @param ick_sysdir The ick data directory.
  * @note May (directly) call ick_lose() with IE127.
  */
 static void check_syslib(/*@partial@*/ char *buffer,
                          size_t size,
                          /*@out@*/ ick_bool *needsyslib,
                          /*@observer@*/ const char *argv0,
-                         /*@observer@*/ const char *ick_datadir)
+                         /*@observer@*/ const char *ick_sysdir)
 {
     tuple *tp;
     struct linerange_t *lp;
@@ -677,7 +680,7 @@ static void check_syslib(/*@partial@*/ char *buffer,
 	    else
 		(void) ick_snprintf_or_die(buffer, size,
 					   "%s%d.%di", lp->libname, ick_Base, ick_Base);
-	    if (ick_findandfreopen(buffer, ick_datadir, "r", argv0, stdin) == NULL)
+	    if (ick_findandfreopen(buffer, ick_sysdir, "r", argv0, stdin) == NULL)
 		ick_lose(IE127, 1, (const char*) NULL);
 #ifdef USE_YYRESTART
 	    yyrestart(stdin);
@@ -1762,9 +1765,9 @@ int main(int argc, char *argv[])
   char	buf[BUFSIZ], buf2[BUFSIZ], *chp, yukcmdstr[BUFSIZ], path[BUFSIZ],
     libbuf[BUFSIZ];
   /*@-shadow@*/ /* no it doesn't, cesspool isn't linked to perpet */
-  const char	*includedir, *libdir, *ick_datadir;
+  const char	*includedir, *libdir, *ick_sysdir, *ick_cskeldir;
   /*@=shadow@*/
-  /* AIS: removed getenv(), added ick_datadir */
+  /* AIS: removed getenv(), added ick_sysdir */
   const char        *cooptsh; /* AIS */
   FILE	*ifp, *ofp;
   int		/* nextcount, AIS */ bugline;
@@ -1777,8 +1780,10 @@ int main(int argc, char *argv[])
     includedir = ICKINCLUDEDIR;
   if (!(libdir = getenv("ICKLIBDIR")))
     libdir = ICKLIBDIR;
-  if (!(ick_datadir = getenv("ICKDATADIR"))) /* AIS */
-    ick_datadir = ICKDATADIR;
+  if (!(ick_sysdir = getenv("ICKSYSDIR")))
+    ick_sysdir = ICKSYSDIR;
+  if (!(ick_cskeldir = getenv("ICKCSKELDIR")))
+    ick_sysdir = ICKCSKELDIR;
 /*
   AIS: nothing actually uses this at the moment,
   commenting it out for future use
@@ -1807,7 +1812,7 @@ int main(int argc, char *argv[])
 
   /* AIS: New function for enhanced file-finding */
   ifp = ick_findandfopen(pickcompile?PSKELETON:SKELETON,
-			 ick_datadir, "r", argv[0]);
+			 ick_cskeldir, "r", argv[0]);
   if(!ifp) ick_lose(IE999, 1, (const char *)NULL);
 
   /* now substitute in tokens in the skeleton */
@@ -1850,7 +1855,7 @@ int main(int argc, char *argv[])
 	fixexpansionlibrary:
 	  tempfn="%s.c";
 	  (void) ick_snprintf_or_die(buf2, sizeof buf2, "%s.c", argv[optind]);
-	  fromcopy = ick_findandfopen(buf2,ick_datadir,"rb",argv[0]);
+	  fromcopy = ick_findandfopen(buf2,ick_cskeldir,"rb",argv[0]);
 	  if(!fromcopy) /* same error as for syslib */
 	    ick_lose(IE127, 1, (const char*) NULL);
 #if __DJGPP__
@@ -1976,7 +1981,7 @@ int main(int argc, char *argv[])
       }
 
       /* Check if we should auto add the system library. */
-      check_syslib(buf2, sizeof buf2, &needsyslib, argv[0], ick_datadir);
+      check_syslib(buf2, sizeof buf2, &needsyslib, argv[0], ick_sysdir);
 
       /*
        * Now propagate type information up the expression tree.
@@ -2006,11 +2011,11 @@ int main(int argc, char *argv[])
        * of the per-file loop since ick_findandtestopen() returns a pointer to a
        * static buffer. Should be fixed.
        */
-      cooptsh = ick_findandtestopen("coopt.sh", ick_datadir, "rb", argv[0]);
+      cooptsh = ick_findandtestopen("coopt.sh", ick_sysdir, "rb", argv[0]);
       /* AIS: and calculate yukcmdstr. */
       (void) ick_snprintf_or_die(yukcmdstr, sizeof yukcmdstr, "%s%s" EXEEXT " %s %s",
 				 strchr(argv[optind],'/')||strchr(argv[optind],'\\')?
-				 "":"./",argv[optind],ick_datadir,argv[0]);
+				 "":"./",argv[optind],ick_sysdir,argv[0]);
 
       /* AIS: Remove the filename from argv[0], leaving only a directory.
 	 If this would leave it blank, change argv[0] to '.'.

@@ -64,8 +64,8 @@ void ick_lwarn(const char *m, int n, const char *s)
   else if(m[0]!='2'||m[1]!='7'||m[2]!='8')
     (void) fprintf(stderr, m + 4, n);
   else
-    (void) fprintf(stderr, m + 4);
-  (void) fprintf(stderr, "        RECONSIDER SOURCE AND RESUBNIT\n\n");
+      (void) fputs(m + 4, stderr);
+  (void) fputs("        RECONSIDER SOURCE AND RESUBNIT\n\n", stderr);
   /* Don't exit. This is not any error except one not causing immediate
      termination of program execution. */
 }

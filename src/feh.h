@@ -11,7 +11,7 @@ extern void ppinit(int); /* AIS */
 extern void typecast(node *np);
 extern void codecheck(void);
 extern void optimize(node *np);
-/*@observer@*/ extern const char *nameof(int value, const assoc table[]);
+/*@observer@*/ /*@null@*/ extern const char *nameof(int value, const assoc table[]);
 extern void emit(tuple *tn, FILE *fp);
 extern void emittextlines(FILE *fp);
 extern void emitslatproto(FILE *fp); /* AIS: emit prototypes for /-functions */

@@ -129,7 +129,8 @@ by Alex Smith
   			Computes the Fibinacci sequence; in the innput file,
 			ONE means compute the nextvterm and ZERO means stop.
   tests/compucome.i	A program to test computed COME FROM
-  tests/onceagain.i	+ A single-threaded program testing ONCE and AGAIN
+  tests/onceagain.i	+ A single-threaded program testing ONCE and AGAIN.
+  			Output just tracks the program control flow.
   tests/arrtest.i	A program to test some changes I made to the grammar.
   			No output expected as it's just a parser test.
   tests/arrtest.doc	The history behind those changes

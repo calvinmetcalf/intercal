@@ -114,7 +114,7 @@ atom;
 typedef struct
 {
     int	value;
-    const char *name;
+    /*@null@*/const char *name;
 }
 assoc;
 
