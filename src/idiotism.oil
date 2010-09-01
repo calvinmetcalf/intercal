@@ -214,15 +214,12 @@
 
 ; Shifts
 
-; A helper in calculating 32-bit shifts; this is a shift on half the bits of
-; a 32-bit number.
-[lshift32half]
-(#0$((_1~#715827882)<<#1))->((_1&#715827882)<<#1)
 ; Rightshift some of the bits
 [rshift]
 <#1-#31
 (_1~#{xselx(x)<<r==x&&x}2)->((_1&_2)>>#{r}0)
 >
+
 ; General 16-bit leftshifts
 ;
 ; Large left-shifts can be written in an optimized way using knowledge of the
@@ -252,6 +249,11 @@
     <<#{setbitcount(x3&((2LU<<(r*2))-1))}0)|#{iselect(mingle(x4,x2),x3)}0)
 >
 
+; A helper in calculating 32-bit shifts; this is a shift on half the bits of
+; a 32-bit number.
+[lshift32half]
+(#0$((:1~#715827882)<<#1))->((:1&#715827882)<<#1)
+(#0$((:1&#2863311530)~#715827883))->((:1&#2863311530)<<#1)
 
 ; 32-bit leftshift by 1; there are 8 ways to write this.
 [lshift32by1]
@@ -263,10 +265,6 @@
 (((_1&#715827882)<<#1)|((#1431655765&_1)<<#1))->((_1&#2147483647)<<#1)
 (((#715827882&_1)<<#1)|((_1&#1431655765)<<#1))->((_1&#2147483647)<<#1)
 (((#715827882&_1)<<#1)|((#1431655765&_1)<<#1))->((_1&#2147483647)<<#1)
-
-; a weird part of a leftshift
-[lshift32half]
-(#0$((:1&#2863311530)~#715827883))->((:1&#2863311530)<<#1)
 
 ; Move rshift, AND out of neg
 [rshiftoutofneg]
