@@ -174,7 +174,7 @@ DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.s
 
 # Clean the pit test binaries on toplevel make clean
 clean-local:
-	cd pit; make clean
+	if [ -d pit ]; then cd pit; make clean; fi
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
