@@ -41,6 +41,7 @@ BASE2SOURCES = \
 	./sort.i \
 	./tests/ais1.i \
 	./tests/ais2.i \
+	./tests/compucome.i \
 	./tests/hello.i \
 	./tests/ignorret \
 	./tests/iogerunds.i \
@@ -137,12 +138,14 @@ fft: fft.i
 	$(ICK) -m fft.i
 pass: pass.i
 	$(ICK) -m pass.i
+tests/compucome: tests/compucome.i
+	$(ICK) -m tests/compucome.i
 tests/permute: tests/permute.i
 	$(ICK) -m tests/permute.i
-tests/whileadd: tests/whileadd.i
-	$(ICK) -m tests/whileadd.i
 tests/testcreate: tests/testcreate.i
 	$(ICK) -a tests/testcreate.i
+tests/whileadd: tests/whileadd.i
+	$(ICK) -m tests/whileadd.i
 
 lines:
 	wc -l $(SOURCES)

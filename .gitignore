@@ -8,6 +8,7 @@ config.log
 config.status
 stamp-h1
 .deps
+buildaux/Makefile.in
 # Uploading the web page lands a copy here
 index.html
 # Executables produced by standard build
@@ -17,7 +18,7 @@ ick
 oil
 # C source files and includes in the top directory were copied there, ignore
 *.[chyl]
-# So were any copies of the INTERCAL libraries and buld cruft we might find here
+# So were any copies of the INTERCAL libs and build cruft we might find here
 syslib.i
 syslib3.3i
 syslib4.4i
@@ -71,6 +72,7 @@ pit/sample
 pit/sort
 pit/tests/ais1
 pit/tests/ais2
+pit/tests/compucome
 pit/tests/count
 pit/tests/hello
 pit/tests/ignorret
