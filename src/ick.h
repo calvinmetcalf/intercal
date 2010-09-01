@@ -41,8 +41,8 @@ typedef int ick_bool;
 #define MAXTYPES	32
 
 /* AIS: Maximum supported spark/ears nesting, divided by 32. The value given
-   allows for 256 nested spark/ears groupings, which should be enough. */
-#define SENESTMAX       8
+   allows for 3200 nested spark/ears groupings, which should be enough. */
+#define SENESTMAX       100
 
 enum onceagain {onceagain_NORMAL, onceagain_ONCE, onceagain_AGAIN}; /* AIS */
 
