@@ -136,27 +136,17 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
 # root of the /build tree/, which makes a lot more sense than putting
-# them in the root of the source tree.
+# them in the root of the source tree. Also, make sure not to
+# distribute executables lying around in the pit from previous tests.
 dist-hook:
 	$(MKDIR_P) $(distdir)/prebuilt
 	mv $(distdir)/parser.c $(distdir)/prebuilt
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
+	@find $(distdir)/pit -perm -u+x -type f -and -not -name regresscheck | xargs rm
 	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
-
-# Update the prebuilt directory in the original source from the built
-# versions; this is for the repository version of C-INTERCAL, so it's
-# up to date the same way that distributed versions are.
-repoupdate: parser.c parser.h lexer.c oil-oil.c $(srcdir)/MANIFEST
-	cp parser.c $(srcdir)/prebuilt/parser.c
-	cp parser.h $(srcdir)/prebuilt/parser.h
-	cp lexer.c $(srcdir)/prebuilt/lexer.c
-	cp oil-oil.c $(srcdir)/prebuilt/oil-oil.c
-$(srcdir)/MANIFEST: distdir
-	cp $(distdir)/MANIFEST $(srcdir)/MANIFEST
-	$(am__remove_distdir)
 
 # N.B. the parser.y, lexer.l, syslib, headers and skeletons are the
 # links made to simplify the build, not the originals
@@ -172,13 +162,33 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
 # about.)
 DISTCLEANFILES = parser.c parser.h lexer.c oil-oil.c host.mak bconfig.h config.status.build
 
+# A veryclean is a distclean that removes /all/ generated files,
+# even the ones that are part of the distributed system
+veryclean: distclean
+	rm -f $(top_srcdir)/buildaux/buildconfig
+	rm -f $(top_srcdir)/buildaux/depcomp
+	rm -f $(top_srcdir)/buildaux/install-sh
+	rm -f $(top_srcdir)/buildaux/missing
+	rm -f $(top_srcdir)/buildaux/ylwrap 
+	rm -f $(top_srcdir)/buildaux/Makefile.in
+	rm -f $(top_srcdir)/aclocal.m4
+	rm -f $(top_srcdir)/configure
+	rm -f $(top_srcdir)/src/bconfigh.in
+	rm -f $(top_srcdir)/src/configh.in
+	rm -rf $(top_srcdir)/autom4te.cache
+	rm -rf $(top_srcdir)/buildaux/autom4te.cache
+
 # Clean the pit test binaries on toplevel make clean
 clean-local:
 	if [ -d pit ]; then cd pit; make clean; fi
 
 # Make self-tests available in the standard way
-check-am:
-	cd pit; make test
+# The pit has to be writable for the tests to work, unfortunately...
+check-am: ick$(EXEEXT)
+	chmod u+w $(top_srcdir)/pit
+	chmod u+w $(top_srcdir)/pit/lib
+	chmod u+w $(top_srcdir)/pit/tests
+	make -f $(top_srcdir)/pit/Makefile ICK="./ick$(EXEEXT) -b" PIT=$(top_srcdir)/pit test
 
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
