@@ -197,6 +197,9 @@ check-am: ick$(EXEEXT)
 doc/ick.txt: doc/ick.txi
 	cd $(top_srcdir)/doc && make ick.txt
 
+echo-version:
+	@echo @PACKAGE_VERSION@
+
 # The build system itself is included in the makefile; tell Automake
 # about my tweaking.
 $(top_srcdir)/configure:  $(am__configure_deps)

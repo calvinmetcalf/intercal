@@ -76,8 +76,8 @@ INCLUDE_HIDDEN_FROM_AUTOMAKE="include"
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(INCLUDE_HIDDEN_FROM_AUTOMAKE)
 
-AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in host.mak:buildaux/hostmak.in])
-AC_OUTPUT
+AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in host.mak:buildaux/hostmak.in website/index.html])
+AC_OUTPUT(,[chmod a-w website/index.html])
 # After the output, chmod coopt.sh to be executable.
 chmod a+x coopt.sh
 
