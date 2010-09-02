@@ -3044,10 +3044,10 @@ Character	Name	Use (if any)
 V	V (or book)	unary logical OR
 \*(vb	bookworm (or universal qualifier)	unary exclusive OR
 $	big money 	\fIbinary mingle (ASCII)\fR
-\(ct	change  	binary mingle
+\*(ct	change  	binary mingle
 ~	sqiggle  	binary select
 \&_	flat worm
-\(rn	overline	indicates "times 1000"
+\*(ov	overline	indicates "times 1000"
 +	intersection	separates list items
 /	slat
 \e	backslat
@@ -3064,7 +3064,7 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 \(sc	swash
 \(*m	microscope
 \(+-	interworm
-\(no	half turn
+\*(no	half turn
 \(Po	quid	binary mingle
 \(Cs	zlotnik	binary mingle
 \}
@@ -3103,10 +3103,10 @@ Character	Name	Use (if any)
 V	V (or book)	unary logical OR
 \*(vb	bookworm (universal qualifier)	unary logical XOR (INTERCAL-72)
 $	big money 	binary mingle
-\(ct	change  	binary mingle (INTERCAL-72)
+\*(ct	change  	binary mingle (INTERCAL-72)
 ~	sqiggle  	binary select
 \&_	flat worm
-\(rn	overline	indicates "times 1000"
+\*(ov	overline	indicates "times 1000"
 +	intersection	separates list items
 /	slat
 \e	backslat
@@ -3123,7 +3123,7 @@ $	big money 	binary mingle
 \(sc	swash
 \(*m	microscope
 \(+-	interworm
-\(no	half turn
+\*(no	half turn
 \(Po	quid	binary mingle
 \(Cs	zlotnik	binary mingle
 \}
