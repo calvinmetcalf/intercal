@@ -74,8 +74,8 @@ oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
 	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c $(LIBS_FOR_BUILD)
 bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
 	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS_FOR_BUILD)
-oil:
-bin2c:
+oil$(EXEEXT):
+bin2c$(EXEEXT):
 
 # Optional libraries are in lib_LIBRARIES, but with a null build rule.
 lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a libick_ecto_b98.a
@@ -199,8 +199,6 @@ doc/ick.txt: doc/ick.txi
 
 # The build system itself is included in the makefile; tell Automake
 # about my tweaking.
-$(top_srcdir)/configure:  $(am__configure_deps)
-	cd $(top_srcdir) && $(AUTOCONF)
 $(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/src/bconfigh.in
 	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
 	chmod a+x $(top_srcdir)/buildaux/buildconfig

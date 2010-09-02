@@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([src/abcess.h])
 AC_CONFIG_HEADER([config.h:src/configh.in])
 AC_CONFIG_AUX_DIR([buildaux])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-lzma tar-pax check-news
-		  no-texinfo.tex])
+		  no-texinfo.tex -Wall -Wno-override])
 
 dnl Information about this version of INTERCAL.
 PACKAGE_VERSION=0.29
