@@ -3044,10 +3044,10 @@ Character	Name	Use (if any)
 V	V (or book)	unary logical OR
 \*(vb	bookworm (or universal qualifier)	unary exclusive OR
 $	big money 	\fIbinary mingle (ASCII)\fR
-\*(ct	change  	binary mingle
+\(ct	change  	binary mingle
 ~	sqiggle  	binary select
 \&_	flat worm
-\*(ov	overline	indicates "times 1000"
+\(rn	overline	indicates "times 1000"
 +	intersection	separates list items
 /	slat
 \e	backslat
@@ -3056,15 +3056,15 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 ^	shark (or simply sharkfin)
 \o"#*\(sq"	blotch
 .if '\*c'y' \{\
-\*(de	bunghole
-\*(rg	name grabber
-\*(mu	andrew cross
-\*(di	norwegian minus
-\*(co	text grabber
-\*(sc	swash
-\*(*m	microscope
-\*(+-	interworm
-\*(no	half turn
+\(de	bunghole
+\(rg	name grabber
+\(mu	andrew cross
+\(di	norwegian minus
+\(co	text grabber
+\(sc	swash
+\(*m	microscope
+\(+-	interworm
+\(no	half turn
 0xA3	quid	binary mingle
 0xA4	zlotnik	binary mingle
 \}
@@ -3103,27 +3103,27 @@ Character	Name	Use (if any)
 V	V (or book)	unary logical OR
 \*(vb	bookworm (universal qualifier)	unary logical XOR (INTERCAL-72)
 $	big money 	binary mingle
-\*(ct	change  	binary mingle (INTERCAL-72)
+\*ct	change  	binary mingle (INTERCAL-72)
 ~	sqiggle  	binary select
 \&_	flat worm
-\*(ov	overline	indicates "times 1000"
+\(rn	overline	indicates "times 1000"
 +	intersection	separates list items
 /	slat
 \e	backslat
 @	whirlpool	unary logical BUT (TriINTERCAL)
-\*(no	hookworm
+\(no	hookworm
 ^	shark (or simply sharkfin)	unary logical XOR (TriINTERCAL)
 \o"#*\(sq"	blotch
 .if '\*c'y' \{\
-\*(de	bunghole
-\*(rg	name grabber
-\*(mu	andrew cross
-\*(di	norwegian minus
-\*(co	text grabber
-\*(sc	swash
-\*(*m	microscope
-\*(+-	interworm
-\*(no	half turn
+\(de	bunghole
+\(rg	name grabber
+\(mu	andrew cross
+\(di	norwegian minus
+\(co	text grabber
+\(sc	swash
+\(*m	microscope
+\(+-	interworm
+\(no	half turn
 0xA3	quid	binary mingle
 0xA4	zlotnik	binary mingle
 \}
