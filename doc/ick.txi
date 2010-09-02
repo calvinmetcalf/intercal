@@ -1247,14 +1247,15 @@ Various environment variables can be set to affect the operation of
 
 @multitable @columnfractions .3 .7
 @headitem Variable @tab Meaning
-@item ICKINCLUDEDIR@*ICKLIBDIR@*ICKDATADIR
+@item ICKINCLUDEDIR@*ICKLIBDIR@*ICKSYSDIR@*ICKCSKELDIR
 @tab
-These three environment variables suggest locations in which
+These four environment variables suggest locations in which
 @command{ick} should look to find various files that it needs: the
 skeleton file, system library, C header files and libraries that it
 needs, constant-output optimiser, and the GNU General Public License
 (which the debugger needs to be able to display on demand for legal
 reasons).
+@c Note: ICKSYDIR and ICKCSKELDIR used to be one variable, ICKDATADIR.
 @item CC
 @tab
 The name of a C compiler to use (defaults to gcc, which is the only
