@@ -50,8 +50,9 @@ original.txt: intercal.mm
 	GROFF_NO_SGR=1 groff -dc=n -Tascii -p -t -mm intercal.mm >original.txt
 	-rm intercal.refs.qrf
 
+# Don't delete *.txt here - not while we have asciidoc text masters, anyway
 clean:
-	rm -f *.ps *.txt *.refs* ick.in* ick.txt ick.htm ick.pdf
+	rm -f *.ps *.refs* ick.in* ick.txt ick.htm ick.pdf
 	rm -rf html
 
 ick.inf: ick.txi fdl-1-2.txi
