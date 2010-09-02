@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #
 # NAME
 #     interfuzz.pl -- C-INTERCAL optimiser fuzz-tester
@@ -26,8 +27,8 @@ use File::Temp qw/tempdir/;
 use File::Spec;
 
 use constant fuzzamount => 1000;
-use constant ickpath => '../build/ick';
-use constant idiompath => '../src/idiotism.oil';
+use constant ickpath => $ENV{ICK} || '../build/ick';
+use constant idiompath => $ENV{IDIOTISM} || '../src/idiotism.oil';
 
 # Before getting to the main program, we need to read in idiom LHSes.
 print STDERR "Loading idioms...\n";

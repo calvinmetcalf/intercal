@@ -44,22 +44,30 @@ LICENSE TERMS
 
 /* AIS: split ICKDATADIR from ICKLIBDIR */
 #ifndef ICKINCLUDEDIR
-#define ICKINCLUDEDIR "/usr/local/include"
+# define ICKINCLUDEDIR "/usr/local/include"
 #endif
 #ifndef ICKSYSDIR
-#define ICKSYSDIR "/usr/local/share"
+# ifdef ICKDATADIR
+#  define ICKSYSDIR ICKDATADIR
+# else
+#  define ICKSYSDIR "/usr/local/share"
+# endif
 #endif
 #ifndef ICKCSKELDIR
-#define ICKCSKELDIR "/usr/local/share"
+# ifdef ICKDATADIR
+#  define ICKCSKELDIR ICKDATADIR
+# else
+#  define ICKCSKELDIR "/usr/local/share"
+# endif
 #endif
 #ifndef ICKLIBDIR
-#define ICKLIBDIR "/usr/local/lib"
+# define ICKLIBDIR "/usr/local/lib"
 #endif
 #ifndef ICKBINDIR
-#define ICKBINDIR "/usr/local/bin"
+# define ICKBINDIR "/usr/local/bin"
 #endif
 #ifndef CC
-#define CC "gcc"
+# define CC "gcc"
 #endif
 
 #define ARGSTRING "abcdefghlmoptuvwxyCEFHOPUYX@"
@@ -1786,7 +1794,7 @@ int main(int argc, char *argv[])
   if (!(ick_sysdir = getenv("ICKSYSDIR")))
     ick_sysdir = ICKSYSDIR;
   if (!(ick_cskeldir = getenv("ICKCSKELDIR")))
-    ick_sysdir = ICKCSKELDIR;
+    ick_cskeldir = ICKCSKELDIR;
 /*
   AIS: nothing actually uses this at the moment,
   commenting it out for future use
