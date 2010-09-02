@@ -231,13 +231,16 @@ optimization: template '-' '>' replacement
      substituting one for the other. (This is an inefficient but general way
      to do this.) One special case is needed; because pointers into the root
      node need to continue pointing there, the temporary node tp is copied
-     member-for-member and then freed again. To make coding optimizations
-     easier, the root stays as the same width no matter what. */
+     member-for-member and then freed again. The root width can change (this
+     is a deviation from previous code), in order to prevent a bug where the
+     new root happens to be a unary. (This means we can get a 16-bit unary
+     applied to 32-bit data; but the optimiser is meant to ensure that this is
+     not problematic.) */
   printf("    tp=newnode();\n");
   treerepcount($4,replcount);
   treerepgen($4,tempmem,replcount);
   printf("    nodefree(np->lval); nodefree(np->rval);\n");
-  printf("    tempw=np->width; *np=*tp; np->width=tempw; free(tp);\n");
+  printf("    *np=*tp; free(tp);\n");
   printf("  } while(0);\n\n");
   /* Free the template and replacement now they're finished being used. */
   treefree($1);
