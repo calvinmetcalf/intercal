@@ -29,7 +29,7 @@ convickt
 ick
 oil
 # C source files and includes in the top directory were copied there, ignore
-*.[chyl]
+/*.[chyl]
 # So were any copies of the INTERCAL libs and build cruft we might find here
 syslib.i
 syslib3.3i
