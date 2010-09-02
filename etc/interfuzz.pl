@@ -291,8 +291,9 @@ system $compilecommand;
 print STDERR "Running optimised program...\n";
 my $optimised_output = `$fn`;
 
+# -g suppresses optimisation
 print STDERR "Compiling program unoptimised...\n";
-system "$ickpath -b $fn.i";
+system "$ickpath -bg $fn.i";
 
 print STDERR "Running unoptimised program...\n";
 my $unoptimised_output = `$fn`;

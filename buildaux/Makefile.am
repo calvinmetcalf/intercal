@@ -192,6 +192,13 @@ check-am: ick$(EXEEXT)
 	chmod u+w $(top_srcdir)/pit/tests
 	make -f $(top_srcdir)/pit/Makefile ICK="./ick$(EXEEXT) -b" PIT=$(top_srcdir)/pit test
 
+# Run the fuzztest
+fuzz: ick$(EXEEXT) src/idiotism.oil $(top_srcdir)/etc/interfuzz.pl
+	ICK="./ick$(EXEEXT)" IDIOTISM="$(top_srcdir)/src/idiotism.oil" perl $(top_srcdir)/etc/interfuzz.pl
+
+# Run regression tests, fuzz tests and build tests
+test: fuzz distcheck
+
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
 doc/ick.txt: doc/ick.txi
