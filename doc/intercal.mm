@@ -3065,8 +3065,8 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 \(*m	microscope
 \(+-	interworm
 \(no	half turn
-0xA3	quid	binary mingle
-0xA4	zlotnik	binary mingle
+\[Po]	quid	binary mingle
+\[Cs]	zlotnik	binary mingle
 \}
 .TE \}
 .el \{\
@@ -3103,7 +3103,7 @@ Character	Name	Use (if any)
 V	V (or book)	unary logical OR
 \*(vb	bookworm (universal qualifier)	unary logical XOR (INTERCAL-72)
 $	big money 	binary mingle
-\*ct	change  	binary mingle (INTERCAL-72)
+\(ct	change  	binary mingle (INTERCAL-72)
 ~	sqiggle  	binary select
 \&_	flat worm
 \(rn	overline	indicates "times 1000"
@@ -3124,8 +3124,8 @@ $	big money 	binary mingle
 \(*m	microscope
 \(+-	interworm
 \(no	half turn
-0xA3	quid	binary mingle
-0xA4	zlotnik	binary mingle
+\[Po]	quid	binary mingle
+\[Cs]	zlotnik	binary mingle
 \}
 .TE \}
 .ce 1
