@@ -18,11 +18,6 @@ buildaux/missing
 buildaux/ylwrap
 src/bconfigh.in
 src/configh.in
-# Uploading the web page lands a copy here
-index.html
-README.html
-NEWS.html
-BUGS.html
 # Executables produced by standard build
 bin2c
 convickt

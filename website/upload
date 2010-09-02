@@ -1,0 +1,29 @@
+#!/bin/sh 
+#
+# Upload C-INTERCAL website contents.
+# Please do not introduce bashims into this script.
+#
+webdir=login.ibiblio.org:/public/html/catb/esr/intercal
+
+# Ensure all derived HTML and checksums are up to date.
+make
+
+if [ $1 ]
+then
+    for f in $*; do scp $f $webdir/$f; done
+else
+    eligible=`ls *.html *.png`
+    if [ -e .upload-stamp ]
+    then
+	eligible=`find $eligible -newer .upload-stamp`
+    fi
+    if [ -z "$eligible" ]
+    then
+        echo "Website is up to date."
+    else
+        scp $eligible $webdir && touch .upload-stamp
+    fi
+fi
+
+# End
+
