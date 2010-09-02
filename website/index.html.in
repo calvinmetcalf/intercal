@@ -178,8 +178,12 @@ INTERCAL is better than Perl</a>.
 <a href="http://www.computerworld.com.au/index.php/id;528456667;pp;1">interview
 Don Woods</a> on INTERCAL.  The results are both funny and informative.</p> 
 
-<p>In 2010, ESR reconstructed the history of INTERCAL.  The tale is told in
-<a href="http://esr.ibiblio.org/?p=2491">Risk, Verification, and the INTERCAL Reconstruction Massacree</a>.</p>
+<p>In 2010, ESR recovered most of the history of INTERCAL.  The tale
+is told in <a href="http://esr.ibiblio.org/?p=2491">Risk,
+Verification, and the INTERCAL Reconstruction Massacree</a>. If you
+are in possession of shars or release tarballs for 0.4 or 0.6-0.11 or
+0.14, please ship copies to the maintainers so we can fill in the
+gaps. </p>
 
 <h1>Other Interesting Languages</h1>
 <ul>
@@ -187,11 +191,8 @@ Don Woods</a> on INTERCAL.  The results are both funny and informative.</p>
 Computer Programming in multiple Directions, Dimensions, and
 Topologies.</li>
 
-<li><a href="http://www.muppetlabs.com/~breadbox/bf/">BrainF***</a>
-&mdash; An 8-instruction Turing-complete computer language.</li>
-
 <li><a
-href="http://www.mines.edu/students/b/bolmstea/malbolge/index.html">
+href="http://www.lscheffer.com/malbolge.shtml">
 Malebolge</a> &mdash; Programming from Hell.</li>
 
 <li><a
