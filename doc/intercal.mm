@@ -3009,11 +3009,16 @@ This footnote intentionally unreferenced.
 .bp
 .\".nr * \n*-1
 .\".ps \n[@ps]
+.\"
+.\" Note: In the original manual, the headers on the character-set table 
+.\" were more or less centered. This should be achievable with a "c c c"
+.\" format line, but for some reason the attempt desperately confuses
+.\" groff in 2010.
+.\"
 .ie '\*c'n' \{\
 .\" CORRECTION: "exclusive or" was typoed as "exlusive or"
 .TS
 box;
-c c c
 l l l.
 Character	Name	Use (if any)
 \&.	spot	identify 16-bit variable
@@ -3072,7 +3077,6 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 .el \{\
 .TS
 box;
-c c c
 l l l.
 Character	Name	Use (if any)
 \&.	spot	identify 16-bit variable
