@@ -2986,7 +2986,10 @@ The Official INTERCAL Character Set
 Since all other reference manuals have Appendices, it was decided that
 the INTERCAL manual should contain some other type of removable organ.
 .FE
-.ps \n[@ps]
+.\" I don't remember what this font change did in 1990, 
+.\" but in 2010 it gave groff terrible fits and had to be removed.
+.\" Ditto for the second instance of @ps a few lines down.
+.\".ps \n[@ps]
 .\".nr * \n*+1
 .P
 .\" CORRECTION:
@@ -3005,7 +3008,7 @@ This footnote intentionally unreferenced.
 .ds CH - % -
 .bp
 .\".nr * \n*-1
-.ps \n[@ps]
+.\".ps \n[@ps]
 .ie '\*c'n' \{\
 .\" CORRECTION: "exclusive or" was typoed as "exlusive or"
 .TS
