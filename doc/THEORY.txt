@@ -1,5 +1,6 @@
 = INTERCAL IMPLEMENTOR'S NOTES =
-by ESR and AIS
+Eric S, Raymond <esr@thyrsus.com>
+Alex Smith <ais523@bham.ac.uk>
 
 The C-INTERCAL compiler has a very conventional implementation using YACC and
 LEX (latterly, bison and flex).  It generates C, which is then passed to your C
