@@ -65,6 +65,7 @@
 (#{1}1 << #{1}2)->(#{x1 << x2}0)
 (#{1}1 == #{1}2)->(#{x1 == x2}0)
 (#{1}1 != #{1}2)->(#{x1 != x2}0)
+(! #{1}1)->(#{!x1}0)
 
 ; Reducing constants inside a C or operation can help to recognize idioms
 [cfoldintoorinand]
@@ -202,6 +203,7 @@
 [selectmingle4]
 (_1$(_2~#2863311530))->(((_2&#2863311530)>>#1)|(_1$#0))
 [selectmingle5]
+;3579139412=0xd5555554
 ((_{!(c&4294901760UL)}1$_{!(c&4294901760UL)}2)~#3579139412)
 ->((_1&#32768)|(_2>>#1))
 
@@ -520,8 +522,7 @@
 ; optimizes through distributions over C_OR and then constant folding
 
 ; When a 0 is on one side of a C binary logic operation, or the two sides are
-; the same, simplification is often possible. The and-0 case has been dealt
-; with already.
+; the same, simplification is often possible.
 [noopor]
 (_1|#0)->(_1)
 (#0|_1)->(_1)
@@ -530,6 +531,9 @@
 (#0^_1)->(_1)
 [anditself]
 (_1&_1)->(_1)
+[and0]
+(_1&#0)->(#0)
+(#0&_1)->(#0)
 [oritself]
 (_1|_1)->(_1)
 [xoritself]
