@@ -2,13 +2,22 @@
 *.a
 *~
 Makefile
+aclocal.m4
 autom4te.cache/
 config.h
 config.log
 config.status
+configure
 stamp-h1
 .deps
 buildaux/Makefile.in
+buildaux/buildconfig
+buildaux/depcomp
+buildaux/install-sh
+buildaux/missing
+buildaux/ylwrap
+src/bconfigh.in
+src/configh.in
 # Uploading the web page lands a copy here
 index.html
 README.html
