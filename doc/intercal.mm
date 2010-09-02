@@ -3021,6 +3021,7 @@ This footnote intentionally unreferenced.
 box;
 l l l.
 Character	Name	Use (if any)
+=
 \&.	spot	identify 16-bit variable
 :	two-spot	identify 32-bit variable
 ,	tail	identify 16-bit array
@@ -3079,6 +3080,7 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 box;
 l l l.
 Character	Name	Use (if any)
+=
 \&.	spot	identify 16-bit variable
 :	two-spot	identify 32-bit variable
 ,	tail	identify 16-bit array
