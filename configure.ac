@@ -5,7 +5,7 @@ dnl Yes, that is a valid email address. If your mailer doesn't support nested
 dnl comments, then get a better mailer.
 AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[ick])
 AC_CONFIG_SRCDIR([src/abcess.h])
-AC_CONFIG_HEADER([config.h:src/configh.in])
+AC_CONFIG_HEADER([config.h:buildaux/configh.in])
 AC_CONFIG_AUX_DIR([buildaux])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-lzma tar-pax check-news
 		  no-texinfo.tex -Wall -Wno-override])

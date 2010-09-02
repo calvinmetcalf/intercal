@@ -133,7 +133,7 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              lexer.c doc/ick.txi doc/ick.txt doc/chipspec.txt NEWS README \
              buildaux/buildconfig buildaux/buildconfig.ac \
              buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
-             buildaux/missing buildaux/ylwrap src/bconfigh.in
+             buildaux/missing buildaux/ylwrap buildaux/bconfigh.in
 
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
@@ -150,13 +150,13 @@ dist-hook:
 	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
 
-# N.B. the parser.y, lexer.l, syslib, headers and skeletons are the
+# N.B. the parser.y, lexer.l, libraries, headers and skeletons are the
 # links made to simplify the build, not the originals
 CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
              syslib.i syslib3.3i syslib4.4i syslib5.5i \
              syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
-             ick_lose.h yuk.h
+             ick_lose.h yuk.h floatlib.i ick_bool.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
 # versions of the prebuilt files. (The source tree versions will
@@ -173,10 +173,10 @@ veryclean: distclean
 	rm -f $(top_srcdir)/buildaux/missing
 	rm -f $(top_srcdir)/buildaux/ylwrap 
 	rm -f $(top_srcdir)/buildaux/Makefile.in
+	rm -f $(top_srcdir)/buildaux/bconfigh.in
+	rm -f $(top_srcdir)/buildaux/configh.in
 	rm -f $(top_srcdir)/aclocal.m4
 	rm -f $(top_srcdir)/configure
-	rm -f $(top_srcdir)/src/bconfigh.in
-	rm -f $(top_srcdir)/src/configh.in
 	rm -rf $(top_srcdir)/autom4te.cache
 	rm -rf $(top_srcdir)/buildaux/autom4te.cache
 
@@ -206,11 +206,11 @@ doc/ick.txt: doc/ick.txi
 
 # The build system itself is included in the makefile; tell Automake
 # about my tweaking.
-$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/src/bconfigh.in
+$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/buildaux/bconfigh.in
 	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
 	chmod a+x $(top_srcdir)/buildaux/buildconfig
-$(top_srcdir)/src/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
+$(top_srcdir)/buildaux/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
 	cd $(top_srcdir)/buildaux && $(AUTOHEADER) buildconfig.ac
 	rm -f stamp-h1
 	touch $@
-CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/src/bconfigh.in
+CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/buildaux/bconfigh.in
