@@ -3052,7 +3052,7 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 /	slat
 \e	backslat
 @	whirlpool
-\*(no	hookworm
+\(no	hookworm
 ^	shark (or simply sharkfin)
 \o"#*\(sq"	blotch
 .if '\*c'y' \{\
@@ -3065,8 +3065,8 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 \(*m	microscope
 \(+-	interworm
 \(no	half turn
-\[Po]	quid	binary mingle
-\[Cs]	zlotnik	binary mingle
+\(Po	quid	binary mingle
+\(Cs	zlotnik	binary mingle
 \}
 .TE \}
 .el \{\
@@ -3124,8 +3124,8 @@ $	big money 	binary mingle
 \(*m	microscope
 \(+-	interworm
 \(no	half turn
-\[Po]	quid	binary mingle
-\[Cs]	zlotnik	binary mingle
+\(Po	quid	binary mingle
+\(Cs	zlotnik	binary mingle
 \}
 .TE \}
 .ce 1
