@@ -1,8 +1,8 @@
-			NEW IN THIS RELEASE
+= New In This Release =
 
-  Release 0.29 (by Alex Smith)
+== Release 0.29 (by Alex Smith) ==
 
-Changes by Eric S. Raymond
+=== Changes by Eric S. Raymond ===
 
 1. There is now a compiler regression-test suite, invoked through the test 
    production in the pit makefile
@@ -17,7 +17,10 @@ Changes by Eric S. Raymond
    rather declared as an array of associations that can be easily
    modified.
 
-Bugs reported and changes patched by Arvid Norlander
+5. README, NEWS, and BUGS are now mastered in asciidoc fo easier
+   web-page generation.
+
+=== Bugs reported and changes patched by Arvid Norlander ===
 
 1.  Fixed a typo in the perpet.c version of the help information.
 
@@ -43,7 +46,7 @@ Bugs reported and changes patched by Arvid Norlander
 
 7.  Refactored main(). It needed it, badly.
 
-Bugs reported by Elliott Hird
+=== Bugs reported by Elliott Hird ===
 
 8.  Fixed the configure script to work with the default Debian shell dash.
     (also reported independently by Debian)
@@ -61,7 +64,7 @@ Bugs reported by Elliott Hird
     the prebuilt versions; see change 11 of version 0.26, this is finishing
     what that started.)
 
-Bugs reported, changes requested, and patches by Joris Huizer
+=== Bugs reported, changes requested, and patches by Joris Huizer ===
 
 12. The [xoritself] optimiser idiom has been generalised to handle some
     situations where the redundant XOR operands are on different grouping
@@ -85,16 +88,16 @@ Bugs reported, changes requested, and patches by Joris Huizer
     algorithm in the patch Joris provided, but with different code, to make it
     easier to maintain.)
 
-Changes by Stefan O'Rear
+=== Changes by Stefan O'Rear ===
 
 17. Added INTERCAL syntax highlighting information for vim. Why should Emacs
     have all the fun?
 
-Changes reported by Phantom Hoover
+=== Changes reported by Phantom Hoover ===
 
 18. Fixed a nasty documentation typo.
 
-Changes reported by the Debian autobuilders and Joey Hess
+=== Changes reported by the Debian autobuilders and Joey Hess ===
 
 19. The build of the optimiser idioms is now split over many files, to reduce
     the memory usage of gcc when it tries to compile the giant output C file.
@@ -102,7 +105,7 @@ Changes reported by the Debian autobuilders and Joey Hess
     been removed, as this method works better; likewise, the optimiser
     optimisation now works again.)
 
-Changes by Alex Smith
+=== Changes by Alex Smith ===
 
 20. The build system has been completely redone, again; it now uses automake
     as well as a much newer version of autoconf. This means that there is now
@@ -184,9 +187,9 @@ Changes by Alex Smith
 
 33. Fixed some bugs in the go-away command in interfunge.i.
 
-  Release 0.28 (by Alex Smith) 1 Apr 2008
+== Release 0.28 (by Alex Smith) 1 Apr 2008 ==
 
-Patches, suggestions and bugs found by Joris Huizer
+=== Patches, suggestions and bugs found by Joris Huizer ===
 
 1.  Fixed a typo in the [noopxor] optimiser idiom.
 
@@ -208,7 +211,7 @@ Patches, suggestions and bugs found by Joris Huizer
 7.  The flow optimiser now recognises that comments can be reinstated in
     programs where they can be reinstated.
 
-Changes by Alex Smith
+=== Changes by Alex Smith ===
 
 8.  Fixed some typos in the documentation.
 
@@ -327,7 +330,7 @@ Changes by Alex Smith
 23. Fixed a bug with the ON THE WAY TO line number displayed when COME FROMs
     are involved that I accidentally introduced in 0.25.
 
-Changes from elsewhere
+=== Changes from elsewhere ===
 
 24. Added yet another nontrivial INTERCAL program to the pit; interfunge.i
     (written by Jeffrey Lee) is a Befunge-93 interpreter written in INTERCAL.
@@ -340,7 +343,7 @@ Changes from elsewhere
     most Befunge-93 interpreters don't enforce it), and numeric output is in
     Roman numerals (what did you expect?).)
 
-  Release 0.27 (by Alex Smith) 22 Dec 2007
+== Release 0.27 (by Alex Smith) 22 Dec 2007 ==
 
 1.  Joris Huizer pointed out that the manual nowhere says that a GIVE UP line
     can't be abstained from by line number. This was probably a mistake in the
@@ -523,7 +526,7 @@ Changes from elsewhere
     (it was getting a little bored stuck at 0). The next major release will be
     version 0.27.
 
-  Release 0.26 (by Alex Smith)  1 Apr 2007
+== Release 0.26 (by Alex Smith)  1 Apr 2007 ==
 
 1.  Fixed a few bugs in the previous release (some bugfixed by Joris Huizer).
 
@@ -619,7 +622,7 @@ Changes from elsewhere
 
 24. Fixed a bug where the yuk debugger accessed unallocated memory.
 
-  Release 0.25 (by Alex Smith)  21 Jun 2006
+== Release 0.25 (by Alex Smith)  21 Jun 2006 ==
 
 1. Added support for computed ABSTAIN and TRY AGAIN.
 
@@ -628,62 +631,66 @@ Changes from elsewhere
 3. Added support for multithread programs. This includes ONCE and AGAIN,
 which also work in singlethread programs.
 
-4. Expanded intercal.el to support Font Lock and some utilities for generating
-INTERCAL-style constants. It also works with the compilation routines of Emacs
-to compile INTERCAL programs without the need for make. Degenerated C code now
-has a mode line to help with Emacs compatibility.
+4. Expanded intercal.el to support Font Lock and some utilities for
+   generating INTERCAL-style constants. It also works with the
+   compilation routines of Emacs to compile INTERCAL programs without
+   the need for make. Degenerated C code now has a mode line to help
+   with Emacs compatibility.
 
 5. Added a rudimentary debugger and profiler for singlethread programs. The
-debugger's features include useful things like 'write out INTERCAL expression
-in simpler terms' (which is only possible if -O is on). The profiler works
-much like gcov, counting the length of time spent in and number of executions
-of each command in the code.
+   debugger's features include useful things like 'write out INTERCAL expression
+   in simpler terms' (which is only possible if -O is on). The profiler works
+   much like gcov, counting the length of time spent in and number of executions
+   of each command in the code.
 
-6. Changed searching for includes, libraries, syslib, skeleton. This is so that
-non-root users, or people who want to evaluate ick, can do so more simply. The
-compiler will search for the above files in the directory they should have been
-installed in, the current directory, and the directory in which ick's
-executable resides (in that order). Skeleton problems, in particular, seem to
-have been a major problem for unfamiliar users trying out ick.
+6. Changed searching for includes, libraries, syslib, skeleton. This
+   is so that non-root users, or people who want to evaluate ick, can
+   do so more simply. The compiler will search for the above files in
+   the directory they should have been installed in, the current
+   directory, and the directory in which ick's executable resides (in
+   that order). Skeleton problems, in particular, seem to have been a
+   major problem for unfamiliar users trying out ick.
 
 7. Added several new test programs to the Pit.
 
-8. Greatly expanded the original optimizer (which optimizes expressions). It
-can now recognize most of the idioms in syslib, and many idioms in other Pit
-programs. Also added a new optimizer, to try to optimize program flow, which is
-important because otherwise INTERCAL wouldn't have any rudimentary optimizers.
-There is also the -F optimizer, which I hope will become infamous. It creates
-object code which is close to maximally fast in some specialized situations, at
-the expense of compile time (compilation can take a very long time when -F is
-active) and object file size. I suggest checking its effect on primes.i.
+8. Greatly expanded the original optimizer (which optimizes
+   expressions). It can now recognize most of the idioms in syslib,
+   and many idioms in other Pit programs. Also added a new optimizer,
+   to try to optimize program flow, which is important because
+   otherwise INTERCAL wouldn't have any rudimentary optimizers.  There
+   is also the -F optimizer, which I hope will become infamous. It
+   creates object code which is close to maximally fast in some
+   specialized situations, at the expense of compile time (compilation
+   can take a very long time when -F is active) and object file
+   size. I suggest checking its effect on primes.i.
 
 9. Fixed the grammar (again) in a spark/ears situation involving array
-subscripts, after proving that the previous fixes weren't adequate.
+   subscripts, after proving that the previous fixes weren't adequate.
 
-10. Added support for backtracking (MAYBE, GO AHEAD, GO BACK). Note that it is
-possible for multithreading, backtracking, computed ABSTAIN, and computed COME
-FROM to all be used simultaneously in the same program, to help maximize
-obfuscation.
+10. Added support for backtracking (MAYBE, GO AHEAD, GO BACK). Note
+    that it is possible for multithreading, backtracking, computed
+    ABSTAIN, and computed COME FROM to all be used simultaneously in
+    the same program, to help maximize obfuscation.
 
-11. Added an option (-l) for generating warnings. To prevent this actually
-being useful, it is designed to generate far too many warnings, which all have
-to be trawled through to find the important ones, and has no way to turn the
-unimportant ones off.
+11. Added an option (-l) for generating warnings. To prevent this
+    actually being useful, it is designed to generate far too many
+    warnings, which all have to be trawled through to find the
+    important ones, and has no way to turn the unimportant ones off.
 
 12. Added the +printflow and +mystery options for executing INTERCAL programs.
-Note that it is not entirely obvious what either of them do (+printflow is a
-debugging aid, but the output is somewhat obfuscated, and I am not going to
-explain what +mystery does in this document).
+    Note that it is not entirely obvious what either of them do (+printflow is a
+    debugging aid, but the output is somewhat obfuscated, and I am not going to
+    explain what +mystery does in this document).
 
-	Release 0.24  (by Eric S. Raymond) 31 Dec 2003
+== Release 0.24  (by Eric S. Raymond) 31 Dec 2003 ==
 
 1. RPMs can now be built by non-root users.
 
-	Release 0.23  (by Eric S. Raymond) 9 Mar 2003
+== Release 0.23  (by Eric S. Raymond) 9 Mar 2003 ==
 
 1. More fixes by Don Knuth.  He found a bug in the type-propagation logic.
 
-	Release 0.22  (by Eric S. Raymond) 4 Mar 2003
+== Release 0.22  (by Eric S. Raymond) 4 Mar 2003 ==
 
 1. Incorporated a minor fix patch from Donald Knuth.  Yes, *the*
 Donald Knuth.  Seems he found a weakness in the code for handling
@@ -692,63 +699,63 @@ some improvements to intercal.el, and contributed a test program.
 
 2. Updated build machinery.  This package now uses GNU autoconf.
 
-	Release 0.21 (by Eric S. Raymond) 30 July 2002
+== Release 0.21 (by Eric S. Raymond) 30 July 2002 ==
 
 1. Jonathan Nieder sent a grammar fix for BLR's old bug #5 (a bad spark-ears
-interaction.)
+   interaction.)
 
 2. Latin-1 support and makefile fixes from Magnus Bodin.
 
-	Release 0.20 (by Eric S. Raymond) 16 September 1999
+== Release 0.20 (by Eric S. Raymond) 16 September 1999 ==
 
   (The following changes are due to John Cowan <cowan@ccil.org>)
 
-1.  In addition to Latin-1, UTF-8 is now acceptable in source code as well.
-All the numerous currency symbols of Unicode (ISO 10646) can be used as
-big-money alternatives in their UTF-8 format.  Indeed, a random mixture of
-Latin-1 and UTF-8 also works fine; this seems very much in the spirit of
-Intercal.
+1. In addition to Latin-1, UTF-8 is now acceptable in source code as well.
+   All the numerous currency symbols of Unicode (ISO 10646) can be used as
+   big-money alternatives in their UTF-8 format.  Indeed, a random mixture of
+   Latin-1 and UTF-8 also works fine; this seems very much in the spirit of
+   Intercal.
 
-2.  Intercal has now been localized for the Ancient Roman as well as the
-Posix/C locale.  You may input numbers in Latin and write Intercal programs
-using Latin keywords.  See lexer.l for a list of equivalences.
+2. Intercal has now been localized for the Ancient Roman as well as the
+   Posix/C locale.  You may input numbers in Latin and write Intercal programs
+   using Latin keywords.  See lexer.l for a list of equivalences.
 
-3.  The Makefile in the pit directory now works like a real Makefile, and
-won't compile anything that's already been compiled.
+3. The Makefile in the pit directory now works like a real Makefile, and
+   won't compile anything that's already been compiled.
 
-	Release 0.19 (by Eric S. Raymond) 16 August 1998
+== Release 0.19 (by Eric S. Raymond) 16 August 1998 ==
 
 1. Fixed a code-generation error in assignments from tail and hybrid
-variables. (Error pointed out by Malcom Ryan.)
+   variables. (Error pointed out by Malcom Ryan.)
 
-	Release 0.18 (by Eric S. Raymond) 29 April 1998
+== Release 0.18 (by Eric S. Raymond) 29 April 1998 ==
 
 (The following changes are due to John Cowan <cowan@ccil.org>)
 
-1.  The source code is now POSIXly correct.  By making the POSIX
-variable in the Makefile undefined, you can restore the use of
-<varargs.h>, but otherwise <stdarg.h> is now used.
+1. The source code is now POSIXly correct.  By making the POSIX
+   variable in the Makefile undefined, you can restore the use of
+   <varargs.h>, but otherwise <stdarg.h> is now used.
 
-2.  Latin-1 (ISO 8859-1) is now the standard input charset of C-INTERCAL.
-This means that the change operator (0xA2) has returned as an alternative to
-big money ($).  Furthermore, the quid (0xA3) and zlotnik (0xA4) are also
-acceptable.  For those using Latin-9 (ISO 8859-15), the euro (0xA4) will also
-work.  ("Euro", like "ampersand", cannot be sillified further.)
-New names have been added to intercal.mm.
+2. Latin-1 (ISO 8859-1) is now the standard input charset of C-INTERCAL.
+   This means that the change operator (0xA2) has returned as an alternative to
+   big money ($).  Furthermore, the quid (0xA3) and zlotnik (0xA4) are also
+   acceptable.  For those using Latin-9 (ISO 8859-15), the euro (0xA4) will also
+   work.  ("Euro", like "ampersand", cannot be sillified further.)
+   New names have been added to intercal.mm.
 
 3. A fortiori, input of Volap\"uk digits may now be in Latin-1 or TeX format.
 
 4. Yacc is now deprecated in favor of bison; some old yaccs don't do proper
-error recovery, and lines like "DO ~ ERROR" failed at compile time.
+   error recovery, and lines like "DO ~ ERROR" failed at compile time.
 
-5.  Some minor portability bugs on systems where ptr_diff is not the same
-as int were removed by casting expressions of the form (ptr - ptr) to int.
+5. Some minor portability bugs on systems where ptr_diff is not the same
+   as int were removed by casting expressions of the form (ptr - ptr) to int.
 
-	Release 0.17 (by Eric S. Raymond) 27 Feb 1998
+== Release 0.17 (by Eric S. Raymond) 27 Feb 1998 ==
 
 Incorporates a minor bug fix by Jeff Uphoff <juphoff@tarsier.cv.nrao.edu>.
 
-	Release 0.16 (by Brian Raiter and Eric S. Raymond) 26 May 1997
+== Release 0.16 (by Brian Raiter and Eric S. Raymond) 26 May 1997 ==
 
 This is the 25th-anniversary release of INTERCAL.  This language, conceived
 in irony a quarter century ago today, has outlasted many more serious and
@@ -790,7 +797,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 
 11. Several new programs have been tossed into the pit.
 
-		Release 0.15 (by Eric S. Raymond) 20 Jun 1996
+== Release 0.15 (by Eric S. Raymond) 20 Jun 1996 ==
 
 1. Switched the INTERCAL manual master to mgm in order to be able to handle
    section crossreferences properly.  The manual has now been carefully
@@ -831,7 +838,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
    longer need to fear that they might succumb to the foul and awful
    temptation to use the dastardly +wimpmode option.
 
-		Release 0.14 (by Eric S. Raymond) 9 Jun 1996
+== Release 0.14 (by Eric S. Raymond) 9 Jun 1996 ==
 
 1. The documentation has been reorganized and cleaned up (you can now
    format either a C-INTERCAL or INTERCAL-72 manual from the same master).
@@ -845,7 +852,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 
 4. The distribution is now formally GPLed.
 
-		Release 0.13 (by Eric S. Raymond) 5 Jun 1996
+== Release 0.13 (by Eric S. Raymond) 5 Jun 1996 ==
 
 1. I folded in patches by Brian Raiter <breadbox@muppetlabs.com> that port
    this code to Linux, ANSIfies it, and enables it to use flex.  Note: This
@@ -856,7 +863,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
    `beer' program by Matt DiMeo <mdimeo@brooktree.com>, courtesy of the
    infamous Beer List (URL:http://www.ionet.net/~timtroyr/funhouse/beer.html).
 
-		Release 0.12 (by Eric S. Raymond) 22 Mar 1995
+== Release 0.12 (by Eric S. Raymond) 22 Mar 1995 ==
 
 1. The code now compiles and runs under Linux, using bison and lex.  It does
    *not* yet work with flex;  C.P. Osborne's patches for 0.11 turned out not
@@ -870,7 +877,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
    checked for conformance.  Also, the politesse error message now tells
    you the offending program's line count.
 
-		Release 0.11 (by Eric S. Raymond) 24 Sep 1994
+== Release 0.11 (by Eric S. Raymond) 24 Sep 1994 ==
 
 1. Incorporated changes by Jan-Pieter Cornet <cornet@OTech.fgg.EUR.nl> for
    magical inclusion of the system library.  These address an outstanding bug
@@ -904,7 +911,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 5. Volapuk digits are now recognized on input.  TO DO: Recognize Volapuk
    keywords, including gerunds.
 
-		Release 0.10 (by Eric S. Raymond) 9 Sep 1994
+== Release 0.10 (by Eric S. Raymond) 9 Sep 1994 ==
 
 1. It is now possible to undo a line-number abstention with a gerund
    reinstatement, or undo a gerund abstention with a line-number
@@ -914,7 +921,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 2. After release 0.5, I wrote in the TO DO list as follows:
 
    2. (ESR) Input format internationalization -- allow WRITE IN input digits in
-     major languages such as Nahuatl, Tagalog, Sanskrit, and Basque.
+   major languages such as Nahuatl, Tagalog, Sanskrit, and Basque.
 
    The twisted loons in the alt.folklore.computers crowd loved this idea,
    and I actually got sent digit lists for Nahuatl, Tagalog, Sanskrit, and
@@ -925,7 +932,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 
 3. The THEORY document has been significantly revised.
 
-		Release 0.9 (by Eric S. Raymond) 5 Mar 1993
+== Release 0.9 (by Eric S. Raymond) 5 Mar 1993 ==
 
 1. An embarrassing port bug in the INTERCAL skeleton has been fixed
 
@@ -940,7 +947,7 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 5. You can now set the C compiler to be used as a back end by INTERCAL
    by setting the environment variable CC.  The default is cc.
 
-		Release 0.8 (many hacks on 0.7 by Eric Raymond) 21 Jan 1992
+== Release 0.8 (many hacks on 0.7 by Eric Raymond) 21 Jan 1992 ==
 
 1. A previously undocumented `feature' of the Princeton compiler,
    revealed by Don Woods, is now emulated.  If fewer than 1/5 or more
@@ -966,14 +973,14 @@ pause to reflect, or possibly frighten the crap out of us.  Or both.
 
 The documentation has been updated to reflect these changes.
 
-		Release 0.7 (by Louis Howell) 21 Dec 1991
+== Release 0.7 (by Louis Howell) 21 Dec 1991 ==
 
 In addition to bug fixes, new features in this version include arrays,
 character I/O, modified (hopefully improved!) semantics for the COME
 FROM statement, extensions to bases other than 2, new INTERCAL programs,
 and new documentation.
 
-		Release 0.6 (by Steve Swales) 5 Jan 1991
+== Release 0.6 (by Steve Swales) 5 Jan 1991 ==
 
 1. Restored Princeton documentation (courtesy of Michael Ernst).
 
@@ -984,15 +991,14 @@ generated programs; [+/-]traditional is a no-op at this point.
 
 4. Various bug fixes, esp. in lexical analysis.
 
-		Release 0.5 (ESR's original pre-release) 5 Jun 1990
+== Release 0.5 (ESR's second pre-release) 5 Jun 1990 ==
 
 1. As a convenience to all you junior birdmen out there, `NINER' is accepted as
    a synonym for `NINE' in INTERCAL input.
 
 2. The COME FROM statement is now compiled.
 
-			-------------
+== Release 0.3 (ESR's original pre-release) ==
 
 The resurrection of INTERCAL from its grave took place on 12 May 1990
 when ESR released 0.3 on an unsuspecting USENET.
-

@@ -1,4 +1,4 @@
-			BUGS
+= C-INTERCAL Bug and To-Do list =
 
 There are still some known bugs in INTERCAL (and no doubt many we don't even
 suspect as yet).  The following list accumulates current bug reports and
@@ -10,9 +10,11 @@ LHH = Louis Howell
 BLR = Brian Raiter
 AIS = Alex Smith
 
-1) (ESR) INTERCAL would be intrinsically a crock even if it worked right.
+== Known Bugs ==
 
-2) (BLR) I have hacked up a fix to the problem with line numbers being off
+1. (ESR) INTERCAL would be intrinsically a crock even if it worked right.
+
+2. (BLR) I have hacked up a fix to the problem with line numbers being off
    due to statements sharing/spanning lines. The parser now stores the
    starting line number for all tuples, not just the splatted
    ones. Not only does this give synchronized lines in the comments in
@@ -41,26 +43,26 @@ AIS = Alex Smith
    statement, the last part will get truncated. Again, not a case we
    want to be encouraging people to explore anyway.)
 
-3) (BLR) Interleave does not check the type of its arguments. The manual
+3. (BLR) Interleave does not check the type of its arguments. The manual
    insinuates that interleaving 32-bit values should result in error 533;
    instead, C-INTERCAL silently truncates them to 16 bits. Unfortunately,
    the modified behavior of select's return type depends on this, so
    there's not much we can do about it as things stand.
 
-4) (AIS) Reverse assignments (those with the expression on the left)
+4. (AIS) Reverse assignments (those with the expression on the left)
    are very unlikely to work in bases other than 2. (The current code
    calculates what the answer would be in base 2 and throws an error
    if it isn't correct for the current base.)
 
-5) (AIS) Some of the newer features in intercal.el are not yet fully
+5. (AIS) Some of the newer features in intercal.el are not yet fully
    implemented and have a tendency to print 'Unimplemented' rather
    than doing anything useful.
 
-6) (AIS) The external call system only works with gcc (due to its need
+6. (AIS) The external call system only works with gcc (due to its need
    to pass command-line arguments like -x and -E to it), and fails
    when mixed with come-from-gerund and next-from-gerund.
 
-			TO DO
+== To Do ==
 
 1. (ESR) Add more optimization templates, esp. idioms for +, -, *, /.
 

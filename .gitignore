@@ -11,6 +11,9 @@ stamp-h1
 buildaux/Makefile.in
 # Uploading the web page lands a copy here
 index.html
+README.html
+NEWS.html
+BUGS.html
 # Executables produced by standard build
 bin2c
 convickt
