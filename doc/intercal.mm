@@ -2988,9 +2988,12 @@ the INTERCAL manual should contain some other type of removable organ.
 .FE
 .ps \n[@ps]
 .\".nr * \n*+1
-.nr PG \n%+1
 .P
-Tabulated on page \n(PG are all the characters used in INTERCAL, excepting
+.\" CORRECTION:
+.\" The original manual said "Tabulated on page " and gave a page number, 
+.\" rather than saying "Tabulated next".  But we can't count on the
+.\" page breaks to be in the same places.
+Tabulated next are all the characters used in INTERCAL, excepting
 letters and digits, along with their names and interpretations. Also
 included are several characters not used in INTERCAL, which are presented
 for completeness and to allow for future expansion.
