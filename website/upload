@@ -12,7 +12,7 @@ if [ $1 ]
 then
     for f in $*; do scp $f $webdir/$f; done
 else
-    eligible=`ls *.html *.png ../doc/ick.htm`
+    eligible=`ls *.html *.png ../doc/*.ps ../doc/ick.htm`
     if [ -e .upload-stamp ]
     then
 	eligible=`find $eligible -newer .upload-stamp`
