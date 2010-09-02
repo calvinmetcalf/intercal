@@ -743,7 +743,7 @@ void explexpr(node* np, FILE* fp)
     break;
 
   case C_NOT:
-    (void) fprintf(fp, "(~ ");
+    (void) fprintf(fp, "(~%d ", np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
@@ -1440,7 +1440,7 @@ void prexpr(node *np, FILE *fp, int freenode)
 
     case C_NOT:
 	(void) fprintf(fp, "(~");
-        tempint=np->rval->width; /* AIS */
+        tempint=np->width; /* AIS */
 	prexpr(np->rval, fp, freenode);
 	if (tempint == ick_Small_digits)
 	    (void) fprintf(fp, " & ick_Max_small)");
