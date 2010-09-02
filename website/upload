@@ -21,7 +21,8 @@ else
     then
         echo "Website is up to date."
     else
-        scp $eligible $webdir && touch .upload-stamp
+        scp $eligible $webdir
+	touch .upload-stamp
     fi
 fi
 
