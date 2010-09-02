@@ -113,7 +113,7 @@ unknown.</p>
 completed.  Have patience, the project is presently reorganizing after
 the move to git.</p>
 
-<!-- Test expansion of @PACKAGE_VERSION@ -->
+<!-- Test expansion of PACKAGE_VERSION -->
 
 <h2>Other Tools</h2>
 
@@ -221,7 +221,7 @@ stimulating.</p>
 </html>
 <!--
 Local Variables:
-compile-command: "(cp index.html ..; cd ~/WWW; upload intercal/index.html)"
+compile-command: "upload"
 End:
 -->
 

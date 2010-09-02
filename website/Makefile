@@ -3,7 +3,14 @@
 all: README.html NEWS.html BUGS.html THEORY.html ../doc/ick.htm ../doc/intercal.ps
 
 clean:
-	rm -f README.html NEWS.html BUGS.html THEORY.html
+	rm -f README.html NEWS.html BUGS.html THEORY.html index.html
+
+VERSION=$(shell cd .. && make echo-version)
+
+index.html: index.html
+	@rm -f index.html
+	@(echo "<!-- Generated file -- do not hand-hack! -->"; echo "define(PACKAGE_VERSION, ${VERSION})" | m4 - index.html.in) >index.html
+	@chmod a-w index.html 
 
 README.html: ../README
 	asciidoc - <../README >README.html
