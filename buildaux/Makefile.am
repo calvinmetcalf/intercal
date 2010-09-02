@@ -119,10 +119,10 @@ dist_man1_MANS = doc/ick.1 doc/convickt.1
 info_TEXINFOS = doc/ick.txi
 
 # How to run splint on this code
-SPLINTOPTS = -I. -Isrc +quiet -warnposix -boolops -predboolint
-splint:
+SPLINTOPTS = -I. -I$(top_srcdir)/src +quiet -warnposix -boolops -predboolint
+splint: $(ick_SOURCES) parser.h
 	@echo "Running splint on ick..."
-	-splint $(SPLINTOPTS) -exportlocal -redef $(ick_SOURCES) 
+	-(for x in $(ick_SOURCES); do echo $(top_srcdir)/$$x; done) | xargs splint $(SPLINTOPTS) -exportlocal -redef
 
 EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              src/ick.h src/ick_lose.h src/oil.h src/pick1.h src/pick2.h \
