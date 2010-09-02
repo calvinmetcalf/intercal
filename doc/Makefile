@@ -23,28 +23,28 @@ allorig: intercal.ps intercal.txt original.ps original.txt
 allnew: ick.inf ickhtml ick.htm ick.txt ick.pdf
 
 intercal.ps: intercal.mm
-	groff -dc=y -Tps    -p -t -mm intercal.mm >intercal.refs.tmp
+	groff -U -dc=y -Tps    -p -t -mm intercal.mm >intercal.refs.tmp
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	groff -dc=y -Tps    -p -t -mm intercal.mm >intercal.ps
 	-rm intercal.refs.qrf
 
 original.ps: intercal.mm
-	groff -dc=n -Tps    -p -t -mm intercal.mm >intercal.refs.tmp
+	groff -U -dc=n -Tps    -p -t -mm intercal.mm >intercal.refs.tmp
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	groff -dc=n -Tps    -p -t -mm intercal.mm >original.ps
 	-rm intercal.refs.qrf
 
 intercal.txt: intercal.mm
-	groff -dc=y -Tascii -p -t -mm intercal.mm >/dev/null
+	groff -U -dc=y -Tascii -p -t -mm intercal.mm >/dev/null
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	GROFF_NO_SGR=1 groff -dc=y -Tascii -p -t -mm intercal.mm >intercal.txt
 	-rm intercal.refs.qrf
 
 original.txt: intercal.mm
-	groff -dc=n -Tascii -p -t -mm intercal.mm >/dev/null
+	groff -U -dc=n -Tascii -p -t -mm intercal.mm >/dev/null
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	GROFF_NO_SGR=1 groff -dc=n -Tascii -p -t -mm intercal.mm >original.txt
