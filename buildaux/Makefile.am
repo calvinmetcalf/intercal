@@ -146,7 +146,7 @@ dist-hook:
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
-	@find $(distdir)/pit -perm -u+x -type f -and -not -name regresscheck | xargs rm
+	-find $(distdir)/pit -perm -u+x -type f -and -not -name regresscheck | xargs rm
 	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
 

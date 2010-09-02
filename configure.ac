@@ -26,6 +26,7 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_STDC
+AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([sys/time.h unistd.h stdarg.h])
 AC_CHECK_HEADERS([stdint.h],[HAVE_STDINT_H=1])
 AC_SUBST(HAVE_STDINT_H)
@@ -37,7 +38,6 @@ dnl likewise for _Bool.
 AC_C_CONST
 AC_C_VOLATILE
 AC_CHECK_SIZEOF([long long int],[0])
-AC_CHECK_SIZEOF([_Bool],[0])
 AC_CHECK_SIZEOF([sig_atomic_t],[0],[[#include <signal.h>]])
 AC_HEADER_TIME
 AC_EXEEXT
