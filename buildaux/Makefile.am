@@ -130,7 +130,7 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
              doc/ickstyle.css doc/ick.txt doc/intercal.mm doc/READ.ME \
              doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
-             lexer.c doc/ick.txi doc/ick.txt NEWS README \
+             lexer.c doc/ick.txi doc/ick.txt doc/chipspec.txt NEWS README \
              buildaux/buildconfig buildaux/buildconfig.ac \
              buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
              buildaux/missing buildaux/ylwrap src/bconfigh.in
