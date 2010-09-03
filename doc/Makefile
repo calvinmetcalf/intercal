@@ -13,9 +13,6 @@
 # We make two passes in order to resolve SETR/GETNH references.
 # The sed hackery strips the trailing dots from level 1 section references.
 
-x.txt: x.mm
-	groff -dc=y -Tascii -p -t -mm x.mm >x.txt
-
 all: allorig allnew
 
 allorig: intercal.ps intercal.txt original.ps original.txt
