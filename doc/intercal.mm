@@ -2988,7 +2988,8 @@ the INTERCAL manual should contain some other type of removable organ.
 .FE
 .\" I don't remember what this font change did in 1990, 
 .\" but in 2010 it gave groff terrible fits and had to be removed.
-.\" Ditto for the second instance of @ps a few lines down.
+.\" Ditto for the second instance of @ps a few lines down and
+.\" the third just before Tonsil B.
 .\".ps \n[@ps]
 .\".nr * \n*+1
 .P
@@ -3061,19 +3062,6 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 \(no	hookworm
 ^	shark (or simply sharkfin)
 \o"#*\(sq"	blotch
-.if '\*c'y' \{\
-\(de	bunghole
-\(rg	name grabber
-\(mu	andrew cross
-\(di	norwegian minus
-\(co	text grabber
-\(sc	swash
-\(*m	microscope
-\(+-	interworm
-\*(no	half turn
-\(Po	quid	binary mingle
-\(Cs	zlotnik	binary mingle
-\}
 .TE \}
 .el \{\
 .TS
@@ -3120,7 +3108,6 @@ $	big money 	binary mingle
 \(no	hookworm
 ^	shark (or simply sharkfin)	unary logical XOR (TriINTERCAL)
 \o"#*\(sq"	blotch
-.if '\*c'y' \{\
 \(de	bunghole
 \(rg	name grabber
 \(mu	andrew cross
@@ -3132,14 +3119,13 @@ $	big money 	binary mingle
 \*(no	half turn
 \(Po	quid	binary mingle
 \(Cs	zlotnik	binary mingle
-\}
 .TE \}
 .ce 1
 Table 2 (top view). INTERCAL character set.
 .FS
 Got any better ideas?
 .FE
-.ps \n[@ps]
+\".ps \n[@ps]
 .if '\*c'n' \{\
 .APP "B" "NOTES ON THE ATARI IMPLEMENTATION"
 .P
