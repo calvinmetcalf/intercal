@@ -175,7 +175,7 @@ arguments (see configure --help for details); probably the only one you'll
 want to use is --prefix, which selects the directory to install C-INTERCAL
 into (--prefix=/usr and --prefix=/usr/local (the default) are both likely
 choices, but you may want to install into a subdirectory of your home
-directory to avoid the need for root priveleges). Some revious versions of
+directory to avoid the need for root priveleges). Some previous versions of
 C-INTERCAL required various information to be specified by the user; the build
 system now figures this all out for itself, so you can relax and not need to
 worry (in theory).
