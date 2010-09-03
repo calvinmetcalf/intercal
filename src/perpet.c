@@ -175,9 +175,11 @@ struct linerange_t {
     int start, end;
     char *libname;
 };
+/* Note! "syslib" must be last in this list, as other parts of perpet.c
+   care about whether syslib in particular was included. */
 struct linerange_t lineranges[] = {
-    {1000, 1999, "syslib"},    /* the system library */
     {5000, 5699, "floatlib"},  /* the floating-point support */
+    {1000, 1999, "syslib"},    /* the system library */
     {0, 0, NULL},
 };
 
@@ -1557,8 +1559,9 @@ static void run_coopt(/*@observer@*/ /*@null@*/ /*@unused@*/ const char* cooptsh
                       /*@observer@*/ /*@unused@*/ const char* binaryname)
 {
   /* Note: Params are marked unused because they may not be used if sh isn't supported. */
-#ifdef HAVE_PROG_SH
-# ifdef HAVE_SYS_INTERPRETER
+  /* Assume that sh exists if #! does; sh is needed to run autoconf, so this would
+     otherwise have to be set by hand anyway. */
+#ifdef HAVE_SYS_INTERPRETER
   if(coopt) /* AIS */
   {
     /* The constant-output optimizer is a form of post-processor.
@@ -1576,7 +1579,6 @@ static void run_coopt(/*@observer@*/ /*@null@*/ /*@unused@*/ const char* cooptsh
 	                             neccesary */
     }
   }
-# endif
 #endif
 }
 

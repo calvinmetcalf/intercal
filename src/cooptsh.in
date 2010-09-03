@@ -33,14 +33,12 @@
 #
 ###########################################################################
 
-rm icktemp.out >/dev/null 2>/dev/null
-if $1@EXEEXT@ +mystery >icktemp.out 2>/dev/null ; then : ; else
-rm icktemp.out ; exit 0 ; fi
-if grep 'ickoutTERM???!' icktemp.out ; then rm icktemp.out ; exit 0 ; fi
-echo 'ickoutTERM???!' >> icktemp.out
+rm -f icktemp.out >/dev/null 2>/dev/null
+if `readlink -f $1@EXEEXT@` +mystery >icktemp.out 2>/dev/null ; then : ; else
+echo Execution of $1@EXEEXT@ failed.
+rm -f icktemp.out ; exit 0 ; fi
 rm $1@EXEEXT@
-echo "#! /bin/sh
-cat <<'ickoutTERM???!'" | cat - icktemp.out > $1@EXEEXT@
+echo '#! /bin/sh
+tail -n+3 $0; exit 0' | cat - icktemp.out > $1@EXEEXT@
 chmod +x $1@EXEEXT@
-rm icktemp.out
 exit 0

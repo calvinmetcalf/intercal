@@ -102,7 +102,8 @@ TARGETS = $(BASE2SOURCES:.i=) \
 
 # For instructions on test conventions, see the header comment of regresscheck
 test: $(TARGETS)
-	@$(PIT)/beer | $(PIT)/regresscheck $(PIT)/beer 
+	@$(PIT)/beer | $(PIT)/regresscheck $(PIT)/beer
+	@file $(PIT)/beer | grep -q 'shell script' || echo "Regression test of -F (using beer) FAILED."
 	@cat $(PIT)/bubble.tst | $(PIT)/bubble | $(PIT)/regresscheck $(PIT)/bubble
 	@cat $(PIT)/fft-delta.tst | $(PIT)/fft | $(PIT)/regresscheck $(PIT)/fft-delta
 	@cat $(PIT)/fft-tophat.tst | $(PIT)/fft | $(PIT)/regresscheck $(PIT)/fft-tophat
@@ -134,7 +135,9 @@ test: $(TARGETS)
 	@echo "Tests complete."
 
 
-# Some tests need options to compile extensions.
+# Some tests need options to compile extensions; some test extensions.
+$(PIT)/beer: $(PIT)/beer.i
+	$(ICK) -F $(PIT)/beer.i
 $(PIT)/pass: $(PIT)/pass.i
 	$(ICK) -m $(PIT)/pass.i
 $(PIT)/tests/compucome: $(PIT)/tests/compucome.i
