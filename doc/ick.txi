@@ -2716,13 +2716,14 @@ group is opened inside an array subscript), it's necessary to use the
 other grouping character to the one that opened the current group if you
 want a portable program.
 
-One final comment about sparks and rabbit-ears; if the next character in
-the program is a spot, as often happens because onespot variables are
-common choices for operands, a spark and the following spot can be
-combined into a wow (@code{!}).  Unfortunately, none of the character
-sets that @cic{} accepts as input (UTF-8, Latin-1, and ASCII-7) contain
-the rabbit character, although the Hollerith input format that @clcic{}
-can use does.
+One final comment about sparks and rabbit-ears; if the next character
+in the program is a spot, as often happens because onespot variables
+are common choices for operands, a spark and the following spot can be
+combined into a wow (@code{!}).  Unfortunately, the rabbit-ear/spot
+combination has no one-character equivalent in any of the character
+sets that @cic{} accepts as input (UTF-8, Latin-1, and ASCII-7) as
+none of these contain the rabbit character, although the Hollerith
+input format that @clcic{} can use does.
 
 @item Positional precedences: @clcic{} rules
 
