@@ -27,32 +27,32 @@ intercal.ps: intercal.mm
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	groff -U -dc=y -Tps    -p -t -mm intercal.mm >intercal.ps
-	-rm -f intercal.refs.qrf
+	-rm -f intercal.refs.qrf intercal.refs.tmp
 
 original.ps: intercal.mm
 	groff -U -dc=n -Tps    -p -t -mm intercal.mm >intercal.refs.tmp
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	groff -U -dc=n -Tps    -p -t -mm intercal.mm >original.ps
-	-rm -f intercal.refs.qrf
+	-rm -f intercal.refs.qrf intercal.refs.tmp
 
 intercal.txt: intercal.mm
 	groff -U -dc=y -Tascii -p -t -mm intercal.mm >/dev/null
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	GROFF_NO_SGR=1 groff -U -dc=y -Tascii -p -t -mm intercal.mm >intercal.txt
-	-rm -f intercal.refs.qrf
+	-rm -f intercal.refs.qrf intercal.refs.tmp
 
 original.txt: intercal.mm
 	groff -U -dc=n -Tascii -p -t -mm intercal.mm >/dev/null
 	sed <intercal.refs.tmp -e '/hn \([0-9]*\)\.$$/s//hn \1/' >tmp.refs;
 	mv tmp.refs intercal.refs.tmp
 	GROFF_NO_SGR=1 groff -U -dc=n -Tascii -p -t -mm intercal.mm >original.txt
-	-rm -f intercal.refs.qrf
+	-rm -f intercal.refs.qrf intercal.refs.tmp
 
 # Don't delete *.txt here - not while we have asciidoc text masters, anyway
 clean:
-	rm -f *.ps *.refs* ick.in* ick.txt ick.htm ick.pdf
+	rm -f *.ps *.refs* ick.in* ick.txt ick.htm ick.pdf *.tmp
 	rm -rf html
 
 ick.inf: ick.txi fdl-1-2.txi
