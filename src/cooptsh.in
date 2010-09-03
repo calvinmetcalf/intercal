@@ -41,4 +41,5 @@ rm $1@EXEEXT@
 echo '#! /bin/sh
 tail -n+3 $0; exit 0' | cat - icktemp.out > $1@EXEEXT@
 chmod +x $1@EXEEXT@
+rm -f icktemp.out
 exit 0
