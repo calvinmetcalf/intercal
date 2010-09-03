@@ -82,12 +82,20 @@ international community of technomasochists.</p>
 
 <h2>Documentation</h2>
 
-<p>You can download either a <a
-href="intercal.ps.gz">Postscript</a> or <a
-href="http://www.catb.org/~esr/intercal/intercal.txt.gz">flat
-text</a> version of the Revised INTERCAL Manual here. Postscript is
-recommended, as the manual now includes figures and diagrams until
-recently unseen by any but the small handful with paper copies.</p>
+<p>You can browse the <a href="README.html">README</a>, 
+<a href="NEWS.html">NEWS</a>, and <a href="BUGS.html">BUGS</a>
+files from the distribution from here.</p>
+
+<p>You can browse the <a href="ick.htm">Revamped INTERCAL Manual</a>,
+which describes C-INTERCAL's behavior and options since version 0.18
+in detail.  You can also download the <a href="intercal.ps">Revised INTERCAL
+Manual</a>, which described 0.18 in detail and is a light revision of
+the infamous original, including the Circuitous Diagram and other
+illustrations.</p>
+
+<p>For those potentially interested in hacking C-INTERCAL's code,
+there's a <a href="THEORY.html">description of the compiler's
+internals</a>.</p>
 
 <h2>Source Code</h2>
 
@@ -104,6 +112,8 @@ unknown.</p>
 <p>Plans are afoot to supply distribution tarballs, but not yet
 completed.  Have patience, the project is presently reorganizing after
 the move to git.</p>
+
+<!-- Test expansion of PACKAGE_VERSION -->
 
 <h2>Other Tools</h2>
 
@@ -168,8 +178,12 @@ INTERCAL is better than Perl</a>.
 <a href="http://www.computerworld.com.au/index.php/id;528456667;pp;1">interview
 Don Woods</a> on INTERCAL.  The results are both funny and informative.</p> 
 
-<p>In 2010, ESR reconstructed the history of INTERCAL.  The tale is told in
-<a href="http://esr.ibiblio.org/?p=2491">Risk, Verification, and the INTERCAL Reconstruction Massacree</a>.</p>
+<p>In 2010, ESR recovered most of the history of INTERCAL.  The tale
+is told in <a href="http://esr.ibiblio.org/?p=2491">Risk,
+Verification, and the INTERCAL Reconstruction Massacree</a>. If you
+are in possession of shars or release tarballs for 0.4 or 0.6-0.11 or
+0.14, please ship copies to the maintainers so we can fill in the
+gaps. </p>
 
 <h1>Other Interesting Languages</h1>
 <ul>
@@ -177,11 +191,8 @@ Don Woods</a> on INTERCAL.  The results are both funny and informative.</p>
 Computer Programming in multiple Directions, Dimensions, and
 Topologies.</li>
 
-<li><a href="http://www.muppetlabs.com/~breadbox/bf/">BrainF***</a>
-&mdash; An 8-instruction Turing-complete computer language.</li>
-
 <li><a
-href="http://www.mines.edu/students/b/bolmstea/malbolge/index.html">
+href="http://www.lscheffer.com/malbolge.shtml">
 Malebolge</a> &mdash; Programming from Hell.</li>
 
 <li><a
@@ -211,7 +222,7 @@ stimulating.</p>
 </html>
 <!--
 Local Variables:
-compile-command: "(cp index.html ..; cd ~/WWW; upload intercal/index.html)"
+compile-command: "upload"
 End:
 -->
 

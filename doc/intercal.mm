@@ -2986,11 +2986,17 @@ The Official INTERCAL Character Set
 Since all other reference manuals have Appendices, it was decided that
 the INTERCAL manual should contain some other type of removable organ.
 .FE
-.ps \n[@ps]
+.\" I don't remember what this font change did in 1990, 
+.\" but in 2010 it gave groff terrible fits and had to be removed.
+.\" Ditto for the second instance of @ps a few lines down.
+.\".ps \n[@ps]
 .\".nr * \n*+1
-.nr PG \n%+1
 .P
-Tabulated on page \n(PG are all the characters used in INTERCAL, excepting
+.\" CORRECTION:
+.\" The original manual said "Tabulated on page " and gave a page number, 
+.\" rather than saying "Tabulated next".  But we can't count on the
+.\" page breaks to be in the same places.
+Tabulated next are all the characters used in INTERCAL, excepting
 letters and digits, along with their names and interpretations. Also
 included are several characters not used in INTERCAL, which are presented
 for completeness and to allow for future expansion.
@@ -3002,14 +3008,20 @@ This footnote intentionally unreferenced.
 .ds CH - % -
 .bp
 .\".nr * \n*-1
-.ps \n[@ps]
+.\".ps \n[@ps]
+.\"
+.\" Note: In the original manual, the headers on the character-set table 
+.\" were more or less centered. This should be achievable with a "c c c"
+.\" format line, but for some reason the attempt desperately confuses
+.\" groff in 2010.
+.\"
 .ie '\*c'n' \{\
 .\" CORRECTION: "exclusive or" was typoed as "exlusive or"
 .TS
 box;
-c c c
 l l l.
 Character	Name	Use (if any)
+=
 \&.	spot	identify 16-bit variable
 :	two-spot	identify 32-bit variable
 ,	tail	identify 16-bit array
@@ -3046,29 +3058,29 @@ $	big money 	\fIbinary mingle (ASCII)\fR
 /	slat
 \e	backslat
 @	whirlpool
-\*(no	hookworm
+\(no	hookworm
 ^	shark (or simply sharkfin)
 \o"#*\(sq"	blotch
 .if '\*c'y' \{\
-\*(de	bunghole
-\*(rg	name grabber
-\*(mu	andrew cross
-\*(di	norwegian minus
-\*(co	text grabber
-\*(sc	swash
-\*(*m	microscope
-\*(+-	interworm
+\(de	bunghole
+\(rg	name grabber
+\(mu	andrew cross
+\(di	norwegian minus
+\(co	text grabber
+\(sc	swash
+\(*m	microscope
+\(+-	interworm
 \*(no	half turn
-0xA3	quid	binary mingle
-0xA4	zlotnik	binary mingle
+\(Po	quid	binary mingle
+\(Cs	zlotnik	binary mingle
 \}
 .TE \}
 .el \{\
 .TS
 box;
-c c c
 l l l.
 Character	Name	Use (if any)
+=
 \&.	spot	identify 16-bit variable
 :	two-spot	identify 32-bit variable
 ,	tail	identify 16-bit array
@@ -3105,21 +3117,21 @@ $	big money 	binary mingle
 /	slat
 \e	backslat
 @	whirlpool	unary logical BUT (TriINTERCAL)
-\*(no	hookworm
+\(no	hookworm
 ^	shark (or simply sharkfin)	unary logical XOR (TriINTERCAL)
 \o"#*\(sq"	blotch
 .if '\*c'y' \{\
-\*(de	bunghole
-\*(rg	name grabber
-\*(mu	andrew cross
-\*(di	norwegian minus
-\*(co	text grabber
-\*(sc	swash
-\*(*m	microscope
-\*(+-	interworm
+\(de	bunghole
+\(rg	name grabber
+\(mu	andrew cross
+\(di	norwegian minus
+\(co	text grabber
+\(sc	swash
+\(*m	microscope
+\(+-	interworm
 \*(no	half turn
-0xA3	quid	binary mingle
-0xA4	zlotnik	binary mingle
+\(Po	quid	binary mingle
+\(Cs	zlotnik	binary mingle
 \}
 .TE \}
 .ce 1

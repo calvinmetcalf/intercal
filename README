@@ -1,6 +1,6 @@
-                         Release Notes for C-INTERCAL
+= README for C-INTERCAL =
 
-                                  DISCREDITS
+== Discredits ==
 
 This package is an implementation of the language INTERCAL designed by
 Don Woods and James Lyon, who have since spent decades trying to live
@@ -14,98 +14,93 @@ maintainer from version 0.25 onwards; this release, 0.29, is a unified deforking
 of C-INTERCAL with Alex Smith and Eric S. Raymond as comaintainers. For detailed
 credits see NEWS.
 
-                                     FILES
+== Files ==
 
 The compiler itself is in the src directory.  You can choose where to
 install it with the --prefix argument to configure, or by setting DESTDIR
-in the Makefile.  The doc directory contains (surprise!)  documentation, and
+in the Makefile.  The doc directory contains (surprise!) documentation, and
 pit contains various examples of INTERCAL source code, writhing in agony.
 
 The files included are:
 
-README                  -- this file
-BUGS                    -- current bug and to-do list
-NEWS                    -- info on features and fixes new in this release
-COPYING                 -- copyright and licence information
-MANIFEST                -- a list of all files in the distribution
+|========================================================================
+|README                 | this file
+|BUGS                   | current bug and to-do list
+|NEWS                   | info on features and fixes new in this release
+|COPYING                | copyright and licence information
+|MANIFEST               | a list of all files in the distribution
+|doc/READ.ME            | historical notes on the docs
+|doc/ick.txi            | the Revamped Manual sources, a newer manual
+|doc/fdl-1-2.txi        | the GNU FDL version 1.2 in Texinfo format
+|doc/ick.txt            | the Revamped Manual in plain text format
+|doc/ick.info*          | the Revamped Manual in Info format
+|doc/ickstyle.css       | styling rules for the Revamped Manual in HTML
+|doc/tidy.cfg           | HTML tidying rules for the Revamped Manual
+|doc/fix83.pl           | script to fixup the HTML output for 8.3 systems
+|doc/fixtoc.pl          | script to format the manual table of contents
+|doc/intercal.mm        | the old manual in groffable form
+|doc/Makefile           | makefile to build old and new manuals
+|doc/THEORY.txt         | some notes on the internals of the INTERCAL compiler
+|doc/chipspec.txt       | plans for an INTERCAL-based microprocessor
+|doc/ick.1              | man page for ick
+|doc/convickt.1         | man page for convickt
+|src/abcess.h           | interface to functions linked with programs
+|src/arrgghh.c          | option argument parsing for generated programs
+|src/bin2c.c            | creates C code representations of binary files
+|src/cesspool.c         | the INTERCAL runtime support code
+|src/clc-cset.c         | compatibility code for CLC-INTERCAL character sets
+|src/convickt.c         | command line character set converter
+|src/cooptsh.in         | template for script to help out the -F optimizer
+|src/dekludge.c         | INTERCAL optimizer wrapper and utility functions
+|src/feh.h              | interface to INTERCAL-to-C code generator
+|src/feh2.c             | INTERCAL-to-C code generator
+|src/fiddle.[ch]        | the INTERCAL operators
+|src/ick-wrap.c         | the driver for generated C-from-INTERCAL code
+|src/ick.h              | compilation types and defines
+|src/ick_bool.h         | unified boolean handling
+|src/ick_ec.[ch]        | external call support for INTERCAL
+|src/ick_lose.[ch]      | INTERCAL compile- and run-time error handling
+|src/idiotism.oil       | list of INTERCAL idioms to optimize
+|src/lexer.l            | the lexical analyzer specification (in LEX)
+|src/numerals.c         | numerals table for INTERCAL input
+|src/oil.y              | compiler to translate idiotism.oil into C
+|src/oil.h              | name mangling for OIL files
+|src/parser.y           | the grammar specification (in YACC)
+|src/perpet.c           | main routine for compiler
+|src/pick1.h            | template for compiler-dependent PIC C headers
+|src/pick2.h            | runtime support for compiled PIC-INTERCAL
+|src/pickwrap.c         | the driver for generated PIC C-from-INTERCAL code
+|src/sizes.h            | variables defining the numeric base
+|src/uncommon.[ch]      | code common to the compiler and debugger
+|src/unravel.c          | multithreading functions
+|src/yuk.[ch]           | INTERCAL debugger and profiler
+|src/*.bin              | character set definitions for clc-cset and convickt
+|prebuilt/parser.[ch]   | Prebuilt parser (for systems without bison)
+|prebuilt/lexer.c       | Prebuilt lexer (for systems without flex)
+|prebuilt/oil-oil.c     | Prebuilt OIL compiler (again, for bisonless systems)
+|etc/intercal.el        | elisp for editing INTERCAL code under GNU Emacs
+|etc/intercal.vim       | INTERCAL syntax higlighting information for vim
+|etc/interfuzz.pl       | fuzz-tester for the optimiser
+|etc/cftoec.sh          | script to convert cfunge to a library (see below)
+|etc/IFFI*              | input to that script
+|etc/cfunge.patch       | more input to that script
+|configure              | GNU Autoconf script that generates a Makefile
+|configure.ac           | autoconf source for configure
+|Makefile.in            | template Makefile for compiling C-INTERCAL
+|Makefile.am            | automake source for Makefile.in
+|buildaux/*             | helper scripts and templates used by the build
+|aclocal.m4             | helper file needed to build the build system itself
+|pit/*                  | sample INTERCAL code; see pit/CATALOG
+|pit/tests/*            | INTERCAL code provided specifically for testing
+|pit/explib/*           | source code for expansion libraries
+|pit/lib/*.i            | sample INTERCAL libraries
+|pit/lib/syslib*.*i     | source code for the system libraries
+|pit/*.doc              | documentation for sample INTERCAL code
+|pit/*.tst              | sample inputs for sample INTERCAL code
+|pit/*.chk              | sample outputs for sample INTERCAL code
+|========================================================================
 
-doc/READ.ME             -- historical notes on the docs
-doc/ick.txi             -- the Revamped Manual sources, a newer manual
-doc/fdl-1-2.txi         -- the GNU FDL version 1.2 in Texinfo format
-doc/ick.txt             -- the Revamped Manual in plain text format
-doc/ick.info*           -- the Revamped Manual in Info format
-doc/ickstyle.css	-- styling rules for the Revamped Manual in HTML
-doc/tidy.cfg		-- HTML tidying rules for the Revamped Manual
-doc/fix83.pl            -- script to fixup the HTML output for 8.3 systems
-doc/fixtoc.pl           -- script to format the manual table of contents
-doc/intercal.mm         -- the old manual in groffable form
-doc/Makefile            -- makefile to build old and new manuals
-doc/THEORY.txt          -- some notes on the internals of the INTERCAL compiler
-doc/chipspec.txt        -- plans for an INTERCAL-based microprocessor
-doc/ick.1               -- man page for ick
-doc/convickt.1          -- man page for convickt
-
-src/abcess.h            -- interface to functions linked with programs
-src/arrgghh.c           -- option argument parsing for generated programs
-src/bin2c.c             -- creates C code representations of binary files
-src/cesspool.c          -- the INTERCAL runtime support code
-src/clc-cset.c          -- compatibility code for CLC-INTERCAL character sets
-src/convickt.c          -- command line character set converter
-src/cooptsh.in          -- template for script to help out the -F optimizer
-src/dekludge.c          -- INTERCAL optimizer wrapper and utility functions
-src/feh.h               -- interface to INTERCAL-to-C code generator
-src/feh2.c              -- INTERCAL-to-C code generator
-src/fiddle.[ch]         -- the INTERCAL operators
-src/ick-wrap.c          -- the driver for generated C-from-INTERCAL code
-src/ick.h               -- compilation types and defines
-src/ick_bool.h          -- unified boolean handling
-src/ick_ec.[ch]		-- external call support for INTERCAL
-src/ick_lose.[ch]       -- INTERCAL compile- and run-time error handling
-src/idiotism.oil        -- list of INTERCAL idioms to optimize
-src/lexer.l             -- the lexical analyzer specification (in LEX)
-src/numerals.c          -- numerals table for INTERCAL input
-src/oil.y               -- compiler to translate idiotism.oil into C
-src/oil.h               -- name mangling for OIL files
-src/parser.y            -- the grammar specification (in YACC)
-src/perpet.c            -- main routine for compiler
-src/pick1.h             -- template for compiler-dependent PIC C headers
-src/pick2.h             -- runtime support for compiled PIC-INTERCAL
-src/pickwrap.c          -- the driver for generated PIC C-from-INTERCAL code
-src/sizes.h             -- variables defining the numeric base
-src/uncommon.[ch]       -- code common to the compiler and debugger
-src/unravel.c           -- multithreading functions
-src/yuk.[ch]            -- INTERCAL debugger and profiler
-src/*.bin               -- character set definitions for clc-cset and convickt
-
-prebuilt/parser.[ch]    -- Prebuilt parser (for systems without bison)
-prebuilt/lexer.c        -- Prebuilt lexer (for systems without flex)
-prebuilt/oil-oil.c      -- Prebuilt OIL compiler (again, for bisonless systems)
-
-etc/intercal.el         -- elisp for editing INTERCAL code under GNU Emacs
-etc/intercal.vim        -- INTERCAL syntax higlighting information for vim
-etc/interfuzz.pl        -- fuzz-tester for the optimiser
-etc/cftoec.sh         	-- script to convert cfunge to a library (see below)
-etc/IFFI*               -- input to that script
-etc/cfunge.patch        -- more input to that script
-
-configure               -- GNU Autoconf script that generates a Makefile
-configure.ac            -- autoconf source for configure
-Makefile.in             -- template Makefile for compiling C-INTERCAL
-Makefile.am             -- automake source for Makefile.in
-
-buildaux/*              -- helper scripts and templates used by the build
-aclocal.m4              -- helper file needed to build the build system itself
-
-pit/*                   -- sample INTERCAL code; see pit/CATALOG
-pit/tests/*             -- INTERCAL code provided specifically for testing
-pit/explib/*            -- source code for expansion libraries
-pit/lib/*.i             -- sample INTERCAL libraries
-pit/lib/syslib*.*i      -- source code for the system libraries
-pit/*.doc               -- documentation for sample INTERCAL code
-pit/*.tst               -- sample inputs for sample INTERCAL code
-pit/*.chk               -- sample outputs for sample INTERCAL code
-
-                              HOW TO GET STARTED
+== How to Get Started ==
 
 First, note that there is a much fuller manual than this file available. For
 full information about C-INTERCAL, including extensive installation and usage
@@ -131,24 +126,24 @@ interested readers are referred to the Revamped Manual, or to ick -@ (which
 prints a usage message).
 
 Every compiled INTERCAL program also accepts certain options at runtime (code
-by Steve Swales).  These include [+/-]help, [+/-]traditional, and
-[+/-]wimpmode.  The help option (with either + or -) triggers a 'usage'
+by Steve Swales).  These include 'help', 'traditional', and
+'wimpmode'.  The help option (with either + or -) triggers a usage
 message. The +traditional option is presently a no-op. Also available are
-[+/-] printflow, which gives information that may or may not be helpful for
-debugging a program, and [+/-] mystery, which is deliberately undocumented.
+'printflow', which gives information that may or may not be helpful for
+debugging a program, and 'mystery', which is deliberately undocumented.
 
 Steve writes: "The wimpmode option is the most interesting. I found myself
 always running my test programs with filters on both ends to work around the
-'nifty' INTERCAL number representations. This was so painful that I decided it
-would be LESS painful (and a lot less code) if I added a 'wimp' option.  With
+\'nifty' INTERCAL number representations. This was so painful that I decided it
+would be LESS painful (and a lot less code) if I added a \'wimp' option.  With
 the +wimpmode option, the user is subjected to a humiliating message about what
 a wimp he or she is to use this mode, but after that is allowed to use
 conventional numerical notation.  While such a mode doubtless violates to some
-extent the INTERCAL philosophy, the fact that a 'unbutcher' command has been
+extent the INTERCAL philosophy, the fact that a \'unbutcher' command has been
 posted clearly indicates the need for it. Anyway... if you don't like it, don't
 use it... the default is -wimpmode (i.e. NOT wimp mode)."
 
-                              SPREADING THE BLAME
+== Spreading the Blame ==
 
 There is an INTERCAL Resource Page at http://www.catb.org/intercal, and another
 at http://intercal.freeshell.org; http://c.intercal.org.uk contains a few
@@ -163,7 +158,7 @@ occasionally someone asks if the newsgroup is dead and gets several responses
 claiming it isn't. Mostly it's full of C-INTERCAL release notices, and is thus
 a good way to determine the most recent version of C-INTERCAL.)
 
-			     BUILDING C-INTERCAL
+== Building C-INTERCAL ==
 
 C-INTERCAL now uses a GNU Autotools-based build system, this is something like
 the fourth build system that has been tried for it, and hopefully it now works
@@ -209,7 +204,7 @@ to use for profiling, such functions are often system-specific; you may be
 able to get better profiling output by tinkering with yuk.h to specify a
 different method of profiling.
 
-                        NOTES ON COMPILING PIC-INTERCAL
+== Notes on compiling PIC-INTERCAL ==
 
 PIC C compilers tend to differ substantially in the way they handle various
 language constructs. As a result, this compiler will only compile to C (not to
@@ -219,7 +214,7 @@ your compiler can find them, and pick1.h will need to be modified to contain
 compiler-specific data (like the names of data types and the syntax for
 specifying the device type, fuses, and various commands).
 
-	    NOTES ON THE C-INTERCAL / CFUNGE EXTERNAL CALLS SYSTEM
+== Notes on the C-INTERCAL / Cfunge external calls system ==
 
 Code is provided to allow linking of Funge-98 programs to INTERCAL programs;
 however, this requires a Funge-98 interpreter, which is not present in this
@@ -229,7 +224,7 @@ only available for linking with 'cfunge', a Funge-98 interpreter written in
 C. You can get the latest sources for that interpreter from the Internet via
 the bzr version-control system by running this command:
 
-bzr branch http://rage.kuonet.org/~anmaster/bzr/cfunge
+  bzr branch http://rage.kuonet.org/~anmaster/bzr/cfunge
 
 Once you have the source code to cfunge, you can compile it into a library
 suitable for use by C-INTERCAL by changing to the /etc directory of the
@@ -243,14 +238,15 @@ will copy that library into the correct location in your filesystem.
 For information on actually using this system once you've set it up, consult
 the Revamped Manual.
 
-                                   LICENSING
+== Licensing ==
 
-C-INTERCAL is now distributed under the General Public License version 2 (or
-at your choice any later version), except for the C skeleton file which is
-explicitly *not* GPLed in order to avoid the (possibly mythical) "license
-virus" effect, and the Revamped Manual, which is licenced under the GNU Free
-Documentation Licence version 1.2.  See the file COPYING for details on the
-General Public License, and the file doc/fdl-1-2.txi (which is also included
-as a chapter in each of the compiled versions of the documentation, in case
-you don't feel like reading Texinfo) for information on the GNU Free
+C-INTERCAL is now distributed under the GNU General Public License
+version 2 (or at your choice any later version), except for the C
+skeleton file which is explicitly *not* GPLed in order to avoid the
+(possibly mythical) "license virus" effect, and the Revamped Manual,
+which is licenced under the GNU Free Documentation Licence version
+1.2.  See the file COPYING for details on the General Public License,
+and the file doc/fdl-1-2.txi (which is also included as a chapter in
+each of the compiled versions of the documentation, in case you don't
+feel like reading Texinfo) for information on the GNU Free
 Documentation Licence.
