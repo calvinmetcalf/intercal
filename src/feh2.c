@@ -658,19 +658,19 @@ void explexpr(node* np, FILE* fp)
     break;
 
   case AND:
-    (void) fprintf(fp, "(& ");
+    (void) fprintf(fp, "(&%d ", np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
 
   case OR:
-    (void) fprintf(fp, "(V ");
+    (void) fprintf(fp, "(V%d ", np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
 
   case XOR:
-    (void) fprintf(fp, "(? ");
+    (void) fprintf(fp, "(?%d ", np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
@@ -678,7 +678,7 @@ void explexpr(node* np, FILE* fp)
   case FIN:
     if (ick_Base < 3)
       ick_lose(IE997, emitlineno, (const char *)NULL);
-    (void) fprintf(fp, "(^ ");
+    (void) fprintf(fp, "(^%d ", np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
@@ -691,9 +691,9 @@ void explexpr(node* np, FILE* fp)
     if (np->opcode - WHIRL + 3 > ick_Base)
       ick_lose(IE997, emitlineno, (const char *)NULL);
     if(np->opcode == WHIRL)
-      (void) fprintf(fp, "(@ ");
+      (void) fprintf(fp, "(@%d ", np->width);
     else
-      (void) fprintf(fp, "(%d@ ", np->opcode - WHIRL + 1);
+      (void) fprintf(fp, "(%d@%d ", np->opcode - WHIRL + 1, np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
@@ -743,7 +743,7 @@ void explexpr(node* np, FILE* fp)
     break;
 
   case C_NOT:
-    (void) fprintf(fp, "(~ ");
+    (void) fprintf(fp, "(~%d ", np->width);
     explexpr(np->rval, fp);
     (void) fprintf(fp, ")");
     break;
@@ -1440,7 +1440,7 @@ void prexpr(node *np, FILE *fp, int freenode)
 
     case C_NOT:
 	(void) fprintf(fp, "(~");
-        tempint=np->rval->width; /* AIS */
+        tempint=np->width; /* AIS */
 	prexpr(np->rval, fp, freenode);
 	if (tempint == ick_Small_digits)
 	    (void) fprintf(fp, " & ick_Max_small)");

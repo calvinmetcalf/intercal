@@ -74,8 +74,8 @@ oil$(EXEEXT_FOR_BUILD): oil-oil.c bconfig.h
 	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o oil$(EXEEXT_FOR_BUILD) oil-oil.c $(LIBS_FOR_BUILD)
 bin2c$(EXEEXT_FOR_BUILD): src/bin2c.c bconfig.h
 	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(INCLUDES) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o bin2c$(EXEEXT_FOR_BUILD) `test -f 'src/bin2c.c' || echo '$(srcdir)/'`src/bin2c.c $(LIBS_FOR_BUILD)
-oil:
-bin2c:
+oil$(EXEEXT):
+bin2c$(EXEEXT):
 
 # Optional libraries are in lib_LIBRARIES, but with a null build rule.
 lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a libick_ecto_b98.a
@@ -119,10 +119,10 @@ dist_man1_MANS = doc/ick.1 doc/convickt.1
 info_TEXINFOS = doc/ick.txi
 
 # How to run splint on this code
-SPLINTOPTS = -I. -Isrc +quiet -warnposix -boolops -predboolint
-splint:
+SPLINTOPTS = -I. -I$(top_srcdir)/src +quiet -warnposix -boolops -predboolint
+splint: $(ick_SOURCES) parser.h
 	@echo "Running splint on ick..."
-	-splint $(SPLINTOPTS) -exportlocal -redef $(ick_SOURCES) 
+	-(for x in $(ick_SOURCES); do echo $(top_srcdir)/$$x; done) | xargs splint $(SPLINTOPTS) -exportlocal -redef
 
 EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              src/ick.h src/ick_lose.h src/oil.h src/pick1.h src/pick2.h \
@@ -130,10 +130,10 @@ EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
              doc/ickstyle.css doc/ick.txt doc/intercal.mm doc/READ.ME \
              doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
-             lexer.c doc/ick.txi doc/ick.txt NEWS README \
+             lexer.c doc/ick.txi doc/ick.txt doc/chipspec.txt NEWS README \
              buildaux/buildconfig buildaux/buildconfig.ac \
              buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
-             buildaux/missing buildaux/ylwrap src/bconfigh.in
+             buildaux/missing buildaux/ylwrap buildaux/bconfigh.in
 
 # It's ugly to distribute the prebuilt files in the root of the
 # distribution.  configure will move these files back again into the
@@ -146,17 +146,17 @@ dist-hook:
 	mv $(distdir)/parser.h $(distdir)/prebuilt
 	mv $(distdir)/lexer.c $(distdir)/prebuilt
 	mv $(distdir)/oil-oil.c $(distdir)/prebuilt
-	@find $(distdir)/pit -perm -u+x -type f -and -not -name regresscheck | xargs rm
+	-find $(distdir)/pit -perm -u+x -type f -and -not -name regresscheck | xargs rm
 	touch $(distdir)/MANIFEST
 	(cd $(distdir); find . | sort > MANIFEST)
 
-# N.B. the parser.y, lexer.l, syslib, headers and skeletons are the
+# N.B. the parser.y, lexer.l, libraries, headers and skeletons are the
 # links made to simplify the build, not the originals
 CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
              syslib.i syslib3.3i syslib4.4i syslib5.5i \
              syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
-             ick_lose.h yuk.h
+             ick_lose.h yuk.h floatlib.i ick_bool.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
 # versions of the prebuilt files. (The source tree versions will
@@ -173,10 +173,10 @@ veryclean: distclean
 	rm -f $(top_srcdir)/buildaux/missing
 	rm -f $(top_srcdir)/buildaux/ylwrap 
 	rm -f $(top_srcdir)/buildaux/Makefile.in
+	rm -f $(top_srcdir)/buildaux/bconfigh.in
+	rm -f $(top_srcdir)/buildaux/configh.in
 	rm -f $(top_srcdir)/aclocal.m4
 	rm -f $(top_srcdir)/configure
-	rm -f $(top_srcdir)/src/bconfigh.in
-	rm -f $(top_srcdir)/src/configh.in
 	rm -rf $(top_srcdir)/autom4te.cache
 	rm -rf $(top_srcdir)/buildaux/autom4te.cache
 
@@ -192,6 +192,13 @@ check-am: ick$(EXEEXT)
 	chmod u+w $(top_srcdir)/pit/tests
 	make -f $(top_srcdir)/pit/Makefile ICK="./ick$(EXEEXT) -b" PIT=$(top_srcdir)/pit test
 
+# Run the fuzztest
+fuzz: ick$(EXEEXT) src/idiotism.oil $(top_srcdir)/etc/interfuzz.pl
+	ICK="./ick$(EXEEXT)" IDIOTISM="$(top_srcdir)/src/idiotism.oil" perl $(top_srcdir)/etc/interfuzz.pl
+
+# Run regression tests, fuzz tests and build tests
+test: fuzz distcheck
+
 # If a documentation file is needed but not available, invoke the doc
 # makefile to build it.
 doc/ick.txt: doc/ick.txi
@@ -202,13 +209,11 @@ echo-version:
 
 # The build system itself is included in the makefile; tell Automake
 # about my tweaking.
-$(top_srcdir)/configure:  $(am__configure_deps)
-	cd $(top_srcdir) && $(AUTOCONF)
-$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/src/bconfigh.in
+$(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/buildaux/bconfigh.in
 	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
 	chmod a+x $(top_srcdir)/buildaux/buildconfig
-$(top_srcdir)/src/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
+$(top_srcdir)/buildaux/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
 	cd $(top_srcdir)/buildaux && $(AUTOHEADER) buildconfig.ac
 	rm -f stamp-h1
 	touch $@
-CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/src/bconfigh.in
+CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/buildaux/bconfigh.in

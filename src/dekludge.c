@@ -463,7 +463,7 @@ void checknodeactbits(node *np)
     /*@-nullderef@*/
     np->optdata = ick_iselect((unsigned)np->lval->optdata, (unsigned)np->rval->optdata);
     /*@=nullderef@*/
-    temp=16;
+    temp=32;
     while(temp--) np->optdata|=(np->optdata>>1); /* fill in gaps in optdata */
     break;
 

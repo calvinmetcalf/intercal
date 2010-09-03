@@ -44,22 +44,30 @@ LICENSE TERMS
 
 /* AIS: split ICKDATADIR from ICKLIBDIR */
 #ifndef ICKINCLUDEDIR
-#define ICKINCLUDEDIR "/usr/local/include"
+# define ICKINCLUDEDIR "/usr/local/include"
 #endif
 #ifndef ICKSYSDIR
-#define ICKSYSDIR "/usr/local/share"
+# ifdef ICKDATADIR
+#  define ICKSYSDIR ICKDATADIR
+# else
+#  define ICKSYSDIR "/usr/local/share"
+# endif
 #endif
 #ifndef ICKCSKELDIR
-#define ICKCSKELDIR "/usr/local/share"
+# ifdef ICKDATADIR
+#  define ICKCSKELDIR ICKDATADIR
+# else
+#  define ICKCSKELDIR "/usr/local/share"
+# endif
 #endif
 #ifndef ICKLIBDIR
-#define ICKLIBDIR "/usr/local/lib"
+# define ICKLIBDIR "/usr/local/lib"
 #endif
 #ifndef ICKBINDIR
-#define ICKBINDIR "/usr/local/bin"
+# define ICKBINDIR "/usr/local/bin"
 #endif
 #ifndef CC
-#define CC "gcc"
+# define CC "gcc"
 #endif
 
 #define ARGSTRING "abcdefghlmoptuvwxyCEFHOPUYX@"
@@ -167,9 +175,11 @@ struct linerange_t {
     int start, end;
     char *libname;
 };
+/* Note! "syslib" must be last in this list, as other parts of perpet.c
+   care about whether syslib in particular was included. */
 struct linerange_t lineranges[] = {
-    {1000, 1999, "syslib"},    /* the system library */
     {5000, 5699, "floatlib"},  /* the floating-point support */
+    {1000, 1999, "syslib"},    /* the system library */
     {0, 0, NULL},
 };
 
@@ -1549,8 +1559,9 @@ static void run_coopt(/*@observer@*/ /*@null@*/ /*@unused@*/ const char* cooptsh
                       /*@observer@*/ /*@unused@*/ const char* binaryname)
 {
   /* Note: Params are marked unused because they may not be used if sh isn't supported. */
-#ifdef HAVE_PROG_SH
-# ifdef HAVE_SYS_INTERPRETER
+  /* Assume that sh exists if #! does; sh is needed to run autoconf, so this would
+     otherwise have to be set by hand anyway. */
+#ifdef HAVE_SYS_INTERPRETER
   if(coopt) /* AIS */
   {
     /* The constant-output optimizer is a form of post-processor.
@@ -1568,7 +1579,6 @@ static void run_coopt(/*@observer@*/ /*@null@*/ /*@unused@*/ const char* cooptsh
 	                             neccesary */
     }
   }
-# endif
 #endif
 }
 
@@ -1786,7 +1796,7 @@ int main(int argc, char *argv[])
   if (!(ick_sysdir = getenv("ICKSYSDIR")))
     ick_sysdir = ICKSYSDIR;
   if (!(ick_cskeldir = getenv("ICKCSKELDIR")))
-    ick_sysdir = ICKCSKELDIR;
+    ick_cskeldir = ICKCSKELDIR;
 /*
   AIS: nothing actually uses this at the moment,
   commenting it out for future use

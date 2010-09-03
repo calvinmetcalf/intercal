@@ -5,10 +5,10 @@ dnl Yes, that is a valid email address. If your mailer doesn't support nested
 dnl comments, then get a better mailer.
 AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[ick])
 AC_CONFIG_SRCDIR([src/abcess.h])
-AC_CONFIG_HEADER([config.h:src/configh.in])
+AC_CONFIG_HEADER([config.h:buildaux/configh.in])
 AC_CONFIG_AUX_DIR([buildaux])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-lzma tar-pax check-news
-		  no-texinfo.tex])
+		  no-texinfo.tex -Wall -Wno-override])
 
 dnl Information about this version of INTERCAL.
 PACKAGE_VERSION=0.29
@@ -26,6 +26,7 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_STDC
+AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([sys/time.h unistd.h stdarg.h])
 AC_CHECK_HEADERS([stdint.h],[HAVE_STDINT_H=1])
 AC_SUBST(HAVE_STDINT_H)
@@ -37,7 +38,6 @@ dnl likewise for _Bool.
 AC_C_CONST
 AC_C_VOLATILE
 AC_CHECK_SIZEOF([long long int],[0])
-AC_CHECK_SIZEOF([_Bool],[0])
 AC_CHECK_SIZEOF([sig_atomic_t],[0],[[#include <signal.h>]])
 AC_HEADER_TIME
 AC_EXEEXT

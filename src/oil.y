@@ -29,20 +29,7 @@ LICENSE TERMS
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
-/* Autoconf lets us know if we have _Bool available, usually. On DJGPP there's
-   an occasional bug that I haven't managed to reproduce that leaves
-   SIZEOF_BOOL as the null string, so detect that ick_first. */
-#if 100 - SIZEOF__BOOL - 1 == 101
-/* The bug happened, so play safe. */
-  typedef int mybool;
-#else
-# if SIZEOF__BOOL > 0
-  typedef _Bool mybool;
-# else
-  typedef int mybool;
-# endif
-#endif
+#include "ick_bool.h"
 
 /* Define strdup if it isn't available */
 #ifndef HAVE_STRDUP
@@ -76,14 +63,14 @@ struct ickstype
 			 there isn't a condition other than maybe mustbemesh */
   const char* nodetypename; /* The name of the type of node this condition matches,
 		         or NULL for a LEXERLEAF */
-  mybool usec;        /* Whether to append the value of c to the condition */
-  mybool mustbemesh;  /* Must this node be a mesh or mesh32? */
-  mybool cxneeded;    /* True means calculate c and x for the node and the
+  bool usec;        /* Whether to append the value of c to the condition */
+  bool mustbemesh;  /* Must this node be a mesh or mesh32? */
+  bool cxneeded;    /* True means calculate c and x for the node and the
 			 condition is on those; false means append 'condition'
 			 to the node itself to form the condition and c and x
 			 aren't needed */
-  mybool width32;     /* Generate a 32-bit node? */
-  mybool ublo;        /* Is this a UBLO (if set, generate conditions
+  bool width32;     /* Generate a 32-bit node? */
+  bool ublo;        /* Is this a UBLO (if set, generate conditions
 			 to check width)? */
   unsigned long c;    /* The value to append to the condition */
   int replnum;        /* Number of this group for replacements */
@@ -102,10 +89,10 @@ typedef struct ickstype *YYSTYPE;
 void splitend(void);
 void splitstart(void);
 
-void treedepthup(YYSTYPE, mybool);
+void treedepthup(YYSTYPE, bool);
 void treefree(YYSTYPE);
 void gennodepath(unsigned, unsigned long);
-mybool treeshapecond(YYSTYPE, mybool);
+bool treeshapecond(YYSTYPE, bool);
 YYSTYPE treenscheck(YYSTYPE, YYSTYPE, int);
 void treecxcond(YYSTYPE);
 void treerepcount(YYSTYPE, int*);
@@ -162,7 +149,7 @@ int yyerror(char const *);
 #define SPLITMAX 20
 int splitcount=SPLITMAX;
 int filenumber=0;
-mybool inloop=0;
+bool inloop=0;
 %}
 
 /* Various conditions can come out from the lexer. The most common is a char,
@@ -244,13 +231,16 @@ optimization: template '-' '>' replacement
      substituting one for the other. (This is an inefficient but general way
      to do this.) One special case is needed; because pointers into the root
      node need to continue pointing there, the temporary node tp is copied
-     member-for-member and then freed again. To make coding optimizations
-     easier, the root stays as the same width no matter what. */
+     member-for-member and then freed again. The root width can change (this
+     is a deviation from previous code), in order to prevent a bug where the
+     new root happens to be a unary. (This means we can get a 16-bit unary
+     applied to 32-bit data; but the optimiser is meant to ensure that this is
+     not problematic.) */
   printf("    tp=newnode();\n");
   treerepcount($4,replcount);
   treerepgen($4,tempmem,replcount);
   printf("    nodefree(np->lval); nodefree(np->rval);\n");
-  printf("    tempw=np->width; *np=*tp; np->width=tempw; free(tp);\n");
+  printf("    *np=*tp; free(tp);\n");
   printf("  } while(0);\n\n");
   /* Free the template and replacement now they're finished being used. */
   treefree($1);
@@ -493,7 +483,7 @@ int yylex(void)
   }
 }
 
-void treedepthup(YYSTYPE v, mybool i)
+void treedepthup(YYSTYPE v, bool i)
 {
   if(!v) return;
   treedepthup(v->n1,i);
@@ -521,7 +511,7 @@ void gennodepath(unsigned depth, unsigned long path)
   }
 }
 
-mybool treeshapecond(YYSTYPE v, mybool firstopt)
+bool treeshapecond(YYSTYPE v, bool firstopt)
 {
   if(!v) return firstopt;
   /* To prevent possibly dereferencing a null pointer, check the root ick_first */

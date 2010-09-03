@@ -3,6 +3,7 @@
    Copyright (C) Alex Smith 2008
    See oil.y for copyright conditions. */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

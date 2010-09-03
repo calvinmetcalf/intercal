@@ -6540,34 +6540,34 @@ with that number are also set.
 @cindex OIL, replacements
 @cindex replacements
 
-Replacements have much the same syntax as patterns.  The expressions are
-parsed in much the same way; however, one peculiarity of replacements is
-that bitwidths must be specified.  @ical{} has a typecaster that figures
-out whether each expression is 16 bits or 32 bits wide, but it runs
-before the optimizer, and as the optimizer can produce expressions whose
-bitwidths don't obey @ical{}'s rules, this information needs to be
-inserted somehow in a replacement.  In @cic{}, it usually doesn't matter
-what the bitwidth is, and in cases where it doesn't matter the normal
-operators (@code{$}, @code{~}, and so on) can be used.  (Note that the
-bit width of the entire replacement is always set to the same bit width
-as the bit width of the expression matched by the pattern; so you don't
-have to worry about the effect on unary logical operators that might be
-operating on the expression being optimized.  This is an exception to
-the normal bitwidth rules for a replacement.)  In cases where it does
-matter (due to @cic{}'s lenient interpretation of bitwidth on mingle
-inputs, the only place it matters is in the input to @ical{} unary
-logical operators), both the bitwidth of the operator and the argument
-on which it operates must be explicitly given, and given as the same
-value; to set the bitwidth of an operator's result, simply write the
-bitwidth (16 or 32 for onespot and twospot respectively) immediately
-after the operator; for instance, @code{!=32} will generate a not-equals
-operation with a 32-bit bitwidth.  If an operator's width is set to 16,
-and during the course of execution of the optimized program, a value
-that doesn't fit into 16 bits is encountered, that's undefined behaviour
-and anything might happen (most likely, though, the program will just
-act as though its width had been set to 32 bits instead); this error
-condition is not detected.  Also note that operators like @code{&32}
-already have a bitwidth specified, so specifying @code{&3232} (or worse,
+Replacements have much the same syntax as patterns.  The expressions
+are parsed in much the same way; however, one peculiarity of
+replacements is that bitwidths must be specified.  @ical{} has a
+typecaster that figures out whether each expression is 16 bits or 32
+bits wide, but it runs before the optimizer, and as the optimizer can
+produce expressions whose bitwidths don't obey @ical{}'s rules, this
+information needs to be inserted somehow in a replacement.  In @cic{},
+it usually doesn't matter what the bitwidth is, and in cases where it
+doesn't matter the normal operators (@code{$}, @code{~}, and so on)
+can be used.  (The bitwidth of the entire replacement may be different
+from the bitwidth of the original, thus leading to, say, a 32-bit
+unary logical operation applied to a ``16-bit'' argument; but this is
+not a problem, as it just means that there's an implied typecast in
+there somewhere.)  In cases where it does matter (due to @cic{}'s
+lenient interpretation of bitwidth on mingle inputs, the only place it
+matters is in the input to @ical{} unary logical operators), both the
+bitwidth of the operator and the argument on which it operates must be
+explicitly given, and given as the same value; to set the bitwidth of
+an operator's result, simply write the bitwidth (16 or 32 for onespot
+and twospot respectively) immediately after the operator; for
+instance, @code{!=32} will generate a not-equals operation with a
+32-bit bitwidth.  If an operator's width is set to 16, and during the
+course of execution of the optimized program, a value that doesn't fit
+into 16 bits is encountered, that's undefined behaviour and anything
+might happen (most likely, though, the program will just act as though
+its width had been set to 32 bits instead); this error condition is
+not detected.  Also note that operators like @code{&32} already have a
+bitwidth specified, so specifying @code{&3232} (or worse,
 @code{&3216}) is not allowed.
 
 @cindex operands, OIL, in replacements
