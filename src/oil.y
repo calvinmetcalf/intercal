@@ -735,7 +735,8 @@ void splitend(void)
 	 "  if(c+c1+c2+c3+c4+c5+c6+c7+c8+c9+r+\n"
 	 "     x+x1+x2+x3+x4+x5+x6+x7+x8+x9) raise(SIGSEGV);\n");
   printf("  return opted;\n}\n");
-  fclose(stdout);
+  /* do not close stdout; freopen implicitly closes it anyway, and explicitly
+     closing it breaks on DOS */
 }
 
 int main(void)
