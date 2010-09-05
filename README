@@ -180,15 +180,22 @@ C-INTERCAL required various information to be specified by the user; the build
 system now figures this all out for itself, so you can relax and not need to
 worry (in theory).
 
-Building on DOS (via DJGPP) and Windows (via Cygwin) both work fine the same
-way as builds on POSIX-like systems like Linux, Mac OS X, and BSD.
+Building on Windows (via Cygwin) works fine much the same way as builds on
+POSIX-like systems like Linux, Mac OS X, and BSD; to build on DOS, via DJGPP,
+use bash as your shell, cd to the buildaux directory, and run the script
+build-dj.sh, which will set things up appropriately for a DJGPP build, then
+do the build itself (into a subdirectory "build" of the main build tree);
+you should use the makefile build/makefile to rebuild from then on, though,
+rather than rerun the script.
 
 I have come across lexes whose default limits for various things aren't high
 enough to handle INTERCAL's various lexing conundrums. In this case, pay
 attention to the error messages they give you, and alter the source file
 src/lexer.l accordingly. This should not happen on most modern systems, as
 most modern lexers allocate memory dynamically and so can handle source files
-of any length.
+of any length. If you don't have a lex-like lexer generator or yacc-like
+parser generator at all, prebuilt versions of the parsers and lexers will be
+used rather than compiling from scratch.
 
 The build now uses your default compiler and compiler options; you can change
 either of these by specifying them as options to configure (for instance,

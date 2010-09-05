@@ -241,6 +241,7 @@ directly to the maintainers.)
 * Obtaining::            How to get a @cic{} distribution to install
 * Unpacking::            What to do with the distribution file
 * Simple Installation::  How to install things the easy way
+* Installation on DOS::  For users of DOS with DJGPP
 * Uninstalling::         If you don't want to use the software
 * Reporting Bugs::       If it doesn't work or you know how to fix it
 * Distributing::         How to make your own @cic{} distribution
@@ -397,7 +398,8 @@ ick-@value{VERSION}}).
 @cindex configuring
 
 There are scripts included in the distribution to automate the process
-of installing, in various ways.  The simplest method of installing is to
+of installing, in various ways.  The simplest method of installing on
+most operating systems (on DOS, @pxref{Installation on DOS}) is to
 use the following routine:
 
 @enumerate
@@ -418,7 +420,7 @@ to build in a subdirectory of the distribution called ``build'').  You
 also specify where you want the files to be installed at this stage;
 the default of @samp{/usr/local} is good for many people, but you may
 want to install elsewhere (in particular, if you want to test out
-C-INTERCAL without installing it, create a new directory somewhere you
+@cic{} without installing it, create a new directory somewhere you
 own and specify that as the place to install it, so the install will
 actually just copy the files into the right structure for use instead
 of installing them).  To specify a location, give the option
@@ -444,7 +446,9 @@ using @command{make install}.  (This is the only step that needs
 root/administrator permissions; so on a system that uses sudo to
 elevate permissions, for instance, write it as @command{sudo make
 install} if you're installing into a directory that you can't write to
-as a non-administrative user.)
+as a non-administrative user.) This step is optional; if you do not
+install @cic{}, you can still run it by directly referencing the exact
+location of the @command{ick} command.
 
 @end enumerate
 
@@ -518,6 +522,115 @@ view the options that you can set on @command{configure}; there's a wide
 range of settings that you can set available there, and one of them may
 be what you want.
 
+@node Installation on DOS
+@section Installation on DOS
+@cindex installing, DOS
+@cindex DOS
+@cindex DJGPP
+
+On DOS-based systems, it's possible to install @cic{} via compiling it
+using DJGPP, a free DOS development system. (You can obtain DJGPP via
+its homepage, at @uref{http://www.delorie.com/djgpp/}.) The process
+for installing it works like this:
+
+@enumerate
+
+@item
+To start with, you will need to install DJGPP and various utilities
+(especially many of the GNU utilities) that come with it. To do this,
+see the instructions on DJGPP's website, and download and unpack any
+additional packages on this list that you did not install as part of
+those instructions (a filename by which the package can be found on
+DJGPP mirrors is given, and a version number with which @cic{} was
+tested is given as part of the filename, but other versions are likely
+to work as well):
+
+@itemize
+
+@item
+Unzip32 (@samp{unzip32.exe}) --- to unpack the other packages
+
+@item
+DJGPP development kit (@samp{v2/djdev203.zip}) --- needed for all
+DJGPP compiles
+
+@item
+CS's DPMI Provider (@samp{v2misc/csdmpi7b.zip}) --- you need some DPMI
+provider to run @cic{} on a plain DOS system, although this is not
+needed on systems such as Microsoft Windows' emulation of DOS which
+already include a DPMI provider
+
+@item
+GNU Binutils (@samp{v2gnu/bnu219b.zip}) --- needed to produce
+executables
+
+@item
+gcc (@samp{v2gnu/gcc444b.zip}) --- used to compile C code
+
+@item
+GNU make (@samp{v2gnu/mak3791b.zip}) --- used to resolve dependencies
+within the build system
+
+@item
+GNU bash (@samp{v2gnu/bsh204b.zip}) --- used to interpret build
+scripts
+
+@item
+GNU Diffutils (@samp{v2gnu/dif20b.zip}) --- used by the build scripts
+
+@item
+GNU Fileutils (@samp{v2gnu/fil41b.zip}) --- used by the build scripts
+
+@item
+GNU Findutils (@samp{v2gnu/find41b.zip}) --- used by the build scripts
+
+@item
+GNU awk (@samp{v2gnu/gwk318b.zip}) --- used by the build scripts
+
+@item
+GNU sed (@samp{v2gnu/sed421b.zip}) --- used by the build scripts
+
+@item
+GNU Shellutils (@samp{v2gnu/shl2011b.zip}) --- used by the build
+scripts
+
+@item
+GNU Textutils (@samp{v2gnu/txt20b.zip}) --- used by the build scripts,
+and sometimes by @cic{} itself too
+
+@end itemize
+
+You might want to install other packages, particularly GNU Bison and
+GNU Flex, in order to be able to rebuild certain parts of the compiler
+if you change them. This is not necessary to simply be able to run
+@cic{} without changing it, though.
+
+@item
+Test your DJGPP install to ensure it works, and make sure you have
+environment variables set up correctly. In addition to the
+@samp{DJGPP} variable that points to your @samp{DJGPP.ENV} file, and
+the @samp{PATH} variable that needs to contain DJGPP's binaries
+directory, you also need to set the @samp{DJDIR} environment variable
+to point to the main DJGPP installation directory.
+
+@item
+Unpack a copy of @cic{} in its own directory, if you haven't
+already (@pxref{Unpacking}).
+
+@item
+Load up a @command{bash} session, change to the @samp{buildaux}
+subdirectory of your main @cic{} directory, and run the command
+@command{build-dj.sh}. This will run the entire @cic{} build system,
+and hopefully end up with executables you can run in the @samp{build}
+subdirectory that will be created in your main @cic{} directory.
+
+@item
+If you wish, you can install @cic{} by using the command @command{make
+install} from the new @samp{build} subdirectory. It will run just fine
+in-place without a need to install, though, if you prefer.
+
+@end enumerate
+
 @node Uninstalling
 @section Uninstalling
 @cindex uninstalling
@@ -549,7 +662,13 @@ will delete any files created by compilation; @command{make distclean}
 will delete those files, and also any files created by configuring.
 It's probably a wise idea to uninstall before doing a distclean,
 though, as otherwise information needed to uninstall will be deleted,
-as that information is generated by @command{configure}.
+as that information is generated by @command{configure}. You can go
+even further and use @command{make veryclean} which will delete not
+only files created by configuring, but the entire build system; doing
+so is not recommended unless you have some method of rebuilding the
+build system from its original sources (a script to do this is
+provided in repository versions of @cic{}, because the generated part
+of the build system is not stored in the repository).
 
 @node Reporting Bugs
 @section Reporting Bugs
@@ -1694,7 +1813,7 @@ BETTER LATE THAN NEVER
 @end quotation
 Oops!  The compiler just noticed that it had a buffer overflow.
 (Normally programs catch buffer overflows before they happen;
-C-INTERCAL catches them just afterwards instead.)  This only happens
+@cic{} catches them just afterwards instead.)  This only happens
 on systems which don't have a modern C standard library. Try using
 shorter or fewer filenames on the command line, to reduce the risk of
 such an overflow.
@@ -1987,7 +2106,7 @@ YOU MUST HAVE ME CONFUSED WITH SOME OTHER COMPILER
 @end quotation
 
 This error occurs just before compile-time if a file is encountered on
-the command line that C-INTERCAL doesn't recognise.  (If this error
+the command line that @cic{} doesn't recognise.  (If this error
 occurs due to a @samp{.a}, @samp{.b98}, @samp{.c}, or @samp{.c99},
 then you forgot to enable the external calls system using @option{-e}
 (@pxref{-e}).)
