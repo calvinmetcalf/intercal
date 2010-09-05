@@ -13,39 +13,39 @@ ick_SOURCES = src/feh2.c src/dekludge.c src/ick_lose.c \
               src/fiddle.c src/perpet.c src/uncommon.c
 nodist_ick_SOURCES = parser.y lexer.l
 parser.y : src/parser.y
-	$(LN_S) `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y parser.y
+	$(LN_S) -f `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y parser.y
 lexer.l : src/lexer.l
-	$(LN_S) `test -f 'src/lexer.l' || echo '$(srcdir)/'`src/lexer.l lexer.l
+	$(LN_S) -f `test -f 'src/lexer.l' || echo '$(srcdir)/'`src/lexer.l lexer.l
 ick-wrap.c : src/ick-wrap.c
-	$(LN_S) `test -f 'src/ick-wrap.c' || echo '$(srcdir)/'`src/ick-wrap.c ick-wrap.c
+	$(LN_S) -f `test -f 'src/ick-wrap.c' || echo '$(srcdir)/'`src/ick-wrap.c ick-wrap.c
 pickwrap.c : src/pickwrap.c
-	$(LN_S) `test -f 'src/pickwrap.c' || echo '$(srcdir)/'`src/pickwrap.c pickwrap.c
+	$(LN_S) -f `test -f 'src/pickwrap.c' || echo '$(srcdir)/'`src/pickwrap.c pickwrap.c
 syslib.i : pit/lib/syslib.i
-	$(LN_S) `test -f 'pit/lib/syslib.i' || echo '$(srcdir)/'`pit/lib/syslib.i syslib.i
+	$(LN_S) -f `test -f 'pit/lib/syslib.i' || echo '$(srcdir)/'`pit/lib/syslib.i syslib.i
 syslib3.3i : pit/lib/syslib3.3i
-	$(LN_S) `test -f 'pit/lib/syslib.3i' || echo '$(srcdir)/'`pit/lib/syslib3.3i syslib3.3i
+	$(LN_S) -f `test -f 'pit/lib/syslib.3i' || echo '$(srcdir)/'`pit/lib/syslib3.3i syslib3.3i
 syslib4.4i : pit/lib/syslib4.4i
-	$(LN_S) `test -f 'pit/lib/syslib.4i' || echo '$(srcdir)/'`pit/lib/syslib4.4i syslib4.4i
+	$(LN_S) -f `test -f 'pit/lib/syslib.4i' || echo '$(srcdir)/'`pit/lib/syslib4.4i syslib4.4i
 syslib5.5i : pit/lib/syslib5.5i
-	$(LN_S) `test -f 'pit/lib/syslib.5i' || echo '$(srcdir)/'`pit/lib/syslib5.5i syslib5.5i
+	$(LN_S) -f `test -f 'pit/lib/syslib.5i' || echo '$(srcdir)/'`pit/lib/syslib5.5i syslib5.5i
 syslib6.6i : pit/lib/syslib6.6i
-	$(LN_S) `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib6.6i syslib6.6i
+	$(LN_S) -f `test -f 'pit/lib/syslib.6i' || echo '$(srcdir)/'`pit/lib/syslib6.6i syslib6.6i
 syslib7.7i : pit/lib/syslib7.7i
-	$(LN_S) `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib7.7i syslib7.7i
+	$(LN_S) -f `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib7.7i syslib7.7i
 floatlib.i : pit/lib/floatlib.i
-	$(LN_S) `test -f 'pit/lib/floatlib.i' || echo '$(srcdir)/'`pit/lib/floatlib.i floatlib.i
+	$(LN_S) -f `test -f 'pit/lib/floatlib.i' || echo '$(srcdir)/'`pit/lib/floatlib.i floatlib.i
 ick_ec.h : src/ick_ec.h
-	$(LN_S) `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
+	$(LN_S) -f `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
 ick_lose.h : src/ick_lose.h
-	$(LN_S) `test -f 'src/ick_lose.h' || echo '$(srcdir)/'`src/ick_lose.h ick_lose.h
+	$(LN_S) -f `test -f 'src/ick_lose.h' || echo '$(srcdir)/'`src/ick_lose.h ick_lose.h
 fiddle.h : src/fiddle.h
-	$(LN_S) `test -f 'src/fiddle.h' || echo '$(srcdir)/'`src/fiddle.h fiddle.h
+	$(LN_S) -f `test -f 'src/fiddle.h' || echo '$(srcdir)/'`src/fiddle.h fiddle.h
 abcess.h : src/abcess.h
-	$(LN_S) `test -f 'src/abcess.h' || echo '$(srcdir)/'`src/abcess.h abcess.h
+	$(LN_S) -f `test -f 'src/abcess.h' || echo '$(srcdir)/'`src/abcess.h abcess.h
 ick_bool.h : src/ick_bool.h
-	$(LN_S) `test -f 'src/ick_bool.h' || echo '$(srcdir)/'`src/ick_bool.h ick_bool.h
+	$(LN_S) -f `test -f 'src/ick_bool.h' || echo '$(srcdir)/'`src/ick_bool.h ick_bool.h
 yuk.h : src/yuk.h
-	$(LN_S) `test -f 'src/ick-ec.h' || echo '$(srcdir)/'`src/yuk.h yuk.h
+	$(LN_S) -f `test -f 'src/ick-ec.h' || echo '$(srcdir)/'`src/yuk.h yuk.h
 ick_LDADD = libidiot.a
 AM_YFLAGS = -d
 # BUILT_SOURCES is used both to make sure parser.h is built early, and to
