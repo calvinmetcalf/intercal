@@ -15,6 +15,11 @@ PACKAGE_VERSION=0.29
 
 dnl Checks for programs.
 AC_PROG_YACC
+dnl Don't assume yacc exists just because bison doesn't (wtf autoconf...)
+if test "x$YACC" == "xyacc"; then
+YACC=
+AC_CHECK_PROG([YACC],[yacc])
+fi
 AC_PROG_CC
 AM_PROG_LEX
 AC_PROG_RANLIB
@@ -84,12 +89,12 @@ chmod a+x coopt.sh
 # Use prebuilt files if necessary, after config.h is generated.
 # Automake is capable of handling the files in question, but they need to
 # be in the directory configure was run in.
-if test ! -n "$LEX"; then
+if test ! -n "$LEX" || echo "$LEX" | grep missing > /dev/null 2>&1; then
   cp $srcdir/prebuilt/lexer.c $ac_pwd/lexer.c
   AC_MSG_WARN([No version of lex was found; using prebuilt lexer.])
   AC_MSG_WARN([Changes to src/lexer.l will be ignored.])
 fi
-if test ! -n "$YACC"; then
+if test ! -n "$YACC" || echo "$YACC" | grep missing > /dev/null 2>&1; then
   cp $srcdir/prebuilt/parser.c $ac_pwd/parser.c
   cp $srcdir/prebuilt/parser.h $ac_pwd/parser.h
   cp $srcdir/prebuilt/oil-oil.c $ac_pwd/oil-oil.c
