@@ -44,7 +44,8 @@ BASE2SOURCES = \
 	$(PIT)/tests/ais2.i \
 	$(PIT)/tests/compucome.i \
 	$(PIT)/tests/hello.i \
-	$(PIT)/tests/ignorret \
+	$(PIT)/tests/ignorret.i \
+	$(PIT)/tests/ignorearray.i \
 	$(PIT)/tests/iogerunds.i \
 	$(PIT)/tests/limits.i \
 	$(PIT)/tests/permute.i \
@@ -57,7 +58,7 @@ BASE2SOURCES = \
 	$(PIT)/tests/testcf.i \
 	$(PIT)/tests/testcreate .i \
 	$(PIT)/tests/testlib2.i \
-	$(PIT)/tests/testonce \
+	$(PIT)/tests/testonce.i \
 	$(PIT)/tests/testsplat.i \
 	$(PIT)/tests/whileadd.i \
 	$(PIT)/tpk.i \
@@ -124,6 +125,7 @@ test: $(TARGETS)
 	@cat $(PIT)/tests/ais2.tst | $(PIT)/tests/ais2 | $(PIT)/regresscheck $(PIT)/tests/ais2 
 	@$(PIT)/tests/count | $(PIT)/regresscheck $(PIT)/tests/count 
 	@$(PIT)/tests/hello | $(PIT)/regresscheck $(PIT)/tests/hello 
+	@$(PIT)/tests/ignorearray | $(PIT)/regresscheck $(PIT)/tests/ignorearray
 	@$(PIT)/tests/ignorret | $(PIT)/regresscheck $(PIT)/tests/ignorret 
 	@$(PIT)/tests/permute | $(PIT)/regresscheck $(PIT)/tests/permute 
 	@$(PIT)/tests/sink 2>&1 | $(PIT)/regresscheck $(PIT)/tests/sink
