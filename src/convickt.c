@@ -43,10 +43,6 @@ extern int ick_clc_cset_convert(const char* in, /*@partial@*/ char* out, const c
 /*@null@*/ const char* ick_clc_cset_ebcdic=0;
 /*@null@*/ const char* ick_clc_cset_latin1=0;
 
-#ifndef ICKDATADIR
-#define ICKDATADIR "/usr/local/share/ick-0.27"
-#endif
-
 /* In case we don't have vsnprintf. */
 void /*@noreturn@*/ ick_lose(const char *m, int n, /*@null@*/ const char *s)
 {
