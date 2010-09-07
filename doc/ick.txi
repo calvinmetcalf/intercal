@@ -1508,8 +1508,8 @@ trying to simulate a goto.
 @quotation
 SAYING 'ABRACADABRA' WITHOUT A MAGIC WAND WON'T DO YOU ANY GOOD
 @end quotation
-Your program asked to include the system library (by specifying a line
-number from 1000 to 1999 inclusive without including a line with that
+Your program asked to include a system library (by specifying a line
+number in a magic range without including a line with that
 number), but due to installation problems the compiler couldn't find the
 system library to include.  You could try using the @option{-u}
 (@pxref{-u}) option to see where the compiler's looking; that may give
@@ -1568,10 +1568,9 @@ via the external calls system).)
 SO@!  65535 LABELS AREN'T ENOUGH FOR YOU?
 @end quotation
 
-Legal values for line labels are 1 to 65535 (with values from 1000 to
-1999 reserved if you want to use the system library, and 1600 to 1699
-reserved if you're using other expansion libraries).  This error comes
-up if you use nonpositive or twospot values for a line label.
+Legal values for line labels are 1 to 65535 (certain subranges are
+reserved for system and expansion libraries).  This error comes up if
+you use nonpositive or twospot values for a line label.
 
 @ieanchor E200
 @cindex variable, illegal number
