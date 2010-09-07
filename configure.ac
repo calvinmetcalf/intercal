@@ -53,6 +53,51 @@ AC_TYPE_SIZE_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 
+# Some compilers (correctly according to the standard, but dubiously for
+# actual use in code) dislike mixing _Bool and varargs.
+if test "x$ac_cv_type__Bool" == "xyes"
+then
+AC_MSG_CHECKING([[whether booleans can be passed via varargs]])
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <stdlib.h>
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+void test(int x, ...)
+#else
+#include <varargs.h>
+void test(va_alist) va_dcl
+#endif
+{
+  int y,z;
+  _Bool b;
+  va_list ap;
+#ifdef HAVE_STDARG_H
+  va_start(ap, x);
+  y = x;
+#else
+  va_start(ap);
+  y = va_arg(ap, int);
+#endif
+  b = va_arg(ap, _Bool);
+  z = va_arg(ap, int);
+  if(b && x != z) exit(2);
+  if(!b && x == z) exit(3);
+}
+]],[[
+_Bool match = (_Bool)1;
+_Bool nomatch = (_Bool) 0;
+test(12345,match,12345);
+test(23456,nomatch,1234);
+exit(0);
+]])],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)
+AC_DEFINE([BOOL_VARARGS_BROKEN],[],dnl
+[Define if _Bool works but cannot be passed via varargs.])
+],[AC_MSG_RESULT([[unknown in a cross-compile, assuming no]])
+AC_DEFINE([BOOL_VARARGS_BROKEN],[],dnl
+[Define if _Bool works but cannot be passed via varargs.])
+])
+fi
+
 AC_MSG_CHECKING([[whether yyrestart() is needed]])
 # Write a lex program that will cause an error if yyrestart exists.
 echo '%%

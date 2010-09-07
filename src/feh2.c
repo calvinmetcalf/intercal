@@ -2099,8 +2099,13 @@ void emit(tuple *tn, FILE *fp)
 	  dim++;
 	(void) fprintf(fp, "\t""ick_resize(");
 	prvar(np->lval, fp, 1);
+#ifdef BOOL_VARARGS_BROKEN
+	(void) fprintf(fp, ", (int)%s[%lu]", nameof(np->lval->opcode, forgetbits),
+		       np->lval->constant);
+#else
 	(void) fprintf(fp, ", %s[%lu]", nameof(np->lval->opcode, forgetbits),
 		       np->lval->constant);
+#endif
 	(void) fprintf(fp, ", %d", dim);
 	for (sp = np->rval; sp; sp = sp->rval) {
 	  (void) fprintf(fp, ", (size_t)");

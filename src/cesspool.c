@@ -632,7 +632,11 @@ void ick_resize(va_alist) va_dcl
   type = va_arg(ap, unsigned int);
 #endif
   a = va_arg(ap, ick_array*);
+#ifdef BOOL_VARARGS_BROKEN
+  forget = (bool)va_arg(ap, int);
+#else
   forget = va_arg(ap, bool);
+#endif
 
   /* AIS: a->dims is no longer initialised. So initialise it here if
      it isn't already initialised, with an annotation to explain that
