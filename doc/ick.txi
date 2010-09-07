@@ -3901,19 +3901,41 @@ expression.)
 @node System Libraries
 @chapter System Libraries
 @cindex system libraries
-@cindex syslib, floatlib
+
+Some programming support libraries may be included automatically at
+the end of your program by the @cic{} compiler. While such a
+convenience feature might be judged not in the spirit of @ical{}, the
+required level of perversity is arguably restored by the way inclusion
+is triggered: whenever your program refers to a line from specified
+magic ranges without defining any line in those ranges in the program.
+
+(@clcic{} does not have this feature, but it is trivial to concatenate
+a copy of any desire library onto the end of the program.)
+
+The following table maps magic line ranges to systen libraries.
+Descriptions of the libraries follow it.
+
+@menu
+* syslib::            Base system library
+* floatlib::          Floating-point library
+@end menu
+
+@multitable @columnfractions .1 .1 .1 .6
+@headitem From @tab To @tab Versions @tab Description
+@item (1000) @tab (1999) @tab All @tab
+Basic System Library
+@item (5000) @tab (5999) @tab >=0.29 @tab
+Floatring Point Library
+@end multitable
+
+@node syslib
+@section syslib
+@cindex syslib
 
 @portability{yes, all versions, no, all versions}
 
 @ical{} has a system library, called @samp{syslib} (versions for bases
-other than 2 will have a numeric suffix on the name).  It is included
-automatically at the end of your program by the compiler whenever your
-program refers to a line from (1000) to (1999) without defining any
-line in that range in the program.  (Although it is not added
-automatically by the compiler in @clcic{}, it is trivial to
-concatenate a copy onto the end of the program; copies of the system
-library are available from many sources on the Internet, including a
-version in the example code that comes with @cic{}.)
+other than 2 will have a numeric suffix on the name). 
 
 The intention of the system library is to provide a range of useful
 capabilities, like multiplication, that can otherwise be hard to write
@@ -4028,12 +4050,18 @@ speed, rather than the default version (which is written in @ical{}).
 To do this, use the command line options @option{-eE} (before the
 @ical{} file), and @option{syslibc} (at the end of the command line).
 
+@node floatlib
+@section floatlib
+@cindex floatlib
+
+@portability{yes, all versions, no, all versions}
+
 @ical{} also has a floating-point library, called @samp{floatlib},
 presently available only in base 2. It is used by several of the
 demonstration programs shipped with the distribution. In versions
 after 0.28 it is included automatically at the end of your program by
 the compiler whenever your program refers to a line from (5000) to
-(1999) without defining any line in that range in the program.
+(5999) without defining any line in that range in the program.
 
 Here is a summary of routines in floatlib.i:
 
