@@ -27,7 +27,7 @@ typedef int_fast8_t bool;
 typedef int bool;
 #   endif
 #  else
-typedef _Bool bool
+typedef _Bool bool;
 #  endif
 #  define true 1
 #  define false 0

@@ -69,7 +69,7 @@
 
 ; Reducing constants inside a C or operation can help to recognize idioms
 [cfoldintoorinand]
-(((_1) | #{(x != x & x3)}2) & #{1}3)->(((_1) | #{x2 & x3}0) & _3)
+(((_1) | #{(x != (x & x3))}2) & #{1}3)->(((_1) | #{x2 & x3}0) & _3)
 
 ; Binary bitwise optimizations
 [cbinand]
