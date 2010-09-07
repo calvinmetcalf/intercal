@@ -157,7 +157,7 @@ Basic @ical{} features
 * Syntax::                          Holding statements together
 * Expressions::                     Operators, operands, and grouping
 * Statements::                      What an @ical{} statement can do
-* System Library::                  Pre-existing @ical{} routines
+* System Libraries::                Pre-existing @ical{} routines
 
 @ical{} dialects and extensions
 * TriINTERCAL::                     @ical{} in non-binary bases
@@ -3898,10 +3898,10 @@ a label, and so that situation should be avoided in portable code.
 to use computed @code{COME FROM}s or @code{NEXT FROM}s with a constant
 expression.)
 
-@node System Library
-@chapter System Library
-@cindex system libary
-@cindex syslib
+@node System Libraries
+@chapter System Libraries
+@cindex system libraries
+@cindex syslib, floatlib
 
 @portability{yes, all versions, no, all versions}
 
@@ -4027,6 +4027,87 @@ possible to use a version of the system library written in C for
 speed, rather than the default version (which is written in @ical{}).
 To do this, use the command line options @option{-eE} (before the
 @ical{} file), and @option{syslibc} (at the end of the command line).
+
+@ical{} also has a floating-point library, called @samp{floatlib},
+presently available only in base 2. It is used by several of the
+demonstration programs shipped with the distribution. In versions
+after 0.28 it is included automatically at the end of your program by
+the compiler whenever your program refers to a line from (5000) to
+(1999) without defining any line in that range in the program.
+
+Here is a summary of routines in floatlib.i:
+
+@multitable @columnfractions .1 .8
+@headitem Line @tab Description
+@item (5000) @tab
+:3 <- :1 plus :2
+@item (5010) @tab
+:3 <- :1 minus :2
+@item (5020) @tab
+:2 <- the integer part of :1, :3 <- the fractional part of :1
+@item (5030) @tab
+:3 <- :1 times :2
+@item (5040) @tab
+:3 <- :1 divided by :2
+@item (5050) @tab
+:3 <- :1 modulo :2
+@item (5060) @tab
+:2 <- :1 cast from a two's-complement integer into a floating-point number
+@item (5070) @tab
+:2 <- :1 cast from a floating-point number into the nearest two's-complement ineger
+@item (5080) @tab
+:2 <- :1 cast from a floating-point number into a decimal representation in scientific notation
+@item (5090) @tab
+:2 <- :1 cast from a decimal representation in scientific notation into a floating-point number
+@item (5100) @tab
+:2 <- the square root of :1
+@item (5110) @tab
+:2 <- the natural logarithm of :1
+@item (5120) @tab
+:2 <- e to the power of :1 (the exponential function)
+@item (5130) @tab
+:3 <- :1 to the power of :2
+@item (5200) @tab
+:2 <- sin :1
+@item (5210) @tab
+:2 <- cos :1
+@item (5220) @tab
+:2 <- tan :1
+@item (5400) @tab
+:1 <- uniform random number between zero and one exclusive
+@item (5410) @tab
+:2 <- :1 times phi
+@item (5419) @tab
+:2 <- :1 divided by phi
+@end multitable
+
+Note: All of the above routines except (5020), (5060), (5080), (5200),
+(5210), and (5400) also modify .5 as follows: .5 will contain #3 if
+the result overflowed or if the arguments were out of domain, #2 if
+the result underflowed, #1 otherwise. (See below.)
+
+The INTERCAL floating-point library uses the IEEE format for 32-bit
+floating-point numbers, which uses bit 31 as a sign bit (1 being
+negative), bits 30 through 23 hold the exponent with a bias of 127,
+and bits 22 through 0 contain the fractional part of the mantissa with
+an implied leading 1. In mathematical notation:
+
+@samp{N = (1.0 + fraction) * 2^(exponent - 127) * -1^sign}
+
+Thus the range of floating-point magnitudes is, roughly, from
+5.877472*10^-39 up to 6.805647*10^38, positive and negative. Zero is
+specially defined as all bits 0. (Actually, to be precise, zero is
+defined as bits 30 through 0 as being 0. Bit 31 can be 1 to represent
+negative zero, which the library generally treats as equivalent to
+zero, though don't hold me to that.)
+
+Note that, contrary to the IEEE standard, exponents 0 and 255 are not
+given special treatment (besides the representation for zero). Thus
+there is no representation for infinity or not-a-numbers, and there is
+no gradual underflow capability. Conformance with widely-accepted
+standards was not considered to be a priority for an INTERCAL library.
+(The fact that the general format conforms to IEEE at all is due to
+sheer pragmatism.)
 
 @ifset notsplit
 @partheading{PART III: @ical{} DIALECTS AND EXTENSIONS}
@@ -5868,7 +5949,7 @@ completely different way.
 @cindex C, system library
 
 @option{syslibc} is an implementation of the base-2 @ical{} system
-library in C (@pxref{System Library}); using it in programs running in
+library in C (@pxref{System Libraries}); using it in programs running in
 other bases is accepted by the compiler, but likely to produce
 unpredictable results.  When using this expansion library, you also
 need to give the @option{-E} option (@pxref{-E+,,-E}) so that the main
