@@ -5566,18 +5566,18 @@ must be compiled.  (After the library has been compiled, then you will
 need to reinstall @cic{}; however, you will not need to recompile
 @cic{}.)
 
-At present, only the cfunge Funge-98 interpreter can be converted into
-a library suitable for use by @cic{}; also, doing this is only
-supported on POSIX systems (although if someone gets it to work on
-DOS/Windows, the author of this manual would be interested to hear
-about it.)  Also, a source-code distribution (rather than a binary
-distribution) is needed.  One way to obtain the latest cfunge sources
-is via the bzr version-control system, using the following command
-(correct as of the time of writing, but as always, links can become
-dead):
+At present, only the cfunge Funge-98 interpreter
+(@uref{https://launchpad.net/cfunge/+index}) can be converted into a
+library suitable for use by @cic{}; also, doing this is only supported
+on POSIX systems (although if someone gets it to work on DOS/Windows,
+the author of this manual would be interested to hear about it.)
+Also, a source-code distribution (rather than a binary distribution)
+is needed.  One way to obtain the latest cfunge sources is via the bzr
+version-control system, using the following command (correct as of the
+time of writing, but as always, links can become dead):
 
 @example
-bzr branch http://rage.kuonet.org/~anmaster/bzr/cfunge
+bzr branch lp:cfunge
 @end example
 
 (As a licensing note, note that cfunge is licensed under the GNU
