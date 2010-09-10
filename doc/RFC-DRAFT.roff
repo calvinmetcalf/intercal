@@ -1,0 +1,185 @@
+.pl 10.0i
+.po 0
+.ll 7.2i
+.lt 7.2i
+.nr LL 7.2i
+.nr LT 7.2i
+.ds LF Raymond
+.ds RF FORMFEED[Page %]
+.ds LH Network Working Group
+.ds RH April 1st, 2011
+.ds CH IFFY encoding
+.ds CF 
+.hy 0
+.nh
+.ad l
+.in 0
+
+.nf
+.tl 'Network Working Group''E. Raymond'
+.tl 'Request for comments: XXXX''(ECSL)'
+.tl 'Category: Informational''April 1, 2011'
+.fi
+
+.ce 2
+IFFY Encoding For Transmission of INTERCAL Code In IPV6 Addresses
+.fi
+.in 3
+
+
+.ti 0
+Status of this Memo
+
+This memo provides information for the Internet community.  It does
+not specify an Internet standard of any kind.  Distribution of this
+memo is unlimited.
+
+
+.ti 0
+Copyright and License Notice\" Boilerplate from December 2009
+
+Copyright (c) 2010 IETF Trust and the persons identified as the document authors. All rights reserved.
+
+This document is subject to BCP\078 and the IETF Trust's Legal Provisions Relating to IETF Documents \%(http://trustee.ietf.org/license-info) in effect on the date of publication of this document. Please review these documents carefully, as they describe your rights and restrictions with respect to this document. Code Components extracted from this document must include Simplified BSD License text as described in Section\04.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.
+
+
+.bp
+.ti 0
+Abstract
+
+A method for embedding INTERCAL code snippets in IPV6 hexadectets is presented. The utility of this technique should be obvious.
+
+.\" \# TD4  -- Set TOC depth by altering this value (TD5 = depth 5)
+.\" \# TOC  -- Beginning of auto updated Table of Contents
+.in 0
+Table of Contents
+
+.nf
+   1  Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+      1.1  Terminology . . . . . . . . . . . . . . . . . . . . . . . . 3
+   2. IFFY encoding  . . . . . . . . . . . . . . . . . . . . . . . . . 3
+      2.1  Prerequisites . . . . . . . . . . . . . . . . . . . . . . . 3
+      2.2  Procedure . . . . . . . . . . . . . . . . . . . . . . . . . 4
+   3  Security Considerations  . . . . . . . . . . . . . . . . . . . . 5
+   4  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . . 5
+   5  References . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+      5.1  Normative References  . . . . . . . . . . . . . . . . . . . 5
+      5.2  Informative References  . . . . . . . . . . . . . . . . . . 5
+   6. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . . 5
+   Author's Addresses  . . . . . . . . . . . . . . . . . . . . . . . . 5
+.fi
+.in 3
+
+.\" \# ETC -- End of auto updated Table of Contents
+
+.bp
+.ti 0
+1  Introduction
+
+Since 1972 INTERCAL has presented an extreme example of exceptional qualities in programming-language design. For historical reasons, the language employs a syntax that makes extensive use of characters that are not merely special but downright bizarre.  Consult [REVISED] and [REVAMPED] for a reference on INTERCAL and its character set.
+
+Building on the specifications of [RFC1294], we present a means of encoding lines of INTERCAL code in the 128 bits of an IPV6 address using a base-85 encoding which, for no particular reason, we call IFFY. We are aware that this name violates longstanding tradition by not being a TLA [RFC5513], but INTERCAL has previously violated so many other traditions (as well as any notion of sanity) that this can hardly be considered a significant defect.
+
+.ti 0
+1.1  Terminology
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
+
+We caution that IFFY must be carefully distinguished from IFFI, the fingerprint used in C-INTERCAL for managing external calls to a Funge-98 interpreter.  If the preceding sentence made no sense to you whatsoever, consider yourself extremely fortunate.
+
+.ti 0
+2. IFFY encoding
+
+.ti 0
+2.1  Prerequisites
+
+Conformant implementations MUST implement [RFC1924] encoding in order to decode an IPV6 address into the correct representation of an INTERCAL statement.  For purposes of this specification, we will implicate the author of that RFC by referring to the preceding transcoding as a 'forward Elz transform'.  
+
+Conformant implementations MUST implement the inverse of [RFC1924] encoding in order to encode an INTERCAL statement into an IPV6 address.   For purposes of this specification, we to the preceding transcoding as a 'reverse Elz transform'.  In either case, Elz to pay.
+
+Conformant implementation SHALL begin by expressing the INTERCAL source code in the 7-bit ASCII "Atari" syntax. Support for the 8-bit EBCDIC Princeton syntax and 8-bit Latin-1 Princeton syntax are beyond the scope of this specification, and support for the 5-bit
+Baudot Princeton syntax with shift codes is right out.
+
+.ti 0
+2.2  Procedure
+
+The IFFY encoding of an INTERCAL statement proceeds in the following steps:
+
+   1. Transcoding of INTERCAL source to an RFC1924-compatible format
+
+   2. Application of a reverse Elz transform to the transcoded version.
+
+To perform an IFFY decode of an IPV6 address, simply reverse this: apply a forward 
+Elz transform to the address, then reverse-transcode the resulting string.  
+
+Certain characters used in the Atari INTERCAL syntax are omitted from the range of the forward Elz transform and must therefore be transcoded before the reverse can be applied.  These characters are as follows:
+
+Double quote, aka ASCII codepoint 34 decimal, aka INTERCAL "rabbit ears".  We encode this as backquote, aka ASCII codepoint 96 decimal, aka INTERCAL backspark,
+
+Single quote, aka ASCII codepoint 39 decimal, aka INTERCAL "spark".  We encode this as pipe, aka ASCII codepoint 124, aka INTERCAL "spike".
+
+Comma, aka ASCII codepoint 46 decimal, aka INTERCAL "tail". We encode this as circumflex. aka ASCII codepoint 94, aka INTERCAL "backspark"
+
+Because the reverse Elz transform imposes a limit of 20 characters on the length of string that can be encoded in an IPV6 address, and INTERCAL statements can be longer than this, the IFFY encoding requires an additional special character: equal sign, aka ASCII code point 61 decimal, aka INTERCAL "half-mesh".  This indicates that the encoding is continued at next address.
+
+.bp
+.ti 0
+3  Security Considerations
+
+INTERCAL is well known to promote (job) security, if at the expense of an occasional dose of a strong antipsychotic.  IFFY encoding adds an additional steganographic layer; lacking prior knowledge that addresses are being used to encode INTERCAL, attackers will be unable to derange themselves by contemplating its actual semantics.  Additionally, IFFY opens up some novel possibilities for hiding the implementation of sensitive algorithms, e.g. in routing tables.
+
+
+.ti 0
+4  IANA Considerations
+
+IFFY protocol does not require an IANA registry for operation and, indeed, IANA registrars would be well advised to refrain from considering it too closely.
+
+
+.ti 0
+5  References 
+
+.ti 0 
+5.1  Normative References
+
+.in 15
+.ti 3
+[RFC2119]   S. Bradner, "Key words for use in RFCs to Indicate Requirement Levels", BCP\014, RFC\02119, March 1997.
+
+.ti 3
+[RFC1924]   R. Elz, "A Compact Representation of IPv6 Addresses", April 1996
+
+.ti 3
+[REVISED]   D. Woods, J. Lyons, L. Howell, E. Raymond, "The INTERCAL programming language Revised Reference Manual", 1973-2010
+
+.ti 3
+[REVAMPED]  A. Smith, "The INTERCAL Programming Language: Revampred Reference Manual", 2007
+.in 3
+
+
+.ti 0
+5.2  Informative References
+
+.in 15
+.ti 3
+[RFC5133]   A. Farrel, "IANA Considerations for Three Letter Acronyms", RFC\05133, April 2009.
+.in 3
+
+.ti 0
+6. Acknowledgements
+
+The author is pleased to acknowledge Ken Burnside for pointing out that INTERCAL and RFC1924 are such a natural match, and promises to get Ken for that if it's the last thing he does.
+
+
+.ti 0
+Author's Addresses
+
+.sp
+.nf
+Eric S. Raymond
+Eric Conpiracy Secret Labs
+Malvern, Pennsylvania 19355
+
+EMail: esr@thyrsus.com
+.sp
+.fi
+

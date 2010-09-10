@@ -49,12 +49,15 @@ original.txt: intercal.mm
 
 # Don't delete *.txt here - not while we have asciidoc text masters, anyway
 clean:
-	rm -f *.ps *.refs* ick.in* ick.txt ick.htm ick.pdf *.tmp
+	rm -f *.ps *.refs* ick.in* ick.txt RFC-DRAFT.txt ick.htm ick.pdf *.tmp
 	rm -rf html
 
 ick.inf: ick.txi fdl-1-2.txi
 	makeinfo -o ick.info ick.txi
 	-mv ick.info ick.inf
+
+RFC-DRAFT.txt: RFC-DRAFT.roff
+	groff -Tascii RFC-DRAFT.roff | col -x -b >RFC-DRAFT.txt
 
 # The --css-include is skipped here because it seems to cause makeinfo
 # to leak open file space, and it fails with an EMFILE error. Instead,
