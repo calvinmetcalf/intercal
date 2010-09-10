@@ -34,6 +34,8 @@ syslib7.7i : pit/lib/syslib7.7i
 	$(LN_S) -f `test -f 'pit/lib/syslib.7i' || echo '$(srcdir)/'`pit/lib/syslib7.7i syslib7.7i
 floatlib.i : pit/lib/floatlib.i
 	$(LN_S) -f `test -f 'pit/lib/floatlib.i' || echo '$(srcdir)/'`pit/lib/floatlib.i floatlib.i
+ecto_b98.c : pit/explib/ecto_b98.c
+	$(LN_S) -f `test -f 'pit/explib/ecto_b98.c' || echo '$(srcdir)/'`pit/explib/ecto_b98.c ecto_b98.c
 ick_ec.h : src/ick_ec.h
 	$(LN_S) -f `test -f 'src/ick_ec.h' || echo '$(srcdir)/'`src/ick_ec.h ick_ec.h
 ick_lose.h : src/ick_lose.h
@@ -52,7 +54,7 @@ AM_YFLAGS = -d
 # create symlinks used by ick to find files if it's run without first being
 # installed.
 BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib3.3i syslib4.4i \
-                syslib5.5i syslib6.6i syslib7.7i floatlib.i \
+                syslib5.5i syslib6.6i syslib7.7i floatlib.i ecto_b98.c \
 		ick_ec.h fiddle.h abcess.h ick_bool.h ick_lose.h yuk.h
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
@@ -80,7 +82,9 @@ bin2c$(EXEEXT):
 # Optional libraries are in lib_LIBRARIES, but with a null build rule.
 lib_LIBRARIES = libick.a libickmt.a libickec.a libyuk.a libick_ecto_b98.a
 libick_ecto_b98_a_SOURCES =
-libick_ecto_b98.a:
+libick_ecto_b98.a: etc/libick_ecto_b98.a
+	-(test -f etc/libick_ecto_b98.a || test -f $(srcdir)/etc/libick_ecto_b98.a) && $(LN_S) -f `test -f 'etc/libick_ecto_b98.a' || echo '$(srcdir)/'`etc/libick_ecto_b98.a libick_ecto_b98.a
+etc/libick_ecto_b98.a:
 libick_a_SOURCES = src/cesspool.c src/numerals.c src/ick_lose.c src/fiddle.c \
                    src/arrgghh.c src/clc-cset.c src/uncommon.c
 libick_a_LIBADD = atari.o baudot.o ebcdic.o latin1.o
@@ -156,7 +160,7 @@ CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
              syslib.i syslib3.3i syslib4.4i syslib5.5i \
              syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
-             ick_lose.h yuk.h floatlib.i ick_bool.h
+             ick_lose.h yuk.h floatlib.i ecto_b98.c ick_bool.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
 # versions of the prebuilt files. (The source tree versions will
