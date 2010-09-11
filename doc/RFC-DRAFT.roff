@@ -22,7 +22,7 @@
 .fi
 
 .ce 2
-IFFY Encoding For Transmission of INTERCAL Code In IPV6 Addresses
+IFFY Encoding For Transmission of INTERCAL Code In IPv6 Addresses
 .fi
 .in 3
 
@@ -47,7 +47,7 @@ This document is subject to BCP\078 and the IETF Trust's Legal Provisions Relati
 .ti 0
 Abstract
 
-A method for embedding INTERCAL code snippets in IPV6 hexadectets is presented. The utility of this technique should be obvious.
+A method for embedding INTERCAL code snippets in IPv6 hexadectets is presented. The utility of this technique should be obvious.
 
 .\" \# TD4  -- Set TOC depth by altering this value (TD5 = depth 5)
 .\" \# TOC  -- Beginning of auto updated Table of Contents
@@ -78,7 +78,7 @@ Table of Contents
 
 Since 1972 INTERCAL has presented an extreme example of exceptional qualities in programming-language design. For historical reasons, the language employs a syntax that makes extensive use of characters that are not merely special but downright bizarre.  Consult [REVISED] and [REVAMPED] for a reference on INTERCAL and its character set.
 
-Building on the specifications of [RFC1294], we present a means of encoding lines of INTERCAL code in the 128 bits of an IPV6 address using a base-85 encoding which, for no particular reason, we call IFFY. We are aware that this name violates longstanding tradition by not being a TLA [RFC5513], but INTERCAL has previously violated so many other traditions (as well as any notion of sanity) that this can hardly be considered a significant defect.
+Building on the specifications of [RFC1294], we present a means of encoding lines of INTERCAL code in the 128 bits of an IPv6 address using a base-85 encoding which, for no particular reason, we call IFFY. We are aware that this name violates longstanding tradition by not being a TLA [RFC5513], but INTERCAL has previously violated so many other traditions (as well as any notion of sanity) that this can hardly be considered a significant defect.
 
 .ti 0
 1.1  Terminology
@@ -93,9 +93,9 @@ We caution that IFFY must be carefully distinguished from IFFI, the fingerprint 
 .ti 0
 2.1  Prerequisites
 
-Conformant implementations MUST implement [RFC1924] encoding in order to decode an IPV6 address into the correct representation of an INTERCAL statement.  For purposes of this specification, we will implicate the author of that RFC by referring to the preceding transcoding as a 'forward Elz transform'.  
+Conformant implementations MUST implement [RFC1924] encoding in order to decode an IPv6 address into the correct representation of an INTERCAL statement.  For purposes of this specification, we will implicate the author of that RFC by referring to the preceding transcoding as a 'forward Elz transform'.  
 
-Conformant implementations MUST implement the inverse of [RFC1924] encoding in order to encode an INTERCAL statement into an IPV6 address.   For purposes of this specification, we to the preceding transcoding as a 'reverse Elz transform'.  In either case, Elz to pay.
+Conformant implementations MUST implement the inverse of [RFC1924] encoding in order to encode an INTERCAL statement into an IPv6 address.   For purposes of this specification, we to the preceding transcoding as a 'reverse Elz transform'.  In either case, Elz to pay.
 
 Conformant implementation SHALL begin by expressing the INTERCAL source code in the 7-bit ASCII "Atari" syntax. Support for the 8-bit EBCDIC Princeton syntax and 8-bit Latin-1 Princeton syntax are beyond the scope of this specification, and support for the 5-bit
 Baudot Princeton syntax with shift codes is right out.
@@ -109,7 +109,7 @@ The IFFY encoding of an INTERCAL statement proceeds in the following steps:
 
    2. Application of a reverse Elz transform to the transcoded version.
 
-To perform an IFFY decode of an IPV6 address, simply reverse this: apply a forward 
+To perform an IFFY decode of an IPv6 address, simply reverse this: apply a forward 
 Elz transform to the address, then reverse-transcode the resulting string.  
 
 Certain characters used in the Atari INTERCAL syntax are omitted from the range of the forward Elz transform and must therefore be transcoded before the reverse can be applied.  These characters are as follows:
@@ -120,13 +120,13 @@ Single quote, aka ASCII codepoint 39 decimal, aka INTERCAL "spark".  We encode t
 
 Comma, aka ASCII codepoint 46 decimal, aka INTERCAL "tail". We encode this as circumflex. aka ASCII codepoint 94, aka INTERCAL "backspark"
 
-Because the reverse Elz transform imposes a limit of 20 characters on the length of string that can be encoded in an IPV6 address, and INTERCAL statements can be longer than this, the IFFY encoding requires an additional special character: equal sign, aka ASCII code point 61 decimal, aka INTERCAL "half-mesh".  This indicates that the encoding is continued at next address.
+Because the reverse Elz transform imposes a limit of 20 characters on the length of string that can be encoded in an IPv6 address, and INTERCAL statements can be longer than this, the IFFY encoding requires an additional special character: equal sign, aka ASCII code point 61 decimal, aka INTERCAL "half-mesh".  This indicates that the encoding is continued at next address.
 
 .bp
 .ti 0
 3  Security Considerations
 
-INTERCAL is well known to promote (job) security, if at the expense of an occasional dose of a strong antipsychotic.  IFFY encoding adds an additional steganographic layer; lacking prior knowledge that addresses are being used to encode INTERCAL, attackers will be unable to derange themselves by contemplating its actual semantics.  Additionally, IFFY opens up some novel possibilities for hiding the implementation of sensitive algorithms, e.g. in routing tables.
+INTERCAL is well known to promote (job) security, if at the expense of an occasional dose of a strong antipsychotic.  IFFY encoding adds an additional steganographic layer; lacking prior knowledge that addresses are being used to encode INTERCAL, attackers will be unable to derange themselves by contemplating its actual semantics.  Additionally, IFFY opens up some novel possibilities for hiding the implementation of sensitive algorithms, e.g. in IPv6 routing tables.
 
 
 .ti 0
@@ -176,7 +176,7 @@ Author's Addresses
 .sp
 .nf
 Eric S. Raymond
-Eric Conpiracy Secret Labs
+Eric Conspiracy Secret Labs
 Malvern, Pennsylvania 19355
 
 EMail: esr@thyrsus.com
