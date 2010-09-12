@@ -17,8 +17,8 @@ buildaux/depcomp
 buildaux/install-sh
 buildaux/missing
 buildaux/ylwrap
-src/bconfigh.in
-src/configh.in
+buildaux/bconfigh.in
+buildaux/configh.in
 # Executables produced by standard build
 bin2c
 convickt
@@ -42,3 +42,4 @@ doc/*.htm
 doc/*.ps
 doc/*.odt
 doc/*.txt
+doc/*.pdf
