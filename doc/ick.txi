@@ -2025,6 +2025,16 @@ yourself from the cfunge sources.  For more information, see
 @ref{Creating the Funge-98 Library}.)
 
 @ieanchor E990
+@cindex unsupported file type
+@cindex invocation flag, unnown
+@quotation
+FLAG ETIQUETTE FAILURE BAD SCOUT NO BISCUIT
+@end quotation
+
+This error occurs at runtime if an INTERCAL program was passed an unknown
+option flag.
+
+@ieanchor E991
 @cindex out of memory, multithreading
 @cindex out of memory, backtracking
 @cindex multithreading, out of memory
@@ -2039,16 +2049,6 @@ multithreaded or backtracking, these are obviously limited to 1 and 0
 respectively).  However, your computer may not be able to cope; if it
 runs out of memory in the multithreader, it will cause this error at
 runtime.
-
-@ieanchor E991
-@cindex unsupported file type
-@cindex invocation flag, unnown
-@quotation
-FLAG ETIQUETTE FAILURE BAD SCOUT NO BISCUIT
-@end quotation
-
-This error occurs at runtime if an INTERCAL program was passed an unknown 
-option flag.
 
 @ieanchor E993
 @cindex @code{TRY AGAIN}, not last
