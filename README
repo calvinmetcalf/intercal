@@ -231,7 +231,7 @@ only available for linking with 'cfunge', a Funge-98 interpreter written in
 C. You can get the latest sources for that interpreter from the Internet via
 the bzr version-control system by running this command:
 
-  bzr branch http://rage.kuonet.org/~anmaster/bzr/cfunge
+  bzr branch lp:cfunge
 
 Once you have the source code to cfunge, you can compile it into a library
 suitable for use by C-INTERCAL by changing to the /etc directory of the
