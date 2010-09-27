@@ -231,12 +231,6 @@ readily available for free for other operating systems.  The following
 instructions will help you install the distribution in a method
 appropriate for your system.
 
-(If you happen to be using Debian or Ubuntu, you can also obtain and
-install binaries with the command @samp{sudo apt-get install
-intercal}, making the rest of this chapter redundant.  If you do this,
-use Debian's bug tracker to report bugs, rather than reporting them
-directly to the maintainers.)
-
 @menu
 * Obtaining::            How to get a @cic{} distribution to install
 * Unpacking::            What to do with the distribution file
@@ -505,15 +499,7 @@ time of writing, they are @samp{binutils}, @samp{cpp}, @samp{gcc},
 modify it, you may also need @samp{autoconf}, @samp{automake},
 @samp{bison}, and @samp{flex}.  For debugging help, you may also want
 @samp{gdb}, and to recompile the documentation, you may need
-@samp{groff}, @samp{tetex-bin}, @samp{texinfo}, and @samp{tidy}.  Of
-course, if @ical{} ever (the author of this sentence was going to
-write something like ``becomes popular, someone will probably package
-up a compiler for Debian or Ubuntu anyway'', but at that point on a
-whim did an Ubuntu package search for 'intercal' and actually came up
-with two results, which look suspiciously like @cic{} and @clcic{},
-later confirming this.  The author was vaguely aware that there was a
-@clcic{} package floating around, but was unaware of the @cic{}
-package, and as a result was too surprised to finish the sentence.)
+@samp{groff}, @samp{texlive}, @samp{texinfo}, and @samp{tidy}.
 
 If you're trying to do something unusual, you probably want to set some
 of the settings yourself rather than letting the compilation process
