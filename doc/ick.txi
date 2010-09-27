@@ -1704,7 +1704,7 @@ anyway.)
 THAT MUCH QUOTATION AMOUNTS TO PLAGIARISM
 @end quotation
 
-There is a limit of 256 on the number of nested spark/ears groups
+There is a limit of 3200 on the number of nested spark/ears groups
 allowed.  If you somehow manage to exceed that limit, that will cause
 this error.  Try breaking the expression up into smaller expressions.
 (The limit is trivial to increase by changing @code{SENESTMAX} in
