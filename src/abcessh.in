@@ -1,4 +1,5 @@
-/* abcess.h -- functions used by compiled INTERCAL programs */
+/* abcess.h -- functions used by compiled INTERCAL programs  -*- c -*- */
+/* This file is generated from abcessh.in */
 
 /* AIS note: This header file now serves two purposes. For non-multithread
    programs, it serves as headers to the degenerated code and many support
@@ -10,17 +11,38 @@
 #include <stdio.h>
 #include <setjmp.h>
 
+/* We use the +1 trick here, as it works whether the values substituted in are
+   the null string, 0, or positive. */
+#ifndef HAVE_STDBOOL_H
+# define HAVE_STDBOOL_H @HAVE_STDBOOL_H@ + 1
+# if HAVE_STDBOOL_H == 1
+#  undef HAVE_STDBOOL_H
+# endif
+#endif
+#ifndef HAVE__BOOL
+# define HAVE__BOOL @HAVE__BOOL@ + 1
+# if HAVE__BOOL == 1
+#  undef HAVE__BOOL
+# endif
+#endif
+#ifndef HAVE_STDINT_H
+# define HAVE_STDINT_H @HAVE_STDINT_H@ + 1
+# if HAVE_STDINT_H == 1
+#  undef HAVE_STDINT_H
+# endif
+#endif
+
 /*
  * Duplicates contents of ick_bool.h.  Someday maybe we'll install this
  * and avoid such grottiness.
  */
 /*@-redef@*/
 #ifndef __bool_true_false_are_defined
-# ifdef HAVE_STDBOOL_H
+# if HAVE_STDBOOL_H >= 1
 #  include <stdbool.h>
 # else
-#  ifndef HAVE__BOOL
-#   ifdef HAVE_STDINT_H
+#  ifndef HAVE__BOOL >= 1
+#   ifdef HAVE_STDINT_H >= 1
 #    include <stdint.h>
 typedef int_fast8_t bool;
 #   else

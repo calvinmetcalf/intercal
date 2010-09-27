@@ -42,8 +42,6 @@ ick_lose.h : src/ick_lose.h
 	$(LN_S) -f `test -f 'src/ick_lose.h' || echo '$(srcdir)/'`src/ick_lose.h ick_lose.h
 fiddle.h : src/fiddle.h
 	$(LN_S) -f `test -f 'src/fiddle.h' || echo '$(srcdir)/'`src/fiddle.h fiddle.h
-abcess.h : src/abcess.h
-	$(LN_S) -f `test -f 'src/abcess.h' || echo '$(srcdir)/'`src/abcess.h abcess.h
 ick_bool.h : src/ick_bool.h
 	$(LN_S) -f `test -f 'src/ick_bool.h' || echo '$(srcdir)/'`src/ick_bool.h ick_bool.h
 yuk.h : src/yuk.h
@@ -55,7 +53,7 @@ AM_YFLAGS = -d
 # installed.
 BUILT_SOURCES = parser.h ick-wrap.c pickwrap.c syslib.i syslib3.3i syslib4.4i \
                 syslib5.5i syslib6.6i syslib7.7i floatlib.i ecto_b98.c \
-		ick_ec.h fiddle.h abcess.h ick_bool.h ick_lose.h yuk.h
+		ick_ec.h fiddle.h ick_bool.h ick_lose.h yuk.h
 noinst_LIBRARIES = libidiot.a
 libidiot_a_SOURCES = src/idiotism.oil
 libidiot.a: src/idiotism.oil oil$(EXEEXT) src/oil.h src/sizes.h src/ick.h \
@@ -108,9 +106,9 @@ latin1.o: bin2c$(EXEEXT_FOR_BUILD) src/latin1.bin
 	./bin2c$(EXEEXT_FOR_BUILD) ick_clc_cset_latin1 < `test -f 'src/latin1.bin' || echo '$(srcdir)/'`src/latin1.bin > latin1.c
 	$(COMPILE) -c latin1.c
 
-ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/abcess.h src/ick_lose.h \
-                     src/yuk.h src/ick_bool.h
-nodist_ickinclude_HEADERS = config.h
+ickinclude_HEADERS = src/ick_ec.h src/fiddle.h src/ick_lose.h src/yuk.h \
+                     src/ick_bool.h
+nodist_ickinclude_HEADERS = config.h abcess.h
 dist_ickdata_DATA = src/atari.bin src/baudot.bin src/ebcdic.bin src/latin1.bin \
                     src/ick-wrap.c src/pickwrap.c COPYING
 # These necessary pit files are in nodist_ here because they're in EXTRA_DIST
@@ -128,7 +126,7 @@ splint: $(ick_SOURCES) parser.h
 	@echo "Running splint on ick..."
 	-(for x in $(ick_SOURCES); do echo $(top_srcdir)/$$x; done) | xargs splint $(SPLINTOPTS) -exportlocal -redef
 
-EXTRA_DIST = pit etc BUGS src/abcess.h src/feh.h src/fiddle.h src/ick_ec.h \
+EXTRA_DIST = pit etc BUGS src/abcessh.in src/feh.h src/fiddle.h src/ick_ec.h \
              src/ick.h src/ick_lose.h src/oil.h src/pick1.h src/pick2.h \
              src/sizes.h src/uncommon.h src/yuk.h src/parser.y src/lexer.l \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
@@ -159,7 +157,7 @@ dist-hook:
 CLEANFILES = oilout*.c parser.y lexer.l ick-wrap.c pickwrap.c \
              atari.c baudot.c ebcdic.c latin1.c ick.dvi \
              syslib.i syslib3.3i syslib4.4i syslib5.5i \
-             syslib6.6i syslib7.7i ick_ec.h fiddle.h abcess.h \
+             syslib6.6i syslib7.7i ick_ec.h fiddle.h \
              ick_lose.h yuk.h floatlib.i ecto_b98.c ick_bool.h
 # Distclean deletes the Makefile and thus requires reconfiguring,
 # and therefore this is a safe moment to delete the build tree
@@ -220,4 +218,4 @@ $(top_srcdir)/buildaux/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
 	cd $(top_srcdir)/buildaux && $(AUTOHEADER) buildconfig.ac
 	rm -f stamp-h1
 	touch $@
-CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/buildaux/bconfigh.in
+CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/buildaux/bconfigh.in $(top_srcdir)/src/abcessh.in

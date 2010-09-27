@@ -7,11 +7,11 @@
 
 /*@-redef@ -incondefs*/
 #ifndef __bool_true_false_are_defined
-# ifdef HAVE_STDBOOL_H
+# if HAVE_STDBOOL_H >= 1
 #  include <stdbool.h>
 # else
-#  ifndef HAVE__BOOL
-#   ifdef HAVE_STDINT_H
+#  if !defined(HAVE__BOOL) || HAVE__BOOL < 1
+#   if HAVE_STDINT_H >= 1
 #    include <stdint.h>
 typedef int_fast8_t bool;
 #   else

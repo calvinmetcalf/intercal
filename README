@@ -44,7 +44,7 @@ The files included are:
 |doc/chipspec.txt       | plans for an INTERCAL-based microprocessor
 |doc/ick.1              | man page for ick
 |doc/convickt.1         | man page for convickt
-|src/abcess.h           | interface to functions linked with programs
+|src/abcessh.in         | template interface to functions linked with programs
 |src/arrgghh.c          | option argument parsing for generated programs
 |src/bin2c.c            | creates C code representations of binary files
 |src/cesspool.c         | the INTERCAL runtime support code

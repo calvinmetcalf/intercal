@@ -4,7 +4,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl Yes, that is a valid email address. If your mailer doesn't support nested
 dnl comments, then get a better mailer.
 AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[ick])
-AC_CONFIG_SRCDIR([src/abcess.h])
+AC_CONFIG_SRCDIR([src/perpet.c])
 AC_CONFIG_HEADER([config.h:buildaux/configh.in])
 AC_CONFIG_AUX_DIR([buildaux])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-lzma tar-pax check-news
@@ -32,14 +32,19 @@ dnl Checks for libraries.
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_STDBOOL
+if test "x$ac_cv_header_stdbool_h" == "xyes"
+then
+HAVE_STDBOOL_H=1
+fi
 AC_CHECK_HEADERS([sys/time.h unistd.h stdarg.h])
 AC_CHECK_HEADERS([stdint.h],[HAVE_STDINT_H=1])
 AC_SUBST(HAVE_STDINT_H)
+AC_SUBST(HAVE_STDBOOL_H)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl This Autoconf input is compatible with pre-C99 Autoconf, so to
-dnl check for long long AC_CHECK_SIZEOF is used to test for a nonzero result,
-dnl likewise for _Bool.
+dnl check for long long AC_CHECK_SIZEOF is used to test for a nonzero
+dnl result.
 AC_C_CONST
 AC_C_VOLATILE
 AC_CHECK_SIZEOF([long long int],[0])
@@ -57,6 +62,7 @@ AC_TYPE_UINT32_T
 # actual use in code) dislike mixing _Bool and varargs.
 if test "x$ac_cv_type__Bool" == "xyes"
 then
+HAVE__BOOL=1
 AC_MSG_CHECKING([[whether booleans can be passed via varargs]])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <stdlib.h>
@@ -90,13 +96,15 @@ test(12345,match,12345);
 test(23456,nomatch,1234);
 exit(0);
 ]])],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)
-AC_DEFINE([BOOL_VARARGS_BROKEN],[],dnl
-[Define if _Bool works but cannot be passed via varargs.])
+AC_DEFINE([BOOL_VARARGS_BROKEN],[1],dnl
+[Define to 1 if _Bool works but cannot be passed via varargs.])
 ],[AC_MSG_RESULT([[unknown in a cross-compile, assuming no]])
-AC_DEFINE([BOOL_VARARGS_BROKEN],[],dnl
-[Define if _Bool works but cannot be passed via varargs.])
+AC_DEFINE([BOOL_VARARGS_BROKEN],[1],dnl
+[Define to 1 if _Bool works but cannot be passed via varargs.])
 ])
 fi
+
+AC_SUBST(HAVE__BOOL)
 
 AC_MSG_CHECKING([[whether yyrestart() is needed]])
 # Write a lex program that will cause an error if yyrestart exists.
@@ -105,12 +113,12 @@ echo '%%
 float yyrestart(int, ...);' | $LEX
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include "${LEX_OUTPUT_ROOT}.c"
 ]], [[exit(0);]])],[AC_MSG_RESULT(no)],[AC_DEFINE([NEED_YYRESTART],dnl
-[],[Define if yyrestart() is necessary to yyparse a new file.])
+[1],[Define to 1 if yyrestart() is necessary to yyparse a new file.])
 AC_MSG_RESULT(yes)])
 rm -f ${LEX_OUTPUT_ROOT}.c
 
 if test "$interpval" != "no"; then
-AC_DEFINE([HAVE_SYS_INTERPRETER], [], [Define if #! works on your system.])
+AC_DEFINE([HAVE_SYS_INTERPRETER], [1], [Define to 1 if #! works on your system.])
 fi
 AC_DEFINE_UNQUOTED([EXEEXT],"$EXEEXT",[Extension to use on executable files.])
 
@@ -126,7 +134,7 @@ INCLUDE_HIDDEN_FROM_AUTOMAKE="include"
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(INCLUDE_HIDDEN_FROM_AUTOMAKE)
 
-AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in host.mak:buildaux/hostmak.in])
+AC_CONFIG_FILES([Makefile:buildaux/Makefile.in coopt.sh:src/cooptsh.in host.mak:buildaux/hostmak.in abcess.h:src/abcessh.in])
 AC_OUTPUT()
 # After the output, chmod coopt.sh to be executable.
 chmod a+x coopt.sh
@@ -193,4 +201,3 @@ mv config.status config.status.save
 (env -i "PATH=$PATH" $srcdir/buildaux/buildconfig "$BUILD_MACHINE_ARG" "$BUILD_CC_ARG" "$BUILD_CFLAGS_ARG" "$BUILD_LDFLAGS_ARG" "$BUILD_LIBS_ARG" "$BUILD_CPPFLAGS_ARG" "$BUILD_CPP_ARG")
 mv config.status config.status.build
 mv config.status.save config.status
-
