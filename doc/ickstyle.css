@@ -4,7 +4,10 @@
    ugliness of the default stylesheet on at least one compiler. This
    stylesheet is public domain from this comment onwards. */
 
-  body               {text-align:justify; font-family:serif;}
+  body               {text-align:justify;
+                      font-family:serif;
+                      background-color:#FFFFFF;
+                      color:#000000;}
   pre                {margin:0.5em 3em 0.5em 3em;
                       background-color:#F8F8F8;
                       border:1px solid #CCCCCC;}
