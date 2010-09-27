@@ -232,7 +232,7 @@ static void print_usage(const char *prog, const char *options)
   fprintf(stderr,"\t\t (without this option, all INTERCAL files produce\n");
   fprintf(stderr,"\t\t separate output files; with it, the first file given\n");
   fprintf(stderr,"\t\t must be the only INTERCAL file) (prevents -mypPf)\n");
-  fprintf(stderr,"\t-E\t:never include the system library (prevents -P)\n");
+  fprintf(stderr,"\t-E\t:never include system libraries (prevents -P)\n");
   fprintf(stderr,"\t-t\t:traditional mode, accept only INTERCAL-72\n");
   fprintf(stderr,"\t-C\t:clockface output (e.g. use IIII instead of IV)\n");
   fprintf(stderr,"\t-O\t:optimize expresssions in generated code\n");

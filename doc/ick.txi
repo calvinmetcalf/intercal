@@ -400,7 +400,7 @@ use the following routine:
 
 @item
 Configure @cic{}, by running @command{configure}.  Although building
-in the distribution directory works; it is recommended that you build
+in the distribution directory works, it is recommended that you build
 elsewhere; create a directory to build in (using @command{mkdir} on
 most operating systems), then run @command{configure} from inside that
 directory (for instance, you could do this from inside the main
@@ -466,7 +466,7 @@ method working.  On a system not based on UNIX or Linux, you may find
 that you don't have some of the software required to run this (for
 instance, you may be missing the shell @command{sh}, and don't have
 the shell @command{bash} which can emulate it, and so can't run
-@command{sh config.sh} that depends on one of those shells being
+@command{configure} that depends on one of those shells being
 available) and so this method won't work for you.  In such cases, one
 solution may be to install all the software required; the GNU project
 has a version of all the commands required, for instance, and there
@@ -476,7 +476,9 @@ work with @command{gcc} and is tested mostly with that compiler, but
 in theory it should work with other C compilers too, and this is
 tested on occasion) and the associated software needed to compile C
 files to object files and executables, combine object files into
-libraries, etc.
+libraries, etc.@:; but this requires trying to do the build by hand,
+so it's generally easier just to install a UNIX-like shell and
+associated tools.
 
 Another possibility that might stop this process working is if your
 version of the relevant software is incompatible with the GNU versions
@@ -626,10 +628,10 @@ It may happen that you decide to uninstall @cic{} after installing it;
 this may be useful if you want to test the installation system, or
 change the location you install programs, or for some reason you don't
 want it on your computer.  It's worth uninstalling just before you
-install a new version of @cic{} because this will save some disk space;
-you cannot install two versions of @cic{} at once (at least, not in
-the same directory; but you can change the --prefix of one of the
-installations to get two versions at once).
+install a new version of @cic{} because this will save some disk
+space; you cannot install two versions of @cic{} at once (at least,
+not in the same directory; but you can change the @option{--prefix} of
+one of the installations to get two versions at once).
 
 If you installed @cic{} using @command{make install}, you can
 uninstall it by using @command{make uninstall} from the installation
@@ -769,7 +771,11 @@ thinks they're tarballs, so will use @samp{.tar} rather than
 @samp{.pax}, and you have to fix this by hand).  @command{make
 distcheck} will also perform some sanity checks on the build system of
 the resulting paxball, which will help to ensure that nothing
-important is missing from it.
+important is missing from it; and some regression tests on a version
+of C-INTERCAL built from the distribution tarball itself, to prove
+that it runs correctly and produces plausible output. (A failure of
+the regression checks will not stop the build, but should stop you
+distributing the resulting compiler.)
 
 @item
 Place the new version somewhere on the Internet, and announce the
@@ -787,7 +793,8 @@ location and the fact that a new version has been released on
 @cindex @command{ick}, options
 @cindex compiling, @ical{} source code
 
-All operations on @ical{} source code available in @cic{} are currently
+All operations on @ical{} source code available in @cic{}, other than
+the conversion from one character set to another, are currently
 carried out by the compiler @command{ick}.
 
 The syntax is
@@ -1363,9 +1370,10 @@ reasons).
 @c Note: ICKSYDIR and ICKCSKELDIR used to be one variable, ICKDATADIR.
 @item CC
 @tab
-The name of a C compiler to use (defaults to gcc, which is the only
-compiler with which @cic{} has been tested recently).  This option has
-no effect on DJGPP, where gcc is always used.
+The name of a C compiler to use (defaults to @command{gcc}; @cic{} has
+recently been tested only with @command{gcc} and @command{clang}).
+This option has no effect on DJGPP, where @command{gcc} is always
+used.
 @item ICKTEMP@*TMPDIR@*TEMP@*TMP
 @tab
 On DJGPP, @command{ick} creates temporary files to pass options to gcc
@@ -1456,8 +1464,8 @@ PROGRAMMER IS OVERLY POLITE
 @end quotation
 
 Of course, the same problem can happen in the other direction; this
-error is caused at compile time if over about one third of the statement
-identifiers are the polite form.
+error is caused at compile time if more than about one third of the
+statement identifiers are the polite form.
 
 @ieanchor E111
 @quotation
@@ -1544,7 +1552,9 @@ FROM} in reverse to be interesting.  This error happens at compile
 time.  (For inconsistency, it @i{is} possible to have multiple lines
 with the same number as long as at most one of them is in an @ical{}
 program (the others have to be in programs in other languages included
-via the external calls system).)
+via the external calls system). The resulting behaviour is entirely
+inconsistent with the rest of the language, though, for what I hope
+are obvious reasons.)
 
 @ieanchor E197
 @cindex line label, illegal value
@@ -1567,10 +1577,12 @@ NOTHING VENTURED, NOTHING GAINED
 @end quotation
 
 You used a variable that isn't actually in your program.  Failing that
-(which would be quite impressive and is probably impossible, at least in
-the present version of @cic{}), you specified an illegal number for a
-variable (legal numbers are positive and onespot).  This error happens
-at compile time, at least for illegal variable numbers.
+(which, contrary to previous versions of this manual, is indeed
+possible in the present version of @cic{}, although I'm not telling
+how; a hint:@: what mechanism in @cic{} allows for a computed variable
+number?), you specified an illegal number for a variable (legal
+numbers are positive and onespot).  This error happens at compile
+time, at least for illegal variable numbers.
 
 @ieanchor E222
 @cindex out of memory, during @code{STASH}

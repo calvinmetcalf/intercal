@@ -100,19 +100,19 @@ Run the yuk profiler on the code (prevents -fme).
 Allow multithreading and backtracking (prevents -ype, implies -w).
 .TP
 .B \-e
-Link one INTERCAL file to non-INTERCAL files or to expansion libraries.
-Doing this changes the syntax of the command line; the first file
-given must be the INTERCAL source file, then this can be followed by
-any number of files in other languages to link via the external calls
-system (currently only C programs are allowed), and then any number of
-expansion libraries.
-The non-INTERCAL files will be processed to link them to the INTERCAL
+Link one INTERCAL file to non-INTERCAL files or to expansion
+libraries.  Doing this changes the syntax of the command line; the
+first file given must be the INTERCAL source file, then this can be
+followed by any number of files in other languages to link via the
+external calls system (currently only C and maybe Befunge-98 programs
+are allowed), and then any number of expansion libraries. The
+non-INTERCAL files will be processed to link them to the INTERCAL
 files, and then compiled with gcc and linked to the main INTERCAL
 program.
 .TP
 .B \-E
-Do not link the system library, even if the code suggests that it is
-needed (prevents -P).
+Do not link any system libraries, even if the code suggests that one
+or more is needed (prevents -P).
 .TP
 .B \-a
 Allow the use of the CREATE statement (prevents -P).
