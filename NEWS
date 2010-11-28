@@ -5,6 +5,6 @@
 * 0.29: 2010-11-28
   The first merged release from ESR and Alex Smith, with encouragement from
   Donald Knuth. The compiler new has a regression-test suite. More error
-  checks (E990 and E004) hace been added. A new program, guess.i, writhes 
+  checks (E990 and E004) have been added. A new program, guess.i, writhes 
   in the pit.
 
