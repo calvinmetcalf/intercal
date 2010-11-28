@@ -1,6 +1,6 @@
 # Make the derived forms of documentation for upload
 
-all: README.html NEWS.html BUGS.html THEORY.html ../doc/ick.htm ../doc/intercal.ps
+all: index.html README.html NEWS.html BUGS.html THEORY.html ../doc/ick.htm ../doc/intercal.ps
 
 clean:
 	rm -f README.html NEWS.html BUGS.html THEORY.html index.html

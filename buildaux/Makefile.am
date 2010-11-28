@@ -219,3 +219,7 @@ $(top_srcdir)/buildaux/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
 	rm -f stamp-h1
 	touch $@
 CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/buildaux/bconfigh.in $(top_srcdir)/src/abcessh.in
+
+release: intercal-$(VERSION).tar.gz
+	shipper -u -t; rm -f *.1 *.html SHIPPER.*
+	cd website; upload

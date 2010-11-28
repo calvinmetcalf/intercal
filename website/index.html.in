@@ -99,21 +99,16 @@ internals</a>.</p>
 
 <h2>Source Code</h2>
 
-<p>The INTERCAL codebase is available for git cloning at:
+<p>The INTERCAL codebase is available for git cloning at: <a href="http://gitorious.org/intercal/intercal">git://gitorious.org/intercal/intercal.git</a></p>
 
-<p><a href="http://gitorious.org/intercal/intercal">git://gitorious.org/intercal/intercal.git</a></p>
+<p>You should find the latest distribution tarball 
+<a href="intercal-PACKAGE_VERSION.tar.gz">here</a>.</p>
 
 <p>Building INTERCAL requires either bison or yacc and flex or
 lex. The code builds and runs nicely under any ANSI/POSIX platform,
 including Linux and the free BSD versions. Past versions of this code
 have run under DOS/Windows, though whether it will still do so is
 unknown.</p>
-
-<p>Plans are afoot to supply distribution tarballs, but not yet
-completed.  Have patience, the project is presently reorganizing after
-the move to git.</p>
-
-<!-- Test expansion of PACKAGE_VERSION -->
 
 <h2>Other Tools</h2>
 
