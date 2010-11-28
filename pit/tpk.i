@@ -1,6 +1,6 @@
         PLEASE ABSTAIN FROM (29733)
 (29733) DON KNUTH'S IMPLEMENTATION OF TPK IN INTERCAL
-                      (C) MARCH 2003
+                  (C) MARCH 2003, NOVEMBER 2010
         REFERENCE --- THE EARLY HISTORY OF PROGRAMMING
         LANGUAGES, BY D E KNUTH AND L TRABB PARDO
 
@@ -12,14 +12,14 @@
            ______
            MMMCXLMDXCIII
 
-        PLEASE NOTE THAT VARIABLE NAMES AND SUBROUTINE NAMES USE
+        PLEASE NOTICE THAT VARIABLE NAMES AND SUBROUTINE NAMES USE
         THE 5-BIT TELEPRINTER CODE IN LETTER-SHIFT MODE, NAMELY
   / E @ A : S I U 1/4 D R J N F C K T Z L W H Y P Q O B G " M X V $
         (WHICH ALAN TURING ADVISED EVERY PROGRAMMER TO LEARN)
 
         PLEASE (6534) NEXT
-        DO ;3 <- #11 BY #2
         DO ;29 <- #2
+        DO ;3 <- #11 BY #2
         PLEASE DO .6 <- #0
         DO (1) NEXT
 (1)     PLEASE DO FORGET #1
@@ -48,8 +48,8 @@
         DO :2 <- #6528$#32544
         PLEASE DO (23438) NEXT
         DO :1 <- #31640$#20792
-        DO READ OUT .6 + :1
         DO REMEMBER :1
+        DO READ OUT .6 + :1
         DO .1 <- #0
         DO ABSTAIN FROM (711)
         PLEASE DO (29904) NEXT
@@ -83,20 +83,20 @@
         DO NOTHING BUT BASIC SUBROUTINES FROM HERE ON
         -------------
         FIRST THERE ARE ROUTINES FOR EXTENDED ARITHMETIC
-        (DOUBLE DOUBLE PRECISION), WHICH CONSISTS OF
+        (DOUBLE-DOUBLE PRECISION), WHICH CONSISTS OF
         TWO 32-BIT NUMBERS WITH A BINARY POINT BETWEEN THEM
         
         TO GET STARTED, DO (INI) FIRST; IT DEFINES BASIC ARRAYS
-(6534)  DO ;1 <- #2
+(6534)  DO ;1 <- #3
         DO ;2 <- #2
         PLEASE RESUME #1
 
         DON'T FORGET TO TEST FOR OVERFLOW AFTER A SERIES OF
-        EXTENDED ARITHMETIC OPERATIONS ... THE (OVC) ROUTINE
-        SETS ;1 TO THE MAX VALUE IF .OV IS 1
+        EXTENDED ARITHMETIC OPERATIONS:
+        THE (OVC) ROUTINE SETS :1 TO THE MAX VALUE IF .OV IS 1
+        ... SO YOU'D BETTER SET .OV TO 0 PERIODICALLY
 (15320) PLEASE DO (2000) NEXT
-        DO ;1 SUB #1 <- #65535$#65535
-        DO ;1 SUB #2 <- #65535$#65535
+        DO :1 <- #65535$#65535
         PLEASE RESUME #1
 (2000)  PLEASE DO (2001) NEXT
         PLEASE RESUME #2
@@ -105,7 +105,7 @@
         DOING (ADY) NEXT SETS ;1 <- ;1+;2+.C~2 AND .C <- CARRY+1
         DOING (ADZ) NEXT SETS ;1 <- ;1+;2 AND .C <- CARRY+1
 (17699) PLEASE .14 <- #1
-(21785) DO STASH :1 + :2 + :3 + :4
+(21795) DO STASH :1 + :2 + :3 + :4
         DO :1 <- ;1 SUB #2
         PLEASE DO :2 <- .14~#2
         PLEASE DO (1509) NEXT
@@ -130,7 +130,7 @@
         DOING (ABX) NEXT SETS ;1 <- ABS(;1)
 (29987) PLEASE STASH .14
         DO (17699) NEXT
-        DO .984 <- "V.984$'.14~#2'"~#1
+        DO .984 <- "V.984$!14~#2'"~#1
         PLEASE RETRIEVE .14
 (30499) DO RESUME #1
 
@@ -141,8 +141,8 @@
         DO ;2 SUB #2 <- '"?'";2 SUB #2"~"#65535$#0"'$#65535"~"#0$#65535"'$
                         '"?'";2 SUB #2"~"#0$#65535"'$#65535"~"#0$#65535"'
         DO .14 <- #2
-        DO (21785) NEXT
-        PLEASE DO .984 <- "V.984$'.14~#1'"~#1
+        DO (21795) NEXT
+        PLEASE DO .984 <- "V.984$!14~#1'"~#1
         PLEASE RETRIEVE ;2 + .14
         DO RESUME #1
 
@@ -171,7 +171,7 @@
         PLEASE RETRIEVE :1 + :2
         PLEASE STASH :1 + :2
         DO :1 <- :1 ~ #65535
-        DO :2  <- :2 ~ '#65280$#65280'
+        DO :2 <- :2 ~ '#65280$#65280'
         DO (1540) NEXT 
         DO (22149) NEXT
         DO (17699) NEXT
@@ -208,7 +208,7 @@
         DO :1 <- ;1 SUB #1
         DO :2 <- ;2 SUB #1
         DO (22108) NEXT
-        PLEASE DO .984 <-  "V.984$' "';1 SUB #1'~';1 SUB #1'" ~#1'" ~ #1
+        PLEASE DO .984 <- "V.984$' "';1 SUB #1'~';1 SUB #1'" ~#1'" ~ #1
         DO ;1 SUB #1 <- ;1 SUB #2
         DO ;1 SUB #2 <- :3
         DO :2 <- ;2 SUB #2
@@ -257,7 +257,7 @@
         DO .1 <- ":1 ~ '#21845$#0'" $
          '"?':1~"#10922$#1"' $ '"?':1~#1'$':2~"#32768$#0"'"~#1'" ~#21845'
         DO .2 <- ":1 ~ '#0$#21845'" $
-         '"? ':1~"#0$#10923"' $ '"?':1~#1'$':2~"#0$#32768"'"~#1'" ~#21845'
+         '"?':1~"#0$#10923"' $ '"?':1~#1'$':2~"#0$#32768"'"~#1'" ~#21845'
         DO :1 <- .1 $ .2
         DO .1 <- ":2 ~ '#21845$#0'" $
          '"&':2~"#10922$#1"' $ #65534" ~ #21845'
@@ -270,10 +270,10 @@
         DO ;2 SUB #1 <- ;4 SUB #1
         DO ;2 SUB #2 <- ;4 SUB #2
         DO .14 <- #2
-        DO (21785) NEXT
+        DO (21795) NEXT
         DO .3 <- ' " '"';1 SUB #1'~';1 SUB #1'"~#1' $
-                      '"';1 SUB #2'~';1 SUB #2'"~#1' " $ .2' ~ #15
-        DO .3 <- '&"'.3~.3'~#1" $ .14' ~ #2
+                     '"';1 SUB #2'~';1 SUB #2'"~#1' " $ .2' ~ #15
+        DO .3 <- '&"!3~.3'~#1" $ .14' ~ #2
         PLEASE DO (2004) NEXT
         DO ;1 SUB #1 <- ;3 SUB #1
         DO ;1 SUB #2 <- ;3 SUB #2
@@ -314,29 +314,25 @@
         DO :1 <- :3
         PLEASE DO (2008) NEXT
 (2007)  DON'T RESUME #1
-        DO :2 <- #0$#1024
-        DO :1 <- :3
-        PLEASE (1510) NEXT
-        DO :1 <- :3
-        DO REMEMBER :1
+        DO :1 <- ;1 SUB #2
         DO .3 <- :4~#1
         DO (2009) NEXT
         DO :4 <- :4~'#65535$#65534'
 (2008)  DO :2 <- :1
         PLEASE DO (1500) NEXT
         DO :1 <- :3
-        DO :2 <- #784 $ #904
-        PLEASE (23438) NEXT
+        DO ;1 SUB #2 <- :3
         DO :2 <- #48576
         PLEASE DO (1500) NEXT
         DO .3 <- :3~'#0$#1024'
+        DO ;1 SUB '"?.3$#2"~#6' <- ':3~"#65535$#0"' $
+                 '"&'":3~'#0$#65535'"$#64511'" ~ "#0$#65535"'
         DO :2 <- ;2 SUB '"?.3$#1"~#3'
         DO :2 <- "'V":2~'#65535$#0'"$":4~'#65535$#0'"' ~ '#0$#65535'" $
                  "'V":2~'#0$#65535'"$":4~'#0$#65535'"' ~ '#0$#65535'"
         PLEASE DO ;2 SUB '"?.3$#1"~#3' <- :2
         PLEASE DO (2007) NEXT
         DO ;1 SUB #2 <- ;2 SUB #2
-        PLEASE REMEMBER :1
         PLEASE ABSTAIN FROM (2007)
         PLEASE RETRIEVE :1 + :2 + :3 + :4 + .3
         PLEASE RESUME #34
@@ -368,8 +364,8 @@
         DO :1 <- ' "? ':1~"#65535$#0"' $ ':2~"#65535$#0"' " ~ "#0$#65535"' $
                  ' "? ':1~"#0$#65535"' $ ':2~"#0$#65535"' " ~ "#0$#65535"'
         DO .3 <- ':2~:1' ~
-            " ' "? '"?:1~:1"~"#65535$#0"' $ #32768"~"#0$#65535" '
-               $ '"?:1~:1"~"#0$#65535"' "
+            " ' "? '"?:1~:1"~"#65535$#0"' $ #32768"~"#0$#65535" ' $
+                 '"?:1~:1"~"#0$#65535"' "
         PLEASE RETRIEVE :1
         DO (2010) NEXT
         DO (2011) NEXT
