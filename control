@@ -1,0 +1,18 @@
+# Not a real Debian control file, though the syntax is upward-compatible.
+# It's project metadata for the shipper tool
+
+Package: intercal
+
+Description: a compiler for the INTERCAL language
+ INTERCAL is the original esoteric language, a farrago of features
+ that will test the mettle of any programmer and bend the minds of
+ most. The INTERCAL suite includes not just a compiler and debugger
+ for the language but most of the code ever written for it as well.
+
+Homepage: http://www.catb.org/~esr/intercal
+XBS-Gitorious-URL: http://gitorious.org/intercal
+XBS-Project-Tag-List: language, retrocomputing, parody, hacker culture
+Destinations: mailto:mam@theory.stanford.edu
+	      mailto:ais523@bham.ac.uk, 
+	      mailto:design@adastragames.com, 
+	      mailto:albaugh@employees.org

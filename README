@@ -27,6 +27,7 @@ The files included are:
 |README                 | this file
 |BUGS                   | current bug and to-do list
 |NEWS                   | info on features and fixes new in this release
+|HISTORY                | Longer-form history of the code tree
 |COPYING                | copyright and licence information
 |MANIFEST               | a list of all files in the distribution
 |doc/READ.ME            | historical notes on the docs

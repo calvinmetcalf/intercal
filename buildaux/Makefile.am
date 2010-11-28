@@ -131,8 +131,8 @@ EXTRA_DIST = pit etc BUGS src/abcessh.in src/feh.h src/fiddle.h src/ick_ec.h \
              src/sizes.h src/uncommon.h src/yuk.h src/parser.y src/lexer.l \
              doc/Makefile doc/fdl-1-2.txi doc/fix83.pl doc/fixtoc.pl \
              doc/ickstyle.css doc/ick.txt doc/intercal.mm doc/READ.ME \
-             doc/THEORY.txt doc/tidy.cfg parser.c parser.h \
-             lexer.c doc/ick.txi doc/ick.txt doc/chipspec.txt NEWS README \
+             doc/THEORY.txt doc/tidy.cfg parser.c parser.h lexer.c control \
+             doc/ick.txi doc/ick.txt doc/chipspec.txt HISTORY NEWS README \
              buildaux/buildconfig buildaux/buildconfig.ac \
              buildaux/depcomp buildaux/hostmak.in buildaux/install-sh \
              buildaux/missing buildaux/ylwrap buildaux/bconfigh.in
