@@ -39,6 +39,7 @@ tests/compucome
 tests/count
 tests/hello
 tests/ignorret
+tests/ignorearray
 tests/iogerunds
 tests/limits
 tests/limits3
