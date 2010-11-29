@@ -2717,7 +2717,7 @@ ago anything had happened.)
 .P 
 The Atari 800 implementation, actually a generic 6502 implementation that
 was begun in 1982 by Mike Albaugh and Karlina Ott, was never completed 
-sufficiently to target the Atari cartridge and screen editor.  These notes
+sufficiently to target the Atari cartridge format.  These notes
 were added by Mike Albaugh when he typed in the original INTERCAL-72 manual,
 which up to that point had existed only in paper copies.
 .P
