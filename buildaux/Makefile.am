@@ -210,7 +210,7 @@ echo-version:
 	@echo @PACKAGE_VERSION@
 
 # The build system itself is included in the makefile; tell Automake
-# about my tweaking.
+# about the buildaux tweaking.
 $(top_srcdir)/buildaux/buildconfig: $(top_srcdir)/buildaux/buildconfig.ac $(top_srcdir)/buildaux/bconfigh.in
 	cd $(top_srcdir) && $(AUTOCONF) buildaux/buildconfig.ac > buildaux/buildconfig
 	chmod a+x $(top_srcdir)/buildaux/buildconfig
@@ -220,6 +220,7 @@ $(top_srcdir)/buildaux/bconfigh.in: $(top_srcdir)/buildaux/buildconfig.ac
 	touch $@
 CONFIG_STATUS_DEPENDENCIES=$(top_srcdir)/buildaux/buildconfig $(top_srcdir)/buildaux/bconfigh.in $(top_srcdir)/src/abcessh.in
 
+# Ship a release
 release: intercal-$(VERSION).tar.gz
-	shipper -u -t; rm -f *.1 *.html SHIPPER.*
+	shipper -u -t; rm -f *.tar.gz *.tar.bz2 *.lzma SHIPPER.*
 	cd website; upload
