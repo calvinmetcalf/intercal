@@ -2513,16 +2513,17 @@ syntax).
 @portability{some versions, yes, version 0.05+, yes}
 
 The other main syntax is the Atari syntax, so called because it was
-originally used by the ``Atari implementation'' of @icst{}.  It is not
-clear why the implementation was given this name, because the authors
-of the implementation are not known; it is not clear whether it has
-any connection with Atari other than running on an Atari computer, for
-instance.  The syntax was designed to work better on ASCII-based
-systems, by avoiding the change character (although it can still be
-written as @samp{c}, backspace, @samp{/}, which the Atari compiler
-documentation claims that the Princeton compiler supported) in favour
-of a `big money' character (@samp{$}), and using the `what' (@samp{?})
-as an alternative character for exclusive-or.  This is the syntax that
+originally described in notes about an ``Atari implementation'' added
+to the paper @icst{} manual when it was softcopied in 1982. These
+notes describe a never-completed compiler implementation for 6502 by
+Mike Albaugh and Karlina Ott; it was meant to use the Atari 800
+cartrtidge and screen editor, but that portion was never written.  The
+syntax was designed to work better on ASCII-based systems, by avoiding
+the change character (although it can still be written as @samp{c},
+backspace, @samp{/}, which the Atari compiler documentation claims
+that the Princeton compiler supported) in favour of a `big money'
+character (@samp{$}), and using the `what' (@samp{?})  as an
+alternative character for exclusive-or.  This is the syntax that
 @cic{} and @jic{} have always used, and is the one most commonly used
 for communicating @ical{} programs on Usenet and other similar fora
 (where ASCII is one of the most reliable-to-send character sets).  It
@@ -2925,27 +2926,26 @@ The original @icst{} compiler (the Princeton compiler) used the
 'change' (cent) character for a mingle, represented as @code{c},
 backspace, @code{/}.  (By the way, this is still the most portable way
 to write a mingle; both @cic{} and @clcic{} accept it, at least if a
-lowercase @code{c} is used, the Atari compiler accepted it, and its
-documentation claimed that the Princeton compiler also accepted it;
-@clcic{} also accepts a capital @code{C} before the backspace and
-@code{/}, and allows @code{|} rather than @code{/}.)  The Atari
-compiler, another @icst{} compiler, used a 'big money' character
-(@code{$}) as the mingle character; this character is also the only
-one accepted for mingle by the @jic{} compiler.  @cic{} originally
-also used the @code{$} character for mingle, and this character is the
-one most commonly seen in existing @cic{} programs, and most often
-used when giving examples of @ical{} on Usenet, because it exists in
-the ASCII-7 character set, and because it doesn't contain control
-characters.  From version 0.18 of @cic{} onwards, various other units
-of currency (change, quid, and zlotnik if Latin-1 is used as the
-input, and euro if Latin-9 is used as the input) are accepted; from
-version 0.20 onwards, in addition to the Latin-1 characters, all the
-currency symbols in Unicode are accepted if UTF-8 is used as the input
-format.  @clcic{} has always used the change character (either the
-Latin-1 version or the version that contains a backspace) for mingle.
-In this manual, mingle will be represented as @code{$}, but it's
-important to bear in mind that this character is not the most portable
-choice.
+lowercase @code{c} is used, the Atari compiler was to accept it, and
+its documentation claimed that the Princeton compiler also accepted
+it; @clcic{} also accepts a capital @code{C} before the backspace and
+@code{/}, and allows @code{|} rather than @code{/}.)  The uncompleted
+Atari compiler intended to use a 'big money' character (@code{$}) as
+the mingle character; this character is also the only one accepted for
+mingle by the @jic{} compiler.  @cic{} originally also used the
+@code{$} character for mingle, and this character is the one most
+commonly seen in existing @cic{} programs, and most often used when
+giving examples of @ical{} on Usenet, because it exists in the ASCII-7
+character set, and because it doesn't contain control characters.
+From version 0.18 of @cic{} onwards, various other units of currency
+(change, quid, and zlotnik if Latin-1 is used as the input, and euro
+if Latin-9 is used as the input) are accepted; from version 0.20
+onwards, in addition to the Latin-1 characters, all the currency
+symbols in Unicode are accepted if UTF-8 is used as the input format.
+@clcic{} has always used the change character (either the Latin-1
+version or the version that contains a backspace) for mingle.  In this
+manual, mingle will be represented as @code{$}, but it's important to
+bear in mind that this character is not the most portable choice.
 
 The mingle operator should be applied to two operands or expressions.
 To be portable, the operands must both be onespot expressions, that is

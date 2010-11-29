@@ -2703,7 +2703,8 @@ for the English-based ones traditionally used.
 See src/lexer.l for details, as we do not propose to break
 Priscian's head (publicly expose our ignorance of Latin) here.   \}
 .if '\*c'y' \{\
-.\" This is the same text as the ATARI NOTES at the end of the manual.
+.\" The final paragraph is the same text as the ATARI NOTES at the end 
+.\" of the manual.
 .H 1 "The Atari Implementation"
 .if '\*c'y' \{\
 .DS I F
@@ -2713,6 +2714,12 @@ all her knowledge of history, Alice had no very clear notion how long
 ago anything had happened.)
 .DE \}
 .SETR atari
+.P 
+The Atari 800 implementation, actually a generic 6502 implementation that
+was begun in 1982 by Mike Albaugh and Karlina Ott, was never completed 
+sufficiently to target the Atari cartridge and screen editor.  These notes
+were added by Mike Albaugh when he typed in the original INTERCAL-72 manual,
+which up to that point had existed only in paper copies.
 .P
 The Atari implementation of INTERCAL differs from the original Princeton
 version primarily in the use of ASCII rather than EBCDIC. Since there is no
