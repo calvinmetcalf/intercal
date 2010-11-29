@@ -18,6 +18,7 @@ buildaux/install-sh
 buildaux/missing
 buildaux/ylwrap
 buildaux/bconfigh.in
+buildaux/bconfig.h
 buildaux/configh.in
 # Executables produced by standard build
 bin2c
@@ -38,8 +39,14 @@ coopt.sh
 host.mak
 # Other generated stuff
 doc/*info*
+doc/*.inf
 doc/*.htm
+doc/html
 doc/*.ps
 doc/*.odt
 doc/*.txt
 doc/*.pdf
+# Tarballs and archives
+*.tar.gz
+*.tar.bz2
+*.tar.lzma
