@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl Yes, that is a valid email address. If your mailer doesn't support nested
 dnl comments, then get a better mailer.
-AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[ick])
+AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[intercal])
 AC_CONFIG_SRCDIR([src/perpet.c])
 AC_CONFIG_HEADER([config.h:buildaux/configh.in])
 AC_CONFIG_AUX_DIR([buildaux])
