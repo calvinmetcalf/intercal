@@ -1,7 +1,7 @@
 This is the long-form history of the project.  For the short form used
 to generate release announcements, see NEWS.
 
-== Release 0.29 (by Alex Smith, Eric S. Raymond) ==
+== Release 0.29 (by Alex Smith, Eric S. Raymond) 29 Nov 2010 ==
 
 === Changes by Eric S. Raymond ===
 
@@ -22,6 +22,9 @@ to generate release announcements, see NEWS.
 
 6.  README, HISTORY, and BUGS are now mastered in asciidoc for easier
     web-page generation.
+
+7. The history of the hitherto-mysterious "Atari implementation" is now
+   documented.
 
 === Bugs reported and changes patched by Arvid Norlander ===
 

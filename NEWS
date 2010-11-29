@@ -4,7 +4,9 @@
 
 * 0.29: 2010-11-28
   The first merged release from ESR and Alex Smith, with encouragement from
-  Donald Knuth. The compiler new has a regression-test suite. More error
+  Donald Knuth. The compiler now has a regression-test suite. More error
   checks (E990 and E004) have been added. A new program, guess.i, writhes 
-  in the pit.
+  in the pit. The mystery and history of the "Atari implementation" has
+  been clarified. Various minor bugs have been fixed.
+
 
