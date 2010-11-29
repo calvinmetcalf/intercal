@@ -12,7 +12,4 @@ Description: a compiler for the INTERCAL language
 Homepage: http://www.catb.org/~esr/intercal
 XBS-Gitorious-URL: http://gitorious.org/intercal
 XBS-Project-Tag-List: language, retrocomputing, parody, hacker culture
-Destinations: mailto:mam@theory.stanford.edu
-	      mailto:ais523@bham.ac.uk, 
-	      mailto:design@adastragames.com, 
-	      mailto:albaugh@employees.org
+Destinations: freshmeat,mailto:mam@theory.stanford.edu, mailto:ais523@bham.ac.uk, mailto:design@adastragames.com, mailto:albaugh@employees.org
