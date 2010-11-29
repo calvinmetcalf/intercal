@@ -6049,12 +6049,12 @@ programs for compatibility with older compilers.
 
 @subheading Differences to the Atari compiler
 @cindex Atari compiler
-The Atari compiler was another implementation of @icst{}, which was
-basically identical to the Princeton compiler apart from its use of
-ASCII and Atari syntax.  Everything said under the previous section
-applies, except that as it uses the same syntax as @cic{} anyway
-(@cic{}'s syntax was based on the Atari compiler's), there is no need
-to use @command{convickt}.
+The Atari compiler was an uncompleted implementation of @icst{},
+optimistically pre-described in some 1982 additions to the original
+@icst{} manual.  Despite the implementation's never actually existing,
+the documentation of the syntax provided a model for @cic{}. If any
+Atari 800 INTERCAL source code actually existed, there would be no
+need to use @command{convickt} on it.
 
 @subheading Differences to @jic{}
 @cindex J-INTERCAL
