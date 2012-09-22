@@ -1,6 +1,12 @@
 This is the long-form history of the project.  For the short form used
 to generate release announcements, see NEWS.
 
+== Release ?.?? (currently unreleased) ==
+
+1.  Some potential undefined behaviour (which happens to do the right
+    thing on every compiler tested) related to the -g option has been
+    fixed. (Thanks to Michael Tautschnig for reporting the bug.)
+
 == Release 0.29 (by Alex Smith, Eric S. Raymond) 29 Nov 2010 ==
 
 === Changes by Eric S. Raymond ===

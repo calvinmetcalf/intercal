@@ -1802,7 +1802,7 @@ void emit(tuple *tn, FILE *fp)
     int	dim;
     int generatecfjump=0; /* AIS */
     static int pasttryagain=0; /* AIS */
-    extern int cdebug;
+    extern bool cdebug; /* AIS */
 
     /* grind out label and source dump */
     if (yydebug || cdebug || compile_only)
