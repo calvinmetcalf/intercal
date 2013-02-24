@@ -9,6 +9,7 @@ AC_CONFIG_HEADER([bconfig.h:../buildaux/bconfigh.in])
 AC_CONFIG_AUX_DIR([.])
 
 dnl Checks for programs.
+AM_PROG_AR
 AC_PROG_YACC
 AC_PROG_CC
 AM_PROG_LEX

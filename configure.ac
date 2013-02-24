@@ -7,7 +7,7 @@ AC_INIT([C-INTERCAL],[0.29],[[ais523(524\)x\((525)y)@bham.ac.uk]],[intercal])
 AC_CONFIG_SRCDIR([src/perpet.c])
 AC_CONFIG_HEADER([config.h:buildaux/configh.in])
 AC_CONFIG_AUX_DIR([buildaux])
-AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-lzma tar-pax check-news
+AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-xz tar-pax check-news
 		  no-texinfo.tex -Wall -Wno-override])
 
 dnl Information about this version of INTERCAL.
@@ -21,6 +21,7 @@ YACC=
 AC_CHECK_PROG([YACC],[yacc])
 fi
 AC_PROG_CC
+AM_PROG_AR
 AM_PROG_LEX
 AC_PROG_RANLIB
 AC_PROG_LN_S
